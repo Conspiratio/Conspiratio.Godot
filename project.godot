@@ -6,31 +6,38 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
 [application]
 
 config/name="Conspiratio.Godot"
 run/main_scene="res://Title.tscn"
+config/features=PackedStringArray("4.0", "C#")
 config/icon="res://icon.png"
 
 [display]
 
+window/size/viewport_width=1600
+window/size/viewport_height=900
+mouse_cursor/custom_image="res://assets/cursor/CurSword-32x32x24.png"
 window/size/width=1600
 window/size/height=900
-mouse_cursor/custom_image="res://assets/cursor/CurSword-32x32x24.png"
+
+[dotnet]
+
+project/assembly_name="Conspiratio.Godot"
 
 [gui]
 
-common/drop_mouse_on_gui_input_disabled=true
 theme/custom="res://assets/standard_theme.tres"
+common/drop_mouse_on_gui_input_disabled=true
 
 [input]
 
 ui_next_or_close={
 "deadzone": 0.5,
-"events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":2,"pressed":false,"doubleclick":false,"script":null)
- ]
+"events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":2,"pressed":false,"double_click":false,"script":null)
+]
 }
 
 [mono]

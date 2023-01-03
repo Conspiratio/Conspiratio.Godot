@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public class title : Node
+public partial class title : Node
 {
 	// Declare member variables here. Examples:
 	// private int a = 2;
@@ -29,7 +29,7 @@ public class title : Node
 		{
 			GD.Print("Process ui_next_or_close Action");
 			Input.SetCustomMouseCursor(cursorDefault);
-			GetTree().ChangeScene("res://Mainmenu.tscn");
+			GetTree().ChangeSceneToFile("res://Mainmenu.tscn");
 		}
 
 		/*
@@ -37,7 +37,7 @@ public class title : Node
 		if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.ButtonIndex == 2)  // right click
 		{
 			GD.Print("Input Event Mouse Right Click");
-			//GetTree().ChangeScene("res://Mainmenu.tscn");
+			//GetTree().ChangeSceneToFile("res://Mainmenu.tscn");
 		}
 		*/
 	}
