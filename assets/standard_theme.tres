@@ -8,10 +8,7 @@ texture = ExtResource("1_ush5x")
 region_rect = Rect2(0, 0, 694, 137)
 
 [sub_resource type="FontFile" id="1"]
-fallbacks = [ExtResource("1")]
-face_index = null
-embolden = null
-transform = null
+fallbacks = Array[Font]([ExtResource("1")])
 cache/0/16/0/ascent = 0.0
 cache/0/16/0/descent = 0.0
 cache/0/16/0/underline_position = 0.0
