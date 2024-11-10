@@ -16,9 +16,9 @@ dest_files=["res://.godot/imported/CurPlus-32x32x24.png-791f2e2dc7f78edf20ff4a02
 [params]
 
 compress/mode=0
+compress/high_quality=false
 compress/lossy_quality=0.7
 compress/hdr_compression=1
-compress/bptc_ldr=0
 compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=false
