@@ -1,7 +1,8 @@
 using Godot;
-using System;
 
-public partial class mainmenu : Control
+namespace Conspiratio.Godot.assets.scripts;
+
+public partial class Mainmenu : Control
 {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
