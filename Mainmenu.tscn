@@ -72,4 +72,5 @@ theme = ExtResource("2_fje1o")
 text = "Beenden
 "
 
+[connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]

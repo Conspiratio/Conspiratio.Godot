@@ -4,9 +4,6 @@ namespace Conspiratio.Godot.assets.scripts;
 
 public partial class Title : Node
 {
-	// Declare member variables here. Examples:
-	// private int a = 2;
-	// private string b = "text";
 	private Resource _cursorWait = ResourceLoader.Load("res://assets/cursor/CurWait-32x32x32.png");
 	private Resource _cursorDefault = ResourceLoader.Load("res://assets/cursor/CurSword-32x32x24.png");
 
@@ -17,12 +14,12 @@ public partial class Title : Node
 	}
 
 	/*
-// Called every frame. 'delta' is the elapsed time since the previous frame.
-public override void _Process(float delta)
-{
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _Process(float delta)
+	{
 
-}
-*/
+	}
+	*/
 
 	public override void _Input(InputEvent @event)
 	{
@@ -32,14 +29,5 @@ public override void _Process(float delta)
 			Input.SetCustomMouseCursor(_cursorDefault);
 			GetTree().ChangeSceneToFile("res://Mainmenu.tscn");
 		}
-
-		/*
-	// Mouse in viewport coordinates.
-	if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.ButtonIndex == 2)  // right click
-	{
-		GD.Print("Input Event Mouse Right Click");
-		//GetTree().ChangeSceneToFile("res://Mainmenu.tscn");
-	}
-	*/
 	}
 }
