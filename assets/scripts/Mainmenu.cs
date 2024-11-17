@@ -1,3 +1,4 @@
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Justiz;
 using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -24,9 +25,15 @@ public partial class Mainmenu : Control
 		GD.Print("Das Spiel startet im Jahr: " + SW.Statisch.StartJahr);
 	}
 	
-	private void _on_button_5_pressed()
+	private async void _on_button_5_pressed()
 	{
-		GetTree().Quit();
+		var dialogScene = GD.Load<PackedScene>("res://dialogs/YesNoDialog.tscn");
+		var dialog = (dialogs.YesNoDialog)dialogScene.Instantiate();
+		AddChild(dialog);
+		var dialogResult = await dialog.ShowDialog();
+
+		if (dialogResult == DialogResultGame.Yes)
+			GetTree().Quit();
 	}
 
 	// TODO: Kann das nicht in die Lib ausgelagert werden?
