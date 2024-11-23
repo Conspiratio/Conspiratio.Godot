@@ -45,12 +45,12 @@ public partial class Mainmenu : Control
 	
 	private async void _on_button_5_pressed()
 	{
-		var dialogScene = GD.Load<PackedScene>("res://dialogs/YesNoDialog.tscn");
-		var dialog = (YesNoDialog)dialogScene.Instantiate();
-		AddChild(dialog);
+		//var dialogScene = GD.Load<PackedScene>("res://dialogs/YesNoDialog.tscn");
+		//var dialog = (YesNoDialog)dialogScene.Instantiate();
+		//AddChild(dialog);
 
 		// if (await SW.UI.JaNeinFrage.ShowDialogTextAsync("Wollt Ihr Conspiratio wirklich beenden?",
-		if (await dialog.ShowDialogText("Wollt Ihr Conspiratio wirklich beenden?",
+		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Conspiratio wirklich beenden?",
 			    "Auf jeden Fall", "Lieber nicht") == DialogResultGame.Yes)
 		{
 			GetTree().Quit();

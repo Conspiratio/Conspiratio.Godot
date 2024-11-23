@@ -1,17 +1,17 @@
 [gd_scene load_steps=4 format=3 uid="uid://dfdookayitpg4"]
 
-[ext_resource type="Texture2D" uid="uid://cyxn721a3muoy" path="res://assets/backgrounds/HintIntro.png" id="1"]
-[ext_resource type="Script" path="res://assets/scripts/Title.cs" id="1_n82t1"]
-[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="2"]
+[ext_resource type="Script" path="res://assets/scripts/Title.cs" id="1_k58xp"]
+[ext_resource type="Texture2D" uid="uid://cyxn721a3muoy" path="res://assets/backgrounds/HintIntro.png" id="2_226nv"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="3_qlpxa"]
 
-[node name="Control" type="Control"]
+[node name="Title" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_n82t1")
+script = ExtResource("1_k58xp")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0
@@ -19,7 +19,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1")
+pivot_offset = Vector2(800, 450)
+texture = ExtResource("2_226nv")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
@@ -33,5 +34,5 @@ offset_right = -7.0
 offset_bottom = -6.0
 grow_horizontal = 0
 grow_vertical = 0
-theme = ExtResource("2")
+theme = ExtResource("3_qlpxa")
 text = "(Rechtsklick zum Fortfahren)"

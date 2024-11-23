@@ -3,29 +3,48 @@
 [ext_resource type="Script" path="res://assets/scripts/YesNoDialog.cs" id="1_newbd"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="1_qa6f0"]
 
-[node name="Control" type="Control"]
+[node name="YesNoDialog" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_newbd")
-LabelQuestionPath = NodePath("NinePatchRect/LabelQuestion")
-LabelYesPath = NodePath("NinePatchRect/LabelYes")
-LabelNoPath = NodePath("NinePatchRect/LabelNo")
+LabelQuestionPath = NodePath("Panel/NinePatchRect/LabelQuestion")
+LabelYesPath = NodePath("Panel/NinePatchRect/LabelYes")
+LabelNoPath = NodePath("Panel/NinePatchRect/LabelNo")
 
-[node name="NinePatchRect" type="NinePatchRect" parent="."]
-layout_mode = 0
-offset_right = 716.0
-offset_bottom = 396.0
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -358.0
+offset_top = -198.0
+offset_right = 358.0
+offset_bottom = 198.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("1_qa6f0")
 patch_margin_left = 15
 patch_margin_top = 15
 patch_margin_right = 15
 patch_margin_bottom = 15
 
-[node name="LabelQuestion" type="Label" parent="NinePatchRect"]
+[node name="LabelQuestion" type="Label" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 42.0
 offset_top = 36.0
@@ -36,7 +55,7 @@ text = "Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgesch
 autowrap_mode = 2
 clip_text = true
 
-[node name="LabelYes" type="Label" parent="NinePatchRect"]
+[node name="LabelYes" type="Label" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 104.0
 offset_top = 269.0
@@ -46,7 +65,7 @@ mouse_filter = 1
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Auf jeden Fall!"
 
-[node name="LabelNo" type="Label" parent="NinePatchRect"]
+[node name="LabelNo" type="Label" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 428.0
 offset_top = 272.0
@@ -56,5 +75,5 @@ mouse_filter = 1
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Lieber nicht!"
 
-[connection signal="gui_input" from="NinePatchRect/LabelYes" to="." method="_on_label_yes_gui_input"]
-[connection signal="gui_input" from="NinePatchRect/LabelNo" to="." method="_on_label_no_gui_input"]
+[connection signal="gui_input" from="Panel/NinePatchRect/LabelYes" to="." method="_on_label_yes_gui_input"]
+[connection signal="gui_input" from="Panel/NinePatchRect/LabelNo" to="." method="_on_label_no_gui_input"]

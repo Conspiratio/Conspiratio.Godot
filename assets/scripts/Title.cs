@@ -27,7 +27,7 @@ public partial class Title : Node
 		{
 			GD.Print("Process ui_next_or_close Action");
 			Input.SetCustomMouseCursor(_cursorDefault);
-			GetTree().ChangeSceneToFile("res://Mainmenu.tscn");
+			GetTree().ChangeSceneToFile("res://Scenes/Main.tscn");
 		}
 	}
 }

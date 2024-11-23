@@ -1,17 +1,18 @@
 [gd_scene load_steps=4 format=3 uid="uid://b2pe5xu3300xv"]
 
-[ext_resource type="Texture2D" uid="uid://dinrnw1myi4qc" path="res://assets/backgrounds/BackgroundMainmenu.png" id="1"]
-[ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_v53wj"]
-[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="2_fje1o"]
+[ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_sjitm"]
+[ext_resource type="Texture2D" uid="uid://dinrnw1myi4qc" path="res://assets/backgrounds/BackgroundMainmenu.png" id="2_sslk7"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="3_3qdh6"]
 
-[node name="Control" type="Control"]
+[node name="Mainmenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_v53wj")
+pivot_offset = Vector2(800, 450)
+script = ExtResource("1_sjitm")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -20,7 +21,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = ExtResource("1")
+texture = ExtResource("2_sslk7")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -35,40 +36,40 @@ offset_right = 0.199951
 offset_bottom = -0.400085
 grow_horizontal = 2
 grow_vertical = 2
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 alignment = 1
 
 [node name="Button" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 text = "Lokales Spiel"
 
 [node name="ButtonHelp" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 text = "Tutorial / Hilfe
 "
 
 [node name="Button3" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 text = "Optionen
 "
 
 [node name="Button4" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 text = "Credits
 "
 
 [node name="Button5" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_fje1o")
+theme = ExtResource("3_3qdh6")
 text = "Beenden
 "
 
