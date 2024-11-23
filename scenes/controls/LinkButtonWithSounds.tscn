@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://ks7nlqqiwarp"]
+
+[ext_resource type="Script" path="res://assets/scripts/LinkButtonWithSounds.cs" id="1_emqh2"]
+
+[node name="LinkButtonWithSounds" type="LinkButton"]
+offset_left = 320.0
+offset_top = 322.0
+offset_right = 360.0
+offset_bottom = 362.0
+mouse_default_cursor_shape = 0
+underline = 2
+script = ExtResource("1_emqh2")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

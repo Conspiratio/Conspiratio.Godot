@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://ds67imhsxoxlo"]
+[gd_scene load_steps=5 format=3 uid="uid://ds67imhsxoxlo"]
 
 [ext_resource type="Script" path="res://assets/scripts/YesNoDialog.cs" id="1_newbd"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="1_qa6f0"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_a7ax2"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="4_f4kh8"]
 
 [node name="YesNoDialog" type="Control"]
 layout_mode = 3
@@ -14,8 +16,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_newbd")
 LabelQuestionPath = NodePath("Panel/NinePatchRect/LabelQuestion")
-LabelYesPath = NodePath("Panel/NinePatchRect/LabelYes")
-LabelNoPath = NodePath("Panel/NinePatchRect/LabelNo")
+LinkButtonYesPath = NodePath("Panel/NinePatchRect/LinkButtonYes")
+LinkButtonNoPath = NodePath("Panel/NinePatchRect/LinkButtonNo")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -35,7 +37,7 @@ anchor_bottom = 0.5
 offset_left = -358.0
 offset_top = -198.0
 offset_right = 358.0
-offset_bottom = 198.0
+offset_bottom = 165.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("1_qa6f0")
@@ -50,30 +52,27 @@ offset_left = 42.0
 offset_top = 36.0
 offset_right = 671.0
 offset_bottom = 190.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird."
 autowrap_mode = 2
 clip_text = true
 
-[node name="LabelYes" type="Label" parent="Panel/NinePatchRect"]
+[node name="LinkButtonYes" parent="Panel/NinePatchRect" instance=ExtResource("3_a7ax2")]
 layout_mode = 0
-offset_left = 104.0
-offset_top = 269.0
-offset_right = 265.0
-offset_bottom = 296.0
-mouse_filter = 1
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+offset_left = 106.0
+offset_top = 270.0
+offset_right = 267.0
+offset_bottom = 310.0
+theme = ExtResource("4_f4kh8")
 text = "Auf jeden Fall!"
 
-[node name="LabelNo" type="Label" parent="Panel/NinePatchRect"]
+[node name="LinkButtonNo" parent="Panel/NinePatchRect" instance=ExtResource("3_a7ax2")]
 layout_mode = 0
-offset_left = 428.0
-offset_top = 272.0
-offset_right = 589.0
-offset_bottom = 299.0
-mouse_filter = 1
-theme_override_colors/font_color = Color(0, 0, 0, 1)
+offset_left = 425.0
+offset_top = 269.0
+offset_right = 586.0
+offset_bottom = 309.0
+theme = ExtResource("4_f4kh8")
 text = "Lieber nicht!"
 
-[connection signal="gui_input" from="Panel/NinePatchRect/LabelYes" to="." method="_on_label_yes_gui_input"]
-[connection signal="gui_input" from="Panel/NinePatchRect/LabelNo" to="." method="_on_label_no_gui_input"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonYes" to="." method="_on_link_button_yes_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonNo" to="." method="_on_link_button_no_pressed"]

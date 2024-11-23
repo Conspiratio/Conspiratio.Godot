@@ -10,14 +10,14 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 	public NodePath LabelQuestionPath { get; set; }
 	
 	[Export]
-	public NodePath LabelYesPath { get; set; }
+	public NodePath LinkButtonYesPath { get; set; }
 	
 	[Export]
-	public NodePath LabelNoPath { get; set; }
+	public NodePath LinkButtonNoPath { get; set; }
 
 	private Label _labelQuestion;
-	private Label _labelYes;
-	private Label _labelNo;
+	private LinkButtonWithSounds _linkButtonYes;
+	private LinkButtonWithSounds _linkButtonNo;
 	
 	private TaskCompletionSource<DialogResultGame> _dialogClosed;
 	
@@ -25,49 +25,37 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 	public override void _Ready()
 	{
 		_labelQuestion = GetNode<Label>(LabelQuestionPath);
-		_labelYes = GetNode<Label>(LabelYesPath);
-		_labelNo = GetNode<Label>(LabelNoPath);
+		_linkButtonYes = GetNode<LinkButtonWithSounds>(LinkButtonYesPath);
+		_linkButtonNo = GetNode<LinkButtonWithSounds>(LinkButtonNoPath);
 		
 		Hide();
 	}
 	
 	public override void _Input(InputEvent @event)
 	{
-		if (Input.IsActionPressed("ui_next_or_close"))
-		{
-			GD.Print("Process ui_next_or_close Action");
-			CloseDialog(DialogResultGame.Cancel);
-		}
+		if (!Input.IsActionPressed("ui_next_or_close")) 
+			return;
+		
+		CloseDialog(DialogResultGame.Cancel);
 	}
 
 	public async Task<DialogResultGame> ShowDialogText(string textQuestion, string textYes = "Ja", string textNo = "Nein")
 	{
 		_labelQuestion.Text = textQuestion;
-		_labelYes.Text = textYes;
-		_labelNo.Text = textNo;
+		_linkButtonYes.Text = textYes;
+		_linkButtonNo.Text = textNo;
 		
-		GD.Print("Showing dialog");
 		Show();
 		return await CloseDialogTask();
 	}
-	
-	private void _on_label_yes_gui_input(InputEvent @event)
+
+	private void _on_link_button_yes_pressed()
 	{
-		if (@event is not InputEventMouseButton mouseButtonEvent || !mouseButtonEvent.IsPressed() ||
-		    mouseButtonEvent.ButtonIndex != MouseButton.Left) 
-			return;
-		
-		GD.Print("Clicked Yes");
 		CloseDialog(DialogResultGame.Yes);
 	}
 	
-	private void _on_label_no_gui_input(InputEvent @event)
+	private void _on_link_button_no_pressed()
 	{
-		if (@event is not InputEventMouseButton mouseButtonEvent || !mouseButtonEvent.IsPressed() ||
-		    mouseButtonEvent.ButtonIndex != MouseButton.Left) 
-			return;
-		
-		GD.Print("Clicked No");
 		CloseDialog(DialogResultGame.No);
 	}
 
