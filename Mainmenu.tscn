@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://b2pe5xu3300xv"]
 
 [ext_resource type="Texture2D" uid="uid://dinrnw1myi4qc" path="res://assets/backgrounds/BackgroundMainmenu.png" id="1"]
-[ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_3lehe"]
+[ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_v53wj"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="2_fje1o"]
 
 [node name="Control" type="Control"]
@@ -11,7 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_3lehe")
+script = ExtResource("1_v53wj")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -44,7 +44,7 @@ size_flags_vertical = 3
 theme = ExtResource("2_fje1o")
 text = "Lokales Spiel"
 
-[node name="Button2" type="Button" parent="VBoxContainer"]
+[node name="ButtonHelp" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme = ExtResource("2_fje1o")
@@ -72,4 +72,6 @@ theme = ExtResource("2_fje1o")
 text = "Beenden
 "
 
+[connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]

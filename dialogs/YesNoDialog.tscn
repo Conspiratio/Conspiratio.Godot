@@ -1,0 +1,60 @@
+[gd_scene load_steps=3 format=3 uid="uid://ds67imhsxoxlo"]
+
+[ext_resource type="Script" path="res://assets/scripts/YesNoDialog.cs" id="1_newbd"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="1_qa6f0"]
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_newbd")
+LabelQuestionPath = NodePath("NinePatchRect/LabelQuestion")
+LabelYesPath = NodePath("NinePatchRect/LabelYes")
+LabelNoPath = NodePath("NinePatchRect/LabelNo")
+
+[node name="NinePatchRect" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_right = 716.0
+offset_bottom = 396.0
+texture = ExtResource("1_qa6f0")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelQuestion" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 36.0
+offset_right = 671.0
+offset_bottom = 190.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird."
+autowrap_mode = 2
+clip_text = true
+
+[node name="LabelYes" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 104.0
+offset_top = 269.0
+offset_right = 265.0
+offset_bottom = 296.0
+mouse_filter = 1
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Auf jeden Fall!"
+
+[node name="LabelNo" type="Label" parent="NinePatchRect"]
+layout_mode = 0
+offset_left = 428.0
+offset_top = 272.0
+offset_right = 589.0
+offset_bottom = 299.0
+mouse_filter = 1
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Lieber nicht!"
+
+[connection signal="gui_input" from="NinePatchRect/LabelYes" to="." method="_on_label_yes_gui_input"]
+[connection signal="gui_input" from="NinePatchRect/LabelNo" to="." method="_on_label_no_gui_input"]
