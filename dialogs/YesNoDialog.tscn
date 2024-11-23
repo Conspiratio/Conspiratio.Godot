@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://ds67imhsxoxlo"]
 
-[ext_resource type="Script" path="res://dialogs/YesNoDialog.cs" id="1_newbd"]
+[ext_resource type="Script" path="res://assets/scripts/YesNoDialog.cs" id="1_newbd"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="1_qa6f0"]
 
 [node name="Control" type="Control"]
@@ -11,6 +11,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_newbd")
+LabelQuestionPath = NodePath("NinePatchRect/LabelQuestion")
+LabelYesPath = NodePath("NinePatchRect/LabelYes")
+LabelNoPath = NodePath("NinePatchRect/LabelNo")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="."]
 layout_mode = 0
@@ -22,7 +25,7 @@ patch_margin_top = 15
 patch_margin_right = 15
 patch_margin_bottom = 15
 
-[node name="Label" type="Label" parent="NinePatchRect"]
+[node name="LabelQuestion" type="Label" parent="NinePatchRect"]
 layout_mode = 0
 offset_left = 42.0
 offset_top = 36.0

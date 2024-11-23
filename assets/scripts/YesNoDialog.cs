@@ -2,21 +2,35 @@ using System.Threading.Tasks;
 using Conspiratio.Lib.Allgemein;
 using Godot;
 
-namespace Conspiratio.Godot.dialogs;
+namespace Conspiratio.Godot.assets.scripts;
 
-public partial class YesNoDialog : Control
+public partial class YesNoDialog : Control, IYesNoQuestion
 {
+	[Export]
+	public NodePath LabelQuestionPath { get; set; }
+	
+	[Export]
+	public NodePath LabelYesPath { get; set; }
+	
+	[Export]
+	public NodePath LabelNoPath { get; set; }
+
+	private Label _labelQuestion;
+	private Label _labelYes;
+	private Label _labelNo;
+	
+	private TaskCompletionSource<DialogResultGame> _dialogClosed;
+	
 	//[Signal]
 	//public delegate void DialogClosedEventHandler(DialogResultGame dialogResult);
-	
-	/// <summary>
-	/// Globale Task Variable als auto implemented Property für Warten auf Buttonklick
-	/// </summary>
-	public TaskCompletionSource<DialogResultGame> tcsButtonklick { get; set; }
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_labelQuestion = GetNode<Label>(LabelQuestionPath);
+		_labelYes = GetNode<Label>(LabelYesPath);
+		_labelNo = GetNode<Label>(LabelNoPath);
+		
 		Hide();
 	}
 
@@ -48,7 +62,7 @@ public partial class YesNoDialog : Control
 	private void CloseDialog(DialogResultGame dialogResult)
 	{
 		Hide();
-		tcsButtonklick?.TrySetResult(dialogResult);
+		_dialogClosed?.TrySetResult(dialogResult);
 		
 		// set_process_unhandled_key_input(false)
 		//EmitSignal(SignalName.DialogClosed, Variant.From(dialogResult));
@@ -60,15 +74,26 @@ public partial class YesNoDialog : Control
 	
 	private Task<DialogResultGame> CloseDialogTask()
 	{
-		tcsButtonklick = new TaskCompletionSource<DialogResultGame>();
-		return tcsButtonklick.Task;
+		_dialogClosed = new TaskCompletionSource<DialogResultGame>();
+		return _dialogClosed.Task;
 	}
-
-	public async Task<DialogResultGame> ShowDialog()
+	
+	public async Task<DialogResultGame> ShowDialogText(string textQuestion, string textYes = "Ja", string textNo = "Nein")
 	{
+		/*
+		var dialogScene = GD.Load<PackedScene>("res://dialogs/YesNoDialog.tscn");
+		var dialog = (YesNoDialog)dialogScene.Instantiate();
+		*/
+		
+		// TODO: Add the dialog to the caller control/node. It's the "parent scene".
+		// But how can we inject the caller here?
+		//GetTree().CurrentScene.AddChild(dialog);
+		_labelQuestion.Text = textQuestion;
+		_labelYes.Text = textYes;
+		_labelNo.Text = textNo;
+		
 		GD.Print("Showing dialog");
 		Show();
-		//await ToSignal(GetTree(), SignalName.DialogClosed);
 		return await CloseDialogTask();
 	}
 }

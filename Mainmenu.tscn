@@ -44,7 +44,7 @@ size_flags_vertical = 3
 theme = ExtResource("2_fje1o")
 text = "Lokales Spiel"
 
-[node name="Button2" type="Button" parent="VBoxContainer"]
+[node name="ButtonHelp" type="Button" parent="VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
 theme = ExtResource("2_fje1o")
@@ -73,4 +73,5 @@ text = "Beenden
 "
 
 [connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]
