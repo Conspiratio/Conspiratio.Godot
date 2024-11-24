@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using Conspiratio.Lib.Allgemein;
-using Conspiratio.Lib.Gameplay.Justiz;
-using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -9,10 +7,14 @@ namespace Conspiratio.Godot.assets.scripts;
 
 public partial class Mainmenu : Control
 {
+	[Export]
+	public NodePath LinkButtonVersionPath { get; set; }
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		
+		var _linkButtonVersion = GetNode<LinkButtonWithSounds>(LinkButtonVersionPath);
+		_linkButtonVersion.Text = "Klicken für Changelog - Version " + ProjectSettings.GetSetting("application/config/version");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -35,13 +37,14 @@ public partial class Mainmenu : Control
 		Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.Wiki/wiki", UseShellExecute = true } );
 	}
 
-	/*
-	// Changelog aufrufen
-	if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr den Changelog in Eurem Standard-Browser öffnen?", "Auf jeden Fall", "Lieber nicht") != DialogResultGame.Yes)
-	return;
+	private async void _on_link_button_version_pressed()
+	{
+		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr den Changelog in Eurem Standard-Browser öffnen?", 
+			    "Auf jeden Fall", "Lieber nicht") != DialogResultGame.Yes)
+			return;
 
-	Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.WinForms/blob/main/CHANGELOG.md", UseShellExecute = true } );
-	*/
+		Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.Godot/blob/main/CHANGELOG.md", UseShellExecute = true } );
+	}
 	
 	private async void _on_button_5_pressed()
 	{

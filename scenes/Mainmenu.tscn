@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://b2pe5xu3300xv"]
+[gd_scene load_steps=5 format=3 uid="uid://b2pe5xu3300xv"]
 
 [ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_sjitm"]
 [ext_resource type="Texture2D" uid="uid://dinrnw1myi4qc" path="res://assets/backgrounds/BackgroundMainmenu.png" id="2_sslk7"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="3_3qdh6"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_7ir7v"]
 
 [node name="Mainmenu" type="Control"]
 layout_mode = 3
@@ -13,6 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(800, 450)
 script = ExtResource("1_sjitm")
+LinkButtonVersionPath = NodePath("TextureRect/LinkButtonVersion")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -22,6 +24,22 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_sslk7")
+
+[node name="LinkButtonVersion" parent="TextureRect" instance=ExtResource("3_7ir7v")]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -435.0
+offset_top = -40.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.878431, 0, 1)
+text = "Klicken für Changelog - Version:"
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -73,6 +91,7 @@ theme = ExtResource("3_3qdh6")
 text = "Beenden
 "
 
+[connection signal="pressed" from="TextureRect/LinkButtonVersion" to="." method="_on_link_button_version_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]
