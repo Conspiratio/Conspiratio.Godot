@@ -32,7 +32,7 @@ public partial class Mainmenu : Control
 			    "Auf jeden Fall", "Lieber nicht") != DialogResultGame.Yes)
 			return;
 
-		Process.Start("https://github.com/Conspiratio/Conspiratio.Wiki/wiki");
+		Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.Wiki/wiki", UseShellExecute = true } );
 	}
 
 	/*
@@ -40,7 +40,7 @@ public partial class Mainmenu : Control
 	if (SW.UI.JaNeinFrage.ShowDialogText("Wollt Ihr den Changelog in Eurem Standard-Browser öffnen?", "Auf jeden Fall", "Lieber nicht") != DialogResultGame.Yes)
 	return;
 
-	Process.Start("https://github.com/Conspiratio/Conspiratio.WinForms/blob/main/CHANGELOG.md");
+	Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.WinForms/blob/main/CHANGELOG.md", UseShellExecute = true } );
 	*/
 	
 	private async void _on_button_5_pressed()
