@@ -1,0 +1,33 @@
+[gd_scene load_steps=6 format=3 uid="uid://cwhsddmao6lwd"]
+
+[ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
+[ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
+[ext_resource type="PackedScene" uid="uid://ds67imhsxoxlo" path="res://scenes/dialogs/YesNoDialog.tscn" id="2_bp0or"]
+[ext_resource type="AudioStream" uid="uid://dlgprinhglsqk" path="res://assets/sounds/bongo_hell.wav" id="4_75uap"]
+[ext_resource type="AudioStream" uid="uid://dxh5y0okk4geh" path="res://assets/sounds/bongo_dunkel.wav" id="5_8bflw"]
+
+[node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_72k8v")
+YesNoDialogPath = NodePath("YesNoDialog")
+AudioStreamPlayerLeftClickPath = NodePath("AudioStreamPlayerLeftClick")
+AudioStreamPlayerRightClickPath = NodePath("AudioStreamPlayerRightClick")
+
+[node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
+layout_mode = 1
+
+[node name="YesNoDialog" parent="." instance=ExtResource("2_bp0or")]
+visible = false
+layout_mode = 1
+offset_top = -0.449997
+
+[node name="AudioStreamPlayerLeftClick" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_75uap")
+
+[node name="AudioStreamPlayerRightClick" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_8bflw")
