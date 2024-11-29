@@ -15,6 +15,7 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 	[Export]
 	public NodePath LinkButtonNoPath { get; set; }
 
+	private Main _main;
 	private Label _labelQuestion;
 	private LinkButtonWithSounds _linkButtonYes;
 	private LinkButtonWithSounds _linkButtonNo;
@@ -24,11 +25,13 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		_main = GetParent<Main>();
+		
 		_labelQuestion = GetNode<Label>(LabelQuestionPath);
 		_linkButtonYes = GetNode<LinkButtonWithSounds>(LinkButtonYesPath);
 		_linkButtonNo = GetNode<LinkButtonWithSounds>(LinkButtonNoPath);
-		
-		Hide();
+
+		HideAndDisableInput();
 	}
 	
 	public override void _Input(InputEvent @event)
@@ -46,7 +49,14 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 		_linkButtonNo.Text = textNo;
 		
 		Show();
+		SetProcessInput(true);
 		return await CloseDialogTask();
+	}
+
+	private void HideAndDisableInput()
+	{
+		Hide();
+		SetProcessInput(false);
 	}
 
 	private void _on_link_button_yes_pressed()
@@ -61,7 +71,12 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 
 	private void CloseDialog(DialogResultGame dialogResult)
 	{
-		Hide();
+		if (dialogResult == DialogResultGame.Cancel)
+			_main.AudioStreamPlayerRightClick.Play();
+		else
+			_main.AudioStreamPlayerLeftClick.Play();
+		
+		HideAndDisableInput();
 		_dialogClosed?.TrySetResult(dialogResult);
 	}
 	

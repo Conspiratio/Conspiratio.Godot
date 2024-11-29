@@ -14,7 +14,7 @@ grow_horizontal = 2
 grow_vertical = 2
 pivot_offset = Vector2(800, 450)
 script = ExtResource("1_sjitm")
-LinkButtonVersionPath = NodePath("TextureRect/LinkButtonVersion")
+LinkButtonVersionPath = NodePath("LinkButtonVersion")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -25,19 +25,17 @@ grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_sslk7")
 
-[node name="LinkButtonVersion" parent="TextureRect" instance=ExtResource("3_7ir7v")]
+[node name="LinkButtonVersion" parent="." instance=ExtResource("3_7ir7v")]
 layout_mode = 1
-anchors_preset = 3
+anchors_preset = -1
 anchor_left = 1.0
-anchor_top = 1.0
+anchor_top = 0.998
 anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -435.0
-offset_top = -40.0
-offset_right = 0.0
-offset_bottom = 0.0
-grow_horizontal = 0
-grow_vertical = 0
+anchor_bottom = 0.998
+offset_left = -463.0
+offset_top = -31.2
+offset_right = -7.0
+offset_bottom = -4.20001
 theme_override_colors/font_color = Color(1, 0.878431, 0, 1)
 text = "Klicken für Changelog - Version:"
 
@@ -91,7 +89,7 @@ theme = ExtResource("3_3qdh6")
 text = "Beenden
 "
 
-[connection signal="pressed" from="TextureRect/LinkButtonVersion" to="." method="_on_link_button_version_pressed"]
+[connection signal="pressed" from="LinkButtonVersion" to="." method="_on_link_button_version_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]
