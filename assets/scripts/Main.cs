@@ -9,6 +9,9 @@ public partial class Main : Control
 	public NodePath YesNoDialogPath { get; set; }
 	
 	[Export]
+	public NodePath LocalGamePath { get; set; }
+	
+	[Export]
 	public NodePath AudioStreamPlayerLeftClickPath { get; set; }
 	
 	[Export]
@@ -16,6 +19,7 @@ public partial class Main : Control
 	
 	public AudioStreamPlayer AudioStreamPlayerLeftClick;
 	public AudioStreamPlayer AudioStreamPlayerRightClick;
+	public LocalGame LocalGame;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -23,6 +27,7 @@ public partial class Main : Control
 		var yesNoDialog = GetNode<YesNoDialog>(YesNoDialogPath);
 		AudioStreamPlayerLeftClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerLeftClickPath);
 		AudioStreamPlayerRightClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerRightClickPath);
+		LocalGame = GetNode<LocalGame>(LocalGamePath);
 		
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, null, null, null, null, null, null, null, null);

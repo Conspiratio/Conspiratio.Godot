@@ -29,6 +29,9 @@ public partial class Mainmenu : Control
 	private void _on_button_1_pressed()
 	{
 		_main.AudioStreamPlayerLeftClick.Play();
+		
+		_main.LocalGame.ShowAndEnableInput();
+		
 		SW.Statisch.Initialisieren();
 		GD.Print("Das Spiel startet im Jahr: " + SW.Statisch.StartJahr);
 	}

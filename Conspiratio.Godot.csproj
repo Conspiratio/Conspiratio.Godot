@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+    <Folder Include="scenes\dialogs\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Conspiratio.Lib" Version="3.0.0" />
