@@ -2,7 +2,7 @@ using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
 
-public partial class LocalGame : Control
+public partial class LocalGameDialog : Control
 {
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -32,5 +32,10 @@ public partial class LocalGame : Control
 	{
 		Show();
 		SetProcessInput(true);
+	}
+
+	public void _on_button_start_game_pressed()
+	{
+		
 	}
 }
