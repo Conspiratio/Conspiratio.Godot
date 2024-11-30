@@ -1,15 +1,15 @@
+using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
 
-public partial class LocalGameDialog : Control
+public partial class NewLocalGameMenu : Control
 {
-	private Main _main;
-	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_main = GetParent<Main>();
+		// TODO: Set Maxlength of LineEdit for Game Name
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -17,9 +17,13 @@ public partial class LocalGameDialog : Control
 	{
 	}
 	
-	public override void _Input(InputEvent @event)
+	public override async void _Input(InputEvent @event)
 	{
 		if (!Input.IsActionPressed("ui_next_or_close")) 
+			return;
+
+		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?") !=
+		    DialogResultGame.Yes)
 			return;
 		
 		HideAndDisableInput();
@@ -35,11 +39,5 @@ public partial class LocalGameDialog : Control
 	{
 		Show();
 		SetProcessInput(true);
-	}
-
-	public void _on_button_start_game_pressed()
-	{
-		_main.NewLocalGameMenu.ShowAndEnableInput();
-		HideAndDisableInput();
 	}
 }

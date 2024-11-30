@@ -9,15 +9,20 @@ public partial class Main : Control
 	public NodePath YesNoDialogPath { get; set; }
 	
 	[Export]
-	public NodePath LocalGamePath { get; set; }
+	public NodePath LocalGameDialogPath { get; set; }
 	
-	public LocalGame LocalGame;
+	[Export]
+	public NodePath NewLocalGameMenuPath { get; set; }
+	
+	public LocalGameDialog LocalGameDialog;
+	public NewLocalGameMenu NewLocalGameMenu;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		var yesNoDialog = GetNode<YesNoDialog>(YesNoDialogPath);
-		LocalGame = GetNode<LocalGame>(LocalGamePath);
+		LocalGameDialog = GetNode<LocalGameDialog>(LocalGameDialogPath);
+		NewLocalGameMenu = GetNode<NewLocalGameMenu>(NewLocalGameMenuPath);
 		
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, null, null, null, null, null, null, null, null);

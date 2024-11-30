@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgpptn2amibrs"]
+
+[ext_resource type="Texture2D" uid="uid://bvl5do8sb0xrg" path="res://assets/backgrounds/BackgroundBookOpen.png" id="1_mm82n"]
+[ext_resource type="Script" path="res://assets/scripts/NewLocalGameMenu.cs" id="1_mnkhp"]
+
+[node name="NewLocalGameMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_mnkhp")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(800, 450)
+texture = ExtResource("1_mm82n")
+
+[node name="LabelTitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 63.0
+offset_top = 46.0
+offset_right = 295.0
+offset_bottom = 76.0
+text = "Neues Spiel erstellen
+
+"
+
+[node name="LabelGameName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 118.0
+offset_top = 191.0
+offset_right = 245.0
+offset_bottom = 221.0
+text = "Spielname:
+
+"
+
+[node name="LineEditGameName" type="LineEdit" parent="."]
+layout_mode = 0
+offset_left = 257.0
+offset_top = 189.0
+offset_right = 620.0
+offset_bottom = 224.0
+placeholder_text = "My Game"

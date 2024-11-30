@@ -29,7 +29,7 @@ public partial class Mainmenu : Control
 
 	private void _on_button_local_game_pressed()
 	{
-		_main.LocalGame.ShowAndEnableInput();
+		_main.LocalGameDialog.ShowAndEnableInput();
 		
 		SW.Statisch.Initialisieren();
 		GD.Print("Das Spiel startet im Jahr: " + SW.Statisch.StartJahr);
