@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://de5tq8e2xo1h0"]
+
+[ext_resource type="Script" path="res://assets/scripts/managers/SoundManager.cs" id="1_kahqt"]
+[ext_resource type="AudioStream" uid="uid://dlgprinhglsqk" path="res://assets/sounds/bongo_hell.wav" id="2_1q1uq"]
+[ext_resource type="AudioStream" uid="uid://dxh5y0okk4geh" path="res://assets/sounds/bongo_dunkel.wav" id="3_sde8w"]
+[ext_resource type="AudioStream" uid="uid://nenujd1k1fic" path="res://assets/music/Song_Intro_BigHornsIntro2.mp3" id="4_508bk"]
+
+[node name="SoundManager" type="Node"]
+script = ExtResource("1_kahqt")
+AudioStreamPlayerLeftClickPath = NodePath("AudioStreamPlayerLeftClick")
+AudioStreamPlayerRightClickPath = NodePath("AudioStreamPlayerRightClick")
+AudioStreamPlayerIntroPath = NodePath("AudioStreamPlayerIntro")
+
+[node name="AudioStreamPlayerLeftClick" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_1q1uq")
+
+[node name="AudioStreamPlayerRightClick" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("3_sde8w")
+
+[node name="AudioStreamPlayerIntro" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_508bk")

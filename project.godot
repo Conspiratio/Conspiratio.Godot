@@ -16,6 +16,10 @@ run/main_scene="res://scenes/Title.tscn"
 config/features=PackedStringArray("4.3", "C#")
 config/icon="res://assets/icons/IconC.ico"
 
+[autoload]
+
+SoundManager="*res://scenes/managers/SoundManager.tscn"
+
 [display]
 
 window/size/viewport_width=1600
@@ -27,6 +31,11 @@ window/size/height=900
 [dotnet]
 
 project/assembly_name="Conspiratio.Godot"
+
+[global_group]
+
+Dialogs="all dialog scenes"
+Controls="all customized controls"
 
 [gui]
 

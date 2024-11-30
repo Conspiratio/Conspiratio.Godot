@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cjjy04owdlrv0"]
+
+[ext_resource type="Script" path="res://assets/scripts/controls/ButtonWithSounds.cs" id="1_ohubc"]
+
+[node name="ButtonWithSounds" type="Button" groups=["Controls"]]
+script = ExtResource("1_ohubc")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

@@ -1,9 +1,10 @@
-[gd_scene load_steps=3 format=3 uid="uid://bkcwpr7dk0e5m"]
+[gd_scene load_steps=4 format=3 uid="uid://bkcwpr7dk0e5m"]
 
 [ext_resource type="Script" path="res://assets/scripts/LocalGame.cs" id="1_gevy4"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_btwms"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="3_gh27k"]
 
-[node name="LocalGame" type="Control"]
+[node name="LocalGame" type="Control" groups=["Dialogs"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,15 +25,15 @@ grow_vertical = 2
 
 [node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -190.0
-offset_right = 229.0
-offset_bottom = 194.0
+anchors_preset = -1
+anchor_left = 0.35
+anchor_top = 0.289
+anchor_right = 0.643
+anchor_bottom = 0.716
+offset_left = -6.10352e-05
+offset_top = -0.100006
+offset_right = 0.199951
+offset_bottom = -0.400024
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_btwms")
@@ -55,38 +56,35 @@ horizontal_alignment = 1
 autowrap_mode = 2
 clip_text = true
 
-[node name="ButtonStartGame" type="Button" parent="Panel/NinePatchRect"]
+[node name="ButtonStartGame" parent="Panel/NinePatchRect" instance=ExtResource("3_gh27k")]
 layout_mode = 1
 anchors_preset = -1
+anchor_top = 0.25
 anchor_right = 1.0
+anchor_bottom = 0.409
 offset_left = 108.0
-offset_top = 96.0
 offset_right = -95.0
-offset_bottom = 165.0
-grow_horizontal = 2
-text = "Spiel starten
-"
+offset_bottom = 7.0
+text = "Spiel starten"
 
-[node name="ButtonLoadGame" type="Button" parent="Panel/NinePatchRect"]
+[node name="ButtonLoadGame" parent="Panel/NinePatchRect" instance=ExtResource("3_gh27k")]
 layout_mode = 1
 anchors_preset = -1
+anchor_top = 0.479
 anchor_right = 1.0
+anchor_bottom = 0.659
 offset_left = 108.0
-offset_top = 270.0
+offset_top = 3.05176e-05
 offset_right = -95.0
-offset_bottom = 339.0
-grow_horizontal = 2
-text = "Spiel fortsetzen
-"
+offset_bottom = 3.05176e-05
+text = "Spiel laden"
 
-[node name="ButtonContinueGame" type="Button" parent="Panel/NinePatchRect"]
+[node name="ButtonContinueGame" parent="Panel/NinePatchRect" instance=ExtResource("3_gh27k")]
 layout_mode = 1
 anchors_preset = -1
+anchor_top = 0.703
 anchor_right = 1.0
+anchor_bottom = 0.883
 offset_left = 108.0
-offset_top = 184.0
 offset_right = -95.0
-offset_bottom = 253.0
-grow_horizontal = 2
-text = "Spiel laden
-"
+text = "Spiel fortsetzen"

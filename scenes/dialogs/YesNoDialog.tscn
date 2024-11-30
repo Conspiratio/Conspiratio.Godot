@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_a7ax2"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="4_f4kh8"]
 
-[node name="YesNoDialog" type="Control"]
+[node name="YesNoDialog" type="Control" groups=["Dialogs"]]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

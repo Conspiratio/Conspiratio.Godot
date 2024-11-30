@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Godot;
 
@@ -15,21 +16,18 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 	[Export]
 	public NodePath LinkButtonNoPath { get; set; }
 
-	private Main _main;
 	private Label _labelQuestion;
-	private LinkButtonWithSounds _linkButtonYes;
-	private LinkButtonWithSounds _linkButtonNo;
+	private controls.LinkButtonWithSounds _linkButtonYes;
+	private controls.LinkButtonWithSounds _linkButtonNo;
 	
 	private TaskCompletionSource<DialogResultGame> _dialogClosed;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_main = GetParent<Main>();
-		
 		_labelQuestion = GetNode<Label>(LabelQuestionPath);
-		_linkButtonYes = GetNode<LinkButtonWithSounds>(LinkButtonYesPath);
-		_linkButtonNo = GetNode<LinkButtonWithSounds>(LinkButtonNoPath);
+		_linkButtonYes = GetNode<controls.LinkButtonWithSounds>(LinkButtonYesPath);
+		_linkButtonNo = GetNode<controls.LinkButtonWithSounds>(LinkButtonNoPath);
 
 		HideAndDisableInput();
 	}
@@ -39,6 +37,7 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 		if (!Input.IsActionPressed("ui_next_or_close")) 
 			return;
 		
+		SoundManager.Instance.PlayRightClick();
 		CloseDialog(DialogResultGame.Cancel);
 	}
 
@@ -71,11 +70,6 @@ public partial class YesNoDialog : Control, IYesNoQuestion
 
 	private void CloseDialog(DialogResultGame dialogResult)
 	{
-		if (dialogResult == DialogResultGame.Cancel)
-			_main.AudioStreamPlayerRightClick.Play();
-		else
-			_main.AudioStreamPlayerLeftClick.Play();
-		
 		HideAndDisableInput();
 		_dialogClosed?.TrySetResult(dialogResult);
 	}

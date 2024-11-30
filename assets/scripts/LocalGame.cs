@@ -19,7 +19,6 @@ public partial class LocalGame : Control
 		if (!Input.IsActionPressed("ui_next_or_close")) 
 			return;
 		
-		//CloseDialog(DialogResultGame.Cancel);
 		HideAndDisableInput();
 	}
 	

@@ -12,6 +12,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_k58xp")
+MainScenePath = "res://scenes/Main.tscn"
+CursorWaitPath = "res://assets/cursor/CurWait-32x32x32.png"
+CursorDefaultPath = "res://assets/cursor/CurSword-32x32x24.png"
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 0

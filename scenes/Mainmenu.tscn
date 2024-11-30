@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://b2pe5xu3300xv"]
+[gd_scene load_steps=6 format=3 uid="uid://b2pe5xu3300xv"]
 
 [ext_resource type="Script" path="res://assets/scripts/Mainmenu.cs" id="1_sjitm"]
 [ext_resource type="Texture2D" uid="uid://dinrnw1myi4qc" path="res://assets/backgrounds/BackgroundMainmenu.png" id="2_sslk7"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="3_3qdh6"]
 [ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_7ir7v"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_8gra0"]
 
 [node name="Mainmenu" type="Control"]
 layout_mode = 3
@@ -49,47 +50,40 @@ anchor_bottom = 0.976
 offset_left = -0.400024
 offset_top = -0.300018
 offset_right = 0.199951
-offset_bottom = -0.400085
+offset_bottom = -23.4
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_3qdh6")
 alignment = 1
 
-[node name="Button" type="Button" parent="VBoxContainer"]
+[node name="ButtonLocalGame" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("3_3qdh6")
 text = "Lokales Spiel"
 
-[node name="ButtonHelp" type="Button" parent="VBoxContainer"]
+[node name="ButtonHelp" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("3_3qdh6")
-text = "Tutorial / Hilfe
-"
+text = "Tutorial / Hilfe"
 
-[node name="Button3" type="Button" parent="VBoxContainer"]
+[node name="ButtonOptions" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("3_3qdh6")
-text = "Optionen
-"
+text = "Optionen"
 
-[node name="Button4" type="Button" parent="VBoxContainer"]
+[node name="ButtonCredits" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("3_3qdh6")
-text = "Credits
-"
+text = "Credits"
 
-[node name="Button5" type="Button" parent="VBoxContainer"]
+[node name="ButtonExit" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("3_3qdh6")
-text = "Beenden
-"
+text = "Beenden"
 
 [connection signal="pressed" from="LinkButtonVersion" to="." method="_on_link_button_version_pressed"]
-[connection signal="pressed" from="VBoxContainer/Button" to="." method="_on_button_1_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonLocalGame" to="." method="_on_button_local_game_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
-[connection signal="pressed" from="VBoxContainer/Button5" to="." method="_on_button_5_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonOptions" to="." method="_on_button_options_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonCredits" to="." method="_on_button_credits_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonExit" to="." method="_on_button_exit_pressed"]
