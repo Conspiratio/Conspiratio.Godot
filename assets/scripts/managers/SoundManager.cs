@@ -13,10 +13,14 @@ public partial class SoundManager : Node
 	public NodePath AudioStreamPlayerRightClickPath { get; set; }
 	
 	[Export]
+	public NodePath AudioStreamPlayerCheckBoxClick { get; set; }
+	
+	[Export]
 	public NodePath AudioStreamPlayerIntroPath { get; set; }
 	
 	private AudioStreamPlayer _audioStreamPlayerLeftClick;
 	private AudioStreamPlayer _audioStreamPlayerRightClick;
+	private AudioStreamPlayer _audioStreamPlayerCheckBoxClick;
 	private AudioStreamPlayer _audioStreamPlayerIntro;
 	
 	// Called when the node enters the scene tree for the first time.
@@ -25,6 +29,7 @@ public partial class SoundManager : Node
 		Instance = this;
 		_audioStreamPlayerLeftClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerLeftClickPath);
 		_audioStreamPlayerRightClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerRightClickPath);
+		_audioStreamPlayerCheckBoxClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerCheckBoxClick);
 		_audioStreamPlayerIntro = GetNode<AudioStreamPlayer>(AudioStreamPlayerIntroPath);
 	}
 
@@ -41,6 +46,11 @@ public partial class SoundManager : Node
 	public void PlayRightClick()
 	{
 		_audioStreamPlayerRightClick.Play();
+	}
+	
+	public void PlayCheckBoxClick()
+	{
+		_audioStreamPlayerCheckBoxClick.Play();
 	}
 
 	public void PlayIntro()

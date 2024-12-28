@@ -39,7 +39,7 @@ Controls="all customized controls"
 
 [gui]
 
-theme/custom="res://assets/standard_theme.tres"
+theme/custom="res://assets/resources/standard_theme.tres"
 common/drop_mouse_on_gui_input_disabled=true
 
 [input]

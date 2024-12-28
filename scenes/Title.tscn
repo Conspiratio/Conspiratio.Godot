@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://assets/scripts/Title.cs" id="1_k58xp"]
 [ext_resource type="Texture2D" uid="uid://cyxn721a3muoy" path="res://assets/backgrounds/BackgroundIntro.png" id="2_226nv"]
-[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/standard_theme.tres" id="3_qlpxa"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_qlpxa"]
 
 [node name="Title" type="Control"]
 layout_mode = 3
