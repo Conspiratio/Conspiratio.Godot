@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=13 format=3 uid="uid://bkne0d4c2vxts"]
+[gd_resource type="Theme" load_steps=24 format=3 uid="uid://bkne0d4c2vxts"]
 
 [ext_resource type="StyleBox" uid="uid://de8p6d25djpwa" path="res://assets/resources/button_style_box_texture.tres" id="1_0qlb6"]
 [ext_resource type="Texture2D" uid="uid://d2e0adswerav" path="res://assets/icons/SymbCheckedSmall.png" id="2_lheqv"]
@@ -37,6 +37,68 @@ expand_margin_left = 2.0
 expand_margin_top = 2.0
 expand_margin_right = 2.0
 expand_margin_bottom = 2.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_r634o"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vegx6"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iafvx"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y4adj"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hptf6"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_v7wqk"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vj6ry"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_27ppv"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xyeeb"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_81y5d"]
+bg_color = Color(0.129412, 0.129412, 0.129412, 0.709804)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oaqcm"]
 
 [sub_resource type="FontFile" id="1"]
 fallbacks = Array[Font]([ExtResource("4_lpmpj")])
@@ -333,10 +395,10 @@ CheckBox/styles/hover_pressed = SubResource("StyleBoxEmpty_hpdll")
 CheckBox/styles/normal = SubResource("StyleBoxEmpty_kxss4")
 CheckBox/styles/pressed = SubResource("StyleBoxEmpty_5nowa")
 Label/colors/font_color = Color(0, 0, 0, 1)
-Label/font_sizes/font_size = 26
+Label/font_sizes/font_size = 32
 LabelItalic/base_type = &"Label"
 LabelItalic/colors/font_color = Color(0.462745, 0.443137, 0.443137, 1)
-LineEdit/font_sizes/font_size = 26
+LineEdit/font_sizes/font_size = 32
 LinkButton/colors/font_color = Color(0, 0, 0, 1)
 LinkButton/colors/font_focus_color = Color(0.95, 0.95, 0.95, 1)
 LinkButton/colors/font_hover_color = Color(1, 0, 0, 1)
@@ -344,7 +406,23 @@ LinkButton/colors/font_outline_color = Color(0, 0, 0, 1)
 LinkButton/colors/font_pressed_color = Color(1, 1, 1, 1)
 LinkButton/constants/outline_size = 0
 LinkButton/constants/underline_spacing = 2
-LinkButton/font_sizes/font_size = 26
+LinkButton/font_sizes/font_size = 32
 LinkButton/styles/focus = SubResource("StyleBoxFlat_db0am")
-TextEdit/font_sizes/font_size = 26
+OptionButton/colors/font_color = Color(1, 1, 1, 1)
+OptionButton/font_sizes/font_size = 32
+OptionButton/styles/disabled = SubResource("StyleBoxEmpty_r634o")
+OptionButton/styles/disabled_mirrored = SubResource("StyleBoxEmpty_vegx6")
+OptionButton/styles/focus = SubResource("StyleBoxFlat_iafvx")
+OptionButton/styles/hover = SubResource("StyleBoxFlat_y4adj")
+OptionButton/styles/hover_mirrored = SubResource("StyleBoxFlat_hptf6")
+OptionButton/styles/hover_pressed = SubResource("StyleBoxFlat_v7wqk")
+OptionButton/styles/hover_pressed_mirrored = SubResource("StyleBoxFlat_vj6ry")
+OptionButton/styles/normal = SubResource("StyleBoxFlat_27ppv")
+OptionButton/styles/normal_mirrored = SubResource("StyleBoxFlat_xyeeb")
+OptionButton/styles/pressed = SubResource("StyleBoxFlat_81y5d")
+OptionButton/styles/pressed_mirrored = SubResource("StyleBoxEmpty_oaqcm")
+PopupMenu/font_sizes/font_separator_size = 32
+PopupMenu/font_sizes/font_size = 32
+PopupMenu/font_sizes/title_font_size = 32
+TextEdit/font_sizes/font_size = 32
 VBoxContainer/constants/separation = 10

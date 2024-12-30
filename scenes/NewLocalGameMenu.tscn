@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cgpptn2amibrs"]
+[gd_scene load_steps=6 format=3 uid="uid://cgpptn2amibrs"]
 
 [ext_resource type="Texture2D" uid="uid://bvl5do8sb0xrg" path="res://assets/backgrounds/BackgroundBookOpen.png" id="1_mm82n"]
 [ext_resource type="Script" path="res://assets/scripts/NewLocalGameMenu.cs" id="1_mnkhp"]
 [ext_resource type="ButtonGroup" uid="uid://xtsxn58h1b3y" path="res://assets/resources/button_group.tres" id="3_h8m3y"]
 [ext_resource type="PackedScene" uid="uid://du838v21rp67t" path="res://scenes/controls/CheckBoxWithSounds.tscn" id="4_l7peb"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_7bp5v"]
 
 [node name="NewLocalGameMenu" type="Control"]
 layout_mode = 3
@@ -29,12 +30,12 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.039
 anchor_top = 0.051
-anchor_right = 0.184
-anchor_bottom = 0.084
+anchor_right = 0.217
+anchor_bottom = 0.081
 offset_left = 0.599998
 offset_top = 0.0999985
-offset_right = 0.599976
-offset_bottom = 0.399994
+offset_right = -52.2
+offset_bottom = 3.09999
 text = "Neues Spiel erstellen
 
 "
@@ -42,13 +43,13 @@ text = "Neues Spiel erstellen
 [node name="LineEditGameName" type="LineEdit" parent="."]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.161
+anchor_left = 0.179
 anchor_top = 0.21
-anchor_right = 0.387
-anchor_bottom = 0.249
-offset_left = -0.600037
-offset_right = 0.799988
-offset_bottom = -0.100006
+anchor_right = 0.406
+anchor_bottom = 0.256
+offset_left = -0.399994
+offset_right = -0.600037
+offset_bottom = -0.400009
 placeholder_text = "My Game"
 
 [node name="LabelGameName" type="Label" parent="."]
@@ -71,10 +72,86 @@ layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.075
 anchor_top = 0.3
-anchor_right = 0.173
-anchor_bottom = 0.33
-offset_right = 0.199982
+anchor_right = 0.196
+anchor_bottom = 0.337
+offset_right = -36.6
+offset_bottom = -6.30002
 text = "Anzahl Spieler"
+
+[node name="LabelGameGoal" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.212
+anchor_right = 0.672
+anchor_bottom = 0.249
+offset_left = 0.400024
+offset_top = 0.199982
+offset_right = -0.200073
+offset_bottom = -0.100006
+text = "Spielziel"
+
+[node name="LabelDifficulty" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.302
+anchor_right = 0.672
+anchor_bottom = 0.339
+offset_left = 0.400024
+offset_top = 0.199982
+offset_right = -0.200073
+offset_bottom = -0.100006
+text = "Schwierigkeit"
+
+[node name="OptionButtonDifficulty" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.702
+anchor_top = 0.296
+anchor_right = 0.937
+anchor_bottom = 0.347
+offset_left = -0.200073
+offset_top = -0.399994
+offset_right = 0.799927
+offset_bottom = -0.299988
+selected = 0
+item_count = 4
+popup/item_0/text = "Keine (freies Spiel)"
+popup/item_1/text = "Leicht"
+popup/item_1/id = 1
+popup/item_2/text = "Mittel"
+popup/item_2/id = 2
+popup/item_3/text = "Schwer"
+popup/item_3/id = 3
+
+[node name="LabelMission" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.388
+anchor_right = 0.624
+anchor_bottom = 0.424
+offset_left = 0.400024
+offset_top = -0.200012
+offset_right = 0.599976
+offset_bottom = 0.399963
+text = "Aufgabe"
+
+[node name="OptionButtonMission" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.702
+anchor_top = 0.38
+anchor_right = 0.937
+anchor_bottom = 0.431
+offset_left = -0.200073
+offset_top = -3.05176e-05
+offset_right = 0.799927
+offset_bottom = 0.0999756
+selected = 0
+item_count = 1
+popup/item_0/text = "Noch nicht implementiert"
 
 [node name="CheckBox1Player" parent="." instance=ExtResource("4_l7peb")]
 layout_mode = 1
@@ -188,3 +265,55 @@ offset_right = 0.599976
 offset_bottom = 0.199982
 button_group = ExtResource("3_h8m3y")
 text = "8"
+
+[node name="CheckBoxCheatmodus" parent="." instance=ExtResource("4_l7peb")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.079
+anchor_top = 0.443
+anchor_right = 0.27
+anchor_bottom = 0.48
+offset_left = -0.400009
+offset_top = 0.299988
+offset_right = -3.05176e-05
+offset_bottom = -3.05176e-05
+text = "Cheatmodus aktiviert"
+
+[node name="CheckBoxTestmodus" parent="." instance=ExtResource("4_l7peb")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.079
+anchor_top = 0.521
+anchor_right = 0.27
+anchor_bottom = 0.558
+offset_left = -0.400009
+offset_top = 0.0999756
+offset_right = -3.05176e-05
+offset_bottom = -0.200012
+text = "Testmodus aktiviert"
+
+[node name="CheckBoxShowDeaths" parent="." instance=ExtResource("4_l7peb")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.079
+anchor_top = 0.601
+anchor_right = 0.27
+anchor_bottom = 0.638
+offset_left = -0.400009
+offset_top = 0.0999756
+offset_right = -3.05176e-05
+offset_bottom = -0.200012
+text = "Todesfälle anzeigen"
+
+[node name="ButtonCreateGame" parent="." instance=ExtResource("5_7bp5v")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.187
+anchor_top = 0.847
+anchor_right = 0.341
+anchor_bottom = 0.913
+offset_left = -0.200012
+offset_top = -0.300049
+offset_right = 0.399963
+offset_bottom = 0.299988
+text = "Spiel erstellen"
