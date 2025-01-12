@@ -1,3 +1,4 @@
+using System.IO;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -6,10 +7,20 @@ namespace Conspiratio.Godot.assets.scripts;
 
 public partial class NewLocalGameMenu : Control
 {
+	private LineEdit _lineEditGameName;
+	private NewGameManager _newGameManager;
+	
+	[Export]
+	public NodePath LineEditGameNamePath { get; set; }
+	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		// TODO: Set Maxlength of LineEdit for Game Name
+		var savegamePath = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Conspiratio");
+		_newGameManager = new NewGameManager(savegamePath);
+		
+		_lineEditGameName = GetNode<LineEdit>(LineEditGameNamePath);
+		_lineEditGameName.MaxLength = _newGameManager.MaxLengthOfGameName;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -39,5 +50,20 @@ public partial class NewLocalGameMenu : Control
 	{
 		Show();
 		SetProcessInput(true);
+	}
+
+	private void _on_button_create_game_pressed()
+	{
+		_lineEditGameName.Text = _newGameManager.SanitizeName(_lineEditGameName.Text);
+
+		if (!_newGameManager.ValidateName(_lineEditGameName.Text, out string error))
+		{
+			// TODO: Show error
+			//SW.UI.ErrorDialog.ShowDialogText(error);
+			return;
+		}
+
+		// TODO: Create new game
+		//_newGameManager.CreateNewGame(_lineEditGameName.Text);
 	}
 }

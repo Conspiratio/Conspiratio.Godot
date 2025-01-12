@@ -1,8 +1,9 @@
 using System.Diagnostics;
-using Conspiratio.Godot.assets.scripts.managers;
+using Conspiratio.Godot.assets.scripts.controls;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
+using JetBrains.Annotations;
 
 namespace Conspiratio.Godot.assets.scripts;
 
@@ -16,8 +17,8 @@ public partial class Mainmenu : Control
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		var _linkButtonVersion = GetNode<controls.LinkButtonWithSounds>(LinkButtonVersionPath);
-		_linkButtonVersion.Text = "Klicken für Changelog - Version " + ProjectSettings.GetSetting("application/config/version");
+		var linkButtonVersion = GetNode<LinkButtonWithSounds>(LinkButtonVersionPath);
+		linkButtonVersion.Text = "Klicken für Changelog - Version " + ProjectSettings.GetSetting("application/config/version");
 
 		_main = GetParent<Main>();
 	}
@@ -63,6 +64,7 @@ public partial class Mainmenu : Control
 		Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.Godot/blob/main/CHANGELOG.md", UseShellExecute = true } );
 	}
 
+	[PublicAPI]
 	public async void _on_button_exit_pressed()
 	{
 		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Conspiratio wirklich beenden?",
