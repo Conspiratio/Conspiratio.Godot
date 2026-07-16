@@ -7,7 +7,10 @@ public partial class Main : Control
 {
 	[Export]
 	public NodePath YesNoDialogPath { get; set; }
-	
+
+	[Export]
+	public NodePath TextDialogPath { get; set; }
+
 	[Export]
 	public NodePath LocalGameDialogPath { get; set; }
 	
@@ -21,11 +24,12 @@ public partial class Main : Control
 	public override void _Ready()
 	{
 		var yesNoDialog = GetNode<YesNoDialog>(YesNoDialogPath);
+		var textDialog = GetNode<TextDialog>(TextDialogPath);
 		LocalGameDialog = GetNode<LocalGameDialog>(LocalGameDialogPath);
 		NewLocalGameMenu = GetNode<NewLocalGameMenu>(NewLocalGameMenuPath);
-		
+
 		// TODO: add missing dialogs
-		SW.UI.Initialisieren(yesNoDialog, null, null, null, null, null, null, null, null);
+		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, null, null, null, null);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=7 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
 [ext_resource type="PackedScene" uid="uid://ds67imhsxoxlo" path="res://scenes/dialogs/YesNoDialog.tscn" id="2_bp0or"]
 [ext_resource type="PackedScene" uid="uid://cgpptn2amibrs" path="res://scenes/NewLocalGameMenu.tscn" id="3_weydb"]
 [ext_resource type="PackedScene" uid="uid://bkcwpr7dk0e5m" path="res://scenes/dialogs/LocalGameDialog.tscn" id="4_mf33r"]
+[ext_resource type="PackedScene" uid="uid://c5o8kkuxg2tqd" path="res://scenes/dialogs/TextDialog.tscn" id="5_txtdg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -15,6 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_72k8v")
 YesNoDialogPath = NodePath("YesNoDialog")
+TextDialogPath = NodePath("TextDialog")
 LocalGameDialogPath = NodePath("LocalGameDialog")
 NewLocalGameMenuPath = NodePath("NewLocalGameMenu")
 
@@ -29,6 +31,10 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 offset_top = -0.449997
+
+[node name="TextDialog" parent="." instance=ExtResource("5_txtdg")]
+visible = false
+layout_mode = 1
 
 [node name="LocalGameDialog" parent="." instance=ExtResource("4_mf33r")]
 visible = false

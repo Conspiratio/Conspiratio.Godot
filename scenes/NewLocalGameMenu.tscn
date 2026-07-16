@@ -15,6 +15,10 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_mnkhp")
 LineEditGameNamePath = NodePath("LineEditGameName")
+CheckBox1PlayerPath = NodePath("CheckBox1Player")
+CheckBoxCheatmodusPath = NodePath("CheckBoxCheatmodus")
+CheckBoxTestmodusPath = NodePath("CheckBoxTestmodus")
+CheckBoxShowDeathsPath = NodePath("CheckBoxShowDeaths")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -319,4 +323,5 @@ offset_right = 0.399963
 offset_bottom = 0.299988
 text = "Spiel erstellen"
 
+[connection signal="text_submitted" from="LineEditGameName" to="." method="_on_line_edit_game_name_text_submitted"]
 [connection signal="pressed" from="ButtonCreateGame" to="." method="_on_button_create_game_pressed"]
