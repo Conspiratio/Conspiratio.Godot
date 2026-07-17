@@ -20,9 +20,13 @@ public partial class Main : Control
 	[Export]
 	public NodePath NewPlayerMenuPath { get; set; }
 
+	[Export]
+	public NodePath KontorPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
+	public Kontor Kontor;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -32,6 +36,7 @@ public partial class Main : Control
 		LocalGameDialog = GetNode<LocalGameDialog>(LocalGameDialogPath);
 		NewLocalGameMenu = GetNode<NewLocalGameMenu>(NewLocalGameMenuPath);
 		NewPlayerMenu = GetNode<NewPlayerMenu>(NewPlayerMenuPath);
+		Kontor = GetNode<Kontor>(KontorPath);
 
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, null, null, null, null);

@@ -20,6 +20,7 @@ public partial class NewPlayerMenu : Control
 	private Label _labelResourceCost;
 
 	private PlayerSetupManager _playerSetupManager;
+	private Main _main;
 	private int _zufallsStadtId;
 	private bool _stadtGewaehlt;
 
@@ -70,6 +71,8 @@ public partial class NewPlayerMenu : Control
 		_optionButtonResource = GetNode<OptionButton>(OptionButtonResourcePath);
 		_labelCityCost = GetNode<Label>(LabelCityCostPath);
 		_labelResourceCost = GetNode<Label>(LabelResourceCostPath);
+
+		_main = GetParent<Main>();
 
 		AssignButtonGroups();
 		SetProcessInput(false);
@@ -262,8 +265,8 @@ public partial class NewPlayerMenu : Control
 		{
 			_playerSetupManager.Beende();
 
-			// TODO: Eigentliches Spiel starten (Migration der Hauptspielszene)
 			HideAndDisableInput();
+			_main.Kontor.StartGame();
 			return;
 		}
 

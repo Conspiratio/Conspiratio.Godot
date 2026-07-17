@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=9 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://bkcwpr7dk0e5m" path="res://scenes/dialogs/LocalGameDialog.tscn" id="4_mf33r"]
 [ext_resource type="PackedScene" uid="uid://c5o8kkuxg2tqd" path="res://scenes/dialogs/TextDialog.tscn" id="5_txtdg"]
 [ext_resource type="PackedScene" uid="uid://bnpm7k2q4x8rd" path="res://scenes/NewPlayerMenu.tscn" id="6_npmnu"]
+[ext_resource type="PackedScene" uid="uid://dkq8x2mkontor" path="res://scenes/Kontor.tscn" id="7_kontr"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -21,6 +22,7 @@ TextDialogPath = NodePath("TextDialog")
 LocalGameDialogPath = NodePath("LocalGameDialog")
 NewLocalGameMenuPath = NodePath("NewLocalGameMenu")
 NewPlayerMenuPath = NodePath("NewPlayerMenu")
+KontorPath = NodePath("Kontor")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -30,6 +32,10 @@ visible = false
 layout_mode = 1
 
 [node name="NewPlayerMenu" parent="." instance=ExtResource("6_npmnu")]
+visible = false
+layout_mode = 1
+
+[node name="Kontor" parent="." instance=ExtResource("7_kontr")]
 visible = false
 layout_mode = 1
 
