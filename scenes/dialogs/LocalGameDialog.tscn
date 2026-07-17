@@ -91,3 +91,5 @@ disabled = true
 text = "Spiel fortsetzen"
 
 [connection signal="pressed" from="Panel/NinePatchRect/ButtonStartGame" to="." method="_on_button_start_game_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/ButtonLoadGame" to="." method="_on_button_load_game_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/ButtonContinueGame" to="." method="_on_button_continue_game_pressed"]

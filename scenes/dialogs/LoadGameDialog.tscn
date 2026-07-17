@@ -1,0 +1,83 @@
+[gd_scene load_steps=5 format=3 uid="uid://loadgamedlg01"]
+
+[ext_resource type="Script" path="res://assets/scripts/LoadGameDialog.cs" id="1_ldgdg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_ldgdg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_ldgdg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_ldgdg"]
+
+[node name="LoadGameDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_ldgdg")
+ItemListSpielstaendePath = NodePath("Panel/NinePatchRect/ItemListSpielstaende")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -280.0
+offset_right = 320.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ldgdg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = 598.0
+offset_bottom = 66.0
+text = "Welcher Spielstand soll geladen werden?"
+horizontal_alignment = 1
+
+[node name="ItemListSpielstaende" type="ItemList" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 85.0
+offset_right = 580.0
+offset_bottom = 430.0
+
+[node name="LinkButtonLoad" parent="Panel/NinePatchRect" instance=ExtResource("3_ldgdg")]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 460.0
+offset_right = 280.0
+offset_bottom = 500.0
+theme = ExtResource("4_ldgdg")
+text = "Laden"
+
+[node name="LinkButtonDelete" parent="Panel/NinePatchRect" instance=ExtResource("3_ldgdg")]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 460.0
+offset_right = 540.0
+offset_bottom = 500.0
+theme = ExtResource("4_ldgdg")
+text = "Löschen"
+
+[connection signal="item_activated" from="Panel/NinePatchRect/ItemListSpielstaende" to="." method="_on_item_list_spielstaende_item_activated"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonLoad" to="." method="_on_link_button_load_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonDelete" to="." method="_on_link_button_delete_pressed"]

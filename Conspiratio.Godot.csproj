@@ -3,12 +3,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12</LangVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Spielstände nutzen das BinaryFormatter-Format des WinForms-Clients (kompatibel in beide Richtungen) -->
+    <EnableUnsafeBinaryFormatterSerialization>true</EnableUnsafeBinaryFormatterSerialization>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Conspiratio.Lib" Version="3.7.0" />
+    <PackageReference Include="Conspiratio.Lib" Version="3.8.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
   </ItemGroup>
 </Project>

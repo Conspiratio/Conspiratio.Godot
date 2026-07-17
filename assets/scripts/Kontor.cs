@@ -14,7 +14,9 @@ public partial class Kontor : Control
 	private Label _labelTaler;
 
 	private RundenManager _rundenManager;
+	private SpeicherManager _speicherManager;
 	private Main _main;
+	private bool _geradeGeladen;
 
 	[Export]
 	public NodePath LabelPlayerNameAndOfficePath { get; set; }
@@ -70,6 +72,19 @@ public partial class Kontor : Control
 			return;
 		}
 
+		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Euer Spiel vorher speichern?") == DialogResultGame.Yes)
+		{
+			if (_speicherManager.Speichern(SW.Dynamisch.SpielName, out string fehler))
+			{
+				ClientSettings.LetzterSpielstand = SW.Dynamisch.SpielName;
+				await SW.UI.ShowText.ShowDialog("Speichervorgang beendet");
+			}
+			else
+			{
+				await SW.UI.ShowText.ShowDialog(fehler);
+			}
+		}
+
 		Hide();
 	}
 
@@ -79,6 +94,21 @@ public partial class Kontor : Control
 	public async void StartGame()
 	{
 		_rundenManager = new RundenManager();
+		_speicherManager = new SpeicherManager(ClientSettings.SavegamePath);
+		_geradeGeladen = false;
+
+		Show();
+		await NaechstenSpielerAnkuendigen();
+	}
+
+	/// <summary>
+	/// Setzt ein geladenes Spiel fort (das Jahresbuch des Vorjahres wird dabei nicht erneut abgewickelt).
+	/// </summary>
+	public async void ContinueLoadedGame()
+	{
+		_rundenManager = new RundenManager();
+		_speicherManager = new SpeicherManager(ClientSettings.SavegamePath);
+		_geradeGeladen = true;
 
 		Show();
 		await NaechstenSpielerAnkuendigen();
@@ -105,13 +135,22 @@ public partial class Kontor : Control
 			return;
 		}
 
-		// Ab dem zweiten Jahr: Die Aufträge des Vorjahres im Buch abwickeln (Exporte und Produktion)
-		if (SW.Dynamisch.GetAktuellesJahr() != SW.Statisch.StartJahr)
+		// Ab dem zweiten Jahr: Die Aufträge des Vorjahres im Buch abwickeln (Exporte und Produktion).
+		// Nach dem Laden eines Spielstands entfällt das, der Zug wird an Ort und Stelle fortgesetzt.
+		if (_geradeGeladen == false && SW.Dynamisch.GetAktuellesJahr() != SW.Statisch.StartJahr)
 		{
 			var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
 			UpdateHud();
 			await ZeigeBuch(buch);
 		}
+
+		_geradeGeladen = false;
+
+		// Automatisch speichern (wie im Original zu Beginn jedes Zugs)
+		if (_speicherManager.Autosave(out string autosaveFehler))
+			ClientSettings.LetzterSpielstand = _speicherManager.GetAutosaveName();
+		else
+			await SW.UI.ShowText.ShowDialog(autosaveFehler);
 
 		SetProcessInput(true);
 	}
