@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -89,7 +91,103 @@ public partial class Kontor : Control
 			return;
 		}
 
+		// Ab dem zweiten Jahr: Die Aufträge des Vorjahres im Buch abwickeln (Exporte und Produktion)
+		if (SW.Dynamisch.GetAktuellesJahr() != SW.Statisch.StartJahr)
+		{
+			var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
+			UpdateHud();
+			await ZeigeBuch(buch);
+		}
+
 		SetProcessInput(true);
+	}
+
+	private static async Task ZeigeBuch(BuchErgebnis buch)
+	{
+		string produktion;
+
+		if (buch.EtwasProduziert == false)
+		{
+			produktion = "Im letzten Jahr habt Ihr keine Waren produziert.";
+		}
+		else
+		{
+			produktion = "Produktion\n\n";
+
+			for (int rohstoffId = 1; rohstoffId < SW.Statisch.GetMaxRohID(); rohstoffId++)
+			{
+				if (buch.ProduzierteWaren[rohstoffId] == 0)
+					continue;
+
+				produktion += string.Format(SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetTextQualitaetProduktion(),
+					BuchManager.QualitaetAlsText(buch.ProduktionsQualitaetProzent[rohstoffId])) + ": " +
+					buch.ProduzierteWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() + "\n";
+			}
+
+			if (buch.EtwasVerloren)
+			{
+				produktion += "\nAus Mangel an Lagerraum opfert Ihr folgende Waren an Bedürftige. Welch' edle Tat!\n";
+
+				for (int rohstoffId = 1; rohstoffId < SW.Statisch.GetMaxRohID(); rohstoffId++)
+				{
+					if (buch.VerloreneWaren[rohstoffId] != 0)
+						produktion += buch.VerloreneWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() + "\n";
+				}
+			}
+		}
+
+		await SW.UI.ShowText.ShowDialog(produktion);
+
+		string exporte;
+
+		if (buch.EtwasExportiert == false)
+		{
+			exporte = "Im letzten Jahr habt Ihr keine Waren exportiert.";
+		}
+		else
+		{
+			exporte = "Exporte\n\n";
+
+			for (int rohstoffId = 1; rohstoffId < SW.Statisch.GetMaxRohID(); rohstoffId++)
+			{
+				if (buch.ExportierteWaren[rohstoffId] != 0)
+					exporte += buch.ExportierteWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() +
+					           " für " + buch.ExportErloese[rohstoffId].ToStringGeld() + "\n";
+			}
+
+			if (buch.EtwasGestohlen)
+			{
+				exporte += "\nAufgrund von Überfällen habt Ihr folgende Waren verloren.\n";
+
+				for (int rohstoffId = 1; rohstoffId < SW.Statisch.GetMaxRohID(); rohstoffId++)
+				{
+					if (buch.GestohleneWaren[rohstoffId] > 0)
+						exporte += buch.GestohleneWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() + "\n";
+				}
+			}
+		}
+
+		if (buch.EtwasExportiert)
+			SoundManager.Instance.PlayCoins();
+
+		await SW.UI.ShowText.ShowDialog(exporte);
+	}
+
+	/// <summary>
+	/// Wird von der Stadtansicht beim Schließen aufgerufen.
+	/// </summary>
+	public void ReturnFromStadt()
+	{
+		UpdateHud();
+		Show();
+		SetProcessInput(true);
+	}
+
+	private void _on_button_handel_pressed()
+	{
+		SetProcessInput(false);
+		Hide();
+		_main.Stadt.ShowStadt();
 	}
 
 	private void UpdateHud()

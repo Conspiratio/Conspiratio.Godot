@@ -64,4 +64,14 @@ anchor_right = 0.97
 anchor_bottom = 0.966
 text = "Runde beenden"
 
+[node name="ButtonHandel" parent="." instance=ExtResource("2_ktbtn")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.03
+anchor_top = 0.9
+anchor_right = 0.2
+anchor_bottom = 0.966
+text = "Handel"
+
 [connection signal="pressed" from="ButtonEndTurn" to="." method="_on_button_end_turn_pressed"]
+[connection signal="pressed" from="ButtonHandel" to="." method="_on_button_handel_pressed"]
