@@ -19,7 +19,8 @@ _Unreleased_
 - Zugnachrichten beim Zugende (erster Teil): Strafen bei Gesetzesverstößen (Höchstzahl Anwesen, maximale Taler), Amtseinkommen, Anwesen-Meldungen, Sterbeprüfung mit Todesursache und Ausscheiden des Spielers (inkl. Spielende, wenn niemand mehr lebt) sowie Schuldenprozess mit Geschworenen-Abstimmung und Schuldturm
 - Kontor-Beschriftungen erscheinen in Gold und nur noch bei MouseOver über dem jeweiligen Bereich
 - Das UI skaliert jetzt mit der Fenstergröße (canvas_items-Stretch mit fester Design-Auflösung 1600×900 und beibehaltenem Seitenverhältnis) — annähernd beliebige Auflösungen werden unterstützt
-- Speichern und Laden: automatisches Speichern zu Beginn jedes Zugs (mit Aufräumen alter Autosaves), Speichern-Abfrage beim Verlassen des Spiels, "Spiel laden" mit Spielstandsliste (inkl. Löschen) und "Spiel fortsetzen" für den letzten Spielstand — die Spielstände sind mit dem WinForms-Client austauschbar
+- Speichern und Laden: automatisches Speichern zu Beginn jedes Zugs (mit Aufräumen alter Autosaves), Speichern-Abfrage beim Verlassen des Spiels, "Spiel laden" mit Spielstandsliste (inkl. Löschen) und "Spiel fortsetzen" für den letzten Spielstand
+- Spielstände werden in einem offenen, von Hand editierbaren JSON-Format gespeichert; alte WinForms-Spielstände (*.dat) können hier nicht geladen werden (im WinForms-Client laden und neu speichern konvertiert sie)
 - Projekt auf Godot 4.7.1 angehoben
 
 #### Geändert
@@ -41,7 +42,8 @@ _Unreleased_
 - Turn messages at the end of the turn (first part): fines for law violations (maximum estates, maximum Taler), office income, estate messages, death check with cause of death and elimination of the player (including game over when nobody is left) as well as the debt trial with juror voting and debtor's tower
 - Kontor captions appear in gold and only on mouse over of the respective area
 - The UI now scales with the window size (canvas_items stretch with a fixed design resolution of 1600×900 and kept aspect ratio) — almost arbitrary resolutions are supported
-- Saving and loading: automatic saving at the start of each turn (with cleanup of old autosaves), save prompt when leaving the game, "Spiel laden" with a savegame list (including deleting) and "Spiel fortsetzen" for the last savegame — savegames are exchangeable with the WinForms client
+- Saving and loading: automatic saving at the start of each turn (with cleanup of old autosaves), save prompt when leaving the game, "Spiel laden" with a savegame list (including deleting) and "Spiel fortsetzen" for the last savegame
+- Savegames are stored in an open, hand-editable JSON format; old WinForms savegames (*.dat) cannot be loaded here (loading and saving them once in the WinForms client converts them)
 - Project upgraded to Godot 4.7.1
 
 #### Changed
