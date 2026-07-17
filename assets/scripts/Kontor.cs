@@ -173,6 +173,12 @@ public partial class Kontor : Control
 		await SW.UI.ShowText.ShowDialog(exporte);
 	}
 
+	private void HideAndDisableInput()
+	{
+		Hide();
+		SetProcessInput(false);
+	}
+
 	/// <summary>
 	/// Wird von der Stadtansicht beim Schließen aufgerufen.
 	/// </summary>
@@ -214,9 +220,99 @@ public partial class Kontor : Control
 		UpdateHud();
 		await _main.AbrechnungDialog.ShowDialog(abrechnung);
 
-		// TODO: Zugnachrichten (Kinder, Hochzeit, Todesfälle, ...) und Jahresbuch migrieren
-		_rundenManager.BeendeZug();
+		// Zug abschließen (Altern und Zug-Flags), damit die Zugnachrichten mit dem neuen Alter rechnen
+		_rundenManager.SchliesseZugAb();
+
+		bool spielVorbei = await ZeigeZugnachrichten();
+
+		if (spielVorbei)
+		{
+			// Zurück ins Hauptmenü
+			HideAndDisableInput();
+			return;
+		}
 
 		await NaechstenSpielerAnkuendigen();
+	}
+
+	/// <summary>
+	/// Zeigt die Zugnachrichten-Ereignisse an und schaltet danach auf den nächsten Spieler weiter.
+	/// </summary>
+	/// <returns>True, wenn das Spiel vorbei ist (kein menschlicher Spieler mehr im Spiel).</returns>
+	private async Task<bool> ZeigeZugnachrichten()
+	{
+		var zugNachrichten = new ZugNachrichtenManager();
+
+		// Gesetzesverstöße mit Strafen
+		foreach (string meldung in zugNachrichten.PruefeVerbrechen())
+		{
+			UpdateHud();
+			await SW.UI.ShowText.ShowDialog(meldung);
+		}
+
+		zugNachrichten.ErweitereStatistik();
+
+		// Amtseinkommen
+		int einkommen = zugNachrichten.KassiereAmtseinkommen();
+
+		if (einkommen > 0)
+		{
+			UpdateHud();
+			SoundManager.Instance.PlayCoins();
+			await SW.UI.ShowText.ShowDialog("Einkommen\n\nAls " + SW.Dynamisch.GetAmtsnameVonSPIDx(SW.Dynamisch.GetAktiverSpieler()) +
+			                                " verdient Ihr dieses Jahr " + einkommen.ToStringGeld() + ".");
+		}
+
+		// Anwesen (Bauzeit, Zustand, Renovierung)
+		foreach (string meldung in zugNachrichten.AktualisiereAnwesen())
+			await SW.UI.ShowText.ShowDialog("Eigentümer\n\n" + meldung);
+
+		// TODO: Weitere Zugereignisse migrieren (Familie, Hinterzimmer, Kartenspiel, Feste, Gericht, Zufallsereignisse, ...)
+
+		// Sterbeprüfung
+		if (zugNachrichten.StirbtAktiverSpieler())
+		{
+			await SW.UI.ShowText.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
+
+			string name = SW.Dynamisch.GetAktHum().GetName();
+			bool spielVorbei = zugNachrichten.FuehreTodDesAktivenSpielersDurch();
+
+			if (spielVorbei)
+			{
+				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\nEs befinden sich keine weiteren Mitstreiter in diesem Spiel.\nDas Spiel wird daher beendet.");
+				return true;
+			}
+
+			await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
+
+			// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
+			return false;
+		}
+
+		// Schuldenprozess
+		if (zugNachrichten.MussSichVorGlaeubigernVerantworten())
+		{
+			await SW.UI.ShowText.ShowDialog("Wegen Euren zahlreichen Schulden müsst Ihr Euch nun vor Euren Gläubigern verantworten!");
+
+			var prozess = zugNachrichten.FuehreSchuldenProzessDurch();
+
+			string urteile = "Die Abstimmung Eurer Gläubiger\n\n";
+
+			for (int i = 0; i < prozess.GeschworenenNamen.Count; i++)
+				urteile += prozess.GeschworenenNamen[i] + ": " + (prozess.Urteile[i] ? "schuldig!" : "nicht schuldig!") + "\n";
+
+			await SW.UI.ShowText.ShowDialog(urteile);
+
+			await SW.UI.ShowText.ShowDialog(prozess.Schuldig
+				? "Aufgrund Eurer zahlreichen Schulden müsst Ihr nächstes\nJahr im Schuldturm verbringen"
+				: "Ihr seid noch einmal mit dem Schrecken davon gekommen...");
+
+			UpdateHud();
+		}
+
+		await SW.UI.ShowText.ShowDialog("Resümee\n\nIn diesem Jahr gab es keine weiteren besonderen Vorkommnisse");
+
+		_rundenManager.SchalteZumNaechstenSpieler();
+		return false;
 	}
 }

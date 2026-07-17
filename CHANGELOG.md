@@ -15,6 +15,7 @@ _Unreleased_
 - Jahresabrechnung beim Zugende (Migration von Abrechnung): alle Kostenpositionen von Arbeitern bis Sold werden berechnet, abgezogen und mit Münzen-Sound im neuen Abrechnungsdialog angezeigt
 - Neue Stadtansicht "Handel & Produktion" (Kontor-Bereiche Handel und Werkstatt): Werkstätten kaufen/verkaufen, Rohstoffe direkt kaufen/verkaufen, beide Produktionsslots einstellen (Produzieren mit Arbeitern und Stätten oder Verkaufen/permanenter Verkauf mit Menge und Zielstadt) sowie Karawane wählen
 - Jahresbuch zu Zugbeginn ab dem zweiten Jahr: Exporte werden verkauft und gutgeschrieben, die Produktion wird mit Qualitätsmeldung eingelagert — die Core-Gameplay-Loop (produzieren, lagern, verkaufen) ist damit spielbar
+- Zugnachrichten beim Zugende (erster Teil): Strafen bei Gesetzesverstößen (Höchstzahl Anwesen, maximale Taler), Amtseinkommen, Anwesen-Meldungen, Sterbeprüfung mit Todesursache und Ausscheiden des Spielers (inkl. Spielende, wenn niemand mehr lebt) sowie Schuldenprozess mit Geschworenen-Abstimmung und Schuldturm
 - Projekt auf Godot 4.7.1 angehoben
 
 #### Geändert
@@ -32,6 +33,7 @@ _Unreleased_
 - Yearly settlement at the end of the turn (migration of Abrechnung): all cost positions from workers to military pay are calculated, deducted and shown in the new settlement dialog with a coin sound
 - New town view "Handel & Produktion" (Kontor areas trade and workshop): buy/sell workshops, buy/sell resources directly, configure both production slots (producing with workers and sites or selling/permanent selling with amount and target town) as well as choosing the caravan
 - Yearly book at the start of the turn from the second year on: exports are sold and credited, the production is stored with a quality message — the core gameplay loop (produce, store, sell) is now playable
+- Turn messages at the end of the turn (first part): fines for law violations (maximum estates, maximum Taler), office income, estate messages, death check with cause of death and elimination of the player (including game over when nobody is left) as well as the debt trial with juror voting and debtor's tower
 - Project upgraded to Godot 4.7.1
 
 #### Changed
