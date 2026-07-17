@@ -34,7 +34,7 @@ public partial class Kontor : Control
 
 		_main = GetParent<Main>();
 
-		// Die Klickbereiche des Kontors sind unsichtbar, nur ihre Beschriftungen sind zu sehen (wie im Original)
+		// Die Klickbereiche des Kontors sind unsichtbar; ihre goldene Beschriftung erscheint nur bei MouseOver
 		foreach (string areaName in new[] { "AreaHandel", "AreaHinterzimmer", "AreaSchreibstube", "AreaKirche", "AreaKampf", "AreaFenster" })
 		{
 			var area = GetNode<Button>(areaName);
@@ -42,6 +42,10 @@ public partial class Kontor : Control
 			area.AddThemeStyleboxOverride("hover", new StyleBoxEmpty());
 			area.AddThemeStyleboxOverride("pressed", new StyleBoxEmpty());
 			area.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+
+			var label = GetNode<Label>("Label" + areaName.Substring("Area".Length));
+			area.MouseEntered += () => label.Visible = true;
+			area.MouseExited += () => label.Visible = false;
 		}
 
 		SetProcessInput(false);

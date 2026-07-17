@@ -61,11 +61,13 @@ offset_bottom = 418.0
 flat = true
 
 [node name="LabelHandel" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 539.0
 offset_top = 120.0
 offset_right = 1075.0
 offset_bottom = 156.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Handel"
 horizontal_alignment = 1
@@ -78,10 +80,12 @@ offset_bottom = 900.0
 flat = true
 
 [node name="LabelHinterzimmer" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_top = 176.0
 offset_right = 199.0
 offset_bottom = 212.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Hinterzimmer"
 horizontal_alignment = 1
@@ -95,11 +99,13 @@ offset_bottom = 586.0
 flat = true
 
 [node name="LabelSchreibstube" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 458.0
 offset_top = 462.0
 offset_right = 1265.0
 offset_bottom = 498.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Schreibstube"
 horizontal_alignment = 1
@@ -113,11 +119,13 @@ offset_bottom = 450.0
 flat = true
 
 [node name="LabelKirche" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 269.0
 offset_top = 146.0
 offset_right = 458.0
 offset_bottom = 182.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Kirche"
 horizontal_alignment = 1
@@ -131,11 +139,13 @@ offset_bottom = 434.0
 flat = true
 
 [node name="LabelKampf" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 1124.0
 offset_top = 110.0
 offset_right = 1382.0
 offset_bottom = 146.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Söldner & Räuber"
 horizontal_alignment = 1
@@ -149,11 +159,13 @@ offset_bottom = 480.0
 flat = true
 
 [node name="LabelFenster" type="Label" parent="."]
+visible = false
 layout_mode = 0
 offset_left = 1400.0
 offset_top = 128.0
 offset_right = 1600.0
 offset_bottom = 192.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 mouse_filter = 2
 text = "Geld zum Fenster
 rauswerfen"
