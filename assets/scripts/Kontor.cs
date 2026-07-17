@@ -12,6 +12,7 @@ public partial class Kontor : Control
 	private Label _labelTaler;
 
 	private RundenManager _rundenManager;
+	private Main _main;
 
 	[Export]
 	public NodePath LabelPlayerNameAndOfficePath { get; set; }
@@ -28,6 +29,8 @@ public partial class Kontor : Control
 		_labelPlayerNameAndOffice = GetNode<Label>(LabelPlayerNameAndOfficePath);
 		_labelPlaceDate = GetNode<Label>(LabelPlaceDatePath);
 		_labelTaler = GetNode<Label>(LabelTalerPath);
+
+		_main = GetParent<Main>();
 
 		SetProcessInput(false);
 	}
@@ -108,7 +111,12 @@ public partial class Kontor : Control
 			return;
 		}
 
-		// TODO: Abrechnung, Zugnachrichten (Kinder, Hochzeit, Todesfälle, ...) und Jahresbuch migrieren
+		// Jahresabrechnung berechnen, verbuchen und anzeigen
+		var abrechnung = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+		UpdateHud();
+		await _main.AbrechnungDialog.ShowDialog(abrechnung);
+
+		// TODO: Zugnachrichten (Kinder, Hochzeit, Todesfälle, ...) und Jahresbuch migrieren
 		_rundenManager.BeendeZug();
 
 		await NaechstenSpielerAnkuendigen();

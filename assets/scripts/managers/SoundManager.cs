@@ -17,11 +17,15 @@ public partial class SoundManager : Node
 	
 	[Export]
 	public NodePath AudioStreamPlayerIntroPath { get; set; }
-	
+
+	[Export]
+	public NodePath AudioStreamPlayerCoinsPath { get; set; }
+
 	private AudioStreamPlayer _audioStreamPlayerLeftClick;
 	private AudioStreamPlayer _audioStreamPlayerRightClick;
 	private AudioStreamPlayer _audioStreamPlayerCheckBoxClick;
 	private AudioStreamPlayer _audioStreamPlayerIntro;
+	private AudioStreamPlayer _audioStreamPlayerCoins;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -31,6 +35,7 @@ public partial class SoundManager : Node
 		_audioStreamPlayerRightClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerRightClickPath);
 		_audioStreamPlayerCheckBoxClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerCheckBoxClick);
 		_audioStreamPlayerIntro = GetNode<AudioStreamPlayer>(AudioStreamPlayerIntroPath);
+		_audioStreamPlayerCoins = GetNode<AudioStreamPlayer>(AudioStreamPlayerCoinsPath);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -56,5 +61,10 @@ public partial class SoundManager : Node
 	public void PlayIntro()
 	{
 		_audioStreamPlayerIntro.Play();
+	}
+
+	public void PlayCoins()
+	{
+		_audioStreamPlayerCoins.Play();
 	}
 }

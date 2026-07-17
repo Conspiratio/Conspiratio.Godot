@@ -12,6 +12,7 @@ _Unreleased_
 - Neues Spiel erstellen: Spieleranzahl, Cheatmodus, Testmodus und Todesfälle anzeigen werden übernommen; Fehlermeldungen werden angezeigt; Enter bestätigt die Eingabe
 - Neues Menü "Spieler erstellen" (Migration von SpielerHinzufuegen): Name, Geschlecht, Religion, Banner-Auswahl (bereits vergebene Banner ausgeblendet) sowie Heimatstadt (zufällig vorausgewählt und kostenlos, Wechsel kostet Taler) und Rohstoff (gezielte Wahl kostet Taler, zufällig ist kostenlos)
 - Erste Version der Kontor-Szene: Spielerleiste (Name mit Titel und Amt, Jahr, Taler), Hot-Seat-Rundenablauf mit Spieler-Ankündigung, "Runde beenden" mit Spieler- und Jahreswechsel sowie Schuldturm-Behandlung
+- Jahresabrechnung beim Zugende (Migration von Abrechnung): alle Kostenpositionen von Arbeitern bis Sold werden berechnet, abgezogen und mit Münzen-Sound im neuen Abrechnungsdialog angezeigt
 
 #### Geändert
 
@@ -25,6 +26,7 @@ _Unreleased_
 - Create new game: player count, cheat mode, test mode and show deaths are applied; error messages are shown; Enter confirms the input
 - New menu "Spieler erstellen" (migration of SpielerHinzufuegen): name, gender, religion, banner selection (already taken banners are hidden) as well as home town (randomly preselected and free, changing it costs Taler) and resource (deliberate choice costs Taler, random is free)
 - First version of the Kontor scene: player bar (name with title and office, year, Taler), hot seat turn flow with player announcement, "end turn" with player and year change as well as debtor's tower handling
+- Yearly settlement at the end of the turn (migration of Abrechnung): all cost positions from workers to military pay are calculated, deducted and shown in the new settlement dialog with a coin sound
 
 #### Changed
 

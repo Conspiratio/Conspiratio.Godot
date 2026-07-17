@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=10 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://c5o8kkuxg2tqd" path="res://scenes/dialogs/TextDialog.tscn" id="5_txtdg"]
 [ext_resource type="PackedScene" uid="uid://bnpm7k2q4x8rd" path="res://scenes/NewPlayerMenu.tscn" id="6_npmnu"]
 [ext_resource type="PackedScene" uid="uid://dkq8x2mkontor" path="res://scenes/Kontor.tscn" id="7_kontr"]
+[ext_resource type="PackedScene" uid="uid://babrechnungdg" path="res://scenes/dialogs/AbrechnungDialog.tscn" id="8_abrdg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -23,6 +24,7 @@ LocalGameDialogPath = NodePath("LocalGameDialog")
 NewLocalGameMenuPath = NodePath("NewLocalGameMenu")
 NewPlayerMenuPath = NodePath("NewPlayerMenu")
 KontorPath = NodePath("Kontor")
+AbrechnungDialogPath = NodePath("AbrechnungDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -45,6 +47,10 @@ layout_mode = 1
 offset_top = -0.449997
 
 [node name="TextDialog" parent="." instance=ExtResource("5_txtdg")]
+visible = false
+layout_mode = 1
+
+[node name="AbrechnungDialog" parent="." instance=ExtResource("8_abrdg")]
 visible = false
 layout_mode = 1
 

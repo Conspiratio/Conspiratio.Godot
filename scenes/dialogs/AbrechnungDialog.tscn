@@ -1,0 +1,74 @@
+[gd_scene load_steps=5 format=3 uid="uid://babrechnungdg"]
+
+[ext_resource type="Script" path="res://assets/scripts/AbrechnungDialog.cs" id="1_abrdg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_abrdg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_abrdg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_abrdg"]
+
+[node name="AbrechnungDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_abrdg")
+GridContainerPositionenPath = NodePath("Panel/NinePatchRect/GridContainerPositionen")
+LinkButtonClosePath = NodePath("Panel/NinePatchRect/LinkButtonClose")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -300.0
+offset_right = 300.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_abrdg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = 558.0
+offset_bottom = 70.0
+text = "Abrechnung"
+horizontal_alignment = 1
+
+[node name="GridContainerPositionen" type="GridContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 85.0
+offset_right = 480.0
+offset_bottom = 480.0
+columns = 2
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_abrdg")]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 505.0
+offset_right = 381.0
+offset_bottom = 545.0
+theme = ExtResource("4_abrdg")
+text = "Weiter"
+
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
