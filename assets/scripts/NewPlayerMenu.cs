@@ -10,6 +10,7 @@ public partial class NewPlayerMenu : Control
 	private Label _labelTitle;
 	private LineEdit _lineEditPlayerName;
 	private CheckBoxWithSounds _checkBoxMale;
+	private CheckBoxWithSounds _checkBoxFemale;
 	private CheckBoxWithSounds _checkBoxReligion1;
 	private CheckBoxWithSounds _checkBoxReligion2;
 	private GridContainer _gridContainerBanner;
@@ -19,6 +20,8 @@ public partial class NewPlayerMenu : Control
 	private Label _labelResourceCost;
 
 	private PlayerSetupManager _playerSetupManager;
+	private int _zufallsStadtId;
+	private bool _stadtGewaehlt;
 
 	[Export]
 	public NodePath LabelTitlePath { get; set; }
@@ -28,6 +31,9 @@ public partial class NewPlayerMenu : Control
 
 	[Export]
 	public NodePath CheckBoxMalePath { get; set; }
+
+	[Export]
+	public NodePath CheckBoxFemalePath { get; set; }
 
 	[Export]
 	public NodePath CheckBoxReligion1Path { get; set; }
@@ -56,6 +62,7 @@ public partial class NewPlayerMenu : Control
 		_labelTitle = GetNode<Label>(LabelTitlePath);
 		_lineEditPlayerName = GetNode<LineEdit>(LineEditPlayerNamePath);
 		_checkBoxMale = GetNode<CheckBoxWithSounds>(CheckBoxMalePath);
+		_checkBoxFemale = GetNode<CheckBoxWithSounds>(CheckBoxFemalePath);
 		_checkBoxReligion1 = GetNode<CheckBoxWithSounds>(CheckBoxReligion1Path);
 		_checkBoxReligion2 = GetNode<CheckBoxWithSounds>(CheckBoxReligion2Path);
 		_gridContainerBanner = GetNode<GridContainer>(GridContainerBannerPath);
@@ -64,7 +71,27 @@ public partial class NewPlayerMenu : Control
 		_labelCityCost = GetNode<Label>(LabelCityCostPath);
 		_labelResourceCost = GetNode<Label>(LabelResourceCostPath);
 
+		AssignButtonGroups();
 		SetProcessInput(false);
+	}
+
+	/// <summary>
+	/// Weist die exklusiven Gruppen (nur eine Option aktiv) im Code zu, da im Godot-Editor
+	/// gespeicherte ButtonGroup-Subressourcen beim erneuten Speichern pro Node dupliziert werden.
+	/// </summary>
+	private void AssignButtonGroups()
+	{
+		var genderGroup = new ButtonGroup();
+		_checkBoxMale.ButtonGroup = genderGroup;
+		_checkBoxFemale.ButtonGroup = genderGroup;
+
+		var religionGroup = new ButtonGroup();
+		_checkBoxReligion1.ButtonGroup = religionGroup;
+		_checkBoxReligion2.ButtonGroup = religionGroup;
+
+		var bannerGroup = new ButtonGroup();
+		for (int i = 0; i < _gridContainerBanner.GetChildCount(); i++)
+			_gridContainerBanner.GetChild<CheckBoxWithSounds>(i).ButtonGroup = bannerGroup;
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -101,8 +128,8 @@ public partial class NewPlayerMenu : Control
 
 		_checkBoxReligion1.Text = SW.Statisch.GetReligionsNamenX(SW.Statisch.GetRelKathID());
 		_checkBoxReligion2.Text = SW.Statisch.GetReligionsNamenX(SW.Statisch.GetRelEvanID());
-		_labelCityCost.Text = "Freie Wahl kostet " + SW.Statisch.GetNSPStadtwahlKosten() + " Taler, zufällig ist kostenlos";
-		_labelResourceCost.Text = "Freie Wahl kostet " + SW.Statisch.GetNSPRohwahlKosten() + " Taler, zufällig ist kostenlos";
+		_labelCityCost.Text = "Zufällig vorausgewählt und kostenlos, eine andere Stadt kostet " + SW.Statisch.GetNSPStadtwahlKosten() + " Taler";
+		_labelResourceCost.Text = "Gezielte Wahl kostet " + SW.Statisch.GetNSPRohwahlKosten() + " Taler, zufällig ist kostenlos";
 		_lineEditPlayerName.MaxLength = SW.Statisch.GetMaxNameLength();
 
 		PopulateCityOptions();
@@ -121,10 +148,21 @@ public partial class NewPlayerMenu : Control
 	private void PopulateCityOptions()
 	{
 		_optionButtonCity.Clear();
-		_optionButtonCity.AddItem("Zufällig", 0);
 
 		for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
 			_optionButtonCity.AddItem(SW.Dynamisch.GetStadtwithID(stadtId).GetGebietsName(), stadtId);
+	}
+
+	private void SelectCity(int stadtId)
+	{
+		for (int i = 0; i < _optionButtonCity.ItemCount; i++)
+		{
+			if (_optionButtonCity.GetItemId(i) != stadtId)
+				continue;
+
+			_optionButtonCity.Select(i);
+			return;
+		}
 	}
 
 	private void UpdateResourceOptions()
@@ -134,14 +172,13 @@ public partial class NewPlayerMenu : Control
 
 		int stadtId = _optionButtonCity.GetSelectedId();
 
-		if (stadtId == 0)
-			return;
-
 		for (int platz = 1; platz <= 2; platz++)
 		{
 			int rohstoffId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
 			_optionButtonResource.AddItem(SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName(), platz);
 		}
+
+		_optionButtonResource.Select(0);
 	}
 
 	private void PrepareNextPlayer()
@@ -155,7 +192,10 @@ public partial class NewPlayerMenu : Control
 		_checkBoxMale.ButtonPressed = true;
 		_checkBoxReligion1.ButtonPressed = true;
 
-		_optionButtonCity.Select(0);
+		// Heimatstadt kostenlos vorauswürfeln; erst ein manueller Wechsel auf eine andere Stadt kostet Taler
+		_zufallsStadtId = _playerSetupManager.WuerfleZufaelligeStadt();
+		_stadtGewaehlt = false;
+		SelectCity(_zufallsStadtId);
 		UpdateResourceOptions();
 
 		// Banner-Auswahl zurücksetzen und bereits vergebene Banner ausblenden
@@ -180,6 +220,7 @@ public partial class NewPlayerMenu : Control
 
 	private void _on_option_button_city_item_selected(long index)
 	{
+		_stadtGewaehlt = _optionButtonCity.GetSelectedId() != _zufallsStadtId;
 		UpdateResourceOptions();
 	}
 
@@ -211,7 +252,7 @@ public partial class NewPlayerMenu : Control
 		int religionId = _checkBoxReligion1.ButtonPressed ? SW.Statisch.GetRelKathID() : SW.Statisch.GetRelEvanID();
 
 		var ergebnis = _playerSetupManager.ErstelleSpieler(_lineEditPlayerName.Text, _checkBoxMale.ButtonPressed,
-			banner, religionId, _optionButtonCity.GetSelectedId(), _optionButtonResource.GetSelectedId());
+			banner, religionId, _optionButtonCity.GetSelectedId(), _stadtGewaehlt, _optionButtonResource.GetSelectedId());
 
 		await SW.UI.ShowText.ShowDialog(_lineEditPlayerName.Text + " wurde erstellt.\nHeimatstadt: " +
 		                                SW.Dynamisch.GetStadtwithID(ergebnis.StadtId).GetGebietsName() + "\nRohstoff: " +

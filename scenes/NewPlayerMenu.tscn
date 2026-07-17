@@ -1,29 +1,23 @@
-[gd_scene load_steps=22 format=3 uid="uid://bnpm7k2q4x8rd"]
+[gd_scene load_steps=19 format=3 uid="uid://bnpm7k2q4x8rd"]
 
 [ext_resource type="Texture2D" uid="uid://bvl5do8sb0xrg" path="res://assets/backgrounds/BackgroundBookOpen.png" id="1_npbg"]
 [ext_resource type="Script" path="res://assets/scripts/NewPlayerMenu.cs" id="1_npscr"]
 [ext_resource type="PackedScene" uid="uid://du838v21rp67t" path="res://scenes/controls/CheckBoxWithSounds.tscn" id="2_npcbx"]
 [ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="3_npbtn"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban1.png" id="4_ban1"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban2.png" id="5_ban2"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban3.png" id="6_ban3"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban4.png" id="7_ban4"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban5.png" id="8_ban5"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban6.png" id="9_ban6"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban7.png" id="10_ban7"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban8.png" id="11_ban8"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban9.png" id="12_ban9"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban10.png" id="13_ban10"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban11.png" id="14_ban11"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban12.png" id="15_ban12"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban13.png" id="16_ban13"]
-[ext_resource type="Texture2D" path="res://assets/images/banner/ban14.png" id="17_ban14"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_gender"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_religion"]
-
-[sub_resource type="ButtonGroup" id="ButtonGroup_banner"]
+[ext_resource type="Texture2D" uid="uid://dh1nmt80m62mm" path="res://assets/images/banner/ban1.png" id="4_ban1"]
+[ext_resource type="Texture2D" uid="uid://cg7vov64bhpm6" path="res://assets/images/banner/ban2.png" id="5_ban2"]
+[ext_resource type="Texture2D" uid="uid://oba7xwb0un0q" path="res://assets/images/banner/ban3.png" id="6_ban3"]
+[ext_resource type="Texture2D" uid="uid://ceu8uqlcjwohx" path="res://assets/images/banner/ban4.png" id="7_ban4"]
+[ext_resource type="Texture2D" uid="uid://ykkatd15asuh" path="res://assets/images/banner/ban5.png" id="8_ban5"]
+[ext_resource type="Texture2D" uid="uid://bsp2qn2h8eche" path="res://assets/images/banner/ban6.png" id="9_ban6"]
+[ext_resource type="Texture2D" uid="uid://by8mmvsmhu06n" path="res://assets/images/banner/ban7.png" id="10_ban7"]
+[ext_resource type="Texture2D" uid="uid://cm2pdwtqcn7xo" path="res://assets/images/banner/ban8.png" id="11_ban8"]
+[ext_resource type="Texture2D" uid="uid://b0brjefkjrtb" path="res://assets/images/banner/ban9.png" id="12_ban9"]
+[ext_resource type="Texture2D" uid="uid://brgxislrixc44" path="res://assets/images/banner/ban10.png" id="13_ban10"]
+[ext_resource type="Texture2D" uid="uid://545euxhljoen" path="res://assets/images/banner/ban11.png" id="14_ban11"]
+[ext_resource type="Texture2D" uid="uid://dgvj7audptao5" path="res://assets/images/banner/ban12.png" id="15_ban12"]
+[ext_resource type="Texture2D" uid="uid://2u3i40yscr15" path="res://assets/images/banner/ban13.png" id="16_ban13"]
+[ext_resource type="Texture2D" uid="uid://cuqgrxb41a2hs" path="res://assets/images/banner/ban14.png" id="17_ban14"]
 
 [node name="NewPlayerMenu" type="Control"]
 layout_mode = 3
@@ -36,6 +30,7 @@ script = ExtResource("1_npscr")
 LabelTitlePath = NodePath("LabelTitle")
 LineEditPlayerNamePath = NodePath("LineEditPlayerName")
 CheckBoxMalePath = NodePath("CheckBoxMale")
+CheckBoxFemalePath = NodePath("CheckBoxFemale")
 CheckBoxReligion1Path = NodePath("CheckBoxReligion1")
 CheckBoxReligion2Path = NodePath("CheckBoxReligion2")
 GridContainerBannerPath = NodePath("GridContainerBanner")
@@ -98,7 +93,6 @@ anchor_top = 0.295
 anchor_right = 0.29
 anchor_bottom = 0.34
 button_pressed = true
-button_group = SubResource("ButtonGroup_gender")
 text = "Männlich"
 
 [node name="CheckBoxFemale" parent="." instance=ExtResource("2_npcbx")]
@@ -108,7 +102,6 @@ anchor_left = 0.3
 anchor_top = 0.295
 anchor_right = 0.41
 anchor_bottom = 0.34
-button_group = SubResource("ButtonGroup_gender")
 text = "Weiblich"
 
 [node name="LabelReligion" type="Label" parent="."]
@@ -128,7 +121,6 @@ anchor_top = 0.385
 anchor_right = 0.29
 anchor_bottom = 0.43
 button_pressed = true
-button_group = SubResource("ButtonGroup_religion")
 text = "Katholisch"
 
 [node name="CheckBoxReligion2" parent="." instance=ExtResource("2_npcbx")]
@@ -138,7 +130,6 @@ anchor_left = 0.3
 anchor_top = 0.385
 anchor_right = 0.41
 anchor_bottom = 0.43
-button_group = SubResource("ButtonGroup_religion")
 text = "Evangelisch"
 
 [node name="LabelBanner" type="Label" parent="."]
@@ -161,72 +152,58 @@ columns = 7
 
 [node name="CheckBoxBanner1" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("4_ban1")
 
 [node name="CheckBoxBanner2" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("5_ban2")
 
 [node name="CheckBoxBanner3" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("6_ban3")
 
 [node name="CheckBoxBanner4" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("7_ban4")
 
 [node name="CheckBoxBanner5" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("8_ban5")
 
 [node name="CheckBoxBanner6" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("9_ban6")
 
 [node name="CheckBoxBanner7" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("10_ban7")
 
 [node name="CheckBoxBanner8" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("11_ban8")
 
 [node name="CheckBoxBanner9" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("12_ban9")
 
 [node name="CheckBoxBanner10" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("13_ban10")
 
 [node name="CheckBoxBanner11" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("14_ban11")
 
 [node name="CheckBoxBanner12" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("15_ban12")
 
 [node name="CheckBoxBanner13" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("16_ban13")
 
 [node name="CheckBoxBanner14" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
 layout_mode = 2
-button_group = SubResource("ButtonGroup_banner")
 icon = ExtResource("17_ban14")
 
 [node name="LabelCity" type="Label" parent="."]
