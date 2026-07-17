@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://dkq8x2mkontor"]
 
-[ext_resource type="Texture2D" path="res://assets/backgrounds/BackgroundKontor.png" id="1_ktbg"]
+[ext_resource type="Texture2D" uid="uid://csjai6s3daurp" path="res://assets/backgrounds/BackgroundKontor.png" id="1_ktbg"]
 [ext_resource type="Script" path="res://assets/scripts/Kontor.cs" id="1_ktscr"]
 [ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="2_ktbtn"]
 
