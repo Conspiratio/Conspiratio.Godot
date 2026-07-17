@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.controls;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Niederlassung;
@@ -8,59 +9,120 @@ using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
 
+/// <summary>
+/// Die Stadtansicht nach der Vorlage des WinForms-Clients: Werkstätten- und Rohstoff-Symbole
+/// mit Lagerbeständen und Preisen, zwei Produktionszeilen sowie Haus- und Transport-Symbol.
+/// </summary>
 public partial class Stadt : Control
 {
-	private OptionButton _optionButtonCity;
-	private Label _labelTaler;
-	private GridContainer _gridContainerResources;
-	private Label _labelKarawane;
+	private const int AnzahlWerkstaetten = 6;
+	private const int MaxRohstoffIcons = 20;
+	private const float BestandLabelOriginalBreite = 86;  // Breite des WinForms-Labels, auf die sich die Ziffern-Klickzonen beziehen
 
-	private readonly OptionButton[] _slotTaetigkeit = new OptionButton[2];
-	private readonly OptionButton[] _slotProdukt = new OptionButton[2];
-	private readonly SpinBox[] _slotMenge = new SpinBox[2];
-	private readonly SpinBox[] _slotStaetten = new SpinBox[2];
-	private readonly OptionButton[] _slotZielstadt = new OptionButton[2];
-	private readonly Label[] _slotKosten = new Label[2];
+	private Label _labelPlayerNameAndOffice;
+	private Label _labelPlaceDate;
+	private Label _labelTaler;
+	private OptionButton _optionButtonCity;
+
+	private readonly TextureButton[] _buttonsWerkstatt = new TextureButton[AnzahlWerkstaetten + 1];
+	private readonly TextureButton[] _buttonsRohstoff = new TextureButton[AnzahlWerkstaetten + 1];
+	private readonly Label[] _labelsPreis = new Label[AnzahlWerkstaetten + 1];
+	private readonly Label[] _labelsBestand = new Label[AnzahlWerkstaetten + 1];
+	private TextureButton _buttonHaus;
+	private TextureButton _buttonTransport;
+
+	private readonly ButtonWithSounds[] _buttonsTaetigkeit = new ButtonWithSounds[2];
+	private readonly HBoxContainer[] _detailRows = new HBoxContainer[2];
+	private readonly ButtonWithSounds[] _buttonsProdukt = new ButtonWithSounds[2];
+	private readonly NumericButtonWithSounds[] _numericsMenge = new NumericButtonWithSounds[2];
+	private readonly NumericButtonWithSounds[] _numericsStaette = new NumericButtonWithSounds[2];
+	private readonly Label[] _labelsText1 = new Label[2];
+	private readonly Label[] _labelsText2 = new Label[2];
+	private readonly Label[] _labelsKosten = new Label[2];
+
+	private readonly Texture2D[] _rohstoffIcons = new Texture2D[MaxRohstoffIcons + 1];
+	private readonly Texture2D[] _werkstattIcons = new Texture2D[MaxRohstoffIcons + 1];
+	private Texture2D _symbolWerkstattKaufbar;
+	private Texture2D _symbolNichtVerfuegbar;
+	private Texture2D _symbolHaus;
+	private Texture2D _symbolHausImBau;
+	private Texture2D _symbolHausNichtVorhanden;
+	private Resource _cursorPlus;
+	private Resource _cursorMinus;
+	private Resource _cursorDefault;
 
 	private Main _main;
 	private HandelsManager _handelsManager;
-	private PackedScene _buttonWithSoundsScene;
 	private int _stadtId = 1;
-	private bool _refreshing;
-
-	[Export]
-	public NodePath OptionButtonCityPath { get; set; }
-
-	[Export]
-	public NodePath LabelTalerPath { get; set; }
-
-	[Export]
-	public NodePath GridContainerResourcesPath { get; set; }
-
-	[Export]
-	public NodePath HBoxSlot0Path { get; set; }
-
-	[Export]
-	public NodePath HBoxSlot1Path { get; set; }
-
-	[Export]
-	public NodePath LabelKarawanePath { get; set; }
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
-		_optionButtonCity = GetNode<OptionButton>(OptionButtonCityPath);
-		_labelTaler = GetNode<Label>(LabelTalerPath);
-		_gridContainerResources = GetNode<GridContainer>(GridContainerResourcesPath);
-		_labelKarawane = GetNode<Label>(LabelKarawanePath);
+		_labelPlayerNameAndOffice = GetNode<Label>("LabelPlayerNameAndOffice");
+		_labelPlaceDate = GetNode<Label>("LabelPlaceDate");
+		_labelTaler = GetNode<Label>("LabelTaler");
+		_optionButtonCity = GetNode<OptionButton>("OptionButtonCity");
+		_buttonHaus = GetNode<TextureButton>("ButtonHaus");
+		_buttonTransport = GetNode<TextureButton>("ButtonTransport");
 
-		_buttonWithSoundsScene = GD.Load<PackedScene>("res://scenes/controls/ButtonWithSounds.tscn");
+		for (int i = 1; i <= AnzahlWerkstaetten; i++)
+		{
+			_buttonsWerkstatt[i] = GetNode<TextureButton>("ButtonWs" + i);
+			_buttonsRohstoff[i] = GetNode<TextureButton>("ButtonRoh" + i);
+			_labelsPreis[i] = GetNode<Label>("LabelPreis" + i);
+			_labelsBestand[i] = GetNode<Label>("LabelBestand" + i);
+
+			int nr = i;
+			_buttonsWerkstatt[i].Pressed += () => OnWerkstattPressed(nr);
+			_buttonsRohstoff[i].Pressed += () => OnRohstoffPressed(nr);
+			_labelsBestand[i].GuiInput += @event => OnBestandGuiInput(nr, @event);
+			_labelsBestand[i].MouseExited += () => Input.SetCustomMouseCursor(_cursorDefault);
+		}
+
+		for (int slot = 0; slot < 2; slot++)
+		{
+			_buttonsTaetigkeit[slot] = GetNode<ButtonWithSounds>("ButtonTaetigkeit" + slot);
+			_detailRows[slot] = GetNode<HBoxContainer>("HBoxDetail" + slot);
+			_buttonsProdukt[slot] = _detailRows[slot].GetNode<ButtonWithSounds>("ButtonProdukt");
+			_numericsMenge[slot] = _detailRows[slot].GetNode<NumericButtonWithSounds>("NumericMenge");
+			_numericsStaette[slot] = _detailRows[slot].GetNode<NumericButtonWithSounds>("NumericStaette");
+			_labelsText1[slot] = _detailRows[slot].GetNode<Label>("LabelText1");
+			_labelsText2[slot] = _detailRows[slot].GetNode<Label>("LabelText2");
+			_labelsKosten[slot] = _detailRows[slot].GetNode<Label>("LabelKosten");
+
+			int slotKopie = slot;
+			_buttonsTaetigkeit[slot].Pressed += () => OnTaetigkeitPressed(slotKopie);
+			_buttonsProdukt[slot].Pressed += () => OnProduktPressed(slotKopie);
+			_numericsMenge[slot].WertChanged += wert => OnMengeChanged(slotKopie, wert);
+			_numericsStaette[slot].WertChanged += wert => OnStaetteChanged(slotKopie, wert);
+		}
+
+		_buttonHaus.Pressed += OnHausPressed;
+		_buttonTransport.Pressed += OnTransportPressed;
+
+		LoadTextures();
+
 		_main = GetParent<Main>();
-
-		InitializeSlotControls(0, GetNode<Control>(HBoxSlot0Path));
-		InitializeSlotControls(1, GetNode<Control>(HBoxSlot1Path));
-
 		SetProcessInput(false);
+	}
+
+	private void LoadTextures()
+	{
+		for (int i = 1; i <= MaxRohstoffIcons; i++)
+		{
+			_rohstoffIcons[i] = GD.Load<Texture2D>("res://assets/images/rohstoffe/Roh" + i + ".png");
+			_werkstattIcons[i] = GD.Load<Texture2D>("res://assets/images/werkstaetten/WSRoh" + i + ".png");
+		}
+
+		_symbolWerkstattKaufbar = GD.Load<Texture2D>("res://assets/images/symbole/SymbWS.png");
+		_symbolNichtVerfuegbar = GD.Load<Texture2D>("res://assets/images/symbole/SymbNV.png");
+		_symbolHaus = GD.Load<Texture2D>("res://assets/images/symbole/SymbAnwHaus1.png");
+		_symbolHausImBau = GD.Load<Texture2D>("res://assets/images/symbole/SymbAnwImBau.png");
+		_symbolHausNichtVorhanden = GD.Load<Texture2D>("res://assets/images/symbole/SymbAnwNV.png");
+
+		_cursorPlus = ResourceLoader.Load("res://assets/cursor/CurPlus-32x32x24.png");
+		_cursorMinus = ResourceLoader.Load("res://assets/cursor/CurMinus-32x32x24.png");
+		_cursorDefault = ResourceLoader.Load("res://assets/cursor/CurSword-32x32x24.png");
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -68,12 +130,26 @@ public partial class Stadt : Control
 	{
 	}
 
-	public override void _Input(InputEvent @event)
+	public override async void _Input(InputEvent @event)
 	{
 		if (!Input.IsActionPressed("ui_next_or_close"))
 			return;
 
-		managers.SoundManager.Instance.PlayRightClick();
+		// Rechtsklick auf eine vorhandene Werkstätte bedeutet wie im Original: Werkstätte verkaufen
+		if (@event is InputEventMouseButton mausklick)
+		{
+			for (int nr = 1; nr <= AnzahlWerkstaetten; nr++)
+			{
+				if (_buttonsWerkstatt[nr].GetGlobalRect().HasPoint(mausklick.GlobalPosition) &&
+				    _handelsManager.RohstoffIdAnPlatz(_stadtId, nr) != 0 && _handelsManager.HatWerkstatt(_stadtId, nr))
+				{
+					await WerkstattVerkaufen(nr);
+					return;
+				}
+			}
+		}
+
+		SoundManager.Instance.PlayRightClick();
 		CloseStadt();
 	}
 
@@ -110,28 +186,6 @@ public partial class Stadt : Control
 		return SW.Statisch.GetMinStadtID();
 	}
 
-	private void InitializeSlotControls(int slot, Control container)
-	{
-		_slotTaetigkeit[slot] = container.GetNode<OptionButton>("OptionButtonTaetigkeit");
-		_slotProdukt[slot] = container.GetNode<OptionButton>("OptionButtonProdukt");
-		_slotMenge[slot] = container.GetNode<SpinBox>("SpinBoxMenge");
-		_slotStaetten[slot] = container.GetNode<SpinBox>("SpinBoxStaetten");
-		_slotZielstadt[slot] = container.GetNode<OptionButton>("OptionButtonZielstadt");
-		_slotKosten[slot] = container.GetNode<Label>("LabelKosten");
-
-		_slotTaetigkeit[slot].Clear();
-		_slotTaetigkeit[slot].AddItem("Kein Auftrag", (int)EnumProduktionsslotAktionsart.KeinAuftrag);
-		_slotTaetigkeit[slot].AddItem("Produzieren", (int)EnumProduktionsslotAktionsart.Produzieren);
-		_slotTaetigkeit[slot].AddItem("Verkaufen", (int)EnumProduktionsslotAktionsart.Verkaufen);
-		_slotTaetigkeit[slot].AddItem("Permanenter Verkauf", (int)EnumProduktionsslotAktionsart.PermanentVerkaufen);
-
-		_slotTaetigkeit[slot].ItemSelected += index => OnSlotTaetigkeitSelected(slot);
-		_slotProdukt[slot].ItemSelected += index => OnSlotProduktSelected(slot);
-		_slotMenge[slot].ValueChanged += value => OnSlotMengeChanged(slot, (int)value);
-		_slotStaetten[slot].ValueChanged += value => OnSlotStaettenChanged(slot, (int)value);
-		_slotZielstadt[slot].ItemSelected += index => OnSlotZielstadtSelected(slot);
-	}
-
 	private void PopulateCityOptions()
 	{
 		_optionButtonCity.Clear();
@@ -158,267 +212,233 @@ public partial class Stadt : Control
 
 	private void Refresh()
 	{
-		_refreshing = true;
+		var spieler = SW.Dynamisch.GetAktHum();
 
-		_labelTaler.Text = SW.Dynamisch.GetAktHum().GetTalerFormatiert() + " Taler";
+		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
+		_labelPlaceDate.Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetGebietsName() + " A.D. " + SW.Dynamisch.GetAktuellesJahr();
+		_labelTaler.Text = spieler.GetTalerFormatiert() + " Taler";
 
-		RefreshResourceRows();
+		for (int nr = 1; nr <= AnzahlWerkstaetten; nr++)
+			RefreshWerkstatt(nr);
+
+		HausAnzeigen();
 		RefreshSlot(0);
 		RefreshSlot(1);
-		RefreshKarawane();
 
-		_refreshing = false;
+		_buttonTransport.TextureNormal = GD.Load<Texture2D>("res://assets/images/symbole/SymbKaravane.png");
+		_buttonTransport.TooltipText = "Transport: Karawane beauftragen";
 	}
 
-	private void RefreshResourceRows()
+	private void RefreshWerkstatt(int nr)
 	{
-		foreach (Node child in _gridContainerResources.GetChildren())
+		int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, nr);
+
+		if (rohstoffId == 0 || rohstoffId > MaxRohstoffIcons)
 		{
-			_gridContainerResources.RemoveChild(child);
-			child.QueueFree();
+			_buttonsWerkstatt[nr].Visible = false;
+			_buttonsRohstoff[nr].Visible = false;
+			_labelsPreis[nr].Visible = false;
+			_labelsBestand[nr].Visible = false;
+			return;
 		}
 
-		AddHeaderLabel("Rohstoff");
-		AddHeaderLabel("Preis");
-		AddHeaderLabel("Lager");
-		AddHeaderLabel("Menge");
-		AddHeaderLabel("");
-		AddHeaderLabel("");
-		AddHeaderLabel("Werkstätte");
+		bool hatRecht = _handelsManager.HatRohstoffrecht(_stadtId, nr);
+		bool hatWerkstatt = hatRecht && _handelsManager.HatWerkstatt(_stadtId, nr);
+		string rohstoffName = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
 
-		for (int werkstattNr = 1; werkstattNr <= SW.Statisch.GetMaxWerkstaettenProStadt(); werkstattNr++)
+		_buttonsWerkstatt[nr].Visible = true;
+		_buttonsWerkstatt[nr].Disabled = !hatRecht;
+
+		if (!hatRecht)
 		{
-			int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, werkstattNr);
-
-			if (rohstoffId == 0)
-				continue;
-
-			bool hatRecht = _handelsManager.HatRohstoffrecht(_stadtId, werkstattNr);
-			bool hatWerkstatt = _handelsManager.HatWerkstatt(_stadtId, werkstattNr);
-
-			_gridContainerResources.AddChild(new Label { Text = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() });
-			_gridContainerResources.AddChild(new Label { Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString() });
-			_gridContainerResources.AddChild(new Label
-			{
-				Text = hatWerkstatt ? _handelsManager.GetLagerbestand(_stadtId, rohstoffId).ToString() : "—",
-				TooltipText = hatWerkstatt ? _handelsManager.GetLagerplatzInfo(_stadtId, werkstattNr) : ""
-			});
-
-			var spinBoxMenge = new SpinBox
-			{
-				MinValue = 0,
-				MaxValue = SW.Statisch.GetMaxAnzahlVonEinemRohstoff(),
-				Step = 1,
-				Value = 10,
-				CustomMinimumSize = new Vector2(100, 0),
-				Editable = hatWerkstatt
-			};
-			_gridContainerResources.AddChild(spinBoxMenge);
-
-			int rohstoffIdKopie = rohstoffId;
-
-			var buttonKaufen = CreateButton("Kaufen");
-			buttonKaufen.Disabled = !hatWerkstatt;
-			buttonKaufen.Pressed += () => OnRohstoffKaufenPressed(rohstoffIdKopie, spinBoxMenge);
-			_gridContainerResources.AddChild(buttonKaufen);
-
-			var buttonVerkaufen = CreateButton("Verkaufen");
-			buttonVerkaufen.Disabled = !hatWerkstatt;
-			buttonVerkaufen.Pressed += () => OnRohstoffVerkaufenPressed(rohstoffIdKopie, spinBoxMenge);
-			_gridContainerResources.AddChild(buttonVerkaufen);
-
-			int werkstattNrKopie = werkstattNr;
-			var buttonWerkstatt = CreateButton(hatWerkstatt
-				? "Verkaufen (" + _handelsManager.GetWerkstattVerkaufspreis(_stadtId, werkstattNr).ToStringGeld() + ")"
-				: "Kaufen (" + _handelsManager.GetWerkstattKaufpreis(_stadtId, werkstattNr).ToStringGeld() + ")");
-			buttonWerkstatt.Disabled = !hatRecht;
-			buttonWerkstatt.TooltipText = hatRecht ? "" : "Euch fehlt das Rohstoffrecht für diesen Rohstoff";
-			buttonWerkstatt.Pressed += () => OnWerkstattPressed(werkstattNrKopie);
-			_gridContainerResources.AddChild(buttonWerkstatt);
+			_buttonsWerkstatt[nr].TextureNormal = _symbolNichtVerfuegbar;
+			_buttonsWerkstatt[nr].TooltipText = rohstoffName + ": Euch fehlt das Rohstoffrecht";
 		}
+		else if (hatWerkstatt)
+		{
+			_buttonsWerkstatt[nr].TextureNormal = _werkstattIcons[rohstoffId];
+			_buttonsWerkstatt[nr].TooltipText = _handelsManager.GetLagerplatzInfo(_stadtId, nr) + "\nRechtsklick: Werkstätte verkaufen";
+		}
+		else
+		{
+			_buttonsWerkstatt[nr].TextureNormal = _symbolWerkstattKaufbar;
+			_buttonsWerkstatt[nr].TooltipText = "Werkstätte für " + rohstoffName + " kaufen (" + _handelsManager.GetWerkstattKaufpreis(_stadtId, nr).ToStringGeld() + ")";
+		}
+
+		_buttonsRohstoff[nr].Visible = hatWerkstatt;
+		_buttonsRohstoff[nr].TextureNormal = _rohstoffIcons[rohstoffId];
+		_buttonsRohstoff[nr].TooltipText = rohstoffName + " (Klick: kompletten Bestand verkaufen)";
+
+		_labelsPreis[nr].Visible = hatWerkstatt;
+		_labelsPreis[nr].Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString();
+
+		_labelsBestand[nr].Visible = hatWerkstatt;
+		_labelsBestand[nr].Text = FormatiereBestand(_handelsManager.GetLagerbestand(_stadtId, rohstoffId));
+		_labelsBestand[nr].TooltipText = "Obere Hälfte: einkaufen, untere Hälfte: verkaufen\n(die Ziffernposition bestimmt die Menge)";
 	}
 
-	private void AddHeaderLabel(string text)
+	private static string FormatiereBestand(int anzahl)
 	{
-		_gridContainerResources.AddChild(new Label { Text = text });
+		string text = anzahl.ToString();
+
+		while (text.Length < 6)
+			text = "0" + text;
+
+		return text.Substring(0, 3) + "." + text.Substring(3, 3);
 	}
 
-	private ButtonWithSounds CreateButton(string text)
+	private void HausAnzeigen()
 	{
-		var button = _buttonWithSoundsScene.Instantiate<ButtonWithSounds>();
-		button.Text = text;
-		return button;
+		var haus = SW.Dynamisch.GetAktHum().GetSpielerHatHausVonStadtAnArraystelle(_stadtId);
+
+		if (haus.GetStadtID() == _stadtId && haus.GetHausID() != 0)
+		{
+			_buttonHaus.TextureNormal = haus.GetRestlicheBauzeit() == 0 ? _symbolHaus : _symbolHausImBau;
+			_buttonHaus.TooltipText = haus.GetNameInklPronomen();
+		}
+		else
+		{
+			_buttonHaus.TextureNormal = _symbolHausNichtVorhanden;
+			_buttonHaus.TooltipText = "Ihr besitzt keinen Wohnsitz in dieser Stadt";
+		}
 	}
 
 	private void RefreshSlot(int slot)
 	{
-		var aktionsart = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
-
-		SelectOptionById(_slotTaetigkeit[slot], (int)aktionsart);
-
-		bool produzieren = aktionsart == EnumProduktionsslotAktionsart.Produzieren;
-		bool verkaufen = aktionsart == EnumProduktionsslotAktionsart.Verkaufen || aktionsart == EnumProduktionsslotAktionsart.PermanentVerkaufen;
-
-		_slotProdukt[slot].Visible = produzieren || verkaufen;
-		_slotMenge[slot].Visible = produzieren || verkaufen;
-		_slotStaetten[slot].Visible = produzieren;
-		_slotZielstadt[slot].Visible = verkaufen;
-		_slotKosten[slot].Visible = produzieren || verkaufen;
-
 		var produktionsslot = _handelsManager.GetProduktionsslot(_stadtId, slot);
+		var aktionsart = (EnumProduktionsslotAktionsart)produktionsslot.GetTaetigkeit();
 
-		if (produzieren)
+		_buttonsTaetigkeit[slot].Text = AktionsartAlsText(aktionsart);
+
+		if (aktionsart == EnumProduktionsslotAktionsart.KeinAuftrag)
+		{
+			_detailRows[slot].Visible = false;
+			return;
+		}
+
+		if (aktionsart == EnumProduktionsslotAktionsart.Produzieren)
 		{
 			int rohstoffId = _handelsManager.KorrigiereProduktionsRohstoff(_stadtId, slot);
 
-			_slotProdukt[slot].Clear();
-
-			for (int werkstattNr = 1; werkstattNr <= SW.Statisch.GetMaxWerkstaettenProStadt(); werkstattNr++)
+			if (rohstoffId == 0)
 			{
-				if (_handelsManager.HatRohstoffrecht(_stadtId, werkstattNr) && _handelsManager.HatWerkstatt(_stadtId, werkstattNr))
-				{
-					int rohId = _handelsManager.RohstoffIdAnPlatz(_stadtId, werkstattNr);
-					_slotProdukt[slot].AddItem(SW.Dynamisch.GetRohstoffwithID(rohId).GetRohName(), rohId);
-				}
+				// Keine Werkstätte in dieser Stadt: Es gibt nichts einzustellen
+				_detailRows[slot].Visible = false;
+				return;
 			}
 
-			if (rohstoffId == 0)
-				_slotProdukt[slot].AddItem("Keine Werkstätte", 0);
+			_detailRows[slot].Visible = true;
 
-			SelectOptionById(_slotProdukt[slot], rohstoffId);
+			// Produktionstext zerlegen, z. B. "Braut Bier;an:Kessel.Kesseln"
+			string produktionsText = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetProdText();
+			string verb = produktionsText.Substring(0, produktionsText.IndexOf(';'));
+			string mittelteil = produktionsText.Substring(produktionsText.IndexOf(';') + 1, produktionsText.IndexOf(':') - produktionsText.IndexOf(';') - 1);
+			string staetteEinzahl = produktionsText.Substring(produktionsText.IndexOf(':') + 1, produktionsText.IndexOf('.') - (produktionsText.IndexOf(':') + 1));
+			string staetteMehrzahl = produktionsText.Substring(produktionsText.IndexOf('.') + 1);
 
-			_slotMenge[slot].MaxValue = SW.Statisch.GetMaxArbeiterAnzahl();
-			_slotMenge[slot].SetValueNoSignal(produktionsslot.GetProduktionArbeiter());
-			_slotMenge[slot].TooltipText = "Anzahl Arbeiter";
-			_slotMenge[slot].Editable = rohstoffId != 0;
+			_buttonsProdukt[slot].Text = verb + " mit";
 
-			_slotStaetten[slot].MaxValue = 99;
-			_slotStaetten[slot].SetValueNoSignal(produktionsslot.GetProduktionStaetten());
-			_slotStaetten[slot].TooltipText = "Anzahl Produktionsstätten";
-			_slotStaetten[slot].Editable = rohstoffId != 0;
+			_numericsMenge[slot].TausenderTrenner = false;
+			_numericsMenge[slot].NurEinserSchritte = false;
+			_numericsMenge[slot].MaximalerWert = SW.Statisch.GetMaxArbeiterAnzahl();
+			_numericsMenge[slot].MaximaleStellen = SW.Statisch.GetMaxArbeiterAnzahl().ToString().Length;
+			_numericsMenge[slot].Wert = produktionsslot.GetProduktionArbeiter();
+
+			_labelsText1[slot].Text = (produktionsslot.GetProduktionArbeiter() != 1 ? "Arbeitern " : "Arbeiter ") + mittelteil;
+
+			_numericsStaette[slot].WertAnzeigen = true;
+			_numericsStaette[slot].NurEinserSchritte = false;
+			_numericsStaette[slot].TausenderTrenner = false;
+			_numericsStaette[slot].MaximalerWert = 99;
+			_numericsStaette[slot].MaximaleStellen = 2;
+			_numericsStaette[slot].Wert = produktionsslot.GetProduktionStaetten();
+
+			_labelsText2[slot].Text = produktionsslot.GetProduktionStaetten() != 1 ? staetteMehrzahl : staetteEinzahl;
+			_labelsText2[slot].Visible = true;
+
+			// Reihenfolge wie im Original: Produkt, Arbeiter, Text, Stätten, Text, Kosten
+			_detailRows[slot].MoveChild(_buttonsProdukt[slot], 0);
+			_detailRows[slot].MoveChild(_numericsMenge[slot], 1);
+			_detailRows[slot].MoveChild(_labelsText1[slot], 2);
+			_detailRows[slot].MoveChild(_numericsStaette[slot], 3);
+			_detailRows[slot].MoveChild(_labelsText2[slot], 4);
+			_detailRows[slot].MoveChild(_labelsKosten[slot], 5);
 		}
-		else if (verkaufen)
+		else  // Verkaufen oder Permanenter Verkauf
 		{
 			_handelsManager.KorrigiereVerkaufsEinstellungen(_stadtId, slot);
+			_detailRows[slot].Visible = true;
 
-			_slotProdukt[slot].Clear();
+			_labelsText1[slot].Text = "Verkauft";
 
-			for (int werkstattNr = 1; werkstattNr <= SW.Statisch.GetMaxWerkstaettenProStadt(); werkstattNr++)
-			{
-				int rohId = _handelsManager.RohstoffIdAnPlatz(_stadtId, werkstattNr);
+			_numericsMenge[slot].TausenderTrenner = true;
+			_numericsMenge[slot].NurEinserSchritte = false;
+			_numericsMenge[slot].MaximalerWert = SW.Statisch.GetMaxAnzahlVonEinemRohstoff();
+			_numericsMenge[slot].MaximaleStellen = SW.Statisch.GetMaxAnzahlVonEinemRohstoff().ToString().Length;
+			_numericsMenge[slot].Wert = produktionsslot.GetVerkaufAnzahl();
 
-				if (rohId != 0)
-					_slotProdukt[slot].AddItem(SW.Dynamisch.GetRohstoffwithID(rohId).GetRohName(), rohId);
-			}
+			_buttonsProdukt[slot].Text = SW.Dynamisch.GetRohstoffwithID(produktionsslot.GetVerkaufRohstoff()).GetRohName();
 
-			SelectOptionById(_slotProdukt[slot], produktionsslot.GetVerkaufRohstoff());
+			_numericsStaette[slot].WertAnzeigen = false;
+			_numericsStaette[slot].NurEinserSchritte = true;
+			_numericsStaette[slot].MaximalerWert = SW.Statisch.GetMaxStadtID();
+			_numericsStaette[slot].MaximaleStellen = SW.Statisch.GetMaxStadtID().ToString().Length;
+			_numericsStaette[slot].Wert = produktionsslot.GetVerkaufStadt();
+			_numericsStaette[slot].Text = "in " + SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()).GetGebietsName();
 
-			_slotMenge[slot].MaxValue = SW.Statisch.GetMaxAnzahlVonEinemRohstoff();
-			_slotMenge[slot].SetValueNoSignal(produktionsslot.GetVerkaufAnzahl());
-			_slotMenge[slot].TooltipText = "Verkaufsanzahl (wird aus dem Lager reserviert)";
-			_slotMenge[slot].Editable = true;
+			_labelsText2[slot].Visible = false;
 
-			_slotZielstadt[slot].Clear();
-
-			for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
-			{
-				if (stadtId != _stadtId)
-					_slotZielstadt[slot].AddItem(SW.Dynamisch.GetStadtwithID(stadtId).GetGebietsName(), stadtId);
-			}
-
-			SelectOptionById(_slotZielstadt[slot], produktionsslot.GetVerkaufStadt());
+			// Reihenfolge wie im Original: "Verkauft", Anzahl, Rohstoff, Zielstadt, Kosten
+			_detailRows[slot].MoveChild(_labelsText1[slot], 0);
+			_detailRows[slot].MoveChild(_numericsMenge[slot], 1);
+			_detailRows[slot].MoveChild(_buttonsProdukt[slot], 2);
+			_detailRows[slot].MoveChild(_numericsStaette[slot], 3);
+			_detailRows[slot].MoveChild(_labelsKosten[slot], 4);
 		}
 
-		_slotKosten[slot].Text = "Kosten: " + _handelsManager.BerechneKosten(_stadtId, slot).ToStringGeld();
+		_labelsKosten[slot].Text = "für " + _handelsManager.BerechneKosten(_stadtId, slot).ToStringGeld();
 	}
 
-	private void RefreshKarawane()
+	private static string AktionsartAlsText(EnumProduktionsslotAktionsart aktionsart)
 	{
-		var karawane = _handelsManager.GetKarawane(_stadtId);
-		_labelKarawane.Text = "Karawane: " + karawane.Beschreibung + " (Fixpreis " + karawane.Fixpreis + ", je 100 Stück " +
-		                      karawane.PreisProStueck + ", Verlässlichkeit " + karawane.Verlaesslichkeit + "%, Sicherheit " +
-		                      karawane.Sicherheit + "%)";
+		switch (aktionsart)
+		{
+			case EnumProduktionsslotAktionsart.Produzieren:
+				return "Produzieren";
+			case EnumProduktionsslotAktionsart.Verkaufen:
+				return "Verkaufen";
+			case EnumProduktionsslotAktionsart.PermanentVerkaufen:
+				return "Permanenter Verkauf";
+			default:
+				return "Kein Auftrag";
+		}
 	}
 
 	#endregion
 
-	#region Handler
+	#region Werkstätten und Rohstoffe
 
-	private void _on_option_button_city_item_selected(long index)
-	{
-		_stadtId = _optionButtonCity.GetSelectedId();
-		Refresh();
-	}
-
-	private void _on_button_karawane_pressed()
-	{
-		_handelsManager.NaechsteKarawane(_stadtId);
-		_refreshing = true;
-		RefreshKarawane();
-		RefreshSlot(0);
-		RefreshSlot(1);
-		_refreshing = false;
-	}
-
-	private void _on_button_back_pressed()
-	{
-		CloseStadt();
-	}
-
-	private async void OnRohstoffKaufenPressed(int rohstoffId, SpinBox spinBoxMenge)
+	private async void OnWerkstattPressed(int nr)
 	{
 		SetProcessInput(false);
 
-		int gekauft = _handelsManager.KaufeRohstoff(_stadtId, rohstoffId, (int)spinBoxMenge.Value, out string fehler);
-
-		if (fehler != "")
-			await SW.UI.ShowText.ShowDialog(fehler);
-		else if (gekauft > 0)
-			managers.SoundManager.Instance.PlayCoins();
-
-		Refresh();
-
-		if (Visible)
-			SetProcessInput(true);
-	}
-
-	private void OnRohstoffVerkaufenPressed(int rohstoffId, SpinBox spinBoxMenge)
-	{
-		int erloes = _handelsManager.VerkaufeRohstoff(_stadtId, rohstoffId, (int)spinBoxMenge.Value);
-
-		if (erloes > 0)
-			managers.SoundManager.Instance.PlayCoins();
-
-		Refresh();
-	}
-
-	private async void OnWerkstattPressed(int werkstattNr)
-	{
-		SetProcessInput(false);
-
-		int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, werkstattNr);
-		string rohstoffName = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
-
-		if (_handelsManager.HatWerkstatt(_stadtId, werkstattNr))
+		if (_handelsManager.HatWerkstatt(_stadtId, nr))
 		{
-			int verkaufspreis = _handelsManager.GetWerkstattVerkaufspreis(_stadtId, werkstattNr);
-
-			if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Eure Werkstätte für " + verkaufspreis.ToStringGeld() + "\nverkaufen?") == DialogResultGame.Yes)
-			{
-				_handelsManager.VerkaufeWerkstatt(_stadtId, werkstattNr);
-				managers.SoundManager.Instance.PlayCoins();
-			}
+			// TODO: Werkstätten-Details (Fähigkeiten, Lagerraum kaufen) migrieren
+			await SW.UI.ShowText.ShowDialog(_handelsManager.GetLagerplatzInfo(_stadtId, nr) +
+			                                "\n\nDie Werkstätten-Verwaltung ist noch nicht verfügbar.\nRechtsklick auf die Werkstätte verkauft sie.");
 		}
 		else
 		{
-			int kaufpreis = _handelsManager.GetWerkstattKaufpreis(_stadtId, werkstattNr);
+			int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, nr);
+			int kaufpreis = _handelsManager.GetWerkstattKaufpreis(_stadtId, nr);
 
 			if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr für " + kaufpreis.ToStringGeld() + " in " +
 			                                             SW.Dynamisch.GetStadtwithID(_stadtId).GetGebietsName() + " eine Werkstätte für eine\n" +
-			                                             rohstoffName + "-Produktion kaufen?") == DialogResultGame.Yes)
+			                                             SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() + "-Produktion kaufen?") == DialogResultGame.Yes)
 			{
-				if (_handelsManager.KaufeWerkstatt(_stadtId, werkstattNr, out string fehler))
-					managers.SoundManager.Instance.PlayCoins();
+				if (_handelsManager.KaufeWerkstatt(_stadtId, nr, out string fehler))
+					SoundManager.Instance.PlayCoins();
 				else
 					await SW.UI.ShowText.ShowDialog(fehler);
 			}
@@ -430,36 +450,193 @@ public partial class Stadt : Control
 			SetProcessInput(true);
 	}
 
-	private void OnSlotTaetigkeitSelected(int slot)
+	private async Task WerkstattVerkaufen(int nr)
 	{
-		if (_refreshing)
-			return;
+		SetProcessInput(false);
 
-		_handelsManager.SetzeTaetigkeit(_stadtId, slot, (EnumProduktionsslotAktionsart)_slotTaetigkeit[slot].GetSelectedId());
+		int verkaufspreis = _handelsManager.GetWerkstattVerkaufspreis(_stadtId, nr);
+
+		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Eure Werkstätte für " + verkaufspreis + "\nTaler verkaufen?", "Ja", "Nein") == DialogResultGame.Yes)
+		{
+			_handelsManager.VerkaufeWerkstatt(_stadtId, nr);
+			SoundManager.Instance.PlayCoins();
+		}
+
+		Refresh();
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	private void OnRohstoffPressed(int nr)
+	{
+		// Wie im Original: Ein Klick auf das Rohstoffsymbol verkauft den kompletten Bestand
+		int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, nr);
+		int erloes = _handelsManager.VerkaufeRohstoff(_stadtId, rohstoffId, _handelsManager.GetLagerbestand(_stadtId, rohstoffId));
+
+		if (erloes > 0)
+			SoundManager.Instance.PlayCoins();
+
 		Refresh();
 	}
 
-	private void OnSlotProduktSelected(int slot)
+	private async void OnBestandGuiInput(int nr, InputEvent @event)
 	{
-		if (_refreshing)
+		if (@event is InputEventMouseMotion motion)
+			Input.SetCustomMouseCursor(motion.Position.Y >= _labelsBestand[nr].Size.Y / 2 ? _cursorMinus : _cursorPlus);
+
+		if (@event is not InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left } klick)
 			return;
 
-		int rohstoffId = _slotProdukt[slot].GetSelectedId();
-		var aktionsart = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
+		// Die X-Position des Klicks bestimmt die Menge (wie im Original über die Ziffernposition)
+		float x = klick.Position.X * BestandLabelOriginalBreite / _labelsBestand[nr].Size.X;
+		int menge = 1;
+
+		if (x >= 4 && x < 90)
+		{
+			if (x < 18)
+				menge = 100000;
+			else if (x < 31)
+				menge = 10000;
+			else if (x < 46)
+				menge = 1000;
+			else if (x < 63)
+				menge = 100;
+			else if (x < 77)
+				menge = 10;
+		}
+
+		int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, nr);
+		bool verkaufen = klick.Position.Y >= _labelsBestand[nr].Size.Y / 2;
+
+		SoundManager.Instance.PlayLeftClick();
+
+		if (verkaufen)
+		{
+			int erloes = _handelsManager.VerkaufeRohstoff(_stadtId, rohstoffId, menge);
+
+			if (erloes > 0)
+				SoundManager.Instance.PlayCoins();
+		}
+		else
+		{
+			SetProcessInput(false);
+
+			_handelsManager.KaufeRohstoff(_stadtId, rohstoffId, menge, out string fehler);
+
+			if (fehler != "")
+				await SW.UI.ShowText.ShowDialog(fehler);
+
+			if (Visible)
+				SetProcessInput(true);
+		}
+
+		Refresh();
+	}
+
+	#endregion
+
+	#region Haus und Transport
+
+	private async void OnHausPressed()
+	{
+		SetProcessInput(false);
+
+		// TODO: Anwesen-Verwaltung (Haus bauen, erweitern, renovieren) migrieren
+		await SW.UI.ShowText.ShowDialog("Die Anwesen-Verwaltung ist noch nicht verfügbar.");
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	private async void OnTransportPressed()
+	{
+		SetProcessInput(false);
+
+		while (true)
+		{
+			var karawane = _handelsManager.GetKarawane(_stadtId);
+
+			var antwort = await SW.UI.YesNoQuestion.ShowDialogText(
+				"Welche Karawane wollt Ihr mit Eurem Transport beauftragen?\n\n" +
+				"Karawanenführer: " + karawane.Beschreibung + "\n" +
+				"Fixpreis: " + karawane.Fixpreis + " Taler, je 100 Stück: " + karawane.PreisProStueck + " Taler\n" +
+				"Verlässlichkeit: " + karawane.Verlaesslichkeit + " %, Sicherheit: " + karawane.Sicherheit + " %",
+				"Nächste Karawane", "Diese beauftragen");
+
+			if (antwort != DialogResultGame.Yes)
+				break;
+
+			_handelsManager.NaechsteKarawane(_stadtId);
+		}
+
+		Refresh();
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	#endregion
+
+	#region Produktionsslots
+
+	private void OnTaetigkeitPressed(int slot)
+	{
+		var aktuelleArt = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
+		var neueArt = (EnumProduktionsslotAktionsart)(((int)aktuelleArt + 1) % 4);
+
+		_handelsManager.SetzeTaetigkeit(_stadtId, slot, neueArt);
+		Refresh();
+	}
+
+	private void OnProduktPressed(int slot)
+	{
+		var produktionsslot = _handelsManager.GetProduktionsslot(_stadtId, slot);
+		var aktionsart = (EnumProduktionsslotAktionsart)produktionsslot.GetTaetigkeit();
 
 		if (aktionsart == EnumProduktionsslotAktionsart.Produzieren)
-			_handelsManager.SetzeProduktionsRohstoff(_stadtId, slot, rohstoffId);
+		{
+			// Zum nächsten Rohstoff wechseln, für den der Spieler Recht und Werkstätte besitzt
+			int aktuelleNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(_stadtId, produktionsslot.GetProduktionRohstoff());
+
+			for (int i = 0; i < AnzahlWerkstaetten; i++)
+			{
+				aktuelleNr++;
+
+				if (aktuelleNr > AnzahlWerkstaetten)
+					aktuelleNr = 1;
+
+				if (_handelsManager.HatRohstoffrecht(_stadtId, aktuelleNr) && _handelsManager.HatWerkstatt(_stadtId, aktuelleNr))
+				{
+					int neueRohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, aktuelleNr);
+
+					if (neueRohstoffId != produktionsslot.GetProduktionRohstoff())
+						_handelsManager.SetzeProduktionsRohstoff(_stadtId, slot, neueRohstoffId);
+
+					break;
+				}
+			}
+		}
 		else
-			_handelsManager.SetzeVerkaufsRohstoff(_stadtId, slot, rohstoffId);
+		{
+			// Zum nächsten Rohstoff der Stadt wechseln (die Reservierung wandert zurück ins Lager)
+			int aktuelleNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(_stadtId, produktionsslot.GetVerkaufRohstoff());
+			aktuelleNr++;
+
+			if (aktuelleNr > AnzahlWerkstaetten)
+				aktuelleNr = 1;
+
+			int neueRohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, aktuelleNr);
+
+			if (neueRohstoffId != 0)
+				_handelsManager.SetzeVerkaufsRohstoff(_stadtId, slot, neueRohstoffId);
+		}
 
 		Refresh();
 	}
 
-	private void OnSlotMengeChanged(int slot, int wert)
+	private void OnMengeChanged(int slot, int wert)
 	{
-		if (_refreshing)
-			return;
-
 		var aktionsart = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
 
 		if (aktionsart == EnumProduktionsslotAktionsart.Produzieren)
@@ -470,23 +647,39 @@ public partial class Stadt : Control
 		Refresh();
 	}
 
-	private void OnSlotStaettenChanged(int slot, int wert)
+	private void OnStaetteChanged(int slot, int wert)
 	{
-		if (_refreshing)
-			return;
+		var aktionsart = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
 
-		_handelsManager.SetzeProduktionsStaetten(_stadtId, slot, wert);
-		Refresh();
-	}
+		if (aktionsart == EnumProduktionsslotAktionsart.Produzieren)
+		{
+			_handelsManager.SetzeProduktionsStaetten(_stadtId, slot, wert);
+		}
+		else
+		{
+			// Zielstadt weiterschalten (die eigene Stadt wird wie im Original übersprungen)
+			int alteStadt = _handelsManager.GetProduktionsslot(_stadtId, slot).GetVerkaufStadt();
+			int neueStadt = wert;
 
-	private void OnSlotZielstadtSelected(int slot)
-	{
-		if (_refreshing)
-			return;
+			if (neueStadt == _stadtId)
+				neueStadt += neueStadt > alteStadt ? 1 : -1;
 
-		_handelsManager.SetzeVerkaufsStadt(_stadtId, slot, _slotZielstadt[slot].GetSelectedId());
+			if (neueStadt >= SW.Statisch.GetMaxStadtID())
+				neueStadt = SW.Statisch.GetMinStadtID();
+			else if (neueStadt < SW.Statisch.GetMinStadtID())
+				neueStadt = SW.Statisch.GetMaxStadtID() - 1;
+
+			_handelsManager.SetzeVerkaufsStadt(_stadtId, slot, neueStadt);
+		}
+
 		Refresh();
 	}
 
 	#endregion
+
+	private void _on_option_button_city_item_selected(long index)
+	{
+		_stadtId = _optionButtonCity.GetSelectedId();
+		Refresh();
+	}
 }

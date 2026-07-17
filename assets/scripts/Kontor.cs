@@ -34,6 +34,16 @@ public partial class Kontor : Control
 
 		_main = GetParent<Main>();
 
+		// Die Klickbereiche des Kontors sind unsichtbar, nur ihre Beschriftungen sind zu sehen (wie im Original)
+		foreach (string areaName in new[] { "AreaHandel", "AreaHinterzimmer", "AreaSchreibstube", "AreaKirche", "AreaKampf", "AreaFenster" })
+		{
+			var area = GetNode<Button>(areaName);
+			area.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("hover", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("pressed", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+		}
+
 		SetProcessInput(false);
 	}
 
@@ -189,11 +199,22 @@ public partial class Kontor : Control
 		SetProcessInput(true);
 	}
 
-	private void _on_button_handel_pressed()
+	private void _on_area_handel_pressed()
 	{
 		SetProcessInput(false);
 		Hide();
 		_main.Stadt.ShowStadt();
+	}
+
+	private async void _on_area_nicht_implementiert_pressed()
+	{
+		SetProcessInput(false);
+
+		// TODO: Hinterzimmer, Schreibstube, Kirche, Söldner & Räuber und Geld-aus-dem-Fenster migrieren
+		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+
+		if (Visible)
+			SetProcessInput(true);
 	}
 
 	private void UpdateHud()

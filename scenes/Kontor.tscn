@@ -27,51 +27,150 @@ pivot_offset = Vector2(800, 450)
 texture = ExtResource("1_ktbg")
 
 [node name="LabelPlayerNameAndOffice" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.02
-anchor_top = 0.012
-anchor_right = 0.42
-anchor_bottom = 0.05
+layout_mode = 0
+offset_left = 32.0
+offset_top = 11.0
+offset_right = 672.0
+offset_bottom = 45.0
 text = "Spielername"
 
 [node name="LabelPlaceDate" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.42
-anchor_top = 0.012
-anchor_right = 0.58
-anchor_bottom = 0.05
+layout_mode = 0
+offset_left = 672.0
+offset_top = 11.0
+offset_right = 928.0
+offset_bottom = 45.0
 text = "Kontor A.D. 1600"
 horizontal_alignment = 1
 
 [node name="LabelTaler" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.78
-anchor_top = 0.012
-anchor_right = 0.98
-anchor_bottom = 0.05
+layout_mode = 0
+offset_left = 1248.0
+offset_top = 11.0
+offset_right = 1568.0
+offset_bottom = 45.0
 text = "1000 Taler"
 horizontal_alignment = 2
 
+[node name="AreaHandel" type="Button" parent="."]
+layout_mode = 0
+offset_left = 539.0
+offset_top = 158.0
+offset_right = 1075.0
+offset_bottom = 418.0
+flat = true
+
+[node name="LabelHandel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 539.0
+offset_top = 120.0
+offset_right = 1075.0
+offset_bottom = 156.0
+mouse_filter = 2
+text = "Handel"
+horizontal_alignment = 1
+
+[node name="AreaHinterzimmer" type="Button" parent="."]
+layout_mode = 0
+offset_top = 135.0
+offset_right = 199.0
+offset_bottom = 900.0
+flat = true
+
+[node name="LabelHinterzimmer" type="Label" parent="."]
+layout_mode = 0
+offset_top = 176.0
+offset_right = 199.0
+offset_bottom = 212.0
+mouse_filter = 2
+text = "Hinterzimmer"
+horizontal_alignment = 1
+
+[node name="AreaSchreibstube" type="Button" parent="."]
+layout_mode = 0
+offset_left = 458.0
+offset_top = 504.0
+offset_right = 1265.0
+offset_bottom = 586.0
+flat = true
+
+[node name="LabelSchreibstube" type="Label" parent="."]
+layout_mode = 0
+offset_left = 458.0
+offset_top = 462.0
+offset_right = 1265.0
+offset_bottom = 498.0
+mouse_filter = 2
+text = "Schreibstube"
+horizontal_alignment = 1
+
+[node name="AreaKirche" type="Button" parent="."]
+layout_mode = 0
+offset_left = 269.0
+offset_top = 188.0
+offset_right = 458.0
+offset_bottom = 450.0
+flat = true
+
+[node name="LabelKirche" type="Label" parent="."]
+layout_mode = 0
+offset_left = 269.0
+offset_top = 146.0
+offset_right = 458.0
+offset_bottom = 182.0
+mouse_filter = 2
+text = "Kirche"
+horizontal_alignment = 1
+
+[node name="AreaKampf" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1124.0
+offset_top = 152.0
+offset_right = 1382.0
+offset_bottom = 434.0
+flat = true
+
+[node name="LabelKampf" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1124.0
+offset_top = 110.0
+offset_right = 1382.0
+offset_bottom = 146.0
+mouse_filter = 2
+text = "Söldner & Räuber"
+horizontal_alignment = 1
+
+[node name="AreaFenster" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1429.0
+offset_top = 117.0
+offset_right = 1600.0
+offset_bottom = 480.0
+flat = true
+
+[node name="LabelFenster" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1400.0
+offset_top = 128.0
+offset_right = 1600.0
+offset_bottom = 192.0
+mouse_filter = 2
+text = "Geld zum Fenster
+rauswerfen"
+horizontal_alignment = 1
+
 [node name="ButtonEndTurn" parent="." instance=ExtResource("2_ktbtn")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.8
-anchor_top = 0.9
-anchor_right = 0.97
-anchor_bottom = 0.966
+layout_mode = 0
+offset_left = 1281.0
+offset_top = 838.0
+offset_right = 1489.0
+offset_bottom = 884.0
 text = "Runde beenden"
 
-[node name="ButtonHandel" parent="." instance=ExtResource("2_ktbtn")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.03
-anchor_top = 0.9
-anchor_right = 0.2
-anchor_bottom = 0.966
-text = "Handel"
-
+[connection signal="pressed" from="AreaHandel" to="." method="_on_area_handel_pressed"]
+[connection signal="pressed" from="AreaHinterzimmer" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaSchreibstube" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaKirche" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaKampf" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaFenster" to="." method="_on_area_nicht_implementiert_pressed"]
 [connection signal="pressed" from="ButtonEndTurn" to="." method="_on_button_end_turn_pressed"]
-[connection signal="pressed" from="ButtonHandel" to="." method="_on_button_handel_pressed"]

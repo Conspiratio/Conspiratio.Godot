@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://bstadtszene01"]
+[gd_scene load_steps=5 format=3 uid="uid://bstadtszene01"]
 
-[ext_resource type="Texture2D" uid="uid://bvl5do8sb0xrg" path="res://assets/backgrounds/BackgroundBookOpen.png" id="1_stbg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/BackgroundStadt.png" id="1_stbg"]
 [ext_resource type="Script" path="res://assets/scripts/Stadt.cs" id="1_stscr"]
 [ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="2_stbtn"]
+[ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="3_stnum"]
 
 [node name="Stadt" type="Control"]
 layout_mode = 3
@@ -12,12 +13,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_stscr")
-OptionButtonCityPath = NodePath("OptionButtonCity")
-LabelTalerPath = NodePath("LabelTaler")
-GridContainerResourcesPath = NodePath("GridContainerResources")
-HBoxSlot0Path = NodePath("HBoxSlot0")
-HBoxSlot1Path = NodePath("HBoxSlot1")
-LabelKarawanePath = NodePath("LabelKarawane")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -29,145 +24,357 @@ grow_vertical = 2
 pivot_offset = Vector2(800, 450)
 texture = ExtResource("1_stbg")
 
-[node name="LabelTitle" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.039
-anchor_top = 0.051
-anchor_right = 0.3
-anchor_bottom = 0.081
-text = "Handel & Produktion"
+[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 11.0
+offset_right = 672.0
+offset_bottom = 45.0
+text = "Spielername"
 
-[node name="LabelCity" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_top = 0.055
-anchor_right = 0.56
-anchor_bottom = 0.089
-text = "Stadt:"
-
-[node name="OptionButtonCity" type="OptionButton" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.57
-anchor_top = 0.048
-anchor_right = 0.76
-anchor_bottom = 0.095
+[node name="LabelPlaceDate" type="Label" parent="."]
+layout_mode = 0
+offset_left = 672.0
+offset_top = 11.0
+offset_right = 928.0
+offset_bottom = 45.0
+text = "Stadt A.D. 1600"
+horizontal_alignment = 1
 
 [node name="LabelTaler" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.78
-anchor_top = 0.055
-anchor_right = 0.955
-anchor_bottom = 0.089
+layout_mode = 0
+offset_left = 1248.0
+offset_top = 11.0
+offset_right = 1568.0
+offset_bottom = 45.0
 text = "1000 Taler"
 horizontal_alignment = 2
 
-[node name="GridContainerResources" type="GridContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.07
-anchor_top = 0.13
-anchor_right = 0.94
-anchor_bottom = 0.52
-columns = 7
+[node name="OptionButtonCity" type="OptionButton" parent="."]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 52.0
+offset_right = 292.0
+offset_bottom = 92.0
 
-[node name="HBoxSlot0" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.07
-anchor_top = 0.56
-anchor_right = 0.94
-anchor_bottom = 0.63
-theme_override_constants/separation = 10
+[node name="ButtonWs1" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 234.0
+offset_right = 320.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
 
-[node name="OptionButtonTaetigkeit" type="OptionButton" parent="HBoxSlot0"]
+[node name="ButtonWs2" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 234.0
+offset_right = 532.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs3" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 234.0
+offset_right = 744.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs4" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 234.0
+offset_right = 956.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs5" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 234.0
+offset_right = 1168.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs6" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 234.0
+offset_right = 1380.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LabelPreis1" type="Label" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 346.0
+offset_right = 320.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 346.0
+offset_right = 532.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 346.0
+offset_right = 744.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis4" type="Label" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 346.0
+offset_right = 956.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis5" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 346.0
+offset_right = 1168.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 346.0
+offset_right = 1380.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="ButtonRoh1" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 382.0
+offset_right = 320.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh2" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 382.0
+offset_right = 532.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh3" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 382.0
+offset_right = 744.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh4" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 382.0
+offset_right = 956.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh5" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 382.0
+offset_right = 1168.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh6" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 382.0
+offset_right = 1380.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LabelBestand1" type="Label" parent="."]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 492.0
+offset_right = 313.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 439.0
+offset_top = 492.0
+offset_right = 525.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 651.0
+offset_top = 492.0
+offset_right = 737.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand4" type="Label" parent="."]
+layout_mode = 0
+offset_left = 863.0
+offset_top = 492.0
+offset_right = 949.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand5" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1075.0
+offset_top = 492.0
+offset_right = 1161.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1287.0
+offset_top = 492.0
+offset_right = 1373.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="ButtonHaus" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1380.0
+offset_top = 790.0
+offset_right = 1480.0
+offset_bottom = 890.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonTransport" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1490.0
+offset_top = 790.0
+offset_right = 1590.0
+offset_bottom = 890.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonTaetigkeit0" parent="." instance=ExtResource("2_stbtn")]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 691.0
+offset_right = 346.0
+offset_bottom = 737.0
+text = "Kein Auftrag"
+
+[node name="HBoxDetail0" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 742.0
+offset_right = 1360.0
+offset_bottom = 782.0
+theme_override_constants/separation = 6
+
+[node name="ButtonProdukt" parent="HBoxDetail0" instance=ExtResource("2_stbtn")]
 layout_mode = 2
-custom_minimum_size = Vector2(230, 0)
+size_flags_vertical = 4
+flat = true
 
-[node name="OptionButtonProdukt" type="OptionButton" parent="HBoxSlot0"]
+[node name="NumericMenge" parent="HBoxDetail0" instance=ExtResource("3_stnum")]
 layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
+size_flags_vertical = 4
+custom_minimum_size = Vector2(146, 40)
 
-[node name="SpinBoxMenge" type="SpinBox" parent="HBoxSlot0"]
+[node name="LabelText1" type="Label" parent="HBoxDetail0"]
 layout_mode = 2
-custom_minimum_size = Vector2(130, 0)
+size_flags_vertical = 4
 
-[node name="SpinBoxStaetten" type="SpinBox" parent="HBoxSlot0"]
+[node name="NumericStaette" parent="HBoxDetail0" instance=ExtResource("3_stnum")]
 layout_mode = 2
-custom_minimum_size = Vector2(110, 0)
+size_flags_vertical = 4
+custom_minimum_size = Vector2(60, 40)
 
-[node name="OptionButtonZielstadt" type="OptionButton" parent="HBoxSlot0"]
+[node name="LabelText2" type="Label" parent="HBoxDetail0"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 0)
+size_flags_vertical = 4
 
-[node name="LabelKosten" type="Label" parent="HBoxSlot0"]
+[node name="LabelKosten" type="Label" parent="HBoxDetail0"]
 layout_mode = 2
-text = "Kosten:"
+size_flags_vertical = 4
 
-[node name="HBoxSlot1" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.07
-anchor_top = 0.65
-anchor_right = 0.94
-anchor_bottom = 0.72
-theme_override_constants/separation = 10
+[node name="ButtonTaetigkeit1" parent="." instance=ExtResource("2_stbtn")]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 773.0
+offset_right = 346.0
+offset_bottom = 819.0
+text = "Kein Auftrag"
 
-[node name="OptionButtonTaetigkeit" type="OptionButton" parent="HBoxSlot1"]
+[node name="HBoxDetail1" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 824.0
+offset_right = 1360.0
+offset_bottom = 864.0
+theme_override_constants/separation = 6
+
+[node name="ButtonProdukt" parent="HBoxDetail1" instance=ExtResource("2_stbtn")]
 layout_mode = 2
-custom_minimum_size = Vector2(230, 0)
+size_flags_vertical = 4
+flat = true
 
-[node name="OptionButtonProdukt" type="OptionButton" parent="HBoxSlot1"]
+[node name="NumericMenge" parent="HBoxDetail1" instance=ExtResource("3_stnum")]
 layout_mode = 2
-custom_minimum_size = Vector2(160, 0)
+size_flags_vertical = 4
+custom_minimum_size = Vector2(146, 40)
 
-[node name="SpinBoxMenge" type="SpinBox" parent="HBoxSlot1"]
+[node name="LabelText1" type="Label" parent="HBoxDetail1"]
 layout_mode = 2
-custom_minimum_size = Vector2(130, 0)
+size_flags_vertical = 4
 
-[node name="SpinBoxStaetten" type="SpinBox" parent="HBoxSlot1"]
+[node name="NumericStaette" parent="HBoxDetail1" instance=ExtResource("3_stnum")]
 layout_mode = 2
-custom_minimum_size = Vector2(110, 0)
+size_flags_vertical = 4
+custom_minimum_size = Vector2(60, 40)
 
-[node name="OptionButtonZielstadt" type="OptionButton" parent="HBoxSlot1"]
+[node name="LabelText2" type="Label" parent="HBoxDetail1"]
 layout_mode = 2
-custom_minimum_size = Vector2(200, 0)
+size_flags_vertical = 4
 
-[node name="LabelKosten" type="Label" parent="HBoxSlot1"]
+[node name="LabelKosten" type="Label" parent="HBoxDetail1"]
 layout_mode = 2
-text = "Kosten:"
-
-[node name="LabelKarawane" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.07
-anchor_top = 0.76
-anchor_right = 0.7
-anchor_bottom = 0.81
-text = "Karawane:"
-autowrap_mode = 2
-
-[node name="ButtonKarawane" parent="." instance=ExtResource("2_stbtn")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.72
-anchor_top = 0.75
-anchor_right = 0.94
-anchor_bottom = 0.81
-text = "Andere Karawane"
-
-[node name="ButtonBack" parent="." instance=ExtResource("2_stbtn")]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.72
-anchor_top = 0.85
-anchor_right = 0.94
-anchor_bottom = 0.92
-text = "Zurück zum Kontor"
+size_flags_vertical = 4
 
 [connection signal="item_selected" from="OptionButtonCity" to="." method="_on_option_button_city_item_selected"]
-[connection signal="pressed" from="ButtonKarawane" to="." method="_on_button_karawane_pressed"]
-[connection signal="pressed" from="ButtonBack" to="." method="_on_button_back_pressed"]

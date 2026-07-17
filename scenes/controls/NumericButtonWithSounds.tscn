@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://numericbtnws1"]
+
+[ext_resource type="Script" path="res://assets/scripts/controls/NumericButtonWithSounds.cs" id="1_numbtn"]
+
+[node name="NumericButtonWithSounds" type="Button" groups=["Controls"]]
+offset_right = 146.0
+offset_bottom = 40.0
+flat = true
+alignment = 0
+script = ExtResource("1_numbtn")
