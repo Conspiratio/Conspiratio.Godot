@@ -14,6 +14,7 @@ public partial class NewLocalGameMenu : Control
 	private CheckBoxWithSounds _checkBoxTestmodus;
 	private CheckBoxWithSounds _checkBoxShowDeaths;
 	private NewGameManager _newGameManager;
+	private Main _main;
 
 	[Export]
 	public NodePath LineEditGameNamePath { get; set; }
@@ -43,6 +44,8 @@ public partial class NewLocalGameMenu : Control
 		_checkBoxCheatmodus = GetNode<CheckBoxWithSounds>(CheckBoxCheatmodusPath);
 		_checkBoxTestmodus = GetNode<CheckBoxWithSounds>(CheckBoxTestmodusPath);
 		_checkBoxShowDeaths = GetNode<CheckBoxWithSounds>(CheckBoxShowDeathsPath);
+
+		_main = GetParent<Main>();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -86,8 +89,8 @@ public partial class NewLocalGameMenu : Control
 			return;
 		}
 
-		// TODO: Spielererstellung starten (Migration von SpielerHinzufuegen)
 		HideAndDisableInput();
+		_main.NewPlayerMenu.StartPlayerSetup();
 	}
 
 	private void _on_line_edit_game_name_text_submitted(string newText)
