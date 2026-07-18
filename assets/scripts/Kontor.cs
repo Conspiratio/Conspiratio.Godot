@@ -385,10 +385,14 @@ public partial class Kontor : Control
 
 		await SW.UI.ShowText.ShowDialog("Resümee\n\nIn diesem Jahr gab es keine weiteren besonderen Vorkommnisse");
 
-		// Hat der letzte Spieler seinen Zug beendet, werden vor dem Jahreswechsel die Wahlen abgehalten
-		// (solange die KI-Kandidaten noch gemeldet sind – das Weiterschalten meldet sie danach ab)
+		// Hat der letzte Spieler seinen Zug beendet, folgen vor dem Jahreswechsel die Rundenende-Ereignisse:
+		// zuerst die Wahlen (solange die KI-Kandidaten noch gemeldet sind), dann die Todesfälle unter den KIs
+		// (die Ämter freigeben und so die Wahlen des nächsten Jahres vorbereiten) – wie im Original.
 		if (SW.Dynamisch.GetAktiverSpieler() >= SW.Dynamisch.GetAktivSpielerAnzahl())
+		{
 			await HalteWahlenAb();
+			await ZeigeKiTodesfaelle();
+		}
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
@@ -406,5 +410,25 @@ public partial class Kontor : Control
 			await _main.WahlDialog.ShowWahl(aemterManager, wahlId);
 
 		aemterManager.FuelleRestlicheAemter();
+	}
+
+	/// <summary>
+	/// Führt am Jahresende die Todesfälle unter den KI-Spielern durch. Die Tode treten immer ein
+	/// (freigewordene Ämter werden zu Wahlen des nächsten Jahres); angezeigt werden sie in Seiten zu je
+	/// zehn Meldungen, sofern die Option "Todesfälle anzeigen" aktiv ist.
+	/// </summary>
+	private async Task ZeigeKiTodesfaelle()
+	{
+		var rundenEndeManager = new RundenEndeManager();
+		var meldungen = rundenEndeManager.FuehreKiTodesfaelleDurch();
+
+		if (!rundenEndeManager.SollenTodesfaelleAngezeigtWerden() || meldungen.Count == 0)
+			return;
+
+		for (int i = 0; i < meldungen.Count; i += 10)
+		{
+			int anzahl = System.Math.Min(10, meldungen.Count - i);
+			await SW.UI.ShowText.ShowDialog("Todesfälle in diesem Jahr\n\n" + string.Join("\n", meldungen.GetRange(i, anzahl)));
+		}
 	}
 }
