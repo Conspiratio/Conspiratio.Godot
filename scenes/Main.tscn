@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=19 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -15,6 +15,9 @@
 [ext_resource type="PackedScene" uid="uid://kreditbuchdlg" path="res://scenes/dialogs/KreditbuchDialog.tscn" id="12_krbdg"]
 [ext_resource type="PackedScene" uid="uid://gesetzedlg001" path="res://scenes/dialogs/GesetzeDialog.tscn" id="13_gsdg"]
 [ext_resource type="PackedScene" uid="uid://weltkarte0001" path="res://scenes/Weltkarte.tscn" id="14_wkart"]
+[ext_resource type="PackedScene" uid="uid://hausverwaltungdlg" path="res://scenes/dialogs/HausVerwaltungDialog.tscn" id="15_hvdlg"]
+[ext_resource type="PackedScene" uid="uid://hauswaehlendlg" path="res://scenes/dialogs/HausWaehlenDialog.tscn" id="16_hwdlg"]
+[ext_resource type="PackedScene" uid="uid://hauserweiterungdlg" path="res://scenes/dialogs/HausErweiterungenDialog.tscn" id="17_hedlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -37,6 +40,9 @@ SchreibstubePath = NodePath("Schreibstube")
 KreditbuchDialogPath = NodePath("KreditbuchDialog")
 GesetzeDialogPath = NodePath("GesetzeDialog")
 WeltkartePath = NodePath("Weltkarte")
+HausVerwaltungDialogPath = NodePath("HausVerwaltungDialog")
+HausWaehlenDialogPath = NodePath("HausWaehlenDialog")
+HausErweiterungenDialogPath = NodePath("HausErweiterungenDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -62,6 +68,18 @@ visible = false
 layout_mode = 1
 
 [node name="Weltkarte" parent="." instance=ExtResource("14_wkart")]
+visible = false
+layout_mode = 1
+
+[node name="HausVerwaltungDialog" parent="." instance=ExtResource("15_hvdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HausWaehlenDialog" parent="." instance=ExtResource("16_hwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HausErweiterungenDialog" parent="." instance=ExtResource("17_hedlg")]
 visible = false
 layout_mode = 1
 

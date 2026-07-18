@@ -44,6 +44,15 @@ public partial class Main : Control
 	[Export]
 	public NodePath WeltkartePath { get; set; }
 
+	[Export]
+	public NodePath HausVerwaltungDialogPath { get; set; }
+
+	[Export]
+	public NodePath HausWaehlenDialogPath { get; set; }
+
+	[Export]
+	public NodePath HausErweiterungenDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -55,6 +64,9 @@ public partial class Main : Control
 	public KreditbuchDialog KreditbuchDialog;
 	public GesetzeDialog GesetzeDialog;
 	public Weltkarte Weltkarte;
+	public HausVerwaltungDialog HausVerwaltungDialog;
+	public HausWaehlenDialog HausWaehlenDialog;
+	public HausErweiterungenDialog HausErweiterungenDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -72,6 +84,9 @@ public partial class Main : Control
 		KreditbuchDialog = GetNode<KreditbuchDialog>(KreditbuchDialogPath);
 		GesetzeDialog = GetNode<GesetzeDialog>(GesetzeDialogPath);
 		Weltkarte = GetNode<Weltkarte>(WeltkartePath);
+		HausVerwaltungDialog = GetNode<HausVerwaltungDialog>(HausVerwaltungDialogPath);
+		HausWaehlenDialog = GetNode<HausWaehlenDialog>(HausWaehlenDialogPath);
+		HausErweiterungenDialog = GetNode<HausErweiterungenDialog>(HausErweiterungenDialogPath);
 
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, Weltkarte, null, null, null);

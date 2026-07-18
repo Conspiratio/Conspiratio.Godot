@@ -507,8 +507,9 @@ public partial class Stadt : Control
 	{
 		SetProcessInput(false);
 
-		// TODO: Anwesen-Verwaltung (Haus bauen, erweitern, renovieren) migrieren
-		await SW.UI.ShowText.ShowDialog("Die Anwesen-Verwaltung ist noch nicht verfügbar.");
+		// Anwesen-Verwaltung (Haus bauen/umbauen, renovieren, erweitern, verkaufen)
+		await _main.HausVerwaltungDialog.ShowDialog(_stadtId);
+		Refresh();
 
 		if (Visible)
 			SetProcessInput(true);

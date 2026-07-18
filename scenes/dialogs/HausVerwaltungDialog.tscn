@@ -1,0 +1,133 @@
+[gd_scene load_steps=5 format=3 uid="uid://hausverwaltungdlg"]
+
+[ext_resource type="Script" path="res://assets/scripts/HausVerwaltungDialog.cs" id="1_hvdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_hvdlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_hvdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_hvdlg"]
+
+[node name="HausVerwaltungDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_hvdlg")
+LabelTextPath = NodePath("Panel/NinePatchRect/LabelText")
+HausBildPath = NodePath("Panel/NinePatchRect/HausBild")
+LinkBauenPath = NodePath("Panel/NinePatchRect/LinkBauen")
+LinkRenovierenPath = NodePath("Panel/NinePatchRect/LinkRenovieren")
+LinkErweiternPath = NodePath("Panel/NinePatchRect/LinkErweitern")
+LinkVerkaufenPath = NodePath("Panel/NinePatchRect/LinkVerkaufen")
+LabelZustandPath = NodePath("Panel/NinePatchRect/LabelZustand")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -410.0
+offset_top = -300.0
+offset_right = 410.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_hvdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 28.0
+offset_right = 778.0
+offset_bottom = 64.0
+text = "Wohnsitz"
+horizontal_alignment = 1
+
+[node name="LabelText" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 85.0
+offset_right = 440.0
+offset_bottom = 155.0
+text = "Ihr besitzt hier keinen Wohnsitz"
+autowrap_mode = 3
+
+[node name="LinkBauen" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 180.0
+offset_right = 375.0
+offset_bottom = 220.0
+theme = ExtResource("4_hvdlg")
+text = "Bauen"
+
+[node name="LinkRenovieren" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 230.0
+offset_right = 375.0
+offset_bottom = 270.0
+theme = ExtResource("4_hvdlg")
+text = "Renovieren"
+
+[node name="LinkErweitern" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 280.0
+offset_right = 375.0
+offset_bottom = 320.0
+theme = ExtResource("4_hvdlg")
+text = "Erweitern"
+
+[node name="LinkVerkaufen" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 330.0
+offset_right = 375.0
+offset_bottom = 370.0
+theme = ExtResource("4_hvdlg")
+text = "Verkaufen"
+
+[node name="HausBild" type="TextureRect" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 470.0
+offset_top = 150.0
+offset_right = 770.0
+offset_bottom = 450.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LabelZustand" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 470.0
+offset_right = 440.0
+offset_bottom = 506.0
+text = "Zustand: 100 %"
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 320.0
+offset_top = 545.0
+offset_right = 500.0
+offset_bottom = 585.0
+theme = ExtResource("4_hvdlg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
