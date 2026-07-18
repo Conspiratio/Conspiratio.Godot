@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=22 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -18,6 +18,9 @@
 [ext_resource type="PackedScene" uid="uid://hausverwaltungdlg" path="res://scenes/dialogs/HausVerwaltungDialog.tscn" id="15_hvdlg"]
 [ext_resource type="PackedScene" uid="uid://hauswaehlendlg" path="res://scenes/dialogs/HausWaehlenDialog.tscn" id="16_hwdlg"]
 [ext_resource type="PackedScene" uid="uid://hauserweiterungdlg" path="res://scenes/dialogs/HausErweiterungenDialog.tscn" id="17_hedlg"]
+[ext_resource type="PackedScene" uid="uid://bewerbdlg001" path="res://scenes/dialogs/BewerbDialog.tscn" id="18_bwdlg"]
+[ext_resource type="PackedScene" uid="uid://bewerbinfosdlg" path="res://scenes/dialogs/BewerbInfosDialog.tscn" id="19_bidlg"]
+[ext_resource type="PackedScene" uid="uid://wahldlg0001" path="res://scenes/dialogs/WahlDialog.tscn" id="20_wahl"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -43,6 +46,9 @@ WeltkartePath = NodePath("Weltkarte")
 HausVerwaltungDialogPath = NodePath("HausVerwaltungDialog")
 HausWaehlenDialogPath = NodePath("HausWaehlenDialog")
 HausErweiterungenDialogPath = NodePath("HausErweiterungenDialog")
+BewerbDialogPath = NodePath("BewerbDialog")
+BewerbInfosDialogPath = NodePath("BewerbInfosDialog")
+WahlDialogPath = NodePath("WahlDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -80,6 +86,18 @@ visible = false
 layout_mode = 1
 
 [node name="HausErweiterungenDialog" parent="." instance=ExtResource("17_hedlg")]
+visible = false
+layout_mode = 1
+
+[node name="BewerbDialog" parent="." instance=ExtResource("18_bwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BewerbInfosDialog" parent="." instance=ExtResource("19_bidlg")]
+visible = false
+layout_mode = 1
+
+[node name="WahlDialog" parent="." instance=ExtResource("20_wahl")]
 visible = false
 layout_mode = 1
 

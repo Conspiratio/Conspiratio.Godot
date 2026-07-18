@@ -53,6 +53,15 @@ public partial class Main : Control
 	[Export]
 	public NodePath HausErweiterungenDialogPath { get; set; }
 
+	[Export]
+	public NodePath BewerbDialogPath { get; set; }
+
+	[Export]
+	public NodePath BewerbInfosDialogPath { get; set; }
+
+	[Export]
+	public NodePath WahlDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -67,6 +76,9 @@ public partial class Main : Control
 	public HausVerwaltungDialog HausVerwaltungDialog;
 	public HausWaehlenDialog HausWaehlenDialog;
 	public HausErweiterungenDialog HausErweiterungenDialog;
+	public BewerbDialog BewerbDialog;
+	public BewerbInfosDialog BewerbInfosDialog;
+	public WahlDialog WahlDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -87,6 +99,9 @@ public partial class Main : Control
 		HausVerwaltungDialog = GetNode<HausVerwaltungDialog>(HausVerwaltungDialogPath);
 		HausWaehlenDialog = GetNode<HausWaehlenDialog>(HausWaehlenDialogPath);
 		HausErweiterungenDialog = GetNode<HausErweiterungenDialog>(HausErweiterungenDialogPath);
+		BewerbDialog = GetNode<BewerbDialog>(BewerbDialogPath);
+		BewerbInfosDialog = GetNode<BewerbInfosDialog>(BewerbInfosDialogPath);
+		WahlDialog = GetNode<WahlDialog>(WahlDialogPath);
 
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, Weltkarte, null, null, null);

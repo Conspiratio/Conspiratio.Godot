@@ -385,7 +385,26 @@ public partial class Kontor : Control
 
 		await SW.UI.ShowText.ShowDialog("Resümee\n\nIn diesem Jahr gab es keine weiteren besonderen Vorkommnisse");
 
+		// Hat der letzte Spieler seinen Zug beendet, werden vor dem Jahreswechsel die Wahlen abgehalten
+		// (solange die KI-Kandidaten noch gemeldet sind – das Weiterschalten meldet sie danach ab)
+		if (SW.Dynamisch.GetAktiverSpieler() >= SW.Dynamisch.GetAktivSpielerAnzahl())
+			await HalteWahlenAb();
+
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Hält am Jahresende die anstehenden Wahlen ab: Wahlen mit menschlicher Beteiligung werden
+	/// interaktiv ausgezählt, alle übrigen freien Ämter werden mit einem zufälligen KI-Gewinner besetzt.
+	/// </summary>
+	private async Task HalteWahlenAb()
+	{
+		var aemterManager = new AemterManager();
+
+		foreach (int wahlId in aemterManager.GetWahlenMitMenschlicherBeteiligung())
+			await _main.WahlDialog.ShowWahl(aemterManager, wahlId);
+
+		aemterManager.FuelleRestlicheAemter();
 	}
 }

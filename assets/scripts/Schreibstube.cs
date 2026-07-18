@@ -185,11 +185,21 @@ public partial class Schreibstube : Control
 			SetProcessInput(true);
 	}
 
+	private async void _on_area_bewerbung_pressed()
+	{
+		SetProcessInput(false);
+
+		await _main.BewerbDialog.ShowDialog(new AemterManager());
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
 	private async void _on_area_nicht_implementiert_pressed()
 	{
 		SetProcessInput(false);
 
-		// TODO: Bewerbungen, Privilegien und Kontrahenten migrieren
+		// TODO: Privilegien und Kontrahenten migrieren
 		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
 
 		if (Visible)
