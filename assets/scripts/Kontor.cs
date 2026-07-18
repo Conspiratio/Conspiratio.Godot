@@ -233,7 +233,7 @@ public partial class Kontor : Control
 	}
 
 	/// <summary>
-	/// Wird von der Stadtansicht beim Schließen aufgerufen.
+	/// Wird von untergeordneten Ansichten (Stadt, Schreibstube, ...) beim Schließen aufgerufen.
 	/// </summary>
 	public void ReturnFromStadt()
 	{
@@ -247,6 +247,13 @@ public partial class Kontor : Control
 		SetProcessInput(false);
 		Hide();
 		_main.Stadt.ShowStadt();
+	}
+
+	private void _on_area_schreibstube_pressed()
+	{
+		SetProcessInput(false);
+		Hide();
+		_main.Schreibstube.ShowSchreibstube();
 	}
 
 	private async void _on_area_nicht_implementiert_pressed()

@@ -32,6 +32,15 @@ public partial class Main : Control
 	[Export]
 	public NodePath LoadGameDialogPath { get; set; }
 
+	[Export]
+	public NodePath SchreibstubePath { get; set; }
+
+	[Export]
+	public NodePath KreditbuchDialogPath { get; set; }
+
+	[Export]
+	public NodePath GesetzeDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -39,6 +48,9 @@ public partial class Main : Control
 	public AbrechnungDialog AbrechnungDialog;
 	public Stadt Stadt;
 	public LoadGameDialog LoadGameDialog;
+	public Schreibstube Schreibstube;
+	public KreditbuchDialog KreditbuchDialog;
+	public GesetzeDialog GesetzeDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -52,6 +64,9 @@ public partial class Main : Control
 		AbrechnungDialog = GetNode<AbrechnungDialog>(AbrechnungDialogPath);
 		Stadt = GetNode<Stadt>(StadtPath);
 		LoadGameDialog = GetNode<LoadGameDialog>(LoadGameDialogPath);
+		Schreibstube = GetNode<Schreibstube>(SchreibstubePath);
+		KreditbuchDialog = GetNode<KreditbuchDialog>(KreditbuchDialogPath);
+		GesetzeDialog = GetNode<GesetzeDialog>(GesetzeDialogPath);
 
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, null, null, null, null);

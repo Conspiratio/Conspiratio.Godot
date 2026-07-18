@@ -181,7 +181,7 @@ text = "Runde beenden"
 
 [connection signal="pressed" from="AreaHandel" to="." method="_on_area_handel_pressed"]
 [connection signal="pressed" from="AreaHinterzimmer" to="." method="_on_area_nicht_implementiert_pressed"]
-[connection signal="pressed" from="AreaSchreibstube" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaSchreibstube" to="." method="_on_area_schreibstube_pressed"]
 [connection signal="pressed" from="AreaKirche" to="." method="_on_area_nicht_implementiert_pressed"]
 [connection signal="pressed" from="AreaKampf" to="." method="_on_area_nicht_implementiert_pressed"]
 [connection signal="pressed" from="AreaFenster" to="." method="_on_area_nicht_implementiert_pressed"]
