@@ -258,6 +258,13 @@ public partial class Kontor : Control
 		_main.Schreibstube.ShowSchreibstube();
 	}
 
+	private void _on_area_kirche_pressed()
+	{
+		SetProcessInput(false);
+		Hide();
+		_main.Kirche.ShowKirche();
+	}
+
 	private async void _on_area_nicht_implementiert_pressed()
 	{
 		SetProcessInput(false);
@@ -316,6 +323,9 @@ public partial class Kontor : Control
 	{
 		var zugNachrichten = new ZugNachrichtenManager();
 
+		// Familienereignisse zu Zugbeginn (Geburt, Hochzeit, Kindestod, Brautwerbung)
+		await ZeigeFamilienereignisse();
+
 		// Gesetzesverstöße mit Strafen
 		foreach (string meldung in zugNachrichten.PruefeVerbrechen())
 		{
@@ -340,7 +350,7 @@ public partial class Kontor : Control
 		foreach (string meldung in zugNachrichten.AktualisiereAnwesen())
 			await SW.UI.ShowText.ShowDialog("Eigentümer\n\n" + meldung);
 
-		// TODO: Weitere Zugereignisse migrieren (Familie, Hinterzimmer, Kartenspiel, Feste, Gericht, Zufallsereignisse, ...)
+		// TODO: Weitere Zugereignisse migrieren (Hinterzimmer, Kartenspiel, Feste, Gericht, Zufallsereignisse, ...)
 
 		// Sterbeprüfung
 		if (zugNachrichten.StirbtAktiverSpieler())
@@ -348,22 +358,35 @@ public partial class Kontor : Control
 			await SW.UI.ShowText.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
 
 			string name = SW.Dynamisch.GetAktHum().GetName();
-			bool spielVorbei = zugNachrichten.FuehreTodDesAktivenSpielersDurch();
 
-			if (spielVorbei)
+			// Testament vollstrecken: Ohne Erben scheidet der Spieler aus, mit Erben führt dieser die Dynastie fort
+			var familie = new FamilieManager();
+			var testament = familie.FuehreTestamentAus();
+			await SW.UI.ShowText.ShowDialog("Hier das Testament...\n\nEuer Vermächtnis geht an: " + testament.ErbeBezeichnung);
+
+			if (testament.SpielVorbei)
 			{
-				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\nEs befinden sich keine weiteren Mitstreiter in diesem Spiel.\nDas Spiel wird daher beendet.");
+				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\nDa niemand als Erbe bestimmt war, befinden sich keine weiteren\nMitstreiter in diesem Spiel. Das Spiel wird daher beendet.");
 				return true;
 			}
 
-			await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
+			if (testament.ErbeUebernahm)
+			{
+				// Der Erbe übernimmt die Identität im selben Slot – der Zug endet und schaltet normal weiter
+				UpdateHud();
+				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\n" + SW.Dynamisch.GetAktHum().GetName() +
+				                                " tritt das Erbe an und führt die Dynastie fort.");
+			}
+			else
+			{
+				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
 
-			// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
-			return false;
+				// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
+				return false;
+			}
 		}
-
-		// Schuldenprozess
-		if (zugNachrichten.MussSichVorGlaeubigernVerantworten())
+		// Schuldenprozess (nur für einen lebenden Spieler)
+		else if (zugNachrichten.MussSichVorGlaeubigernVerantworten())
 		{
 			await SW.UI.ShowText.ShowDialog("Wegen Euren zahlreichen Schulden müsst Ihr Euch nun vor Euren Gläubigern verantworten!");
 
@@ -392,10 +415,49 @@ public partial class Kontor : Control
 		{
 			await HalteWahlenAb();
 			await ZeigeKiTodesfaelle();
+			new FamilieManager().VerheirateKis();
 		}
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Zeigt zu Zugbeginn die Familienereignisse in der Reihenfolge des Originals: Geburt eines Kindes,
+	/// Hochzeit (wenn der umworbene Partner voll verliebt ist), Kindestode und die jährliche Brautwerbung.
+	/// </summary>
+	private async Task ZeigeFamilienereignisse()
+	{
+		var familie = new FamilieManager();
+
+		// Geburt eines Kindes
+		if (familie.StehtGeburtAn())
+		{
+			await _main.GeburtDialog.ShowDialog(familie);
+			UpdateHud();
+		}
+
+		// Hochzeit, wenn der umworbene Partner voll verliebt ist
+		if (familie.StehtHochzeitAn())
+		{
+			var hochzeit = familie.FuehreHochzeitDurch();
+			string angebeteter = hochzeit.PartnerMaennlich ? "Euer Angebeteter " : "Eure Angebetete ";
+
+			await SW.UI.ShowText.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
+			                                " hat sich endlich bereit erklärt, Euch zu heiraten. Ihr schwebt im siebten Himmel...");
+			UpdateHud();
+		}
+
+		// Kindestode
+		foreach (string meldung in familie.PruefeKindestode())
+			await SW.UI.ShowText.ShowDialog(meldung);
+
+		// Jährliche Brautwerbung um den umworbenen Partner
+		if (familie.StehtBrautwerbungAn())
+		{
+			await _main.BrautwerbungDialog.ShowDialog(familie);
+			UpdateHud();
+		}
 	}
 
 	/// <summary>

@@ -1,4 +1,4 @@
-<Project Sdk="Godot.NET.Sdk/4.7.1">
+﻿<Project Sdk="Godot.NET.Sdk/4.7.1">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12</LangVersion>
@@ -8,7 +8,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Conspiratio.Lib" Version="3.13.0" />
+    <PackageReference Include="Conspiratio.Lib" Version="3.14.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
   </ItemGroup>
 </Project>

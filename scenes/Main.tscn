@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=26 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -21,6 +21,10 @@
 [ext_resource type="PackedScene" uid="uid://bewerbdlg001" path="res://scenes/dialogs/BewerbDialog.tscn" id="18_bwdlg"]
 [ext_resource type="PackedScene" uid="uid://bewerbinfosdlg" path="res://scenes/dialogs/BewerbInfosDialog.tscn" id="19_bidlg"]
 [ext_resource type="PackedScene" uid="uid://wahldlg0001" path="res://scenes/dialogs/WahlDialog.tscn" id="20_wahl"]
+[ext_resource type="PackedScene" uid="uid://kirche0000001" path="res://scenes/Kirche.tscn" id="21_kirch"]
+[ext_resource type="PackedScene" uid="uid://testamentdlg01" path="res://scenes/dialogs/TestamentDialog.tscn" id="22_tsdlg"]
+[ext_resource type="PackedScene" uid="uid://brautwerbungdlg" path="res://scenes/dialogs/BrautwerbungDialog.tscn" id="23_bwdlg"]
+[ext_resource type="PackedScene" uid="uid://geburtdlg0001" path="res://scenes/dialogs/GeburtDialog.tscn" id="24_gbdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -49,6 +53,10 @@ HausErweiterungenDialogPath = NodePath("HausErweiterungenDialog")
 BewerbDialogPath = NodePath("BewerbDialog")
 BewerbInfosDialogPath = NodePath("BewerbInfosDialog")
 WahlDialogPath = NodePath("WahlDialog")
+KirchePath = NodePath("Kirche")
+TestamentDialogPath = NodePath("TestamentDialog")
+BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
+GeburtDialogPath = NodePath("GeburtDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -98,6 +106,22 @@ visible = false
 layout_mode = 1
 
 [node name="WahlDialog" parent="." instance=ExtResource("20_wahl")]
+visible = false
+layout_mode = 1
+
+[node name="Kirche" parent="." instance=ExtResource("21_kirch")]
+visible = false
+layout_mode = 1
+
+[node name="TestamentDialog" parent="." instance=ExtResource("22_tsdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BrautwerbungDialog" parent="." instance=ExtResource("23_bwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="GeburtDialog" parent="." instance=ExtResource("24_gbdlg")]
 visible = false
 layout_mode = 1
 
