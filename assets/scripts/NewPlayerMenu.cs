@@ -14,7 +14,7 @@ public partial class NewPlayerMenu : Control
 	private CheckBoxWithSounds _checkBoxReligion1;
 	private CheckBoxWithSounds _checkBoxReligion2;
 	private GridContainer _gridContainerBanner;
-	private OptionButton _optionButtonCity;
+	private ButtonWithSounds _buttonCity;
 	private OptionButton _optionButtonResource;
 	private Label _labelCityCost;
 	private Label _labelResourceCost;
@@ -22,6 +22,7 @@ public partial class NewPlayerMenu : Control
 	private PlayerSetupManager _playerSetupManager;
 	private Main _main;
 	private int _zufallsStadtId;
+	private int _gewaehlteStadtId;
 	private bool _stadtGewaehlt;
 
 	[Export]
@@ -46,7 +47,7 @@ public partial class NewPlayerMenu : Control
 	public NodePath GridContainerBannerPath { get; set; }
 
 	[Export]
-	public NodePath OptionButtonCityPath { get; set; }
+	public NodePath ButtonCityPath { get; set; }
 
 	[Export]
 	public NodePath OptionButtonResourcePath { get; set; }
@@ -67,7 +68,7 @@ public partial class NewPlayerMenu : Control
 		_checkBoxReligion1 = GetNode<CheckBoxWithSounds>(CheckBoxReligion1Path);
 		_checkBoxReligion2 = GetNode<CheckBoxWithSounds>(CheckBoxReligion2Path);
 		_gridContainerBanner = GetNode<GridContainer>(GridContainerBannerPath);
-		_optionButtonCity = GetNode<OptionButton>(OptionButtonCityPath);
+		_buttonCity = GetNode<ButtonWithSounds>(ButtonCityPath);
 		_optionButtonResource = GetNode<OptionButton>(OptionButtonResourcePath);
 		_labelCityCost = GetNode<Label>(LabelCityCostPath);
 		_labelResourceCost = GetNode<Label>(LabelResourceCostPath);
@@ -135,7 +136,6 @@ public partial class NewPlayerMenu : Control
 		_labelResourceCost.Text = "Gezielte Wahl kostet " + SW.Statisch.GetNSPRohwahlKosten() + " Taler, zufällig ist kostenlos";
 		_lineEditPlayerName.MaxLength = SW.Statisch.GetMaxNameLength();
 
-		PopulateCityOptions();
 		PrepareNextPlayer();
 
 		Show();
@@ -148,24 +148,9 @@ public partial class NewPlayerMenu : Control
 		SetProcessInput(false);
 	}
 
-	private void PopulateCityOptions()
+	private void UpdateCityButton()
 	{
-		_optionButtonCity.Clear();
-
-		for (int stadtId = 1; stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
-			_optionButtonCity.AddItem(SW.Dynamisch.GetStadtwithID(stadtId).GetGebietsName(), stadtId);
-	}
-
-	private void SelectCity(int stadtId)
-	{
-		for (int i = 0; i < _optionButtonCity.ItemCount; i++)
-		{
-			if (_optionButtonCity.GetItemId(i) != stadtId)
-				continue;
-
-			_optionButtonCity.Select(i);
-			return;
-		}
+		_buttonCity.Text = (_stadtGewaehlt ? "gewählt: " : "zufällig: ") + SW.Dynamisch.GetStadtwithID(_gewaehlteStadtId).GetGebietsName();
 	}
 
 	private void UpdateResourceOptions()
@@ -173,11 +158,9 @@ public partial class NewPlayerMenu : Control
 		_optionButtonResource.Clear();
 		_optionButtonResource.AddItem("Zufällig", 0);
 
-		int stadtId = _optionButtonCity.GetSelectedId();
-
 		for (int platz = 1; platz <= 2; platz++)
 		{
-			int rohstoffId = SW.Dynamisch.GetStadtwithID(stadtId).GetSingleRohstoff(platz);
+			int rohstoffId = SW.Dynamisch.GetStadtwithID(_gewaehlteStadtId).GetSingleRohstoff(platz);
 			_optionButtonResource.AddItem(SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName(), platz);
 		}
 
@@ -195,10 +178,11 @@ public partial class NewPlayerMenu : Control
 		_checkBoxMale.ButtonPressed = true;
 		_checkBoxReligion1.ButtonPressed = true;
 
-		// Heimatstadt kostenlos vorauswürfeln; erst ein manueller Wechsel auf eine andere Stadt kostet Taler
+		// Heimatstadt kostenlos vorauswürfeln; erst eine bewusste Wahl auf der Weltkarte kostet Taler
 		_zufallsStadtId = _playerSetupManager.WuerfleZufaelligeStadt();
+		_gewaehlteStadtId = _zufallsStadtId;
 		_stadtGewaehlt = false;
-		SelectCity(_zufallsStadtId);
+		UpdateCityButton();
 		UpdateResourceOptions();
 
 		// Banner-Auswahl zurücksetzen und bereits vergebene Banner ausblenden
@@ -221,10 +205,23 @@ public partial class NewPlayerMenu : Control
 		return 0;
 	}
 
-	private void _on_option_button_city_item_selected(long index)
+	private async void _on_button_city_pressed()
 	{
-		_stadtGewaehlt = _optionButtonCity.GetSelectedId() != _zufallsStadtId;
-		UpdateResourceOptions();
+		SetProcessInput(false);
+
+		// Die Heimatstadt wird wie im Original auf der politischen Weltkarte gewählt
+		int stadtId = await _main.Weltkarte.WaehleStadt();
+
+		if (stadtId != 0)
+		{
+			_gewaehlteStadtId = stadtId;
+			_stadtGewaehlt = stadtId != _zufallsStadtId;
+			UpdateCityButton();
+			UpdateResourceOptions();
+		}
+
+		if (Visible)
+			SetProcessInput(true);
 	}
 
 	private void _on_line_edit_player_name_text_submitted(string newText)
@@ -255,7 +252,7 @@ public partial class NewPlayerMenu : Control
 		int religionId = _checkBoxReligion1.ButtonPressed ? SW.Statisch.GetRelKathID() : SW.Statisch.GetRelEvanID();
 
 		var ergebnis = _playerSetupManager.ErstelleSpieler(_lineEditPlayerName.Text, _checkBoxMale.ButtonPressed,
-			banner, religionId, _optionButtonCity.GetSelectedId(), _stadtGewaehlt, _optionButtonResource.GetSelectedId());
+			banner, religionId, _gewaehlteStadtId, _stadtGewaehlt, _optionButtonResource.GetSelectedId());
 
 		await SW.UI.ShowText.ShowDialog(_lineEditPlayerName.Text + " wurde erstellt.\nHeimatstadt: " +
 		                                SW.Dynamisch.GetStadtwithID(ergebnis.StadtId).GetGebietsName() + "\nRohstoff: " +

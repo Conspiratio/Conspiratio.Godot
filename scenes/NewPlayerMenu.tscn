@@ -34,7 +34,7 @@ CheckBoxFemalePath = NodePath("CheckBoxFemale")
 CheckBoxReligion1Path = NodePath("CheckBoxReligion1")
 CheckBoxReligion2Path = NodePath("CheckBoxReligion2")
 GridContainerBannerPath = NodePath("GridContainerBanner")
-OptionButtonCityPath = NodePath("OptionButtonCity")
+ButtonCityPath = NodePath("ButtonCity")
 OptionButtonResourcePath = NodePath("OptionButtonResource")
 LabelCityCostPath = NodePath("LabelCityCost")
 LabelResourceCostPath = NodePath("LabelResourceCost")
@@ -215,13 +215,14 @@ anchor_right = 0.68
 anchor_bottom = 0.246
 text = "Heimatstadt:"
 
-[node name="OptionButtonCity" type="OptionButton" parent="."]
+[node name="ButtonCity" parent="." instance=ExtResource("3_npbtn")]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.702
 anchor_top = 0.206
 anchor_right = 0.937
 anchor_bottom = 0.257
+text = "Wählen"
 
 [node name="LabelCityCost" type="Label" parent="."]
 layout_mode = 1
@@ -268,5 +269,5 @@ anchor_bottom = 0.913
 text = "Spieler erstellen"
 
 [connection signal="text_submitted" from="LineEditPlayerName" to="." method="_on_line_edit_player_name_text_submitted"]
-[connection signal="item_selected" from="OptionButtonCity" to="." method="_on_option_button_city_item_selected"]
+[connection signal="pressed" from="ButtonCity" to="." method="_on_button_city_pressed"]
 [connection signal="pressed" from="ButtonCreatePlayer" to="." method="_on_button_create_player_pressed"]

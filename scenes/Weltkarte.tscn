@@ -1,0 +1,30 @@
+[gd_scene load_steps=3 format=3 uid="uid://weltkarte0001"]
+
+[ext_resource type="Texture2D" path="res://assets/images/landkarten/PWK.png" id="1_wkbg"]
+[ext_resource type="Script" path="res://assets/scripts/Weltkarte.cs" id="1_wkscr"]
+
+[node name="Weltkarte" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wkscr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(800, 450)
+texture = ExtResource("1_wkbg")
+
+[node name="HoverRect" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2

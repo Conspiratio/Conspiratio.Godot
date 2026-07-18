@@ -22,7 +22,6 @@ public partial class Stadt : Control
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
 	private Label _labelTaler;
-	private OptionButton _optionButtonCity;
 
 	private readonly TextureButton[] _buttonsWerkstatt = new TextureButton[AnzahlWerkstaetten + 1];
 	private readonly TextureButton[] _buttonsRohstoff = new TextureButton[AnzahlWerkstaetten + 1];
@@ -61,7 +60,6 @@ public partial class Stadt : Control
 		_labelPlayerNameAndOffice = GetNode<Label>("LabelPlayerNameAndOffice");
 		_labelPlaceDate = GetNode<Label>("LabelPlaceDate");
 		_labelTaler = GetNode<Label>("LabelTaler");
-		_optionButtonCity = GetNode<OptionButton>("OptionButtonCity");
 		_buttonHaus = GetNode<TextureButton>("ButtonHaus");
 		_buttonTransport = GetNode<TextureButton>("ButtonTransport");
 
@@ -154,14 +152,13 @@ public partial class Stadt : Control
 	}
 
 	/// <summary>
-	/// Öffnet die Stadtansicht mit der Heimatstadt des aktiven Spielers.
+	/// Öffnet die Stadtansicht für die angegebene Stadt (angesteuert über die politische Weltkarte).
 	/// </summary>
-	public void ShowStadt()
+	public void ShowStadt(int stadtId)
 	{
 		_handelsManager = new HandelsManager();
-		_stadtId = ErmittleHeimatstadt();
+		_stadtId = stadtId;
 
-		PopulateCityOptions();
 		Refresh();
 
 		Show();
@@ -170,42 +167,10 @@ public partial class Stadt : Control
 
 	private void CloseStadt()
 	{
+		// Wie im Original führt der Weg aus der Stadt zurück auf die Handelskarte
 		Hide();
 		SetProcessInput(false);
-		_main.Kontor.ReturnFromStadt();
-	}
-
-	private static int ErmittleHeimatstadt()
-	{
-		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
-		{
-			if (SW.Dynamisch.GetAktHum().GetSpielerHatHausVonStadtAnArraystelle(stadtId).GetHausID() != 0)
-				return stadtId;
-		}
-
-		return SW.Statisch.GetMinStadtID();
-	}
-
-	private void PopulateCityOptions()
-	{
-		_optionButtonCity.Clear();
-
-		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
-			_optionButtonCity.AddItem(SW.Dynamisch.GetStadtwithID(stadtId).GetGebietsName(), stadtId);
-
-		SelectOptionById(_optionButtonCity, _stadtId);
-	}
-
-	private static void SelectOptionById(OptionButton optionButton, int id)
-	{
-		for (int i = 0; i < optionButton.ItemCount; i++)
-		{
-			if (optionButton.GetItemId(i) != id)
-				continue;
-
-			optionButton.Select(i);
-			return;
-		}
+		_main.Weltkarte.ZeigeHandelskarte();
 	}
 
 	#region Refresh
@@ -676,10 +641,4 @@ public partial class Stadt : Control
 	}
 
 	#endregion
-
-	private void _on_option_button_city_item_selected(long index)
-	{
-		_stadtId = _optionButtonCity.GetSelectedId();
-		Refresh();
-	}
 }

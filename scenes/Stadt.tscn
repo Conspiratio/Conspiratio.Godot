@@ -50,13 +50,6 @@ offset_bottom = 45.0
 text = "1000 Taler"
 horizontal_alignment = 2
 
-[node name="OptionButtonCity" type="OptionButton" parent="."]
-layout_mode = 0
-offset_left = 32.0
-offset_top = 52.0
-offset_right = 292.0
-offset_bottom = 92.0
-
 [node name="ButtonWs1" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 220.0
@@ -377,4 +370,3 @@ size_flags_vertical = 4
 layout_mode = 2
 size_flags_vertical = 4
 
-[connection signal="item_selected" from="OptionButtonCity" to="." method="_on_option_button_city_item_selected"]

@@ -1,0 +1,323 @@
+using System.Threading.Tasks;
+using Conspiratio.Godot.assets.scripts.managers;
+using Conspiratio.Lib.Gameplay.Privilegien;
+using Conspiratio.Lib.Gameplay.Spielwelt;
+using Godot;
+
+namespace Conspiratio.Godot.assets.scripts;
+
+/// <summary>
+/// Die politische Weltkarte nach der WinForms-Vorlage: Städte werden beim Überfahren mit einem
+/// goldenen Rahmen markiert (die Rechtecke kommen aus der Lib), außerhalb der Städte werden
+/// Länder bzw. das Reich über Kartenvarianten hervorgehoben. An Städten mit eigenem Haus oder
+/// eigener Werkstätte weht das Banner des Spielers.
+/// </summary>
+public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
+{
+	private const float ScaleX = 1600f / 1366f;
+	private const float ScaleY = 900f / 768f;
+
+	private TextureRect _background;
+	private Panel _hoverRect;
+	private Texture2D _karteStandard;
+	private readonly Texture2D[] _kartenLaender = new Texture2D[5];  // 1..4 = Länder
+	private Texture2D _karteReich;
+
+	private Rect2[] _stadtRechtecke;
+	private TextureRect[] _flaggen;
+
+	private int _hoverStadt;
+	private int _hoverRegion;
+	private bool _nurStaedteMarkieren = true;
+	private bool _handelsModus;
+	private TaskCompletionSource<int> _stadtWahl;
+
+	private Main _main;
+
+	// Called when the node enters the scene tree for the first time.
+	public override void _Ready()
+	{
+		_background = GetNode<TextureRect>("TextureRect");
+		_hoverRect = GetNode<Panel>("HoverRect");
+
+		_karteStandard = GD.Load<Texture2D>("res://assets/images/landkarten/PWK.png");
+
+		for (int i = 1; i <= 4; i++)
+			_kartenLaender[i] = GD.Load<Texture2D>("res://assets/images/landkarten/PWK-10" + i + ".png");
+
+		_karteReich = GD.Load<Texture2D>("res://assets/images/landkarten/PWK-201.png");
+
+		// Goldener Rahmen für die überfahrene Stadt
+		var rahmen = new StyleBoxFlat
+		{
+			DrawCenter = false,
+			BorderColor = Colors.Gold,
+			BorderWidthTop = 2,
+			BorderWidthBottom = 2,
+			BorderWidthLeft = 2,
+			BorderWidthRight = 2
+		};
+		_hoverRect.AddThemeStyleboxOverride("panel", rahmen);
+		_hoverRect.MouseFilter = MouseFilterEnum.Ignore;
+		_hoverRect.Visible = false;
+
+		_main = GetParent<Main>();
+		SetProcessInput(false);
+	}
+
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _Process(double delta)
+	{
+	}
+
+	public override void _Input(InputEvent @event)
+	{
+		if (Input.IsActionPressed("ui_next_or_close"))
+		{
+			SoundManager.Instance.PlayRightClick();
+			Schliessen();
+			return;
+		}
+
+		if (@event is InputEventMouseMotion motion)
+			HoverAktualisieren(motion.GlobalPosition);
+		else if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left } && _hoverStadt != 0)
+			StadtAngeklickt(_hoverStadt);
+	}
+
+	#region Öffnen und Schließen
+
+	/// <summary>
+	/// Öffnet die Karte als Handelsansicht: Klick auf eine Stadt öffnet ihre Stadtansicht,
+	/// die eigenen Banner zeigen Häuser und Werkstätten.
+	/// </summary>
+	public void ZeigeHandelskarte()
+	{
+		_handelsModus = true;
+		_stadtWahl = null;
+		_nurStaedteMarkieren = true;
+
+		OeffneKarte(true);
+	}
+
+	/// <summary>
+	/// Öffnet die Karte zur Stadtwahl (Modus 6 des Originals).
+	/// </summary>
+	/// <returns>Die gewählte Stadt-ID oder 0 bei Abbruch.</returns>
+	public Task<int> WaehleStadt()
+	{
+		_handelsModus = false;
+		_stadtWahl = new TaskCompletionSource<int>();
+		_nurStaedteMarkieren = true;
+
+		OeffneKarte(false);
+		return _stadtWahl.Task;
+	}
+
+	/// <summary>
+	/// Anbindung für die Lib (Privilegien-Modi der Weltkarte).
+	/// </summary>
+	public async void ShowDialogModus(int mod, bool flaggenEinblenden = false)
+	{
+		// TODO: Die Ämter- und Privilegien-Modi der Weltkarte migrieren (AemterEbene, Rohstoffpreise, ...)
+		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+	}
+
+	private void OeffneKarte(bool flaggenEinblenden)
+	{
+		BerechneStadtRechtecke();
+		FlaggenAktualisieren(flaggenEinblenden);
+
+		_background.Texture = _karteStandard;
+		_hoverStadt = 0;
+		_hoverRegion = 0;
+		_hoverRect.Visible = false;
+
+		Show();
+		SetProcessInput(true);
+	}
+
+	private void Schliessen()
+	{
+		Hide();
+		SetProcessInput(false);
+
+		if (_stadtWahl != null)
+		{
+			_stadtWahl.TrySetResult(0);
+			_stadtWahl = null;
+			return;
+		}
+
+		_main.Kontor.ReturnFromStadt();
+	}
+
+	private void StadtAngeklickt(int stadtId)
+	{
+		SoundManager.Instance.PlayLeftClick();
+
+		Hide();
+		SetProcessInput(false);
+
+		if (_stadtWahl != null)
+		{
+			_stadtWahl.TrySetResult(stadtId);
+			_stadtWahl = null;
+			return;
+		}
+
+		if (_handelsModus)
+			_main.Stadt.ShowStadt(stadtId);
+	}
+
+	#endregion
+
+	#region Stadtrechtecke und Flaggen
+
+	private void BerechneStadtRechtecke()
+	{
+		_stadtRechtecke = new Rect2[SW.Statisch.GetMaxStadtID()];
+
+		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+		{
+			float links = SW.Statisch.GetStadtRechteck(stadtId, 0) * ScaleX;
+			float rechts = SW.Statisch.GetStadtRechteck(stadtId, 1) * ScaleX;
+			float oben = SW.Statisch.GetStadtRechteck(stadtId, 2) * ScaleY;
+			float unten = SW.Statisch.GetStadtRechteck(stadtId, 3) * ScaleY;
+
+			_stadtRechtecke[stadtId] = new Rect2(links, oben, rechts - links, unten - oben);
+		}
+	}
+
+	private void FlaggenAktualisieren(bool einblenden)
+	{
+		if (_flaggen == null)
+		{
+			_flaggen = new TextureRect[SW.Statisch.GetMaxStadtID()];
+
+			for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+			{
+				var flagge = new TextureRect
+				{
+					ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+					StretchMode = TextureRect.StretchModeEnum.Scale,
+					MouseFilter = MouseFilterEnum.Ignore,
+					Visible = false
+				};
+
+				_flaggen[stadtId] = flagge;
+				AddChild(flagge);
+			}
+		}
+
+		var spieler = SW.Dynamisch.GetAktHum();
+		var bannerTextur = GD.Load<Texture2D>("res://assets/images/banner/ban" + spieler.GetBanner() + ".png");
+
+		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+		{
+			bool flaggeZeigen = false;
+
+			if (einblenden)
+			{
+				// Die Flagge weht, wenn der Spieler in der Stadt ein Haus besitzt ...
+				if (spieler.GetSpielerHatHausVonStadtAnArraystelle(stadtId).GetHausID() != 0)
+				{
+					flaggeZeigen = true;
+				}
+				else
+				{
+					// ... oder eine Werkstätte mit Lagerraum
+					for (int nr = 1; nr <= SW.Statisch.GetMaxWerkstaettenProStadt(); nr++)
+					{
+						if (spieler.GetSpielerHatInStadtXWerkstaettenY(nr, stadtId).GetSKillX(1) != 0)
+						{
+							flaggeZeigen = true;
+							break;
+						}
+					}
+				}
+			}
+
+			_flaggen[stadtId].Visible = flaggeZeigen;
+
+			if (flaggeZeigen)
+			{
+				_flaggen[stadtId].Texture = bannerTextur;
+				_flaggen[stadtId].Position = new Vector2(_stadtRechtecke[stadtId].End.X + 4, _stadtRechtecke[stadtId].Position.Y);
+				_flaggen[stadtId].Size = new Vector2(29, 41);
+			}
+		}
+	}
+
+	#endregion
+
+	#region Hover
+
+	private void HoverAktualisieren(Vector2 position)
+	{
+		int neueStadt = 0;
+
+		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
+		{
+			if (_stadtRechtecke[stadtId].HasPoint(position))
+			{
+				neueStadt = stadtId;
+				break;
+			}
+		}
+
+		int neueRegion = 0;
+
+		if (neueStadt == 0 && !_nurStaedteMarkieren)
+			neueRegion = ErmittleRegion(position);
+
+		if (neueStadt == _hoverStadt && neueRegion == _hoverRegion)
+			return;
+
+		_hoverStadt = neueStadt;
+		_hoverRegion = neueRegion;
+
+		if (_hoverStadt != 0)
+		{
+			_hoverRect.Position = _stadtRechtecke[_hoverStadt].Position;
+			_hoverRect.Size = _stadtRechtecke[_hoverStadt].Size;
+			_hoverRect.Visible = true;
+		}
+		else
+		{
+			_hoverRect.Visible = false;
+		}
+
+		if (_hoverRegion >= 101 && _hoverRegion <= 104)
+			_background.Texture = _kartenLaender[_hoverRegion - 100];
+		else if (_hoverRegion == 201)
+			_background.Texture = _karteReich;
+		else
+			_background.Texture = _karteStandard;
+	}
+
+	/// <summary>
+	/// Ermittelt die Länderregion unter dem Mauszeiger (Zonen aus dem Original, skaliert auf 1600×900).
+	/// </summary>
+	private static int ErmittleRegion(Vector2 position)
+	{
+		float x = position.X;
+		float y = position.Y;
+
+		if (x < 1010 && y < 327)
+			return 101;
+
+		if (x >= 1011 && y > 88 && y < 420)
+			return 102;
+
+		if ((x < 1010 && y > 327 && y < 606) || (x < 176 && y > 607))
+			return 103;
+
+		if ((x > 417 && x < 1117 && y > 648) || (x > 1116 && y > 548))
+			return 104;
+
+		return 201;
+	}
+
+	#endregion
+}

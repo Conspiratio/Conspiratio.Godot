@@ -23,6 +23,7 @@ _Unreleased_
 - Spielstände werden in einem offenen, von Hand editierbaren JSON-Format gespeichert; alte WinForms-Spielstände (*.dat) können hier nicht geladen werden (im WinForms-Client laden und neu speichern konvertiert sie)
 - Neue Schreibstube (Migration des Kontor-Bereichs): sechs Klickbereiche mit goldenen Hover-Beschriftungen im Original-Layout, Rechtsklick zeigt die Bereichsbeschreibung; mit freien Ämtern liegt wie im Original die Bewerbungsmappe auf dem Tisch
 - Geldleiher (Kredite aufnehmen mit Original-Angebotsformel), Kreditbuch (offene Kredite einsehen und tilgen) und Gesetzesanzeige (Finanz-, Straf- und Kirchengesetze mit Strenge-Bewertung) sind funktionsfähig; Bewerbungen, Privilegien und Kontrahenten folgen später
+- Politische Weltkarte mit der Original-Kartengrafik: Städte werden beim Überfahren mit einem goldenen Rahmen markiert, an Städten mit eigenem Haus oder eigener Werkstätte weht das Banner des Spielers; der Handel führt wie im Original über die Weltkarte in die Stadtansicht, und die Heimatstadt bei der Spielererstellung wird jetzt auf der Weltkarte gewählt (die Ämter- und Privilegien-Modi der Karte folgen später)
 - Projekt auf Godot 4.7.1 angehoben
 
 #### Geändert
@@ -48,6 +49,7 @@ _Unreleased_
 - Savegames are stored in an open, hand-editable JSON format; old WinForms savegames (*.dat) cannot be loaded here (loading and saving them once in the WinForms client converts them)
 - New Schreibstube (migration of the Kontor area): six click areas with golden hover captions in the original layout, right click shows the area description; with free offices the application folder lies on the table like in the original
 - Money lender (taking credits with the original offer formula), credit book (viewing and repaying open credits) and law display (financial, criminal and church laws with strictness rating) are functional; applications, privileges and contenders follow later
+- Political world map with the original map graphic: towns are marked with a golden frame on mouse over, the player's banner flies at towns with an own house or workshop; trade leads via the world map into the town view like in the original, and the home town during player creation is now chosen on the world map (the office and privilege modes of the map follow later)
 - Project upgraded to Godot 4.7.1
 
 #### Changed

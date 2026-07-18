@@ -28,11 +28,10 @@ SoundManager="*res://scenes/managers/SoundManager.tscn"
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
+window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="res://assets/cursor/CurSword-32x32x24.png"
 window/size/width=1600
 window/size/height=900
-window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 
 [dotnet]
 

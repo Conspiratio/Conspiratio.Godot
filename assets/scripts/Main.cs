@@ -41,6 +41,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath GesetzeDialogPath { get; set; }
 
+	[Export]
+	public NodePath WeltkartePath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -51,6 +54,7 @@ public partial class Main : Control
 	public Schreibstube Schreibstube;
 	public KreditbuchDialog KreditbuchDialog;
 	public GesetzeDialog GesetzeDialog;
+	public Weltkarte Weltkarte;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -67,9 +71,10 @@ public partial class Main : Control
 		Schreibstube = GetNode<Schreibstube>(SchreibstubePath);
 		KreditbuchDialog = GetNode<KreditbuchDialog>(KreditbuchDialogPath);
 		GesetzeDialog = GetNode<GesetzeDialog>(GesetzeDialogPath);
+		Weltkarte = GetNode<Weltkarte>(WeltkartePath);
 
 		// TODO: add missing dialogs
-		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, null, null, null, null);
+		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, Weltkarte, null, null, null);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

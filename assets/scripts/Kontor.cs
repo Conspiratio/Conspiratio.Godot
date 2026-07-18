@@ -246,7 +246,9 @@ public partial class Kontor : Control
 	{
 		SetProcessInput(false);
 		Hide();
-		_main.Stadt.ShowStadt();
+
+		// Wie im Original führt der Handel zunächst auf die politische Weltkarte zur Stadtwahl
+		_main.Weltkarte.ZeigeHandelskarte();
 	}
 
 	private void _on_area_schreibstube_pressed()
