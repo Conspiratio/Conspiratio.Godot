@@ -64,9 +64,10 @@ public partial class LocalGameDialog : Control
 
 		if (speicherManager.Laden(ClientSettings.LetzterSpielstand, out string fehler))
 		{
-			await SW.UI.ShowText.ShowDialog("Ladevorgang beendet!");
-
+			// Den Dialog schließen, bevor die Ladebestätigung erscheint, sonst bleibt er darunter sichtbar
 			HideAndDisableInput();
+
+			await SW.UI.ShowText.ShowDialog("Ladevorgang beendet!");
 			_main.Kontor.ContinueLoadedGame();
 			return;
 		}

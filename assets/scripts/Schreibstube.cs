@@ -137,7 +137,7 @@ public partial class Schreibstube : Control
 
 		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
 		_labelPlaceDate.Text = "Schreibstube A.D. " + SW.Dynamisch.GetAktuellesJahr();
-		_labelTaler.Text = spieler.GetTalerFormatiert() + " Taler";
+		_labelTaler.Text = spieler.GetTalerFormatiert();
 	}
 
 	private async void _on_area_geldleiher_pressed()

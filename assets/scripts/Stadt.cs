@@ -181,7 +181,7 @@ public partial class Stadt : Control
 
 		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
 		_labelPlaceDate.Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetGebietsName() + " A.D. " + SW.Dynamisch.GetAktuellesJahr();
-		_labelTaler.Text = spieler.GetTalerFormatiert() + " Taler";
+		_labelTaler.Text = spieler.GetTalerFormatiert();
 
 		for (int nr = 1; nr <= AnzahlWerkstaetten; nr++)
 			RefreshWerkstatt(nr);

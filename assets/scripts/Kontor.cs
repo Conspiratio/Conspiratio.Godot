@@ -282,7 +282,7 @@ public partial class Kontor : Control
 
 		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
 		_labelPlaceDate.Text = "Kontor A.D. " + SW.Dynamisch.GetAktuellesJahr();
-		_labelTaler.Text = spieler.GetTalerFormatiert() + " Taler";
+		_labelTaler.Text = spieler.GetTalerFormatiert();
 	}
 
 	private async void _on_button_end_turn_pressed()
