@@ -52,6 +52,7 @@ public partial class Stadt : Control
 
 	private Main _main;
 	private HandelsManager _handelsManager;
+	private readonly AnwesenManager _anwesenManager = new AnwesenManager();
 	private int _stadtId = 1;
 
 	// Called when the node enters the scene tree for the first time.
@@ -254,12 +255,10 @@ public partial class Stadt : Control
 
 	private void HausAnzeigen()
 	{
-		var haus = SW.Dynamisch.GetAktHum().GetSpielerHatHausVonStadtAnArraystelle(_stadtId);
-
-		if (haus.GetStadtID() == _stadtId && haus.GetHausID() != 0)
+		if (_anwesenManager.HatHaus(_stadtId))
 		{
-			_buttonHaus.TextureNormal = haus.GetRestlicheBauzeit() == 0 ? _symbolHaus : _symbolHausImBau;
-			_buttonHaus.TooltipText = haus.GetNameInklPronomen();
+			_buttonHaus.TextureNormal = _anwesenManager.IstFertig(_stadtId) ? _symbolHaus : _symbolHausImBau;
+			_buttonHaus.TooltipText = _anwesenManager.GetNameInklPronomen(_stadtId);
 		}
 		else
 		{
@@ -557,46 +556,12 @@ public partial class Stadt : Control
 
 	private void OnProduktPressed(int slot)
 	{
-		var produktionsslot = _handelsManager.GetProduktionsslot(_stadtId, slot);
-		var aktionsart = (EnumProduktionsslotAktionsart)produktionsslot.GetTaetigkeit();
+		var aktionsart = (EnumProduktionsslotAktionsart)_handelsManager.GetProduktionsslot(_stadtId, slot).GetTaetigkeit();
 
 		if (aktionsart == EnumProduktionsslotAktionsart.Produzieren)
-		{
-			// Zum nächsten Rohstoff wechseln, für den der Spieler Recht und Werkstätte besitzt
-			int aktuelleNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(_stadtId, produktionsslot.GetProduktionRohstoff());
-
-			for (int i = 0; i < AnzahlWerkstaetten; i++)
-			{
-				aktuelleNr++;
-
-				if (aktuelleNr > AnzahlWerkstaetten)
-					aktuelleNr = 1;
-
-				if (_handelsManager.HatRohstoffrecht(_stadtId, aktuelleNr) && _handelsManager.HatWerkstatt(_stadtId, aktuelleNr))
-				{
-					int neueRohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, aktuelleNr);
-
-					if (neueRohstoffId != produktionsslot.GetProduktionRohstoff())
-						_handelsManager.SetzeProduktionsRohstoff(_stadtId, slot, neueRohstoffId);
-
-					break;
-				}
-			}
-		}
+			_handelsManager.NaechsterProduktionsRohstoff(_stadtId, slot);
 		else
-		{
-			// Zum nächsten Rohstoff der Stadt wechseln (die Reservierung wandert zurück ins Lager)
-			int aktuelleNr = SW.Dynamisch.GetWerkposInStadtXzuRohIDy(_stadtId, produktionsslot.GetVerkaufRohstoff());
-			aktuelleNr++;
-
-			if (aktuelleNr > AnzahlWerkstaetten)
-				aktuelleNr = 1;
-
-			int neueRohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, aktuelleNr);
-
-			if (neueRohstoffId != 0)
-				_handelsManager.SetzeVerkaufsRohstoff(_stadtId, slot, neueRohstoffId);
-		}
+			_handelsManager.NaechsterVerkaufsRohstoff(_stadtId, slot);
 
 		Refresh();
 	}
@@ -624,18 +589,7 @@ public partial class Stadt : Control
 		else
 		{
 			// Zielstadt weiterschalten (die eigene Stadt wird wie im Original übersprungen)
-			int alteStadt = _handelsManager.GetProduktionsslot(_stadtId, slot).GetVerkaufStadt();
-			int neueStadt = wert;
-
-			if (neueStadt == _stadtId)
-				neueStadt += neueStadt > alteStadt ? 1 : -1;
-
-			if (neueStadt >= SW.Statisch.GetMaxStadtID())
-				neueStadt = SW.Statisch.GetMinStadtID();
-			else if (neueStadt < SW.Statisch.GetMinStadtID())
-				neueStadt = SW.Statisch.GetMaxStadtID() - 1;
-
-			_handelsManager.SetzeVerkaufsStadt(_stadtId, slot, neueStadt);
+			_handelsManager.SetzeVerkaufsStadtAusWert(_stadtId, slot, wert);
 		}
 
 		Refresh();

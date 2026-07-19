@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
+using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -32,6 +33,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	private bool _handelsModus;
 	private TaskCompletionSource<int> _stadtWahl;
 
+	private readonly HandelsManager _handelsManager = new HandelsManager();
 	private Main _main;
 
 	// Called when the node enters the scene tree for the first time.
@@ -215,28 +217,8 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 		for (int stadtId = SW.Statisch.GetMinStadtID(); stadtId < SW.Statisch.GetMaxStadtID(); stadtId++)
 		{
-			bool flaggeZeigen = false;
-
-			if (einblenden)
-			{
-				// Die Flagge weht, wenn der Spieler in der Stadt ein Haus besitzt ...
-				if (spieler.GetSpielerHatHausVonStadtAnArraystelle(stadtId).GetHausID() != 0)
-				{
-					flaggeZeigen = true;
-				}
-				else
-				{
-					// ... oder eine Werkstätte mit Lagerraum
-					for (int nr = 1; nr <= SW.Statisch.GetMaxWerkstaettenProStadt(); nr++)
-					{
-						if (spieler.GetSpielerHatInStadtXWerkstaettenY(nr, stadtId).GetSKillX(1) != 0)
-						{
-							flaggeZeigen = true;
-							break;
-						}
-					}
-				}
-			}
+			// Die Flagge weht, wenn der Spieler in der Stadt eine Präsenz hat (Haus oder Werkstätte mit Lager)
+			bool flaggeZeigen = einblenden && _handelsManager.HatPraesenzInStadt(stadtId);
 
 			_flaggen[stadtId].Visible = flaggeZeigen;
 

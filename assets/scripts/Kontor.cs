@@ -411,7 +411,7 @@ public partial class Kontor : Control
 		// Hat der letzte Spieler seinen Zug beendet, folgen vor dem Jahreswechsel die Rundenende-Ereignisse:
 		// zuerst die Wahlen (solange die KI-Kandidaten noch gemeldet sind), dann die Todesfälle unter den KIs
 		// (die Ämter freigeben und so die Wahlen des nächsten Jahres vorbereiten) – wie im Original.
-		if (SW.Dynamisch.GetAktiverSpieler() >= SW.Dynamisch.GetAktivSpielerAnzahl())
+		if (_rundenManager.IstLetzterSpielerImJahr())
 		{
 			await HalteWahlenAb();
 			await ZeigeKiTodesfaelle();

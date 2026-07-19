@@ -32,6 +32,7 @@ _Unreleased_
 - Projekt auf Godot 4.7.1 angehoben
 
 #### Geändert
+- Verbliebene Spiellogik aus dem Frontend in die Lib verlagert (der Godot-Client enthält jetzt nur noch UI-Logik): die "Präsenz in Stadt"-Regel der Weltkarten-Banner, das Weiterschalten von Produktions- und Verkaufsrohstoff sowie der Verkaufs-Zielstadt in der Stadtansicht, der Jahreswechsel-Check und die Haus-Symbol-Auswahl laufen jetzt über HandelsManager/AnwesenManager/RundenManager (Conspiratio.Lib 3.17.0)
 
 #### Behoben
 - Beim Spielstart und nach dem Laden eines Spielstands erschien bei Rechtsklick fälschlicherweise oft der Dialog "Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?" – das Menü "Neues lokales Spiel" verarbeitete die Eingabe auch dann, wenn es gar nicht sichtbar war
@@ -66,6 +67,7 @@ _Unreleased_
 - Project upgraded to Godot 4.7.1
 
 #### Changed
+- Moved remaining game logic out of the frontend into the Lib (the Godot client now only contains UI logic): the "presence in town" rule for the world map banners, advancing the production and sales resource as well as the sales target town in the town view, the year-transition check and the house symbol selection now go through HandelsManager/AnwesenManager/RundenManager (Conspiratio.Lib 3.17.0)
 
 #### Fixed
 - On starting a game and after loading a savegame, right-clicking wrongly showed the dialog "Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?" quite often – the "new local game" menu processed input even while it was not visible
