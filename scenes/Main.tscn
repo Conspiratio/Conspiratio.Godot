@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=29 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -27,6 +27,7 @@
 [ext_resource type="PackedScene" uid="uid://geburtdlg0001" path="res://scenes/dialogs/GeburtDialog.tscn" id="24_gbdlg"]
 [ext_resource type="PackedScene" uid="uid://kirchgang000001" path="res://scenes/Kirchgang.tscn" id="25_kgdlg"]
 [ext_resource type="PackedScene" uid="uid://konfessionslos1" path="res://scenes/dialogs/KonfessionslosDialog.tscn" id="26_kfdlg"]
+[ext_resource type="PackedScene" uid="uid://privilegiendlg1" path="res://scenes/dialogs/PrivilegienDialog.tscn" id="27_prdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -61,6 +62,7 @@ BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
 GeburtDialogPath = NodePath("GeburtDialog")
 KirchgangPath = NodePath("Kirchgang")
 KonfessionslosDialogPath = NodePath("KonfessionslosDialog")
+PrivilegienDialogPath = NodePath("PrivilegienDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -134,6 +136,10 @@ visible = false
 layout_mode = 1
 
 [node name="KonfessionslosDialog" parent="." instance=ExtResource("26_kfdlg")]
+visible = false
+layout_mode = 1
+
+[node name="PrivilegienDialog" parent="." instance=ExtResource("27_prdlg")]
 visible = false
 layout_mode = 1
 

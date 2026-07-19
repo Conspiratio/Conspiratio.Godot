@@ -2,16 +2,28 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Privilegien;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
 
 /// <summary>
 /// Das Testament (Migration von Testamentanzeigen): der Spieler bestimmt zu Lebzeiten seinen Erben,
-/// indem er durch die möglichen Erben (Erzbistum, Ehepartner, Kinder) klickt.
+/// indem er durch die möglichen Erben (Erzbistum, Ehepartner, Kinder) klickt. Implementiert
+/// ITestamentAnzeigenDialog, damit das Testament-Privileg den Dialog öffnen kann.
 /// </summary>
-public partial class TestamentDialog : Control
+public partial class TestamentDialog : Control, ITestamentAnzeigenDialog
 {
+	/// <summary>
+	/// Aufruf über das Testament-Privileg (zu Lebzeiten, tod = false). Der Todesfall wird direkt
+	/// über den Kontor abgewickelt und läuft nicht über diese Schnittstelle.
+	/// </summary>
+	void ITestamentAnzeigenDialog.ShowDialog(bool tod)
+	{
+		// Fire-and-forget: die Schnittstelle ist synchron, der Godot-Dialog läuft asynchron
+		_ = ShowDialog(new FamilieManager());
+	}
+
 	[Export]
 	public NodePath ButtonErbePath { get; set; }
 

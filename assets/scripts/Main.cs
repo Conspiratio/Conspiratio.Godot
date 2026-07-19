@@ -80,6 +80,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath KonfessionslosDialogPath { get; set; }
 
+	[Export]
+	public NodePath PrivilegienDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -103,6 +106,7 @@ public partial class Main : Control
 	public GeburtDialog GeburtDialog;
 	public Kirchgang Kirchgang;
 	public KonfessionslosDialog KonfessionslosDialog;
+	public PrivilegienDialog PrivilegienDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -132,9 +136,14 @@ public partial class Main : Control
 		GeburtDialog = GetNode<GeburtDialog>(GeburtDialogPath);
 		Kirchgang = GetNode<Kirchgang>(KirchgangPath);
 		KonfessionslosDialog = GetNode<KonfessionslosDialog>(KonfessionslosDialogPath);
+		PrivilegienDialog = GetNode<PrivilegienDialog>(PrivilegienDialogPath);
 
-		// TODO: add missing dialogs
-		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, Weltkarte, null, null, null);
+		// Testament ist ein echter Dialog; Bauwerk stiften, Fest geben, Prozentwert und Untergebene
+		// laufen vorerst über einen Platzhalter ("noch nicht verfügbar")
+		var privilegienPlatzhalter = new PrivilegDialogePlatzhalter();
+
+		SW.UI.Initialisieren(yesNoDialog, textDialog, null, privilegienPlatzhalter, privilegienPlatzhalter,
+			Weltkarte, TestamentDialog, privilegienPlatzhalter, privilegienPlatzhalter);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

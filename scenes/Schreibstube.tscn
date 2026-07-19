@@ -170,5 +170,5 @@ horizontal_alignment = 1
 [connection signal="pressed" from="AreaGeldleiher" to="." method="_on_area_geldleiher_pressed"]
 [connection signal="pressed" from="AreaGesetze" to="." method="_on_area_gesetze_pressed"]
 [connection signal="pressed" from="AreaKreditbuch" to="." method="_on_area_kreditbuch_pressed"]
-[connection signal="pressed" from="AreaPrivilegien" to="." method="_on_area_nicht_implementiert_pressed"]
+[connection signal="pressed" from="AreaPrivilegien" to="." method="_on_area_privilegien_pressed"]
 [connection signal="pressed" from="AreaKontrahenten" to="." method="_on_area_nicht_implementiert_pressed"]
