@@ -183,15 +183,23 @@ public partial class Kirche : Control
 			SetProcessInput(true);
 	}
 
-	private async void _on_area_kirchgang_pressed()
+	private void _on_area_kirchgang_pressed()
 	{
 		SetProcessInput(false);
+		Hide();
 
-		await _main.KirchgangDialog.ShowDialog(_kircheManager);
+		// Der Kirchgang ist ein eigener Bildschirm wie im Original
+		_main.Kirchgang.ShowKirchgang(_kircheManager);
+	}
+
+	/// <summary>
+	/// Kehrt aus dem Kirchgang-Bildschirm in die Kirche zurück.
+	/// </summary>
+	public void ReturnFromKirchgang()
+	{
 		UpdateHud();
-
-		if (Visible)
-			SetProcessInput(true);
+		Show();
+		SetProcessInput(true);
 	}
 
 	private async void _on_area_konvertieren_pressed()

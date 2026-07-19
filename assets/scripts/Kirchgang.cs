@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
@@ -8,17 +7,43 @@ using Godot;
 namespace Conspiratio.Godot.assets.scripts;
 
 /// <summary>
-/// Der Kirchgang (Migration von Kirchgang): Ablass kaufen (halbiert die Sünden), beichten (senkt die
-/// Sünden um eins) und ein Waisenkind adoptieren (kostet Taler und Ansehen).
+/// Der Kirchgang als eigener Bildschirm (Migration von Posi_Kirchgang): Ablass kaufen (halbiert die
+/// Sünden), beichten (senkt die Sünden um eins) und ein Waisenkind adoptieren (kostet Taler und Ansehen).
+/// Die Klickbereiche sitzen an den Originalpositionen; Rechtsklick führt zurück in die Kirche.
 /// </summary>
-public partial class KirchgangDialog : Control
+public partial class Kirchgang : Control
 {
+	private static readonly string[] AreaNamen = { "AreaAblass", "AreaBeichten", "AreaWaisenkind" };
+
+	private Label _labelPlayerNameAndOffice;
+	private Label _labelPlaceDate;
+	private Label _labelTaler;
+
+	private Main _main;
 	private KircheManager _kircheManager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
 	public override void _Ready()
 	{
-		HideAndDisableInput();
+		_labelPlayerNameAndOffice = GetNode<Label>("LabelPlayerNameAndOffice");
+		_labelPlaceDate = GetNode<Label>("LabelPlaceDate");
+		_labelTaler = GetNode<Label>("LabelTaler");
+
+		// Die Klickbereiche sind unsichtbar; ihre goldene Beschriftung erscheint nur bei MouseOver
+		foreach (string areaName in AreaNamen)
+		{
+			var area = GetNode<Button>(areaName);
+			area.AddThemeStyleboxOverride("normal", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("hover", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("pressed", new StyleBoxEmpty());
+			area.AddThemeStyleboxOverride("focus", new StyleBoxEmpty());
+
+			var label = GetNode<Label>("Label" + areaName.Substring("Area".Length));
+			area.MouseEntered += () => label.Visible = true;
+			area.MouseExited += () => label.Visible = false;
+		}
+
+		_main = GetParent<Main>();
+		SetProcessInput(false);
 	}
 
 	public override void _Input(InputEvent @event)
@@ -27,19 +52,39 @@ public partial class KirchgangDialog : Control
 			return;
 
 		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
+		CloseKirchgang();
 	}
 
-	public async Task ShowDialog(KircheManager kircheManager)
+	/// <summary>
+	/// Öffnet den Kirchgang. Der KircheManager wird von der Kirche übernommen.
+	/// </summary>
+	public void ShowKirchgang(KircheManager kircheManager)
 	{
 		_kircheManager = kircheManager;
 
+		UpdateHud();
+
 		Show();
 		SetProcessInput(true);
-		await CloseDialogTask();
 	}
 
-	private async void _on_link_ablass_pressed()
+	private void CloseKirchgang()
+	{
+		Hide();
+		SetProcessInput(false);
+		_main.Kirche.ReturnFromKirchgang();
+	}
+
+	private void UpdateHud()
+	{
+		var spieler = SW.Dynamisch.GetAktHum();
+
+		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
+		_labelPlaceDate.Text = "Kirchgang A.D. " + SW.Dynamisch.GetAktuellesJahr();
+		_labelTaler.Text = spieler.GetTalerFormatiert() + " Taler";
+	}
+
+	private async void _on_area_ablass_pressed()
 	{
 		SetProcessInput(false);
 
@@ -57,6 +102,7 @@ public partial class KirchgangDialog : Control
 		{
 			_kircheManager.KaufeAblass(kosten);
 			SoundManager.Instance.PlayCoins();
+			UpdateHud();
 			await SW.UI.ShowText.ShowDialog("Ein Teil Eurer Sünden ist Euch vergeben.");
 		}
 
@@ -64,7 +110,7 @@ public partial class KirchgangDialog : Control
 			SetProcessInput(true);
 	}
 
-	private async void _on_link_beichten_pressed()
+	private async void _on_area_beichten_pressed()
 	{
 		SetProcessInput(false);
 
@@ -86,7 +132,7 @@ public partial class KirchgangDialog : Control
 			SetProcessInput(true);
 	}
 
-	private async void _on_link_waisenkind_pressed()
+	private async void _on_area_waisenkind_pressed()
 	{
 		SetProcessInput(false);
 
@@ -108,6 +154,7 @@ public partial class KirchgangDialog : Control
 			{
 				string name = _kircheManager.AdoptiereWaisenkind(preis);
 				SoundManager.Instance.PlayCoins();
+				UpdateHud();
 				await SW.UI.ShowText.ShowDialog("Dank Eurer großzügigen Spende konntet Ihr das Kind " + name +
 				                                " aus dem Waisenhaus adoptieren. Euer Ansehen hat gelitten.");
 			}
@@ -115,28 +162,5 @@ public partial class KirchgangDialog : Control
 
 		if (Visible)
 			SetProcessInput(true);
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void _on_link_button_close_pressed()
-	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
 	}
 }

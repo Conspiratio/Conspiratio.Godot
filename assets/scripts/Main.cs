@@ -75,7 +75,7 @@ public partial class Main : Control
 	public NodePath GeburtDialogPath { get; set; }
 
 	[Export]
-	public NodePath KirchgangDialogPath { get; set; }
+	public NodePath KirchgangPath { get; set; }
 
 	[Export]
 	public NodePath KonfessionslosDialogPath { get; set; }
@@ -101,7 +101,7 @@ public partial class Main : Control
 	public TestamentDialog TestamentDialog;
 	public BrautwerbungDialog BrautwerbungDialog;
 	public GeburtDialog GeburtDialog;
-	public KirchgangDialog KirchgangDialog;
+	public Kirchgang Kirchgang;
 	public KonfessionslosDialog KonfessionslosDialog;
 	
 	// Called when the node enters the scene tree for the first time.
@@ -130,7 +130,7 @@ public partial class Main : Control
 		TestamentDialog = GetNode<TestamentDialog>(TestamentDialogPath);
 		BrautwerbungDialog = GetNode<BrautwerbungDialog>(BrautwerbungDialogPath);
 		GeburtDialog = GetNode<GeburtDialog>(GeburtDialogPath);
-		KirchgangDialog = GetNode<KirchgangDialog>(KirchgangDialogPath);
+		Kirchgang = GetNode<Kirchgang>(KirchgangPath);
 		KonfessionslosDialog = GetNode<KonfessionslosDialog>(KonfessionslosDialogPath);
 
 		// TODO: add missing dialogs

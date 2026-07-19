@@ -46,6 +46,11 @@ public partial class NewLocalGameMenu : Control
 		_checkBoxShowDeaths = GetNode<CheckBoxWithSounds>(CheckBoxShowDeathsPath);
 
 		_main = GetParent<Main>();
+
+		// Godot aktiviert die Input-Verarbeitung automatisch, sobald _Input überschrieben ist. Da dieses
+		// Menü beim direkten Laden eines Spielstands nie angezeigt wird, muss die Verarbeitung hier
+		// ausgeschaltet werden – sonst fängt das versteckte Menü Rechtsklicks im Kontor ab.
+		SetProcessInput(false);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -58,9 +63,14 @@ public partial class NewLocalGameMenu : Control
 		if (!Input.IsActionPressed("ui_next_or_close"))
 			return;
 
+		SetProcessInput(false);
+
 		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?") !=
 		    DialogResultGame.Yes)
+		{
+			SetProcessInput(true);
 			return;
+		}
 
 		HideAndDisableInput();
 	}
