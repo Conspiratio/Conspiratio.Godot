@@ -74,6 +74,12 @@ public partial class Main : Control
 	[Export]
 	public NodePath GeburtDialogPath { get; set; }
 
+	[Export]
+	public NodePath KirchgangDialogPath { get; set; }
+
+	[Export]
+	public NodePath KonfessionslosDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -95,6 +101,8 @@ public partial class Main : Control
 	public TestamentDialog TestamentDialog;
 	public BrautwerbungDialog BrautwerbungDialog;
 	public GeburtDialog GeburtDialog;
+	public KirchgangDialog KirchgangDialog;
+	public KonfessionslosDialog KonfessionslosDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -122,6 +130,8 @@ public partial class Main : Control
 		TestamentDialog = GetNode<TestamentDialog>(TestamentDialogPath);
 		BrautwerbungDialog = GetNode<BrautwerbungDialog>(BrautwerbungDialogPath);
 		GeburtDialog = GetNode<GeburtDialog>(GeburtDialogPath);
+		KirchgangDialog = GetNode<KirchgangDialog>(KirchgangDialogPath);
+		KonfessionslosDialog = GetNode<KonfessionslosDialog>(KonfessionslosDialogPath);
 
 		// TODO: add missing dialogs
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, null, null, Weltkarte, null, null, null);

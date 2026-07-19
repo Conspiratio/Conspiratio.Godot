@@ -7,19 +7,21 @@ using Godot;
 namespace Conspiratio.Godot.assets.scripts;
 
 /// <summary>
-/// Die Kirche (minimale Migration): Aktuell sind die Hochzeitsglocken (Partnersuche über die Kupplerin)
-/// und das Testament funktional; die übrigen kirchlichen Tätigkeiten (Beichte, Kirchgang, Konvertieren,
-/// Austreten, Bauwerk stiften) sind noch Platzhalter. Rechtsklick auf einen Bereich zeigt seine Beschreibung.
+/// Die Kirche (Migration der Kirche aus dem WinForms-Client): Hochzeitsglocken (Partnersuche über die
+/// Kupplerin), Kirchgang (Ablass kaufen, beichten, Waisenkind adoptieren), Konvertieren, Austreten und
+/// das Testament. Konfessionslose Spieler werden zunächst gefragt, welchen Glauben sie annehmen wollen.
+/// Rechtsklick auf einen Bereich zeigt seine Beschreibung, Rechtsklick sonst führt zurück ins Kontor.
 /// </summary>
 public partial class Kirche : Control
 {
-	private static readonly string[] AreaNamen = { "AreaHochzeit", "AreaTestament", "AreaBeichte", "AreaKirchgang" };
+	private static readonly string[] AreaNamen = { "AreaHochzeit", "AreaTestament", "AreaKirchgang", "AreaKonvertieren", "AreaAustreten" };
 
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
 	private Label _labelTaler;
 
 	private Main _main;
+	private KircheManager _kircheManager;
 	private FamilieManager _familieManager;
 
 	public override void _Ready()
@@ -80,22 +82,38 @@ public partial class Kirche : Control
 		switch (areaName)
 		{
 			case "AreaHochzeit":
-				return "Hier läuten die Hochzeitsglocken – hier könnt Ihr um einen Ehepartner werben";
+				return "Um den Fortbestand Eurer Dynastie zu sichern, solltet Ihr rechtzeitig mit der Werbung um einen Ehepartner beginnen";
 			case "AreaTestament":
 				return "Hier könnt Ihr Euer Testament aufsetzen und den Erben Eures Vermögens bestimmen";
-			case "AreaBeichte":
-				return "Hier könnt Ihr beichten";
+			case "AreaKirchgang":
+				return "Hier werden Geschäfte mit der Kirche abgewickelt";
+			case "AreaKonvertieren":
+				return "Wechselt Euren Glauben. Dies kann Euch Sympathie Andersgläubiger einbringen";
 			default:
-				return "Hier könnt Ihr am Kirchgang teilnehmen";
+				return "Durch das Austreten aus der Kirche werdet Ihr von der Kirchensteuer befreit. Allerdings ist Euch damit auch die Kandidatur für kirchliche Ämter untersagt";
 		}
 	}
 
 	/// <summary>
-	/// Öffnet die Kirche für den aktiven Spieler.
+	/// Öffnet die Kirche für den aktiven Spieler. Konfessionslose werden zuerst nach ihrem Glauben gefragt.
 	/// </summary>
-	public void ShowKirche()
+	public async void ShowKirche()
 	{
+		_kircheManager = new KircheManager();
 		_familieManager = new FamilieManager();
+
+		// Konfessionslose sehen zunächst die Glaubensfrage (wie FormKonfessionslos im Original)
+		if (_kircheManager.IstKonfessionslos())
+		{
+			await _main.KonfessionslosDialog.ShowDialog(_kircheManager);
+
+			// Nimmt der Spieler keinen Glauben an, geht es zurück ins Kontor
+			if (_kircheManager.IstKonfessionslos())
+			{
+				CloseKirche();
+				return;
+			}
+		}
 
 		UpdateHud();
 
@@ -165,12 +183,60 @@ public partial class Kirche : Control
 			SetProcessInput(true);
 	}
 
-	private async void _on_area_nicht_implementiert_pressed()
+	private async void _on_area_kirchgang_pressed()
 	{
 		SetProcessInput(false);
 
-		// TODO: Beichte, Kirchgang, Konvertieren, Austreten und Bauwerk stiften migrieren
-		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+		await _main.KirchgangDialog.ShowDialog(_kircheManager);
+		UpdateHud();
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	private async void _on_area_konvertieren_pressed()
+	{
+		SetProcessInput(false);
+
+		int kosten = _kircheManager.GetKonvertierkosten();
+
+		if (!_kircheManager.KannBezahlen(kosten))
+		{
+			await SW.UI.ShowText.ShowDialog("Die " + kosten.ToStringGeld(false) + " Taler für den Glaubenswechsel besitzt Ihr nicht.");
+		}
+		else if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr für " + kosten.ToStringGeld() + "\nzum " + _kircheManager.GetNaechsteReligionName() +
+		                                                  "en Glauben wechseln?", "Ja", "Nein") == DialogResultGame.Yes)
+		{
+			_kircheManager.Konvertiere(kosten);
+			SoundManager.Instance.PlayCoins();
+			UpdateHud();
+		}
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	private async void _on_area_austreten_pressed()
+	{
+		SetProcessInput(false);
+
+		int kosten = _kircheManager.GetAustrittskosten();
+
+		if (!_kircheManager.KannBezahlen(kosten))
+		{
+			await SW.UI.ShowText.ShowDialog("Die " + kosten.ToStringGeld(false) + " Taler für den Kirchenaustritt besitzt Ihr nicht.");
+		}
+		else if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr für " + kosten.ToStringGeld() + "\naus der Kirche austreten?", "Ja", "Nein") == DialogResultGame.Yes)
+		{
+			_kircheManager.TritteAus(kosten);
+			SoundManager.Instance.PlayCoins();
+			UpdateHud();
+			await SW.UI.ShowText.ShowDialog("Ihr seid nun konfessionslos.");
+
+			// Als Konfessionsloser gibt es hier nichts mehr zu tun – zurück ins Kontor
+			CloseKirche();
+			return;
+		}
 
 		if (Visible)
 			SetProcessInput(true);
