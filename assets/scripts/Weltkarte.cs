@@ -139,7 +139,15 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Die Personen-Ziel-Modi (Prozess initiieren, Henkershand) folgen in einer späteren Stufe.
+		// Personen-Ziel-Modi (Prozess initiieren = 8, Hand des Henkers = 13): Ziel über die
+		// Kontrahenten-Liste wählen. Die Ämter-Hierarchie-Navigation der Karte folgt später.
+		if (mod == 8 || mod == 13)
+		{
+			_ = _main.KontrahentenDialog.ShowDialog(mod);
+			return;
+		}
+
+		// Übrige (noch nicht migrierte) Modi.
 		_ = SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
 	}
 
