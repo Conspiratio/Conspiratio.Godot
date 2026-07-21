@@ -92,6 +92,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath ProzentwertFestlegenDialogPath { get; set; }
 
+	[Export]
+	public NodePath UntergebeneDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -119,6 +122,7 @@ public partial class Main : Control
 	public FestGebenDialog FestGebenDialog;
 	public BauwerkStiftenDialog BauwerkStiftenDialog;
 	public ProzentwertFestlegenDialog ProzentwertFestlegenDialog;
+	public UntergebeneDialog UntergebeneDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -152,13 +156,11 @@ public partial class Main : Control
 		FestGebenDialog = GetNode<FestGebenDialog>(FestGebenDialogPath);
 		BauwerkStiftenDialog = GetNode<BauwerkStiftenDialog>(BauwerkStiftenDialogPath);
 		ProzentwertFestlegenDialog = GetNode<ProzentwertFestlegenDialog>(ProzentwertFestlegenDialogPath);
+		UntergebeneDialog = GetNode<UntergebeneDialog>(UntergebeneDialogPath);
 
-		// Testament, Fest geben, Bauwerk stiften und Prozentwert festlegen sind echte Dialoge;
-		// die Untergebene laufen vorerst über einen Platzhalter ("noch nicht verfügbar")
-		var privilegienPlatzhalter = new PrivilegDialogePlatzhalter();
-
+		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, BauwerkStiftenDialog, FestGebenDialog,
-			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, privilegienPlatzhalter);
+			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, UntergebeneDialog);
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

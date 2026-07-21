@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=33 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -31,6 +31,7 @@
 [ext_resource type="PackedScene" uid="uid://festgebendlg01" path="res://scenes/dialogs/FestGebenDialog.tscn" id="28_fgdlg"]
 [ext_resource type="PackedScene" uid="uid://bauwerkstiftdlg1" path="res://scenes/dialogs/BauwerkStiftenDialog.tscn" id="29_bsdlg"]
 [ext_resource type="PackedScene" uid="uid://prozentwertdlg1" path="res://scenes/dialogs/ProzentwertFestlegenDialog.tscn" id="30_pwdlg"]
+[ext_resource type="PackedScene" uid="uid://untergebenedlg1" path="res://scenes/dialogs/UntergebeneDialog.tscn" id="31_ugdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -69,6 +70,7 @@ PrivilegienDialogPath = NodePath("PrivilegienDialog")
 FestGebenDialogPath = NodePath("FestGebenDialog")
 BauwerkStiftenDialogPath = NodePath("BauwerkStiftenDialog")
 ProzentwertFestlegenDialogPath = NodePath("ProzentwertFestlegenDialog")
+UntergebeneDialogPath = NodePath("UntergebeneDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -158,6 +160,10 @@ visible = false
 layout_mode = 1
 
 [node name="ProzentwertFestlegenDialog" parent="." instance=ExtResource("30_pwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="UntergebeneDialog" parent="." instance=ExtResource("31_ugdlg")]
 visible = false
 layout_mode = 1
 
