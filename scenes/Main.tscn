@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=31 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -29,6 +29,7 @@
 [ext_resource type="PackedScene" uid="uid://konfessionslos1" path="res://scenes/dialogs/KonfessionslosDialog.tscn" id="26_kfdlg"]
 [ext_resource type="PackedScene" uid="uid://privilegiendlg1" path="res://scenes/dialogs/PrivilegienDialog.tscn" id="27_prdlg"]
 [ext_resource type="PackedScene" uid="uid://festgebendlg01" path="res://scenes/dialogs/FestGebenDialog.tscn" id="28_fgdlg"]
+[ext_resource type="PackedScene" uid="uid://bauwerkstiftdlg1" path="res://scenes/dialogs/BauwerkStiftenDialog.tscn" id="29_bsdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -65,6 +66,7 @@ KirchgangPath = NodePath("Kirchgang")
 KonfessionslosDialogPath = NodePath("KonfessionslosDialog")
 PrivilegienDialogPath = NodePath("PrivilegienDialog")
 FestGebenDialogPath = NodePath("FestGebenDialog")
+BauwerkStiftenDialogPath = NodePath("BauwerkStiftenDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -146,6 +148,10 @@ visible = false
 layout_mode = 1
 
 [node name="FestGebenDialog" parent="." instance=ExtResource("28_fgdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BauwerkStiftenDialog" parent="." instance=ExtResource("29_bsdlg")]
 visible = false
 layout_mode = 1
 
