@@ -83,6 +83,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath PrivilegienDialogPath { get; set; }
 
+	[Export]
+	public NodePath FestGebenDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -107,6 +110,7 @@ public partial class Main : Control
 	public Kirchgang Kirchgang;
 	public KonfessionslosDialog KonfessionslosDialog;
 	public PrivilegienDialog PrivilegienDialog;
+	public FestGebenDialog FestGebenDialog;
 	
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -137,12 +141,13 @@ public partial class Main : Control
 		Kirchgang = GetNode<Kirchgang>(KirchgangPath);
 		KonfessionslosDialog = GetNode<KonfessionslosDialog>(KonfessionslosDialogPath);
 		PrivilegienDialog = GetNode<PrivilegienDialog>(PrivilegienDialogPath);
+		FestGebenDialog = GetNode<FestGebenDialog>(FestGebenDialogPath);
 
-		// Testament ist ein echter Dialog; Bauwerk stiften, Fest geben, Prozentwert und Untergebene
+		// Testament und Fest geben sind echte Dialoge; Bauwerk stiften, Prozentwert und Untergebene
 		// laufen vorerst über einen Platzhalter ("noch nicht verfügbar")
 		var privilegienPlatzhalter = new PrivilegDialogePlatzhalter();
 
-		SW.UI.Initialisieren(yesNoDialog, textDialog, null, privilegienPlatzhalter, privilegienPlatzhalter,
+		SW.UI.Initialisieren(yesNoDialog, textDialog, null, privilegienPlatzhalter, FestGebenDialog,
 			Weltkarte, TestamentDialog, privilegienPlatzhalter, privilegienPlatzhalter);
 	}
 

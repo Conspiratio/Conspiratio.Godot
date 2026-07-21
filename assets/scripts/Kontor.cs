@@ -326,6 +326,15 @@ public partial class Kontor : Control
 		// Familienereignisse zu Zugbeginn (Geburt, Hochzeit, Kindestod, Brautwerbung)
 		await ZeigeFamilienereignisse();
 
+		// Fällt in diesem Jahr ein geplantes Fest an, wird es gefeiert
+		string festMeldung = new Conspiratio.Lib.Gameplay.Privilegien.FestGeben.FestManager().FeiereFaelligesFest();
+
+		if (festMeldung != null)
+		{
+			UpdateHud();
+			await SW.UI.ShowText.ShowDialog("Fest\n\n" + festMeldung);
+		}
+
 		// Gesetzesverstöße mit Strafen
 		foreach (string meldung in zugNachrichten.PruefeVerbrechen())
 		{
