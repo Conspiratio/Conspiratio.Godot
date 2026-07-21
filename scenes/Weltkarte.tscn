@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://weltkarte0001"]
+[gd_scene load_steps=4 format=3 uid="uid://weltkarte0001"]
 
 [ext_resource type="Texture2D" path="res://assets/images/landkarten/PWK.png" id="1_wkbg"]
 [ext_resource type="Script" path="res://assets/scripts/Weltkarte.cs" id="1_wkscr"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="2_wklst"]
 
 [node name="Weltkarte" type="Control"]
 layout_mode = 3
@@ -28,3 +29,16 @@ layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 mouse_filter = 2
+
+[node name="ListeButton" parent="." instance=ExtResource("2_wklst")]
+visible = false
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 64.0
+grow_horizontal = 0
+text = "Kontrahenten-Liste"

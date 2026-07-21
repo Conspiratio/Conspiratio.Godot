@@ -33,6 +33,9 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	private bool _handelsModus;
 	private bool _preisModus;
 	private int _preisLevel;
+	private bool _personenModus;
+	private int _personenModusModus;
+	private controls.ButtonWithSounds _listeButton;
 	private TaskCompletionSource<int> _stadtWahl;
 
 	private readonly HandelsManager _handelsManager = new HandelsManager();
@@ -65,6 +68,10 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		_hoverRect.MouseFilter = MouseFilterEnum.Ignore;
 		_hoverRect.Visible = false;
 
+		_listeButton = GetNode<controls.ButtonWithSounds>("ListeButton");
+		_listeButton.Pressed += OnListePressed;
+		_listeButton.Visible = false;
+
 		_main = GetParent<Main>();
 		SetProcessInput(false);
 	}
@@ -84,9 +91,20 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		}
 
 		if (@event is InputEventMouseMotion motion)
+		{
 			HoverAktualisieren(motion.GlobalPosition);
-		else if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left } && _hoverStadt != 0)
-			StadtAngeklickt(_hoverStadt);
+		}
+		else if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left } klick)
+		{
+			// Der Kontrahenten-Listen-Button verarbeitet seinen Klick selbst.
+			if (_personenModus && _listeButton.Visible && _listeButton.GetGlobalRect().HasPoint(klick.GlobalPosition))
+				return;
+
+			if (_hoverStadt != 0)
+				StadtAngeklickt(_hoverStadt);
+			else if (_personenModus && _hoverRegion != 0)
+				RegionAngeklickt(_hoverRegion);
+		}
 	}
 
 	#region Öffnen und Schließen
@@ -99,6 +117,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	{
 		_handelsModus = true;
 		_preisModus = false;
+		_personenModus = false;
 		_stadtWahl = null;
 		_nurStaedteMarkieren = true;
 
@@ -113,6 +132,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	{
 		_handelsModus = false;
 		_preisModus = false;
+		_personenModus = false;
 		_stadtWahl = new TaskCompletionSource<int>();
 		_nurStaedteMarkieren = true;
 
@@ -139,11 +159,18 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Personen-Ziel-Modi (Prozess initiieren = 8, Hand des Henkers = 13): Ziel über die
-		// Kontrahenten-Liste wählen. Die Ämter-Hierarchie-Navigation der Karte folgt später.
+		// Personen-Ziel-Modi (Prozess initiieren = 8, Hand des Henkers = 13): Karte öffnen und das Ziel
+		// über eine angeklickte Stadt/Land/Reich (Ämter-Ebene) oder die Kontrahenten-Liste wählen.
 		if (mod == 8 || mod == 13)
 		{
-			_ = _main.KontrahentenDialog.ShowDialog(mod);
+			_personenModus = true;
+			_personenModusModus = mod;
+			_handelsModus = false;
+			_preisModus = false;
+			_stadtWahl = null;
+			_nurStaedteMarkieren = false; // Länder und Reich sind ebenfalls anklickbar
+
+			OeffneKarte(false);
 			return;
 		}
 
@@ -161,6 +188,9 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		_hoverRegion = 0;
 		_hoverRect.Visible = false;
 
+		// Die Kontrahenten-Liste steht nur in den Personen-Ziel-Modi zur Verfügung.
+		_listeButton.Visible = _personenModus;
+
 		Show();
 		SetProcessInput(true);
 	}
@@ -177,11 +207,18 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Im Preismodus wurde die Karte über ein Privileg geöffnet – zurück zum darunterliegenden
-		// Privilegien-/Schreibstube-Kontext, nicht ins Kontor.
+		// Im Preis- und Personen-Modus wurde die Karte über ein Privileg geöffnet – zurück zum
+		// darunterliegenden Privilegien-/Schreibstube-Kontext, nicht ins Kontor.
 		if (_preisModus)
 		{
 			_preisModus = false;
+			return;
+		}
+
+		if (_personenModus)
+		{
+			_personenModus = false;
+			_listeButton.Visible = false;
 			return;
 		}
 
@@ -204,6 +241,16 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
+		// Personen-Modus: Stadt anklicken öffnet die städtische Ämter-Ebene (Stufe 0). Nach dem
+		// Schließen der Ämter-Ebene schließt sich – wie im Original – auch die Karte.
+		if (_personenModus)
+		{
+			SetProcessInput(false);
+			await _main.AemterEbeneDialog.ShowDialog(stadtId, 0, _personenModusModus);
+			Schliessen();
+			return;
+		}
+
 		Hide();
 		SetProcessInput(false);
 
@@ -216,6 +263,33 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 		if (_handelsModus)
 			_main.Stadt.ShowStadt(stadtId);
+	}
+
+	/// <summary>
+	/// Personen-Modus: Klick auf eine Länderregion (101–104) öffnet die Ämter-Ebene des Landes
+	/// (Stufe 1), ein Klick auf das restliche Reich (201) die Ämter-Ebene des Reichs (Stufe 2).
+	/// </summary>
+	private async void RegionAngeklickt(int region)
+	{
+		SoundManager.Instance.PlayLeftClick();
+		SetProcessInput(false);
+
+		if (region >= 101 && region <= 104)
+			await _main.AemterEbeneDialog.ShowDialog(region - 100, 1, _personenModusModus);
+		else if (region == 201)
+			await _main.AemterEbeneDialog.ShowDialog(1, 2, _personenModusModus);
+
+		// Wie im Original schließt sich nach der Ämter-Ebene auch die Karte.
+		Schliessen();
+	}
+
+	private async void OnListePressed()
+	{
+		SetProcessInput(false);
+		await _main.KontrahentenDialog.ShowDialog(_personenModusModus);
+
+		if (Visible)
+			SetProcessInput(true);
 	}
 
 	#endregion

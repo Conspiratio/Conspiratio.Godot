@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=36 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -34,6 +34,7 @@
 [ext_resource type="PackedScene" uid="uid://untergebenedlg1" path="res://scenes/dialogs/UntergebeneDialog.tscn" id="31_ugdlg"]
 [ext_resource type="PackedScene" uid="uid://rohstoffpreisedlg1" path="res://scenes/dialogs/RohstoffpreiseDialog.tscn" id="32_rpdlg"]
 [ext_resource type="PackedScene" uid="uid://kontrahentendlg1" path="res://scenes/dialogs/KontrahentenDialog.tscn" id="33_kodlg"]
+[ext_resource type="PackedScene" uid="uid://aemterebenedlg1" path="res://scenes/dialogs/AemterEbeneDialog.tscn" id="34_aedlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -75,6 +76,7 @@ ProzentwertFestlegenDialogPath = NodePath("ProzentwertFestlegenDialog")
 UntergebeneDialogPath = NodePath("UntergebeneDialog")
 RohstoffpreiseDialogPath = NodePath("RohstoffpreiseDialog")
 KontrahentenDialogPath = NodePath("KontrahentenDialog")
+AemterEbeneDialogPath = NodePath("AemterEbeneDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
 layout_mode = 1
@@ -184,6 +186,10 @@ visible = false
 layout_mode = 1
 
 [node name="KontrahentenDialog" parent="." instance=ExtResource("33_kodlg")]
+visible = false
+layout_mode = 1
+
+[node name="AemterEbeneDialog" parent="." instance=ExtResource("34_aedlg")]
 visible = false
 layout_mode = 1
 

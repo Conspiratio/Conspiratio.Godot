@@ -101,6 +101,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath KontrahentenDialogPath { get; set; }
 
+	[Export]
+	public NodePath AemterEbeneDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -131,6 +134,7 @@ public partial class Main : Control
 	public UntergebeneDialog UntergebeneDialog;
 	public RohstoffpreiseDialog RohstoffpreiseDialog;
 	public KontrahentenDialog KontrahentenDialog;
+	public AemterEbeneDialog AemterEbeneDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -167,6 +171,7 @@ public partial class Main : Control
 		UntergebeneDialog = GetNode<UntergebeneDialog>(UntergebeneDialogPath);
 		RohstoffpreiseDialog = GetNode<RohstoffpreiseDialog>(RohstoffpreiseDialogPath);
 		KontrahentenDialog = GetNode<KontrahentenDialog>(KontrahentenDialogPath);
+		AemterEbeneDialog = GetNode<AemterEbeneDialog>(AemterEbeneDialogPath);
 
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, null, BauwerkStiftenDialog, FestGebenDialog,
