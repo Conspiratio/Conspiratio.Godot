@@ -1,7 +1,7 @@
 [gd_scene load_steps=6 format=3 uid="uid://aemterebenedlg1"]
 
 [ext_resource type="Script" path="res://assets/scripts/AemterEbeneDialog.cs" id="1_aedlg"]
-[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_aedlg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintAemter.png" id="2_aedlg"]
 [ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_aedlg"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_aedlg"]
 [ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_aedlg"]
@@ -17,69 +17,53 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = ExtResource("4_aedlg")
 script = ExtResource("1_aedlg")
-LabelTitelPath = NodePath("Panel/NinePatchRect/LabelTitel")
-ButtonWechselPath = NodePath("Panel/NinePatchRect/ButtonWechsel")
-VBoxAemterPath = NodePath("Panel/NinePatchRect/VBoxAemter")
+LabelTitelPath = NodePath("LabelTitel")
+ButtonWechselPath = NodePath("ButtonWechsel")
+VBoxAemterPath = NodePath("VBoxAemter")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Background" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -540.0
-offset_top = -320.0
-offset_right = 540.0
-offset_bottom = 320.0
-grow_horizontal = 2
-grow_vertical = 2
 texture = ExtResource("2_aedlg")
-patch_margin_left = 15
-patch_margin_top = 15
-patch_margin_right = 15
-patch_margin_bottom = 15
+expand_mode = 1
+stretch_mode = 6
 
-[node name="LabelTitel" type="Label" parent="Panel/NinePatchRect"]
+[node name="LabelTitel" type="Label" parent="."]
 layout_mode = 0
-offset_left = 40.0
+offset_left = 300.0
 offset_top = 24.0
-offset_right = 1040.0
+offset_right = 1300.0
 offset_bottom = 62.0
 text = "Ämter"
 horizontal_alignment = 1
 
-[node name="ButtonWechsel" parent="Panel/NinePatchRect" instance=ExtResource("5_aedlg")]
+[node name="ButtonWechsel" parent="." instance=ExtResource("5_aedlg")]
 layout_mode = 0
-offset_left = 400.0
+offset_left = 660.0
 offset_top = 74.0
-offset_right = 680.0
+offset_right = 940.0
 offset_bottom = 118.0
 text = "Politische Ebene"
 
-[node name="VBoxAemter" type="VBoxContainer" parent="Panel/NinePatchRect"]
+[node name="VBoxAemter" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 60.0
-offset_top = 140.0
-offset_right = 1020.0
-offset_bottom = 560.0
-theme_override_constants/separation = 16
+offset_left = 300.0
+offset_top = 150.0
+offset_right = 1300.0
+offset_bottom = 780.0
+theme_override_constants/separation = 24
 alignment = 1
 
-[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_aedlg")]
+[node name="LinkButtonClose" parent="." instance=ExtResource("3_aedlg")]
 layout_mode = 0
-offset_left = 460.0
-offset_top = 585.0
-offset_right = 620.0
-offset_bottom = 620.0
+offset_left = 720.0
+offset_top = 810.0
+offset_right = 880.0
+offset_bottom = 850.0
 text = "Schließen"
 
-[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
+[connection signal="pressed" from="LinkButtonClose" to="." method="_on_link_button_close_pressed"]
