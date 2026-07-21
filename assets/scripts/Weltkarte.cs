@@ -31,6 +31,8 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	private int _hoverRegion;
 	private bool _nurStaedteMarkieren = true;
 	private bool _handelsModus;
+	private bool _preisModus;
+	private int _preisLevel;
 	private TaskCompletionSource<int> _stadtWahl;
 
 	private readonly HandelsManager _handelsManager = new HandelsManager();
@@ -96,6 +98,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	public void ZeigeHandelskarte()
 	{
 		_handelsModus = true;
+		_preisModus = false;
 		_stadtWahl = null;
 		_nurStaedteMarkieren = true;
 
@@ -109,6 +112,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	public Task<int> WaehleStadt()
 	{
 		_handelsModus = false;
+		_preisModus = false;
 		_stadtWahl = new TaskCompletionSource<int>();
 		_nurStaedteMarkieren = true;
 
@@ -119,10 +123,24 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	/// <summary>
 	/// Anbindung für die Lib (Privilegien-Modi der Weltkarte).
 	/// </summary>
-	public async void ShowDialogModus(int mod, bool flaggenEinblenden = false)
+	public void ShowDialogModus(int mod, bool flaggenEinblenden = false)
 	{
-		// TODO: Die Ämter- und Privilegien-Modi der Weltkarte migrieren (AemterEbene, Rohstoffpreise, ...)
-		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+		// Preisansichten der Privilegien: Händler (9), Kaufmann (10), Großkaufmann (11).
+		// Im Original wird für Kaufmann/Großkaufmann modus auf 9 gesetzt und Level = modus - 9.
+		if (mod == 9 || mod == 10 || mod == 11)
+		{
+			_preisLevel = mod == 9 ? 0 : mod - 9;
+			_preisModus = true;
+			_handelsModus = false;
+			_stadtWahl = null;
+			_nurStaedteMarkieren = true;
+
+			OeffneKarte(false);
+			return;
+		}
+
+		// Die Personen-Ziel-Modi (Prozess initiieren, Henkershand) folgen in einer späteren Stufe.
+		_ = SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
 	}
 
 	private void OeffneKarte(bool flaggenEinblenden)
@@ -151,12 +169,32 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
+		// Im Preismodus wurde die Karte über ein Privileg geöffnet – zurück zum darunterliegenden
+		// Privilegien-/Schreibstube-Kontext, nicht ins Kontor.
+		if (_preisModus)
+		{
+			_preisModus = false;
+			return;
+		}
+
 		_main.Kontor.ReturnFromStadt();
 	}
 
-	private void StadtAngeklickt(int stadtId)
+	private async void StadtAngeklickt(int stadtId)
 	{
 		SoundManager.Instance.PlayLeftClick();
+
+		// Preismodus: Stadt anklicken öffnet die Rohstoffpreis-Ansicht; die Karte bleibt offen,
+		// damit weitere Städte betrachtet werden können (Rechtsklick schließt die Karte).
+		if (_preisModus)
+		{
+			SetProcessInput(false);
+			await _main.RohstoffpreiseDialog.ShowDialog(stadtId, _preisLevel);
+
+			if (Visible)
+				SetProcessInput(true);
+			return;
+		}
 
 		Hide();
 		SetProcessInput(false);
