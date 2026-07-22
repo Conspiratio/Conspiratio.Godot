@@ -1,0 +1,154 @@
+[gd_scene load_steps=7 format=3 uid="uid://beziehungpflegdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/BeziehungenPflegenDialog.cs" id="1_bpdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_bpdlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_bpdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_bpdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_bpdlg"]
+[ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="6_bpdlg"]
+
+[node name="BeziehungenPflegenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("4_bpdlg")
+script = ExtResource("1_bpdlg")
+LabelErklaerungPath = NodePath("Panel/NinePatchRect/LabelErklaerung")
+OptionenBoxPath = NodePath("Panel/NinePatchRect/OptionenBox")
+BestechenBoxPath = NodePath("Panel/NinePatchRect/BestechenBox")
+NumericTalerPath = NodePath("Panel/NinePatchRect/BestechenBox/HBoxTaler/NumericTaler")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -260.0
+offset_right = 360.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bpdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 26.0
+offset_right = 680.0
+offset_bottom = 64.0
+text = "Beziehungen pflegen"
+horizontal_alignment = 1
+
+[node name="LabelErklaerung" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 90.0
+offset_right = 660.0
+offset_bottom = 160.0
+text = "Wie wollt Ihr Eure Beziehung verbessern?"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="OptionenBox" type="VBoxContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 210.0
+offset_top = 200.0
+offset_right = 510.0
+offset_bottom = 360.0
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="LinkKarten" parent="Panel/NinePatchRect/OptionenBox" instance=ExtResource("3_bpdlg")]
+layout_mode = 2
+theme = ExtResource("4_bpdlg")
+text = "Karten spielen"
+
+[node name="LinkBestechen" parent="Panel/NinePatchRect/OptionenBox" instance=ExtResource("3_bpdlg")]
+layout_mode = 2
+theme = ExtResource("4_bpdlg")
+text = "Bestechen"
+
+[node name="BestechenBox" type="Control" parent="Panel/NinePatchRect"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LabelBestechen" type="Label" parent="Panel/NinePatchRect/BestechenBox"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 180.0
+offset_right = 660.0
+offset_bottom = 230.0
+text = "Gebt an, wieviel Taler Ihr zukommen lassen wollt."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="HBoxTaler" type="HBoxContainer" parent="Panel/NinePatchRect/BestechenBox"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 250.0
+offset_right = 480.0
+offset_bottom = 298.0
+alignment = 1
+
+[node name="NumericTaler" parent="Panel/NinePatchRect/BestechenBox/HBoxTaler" instance=ExtResource("6_bpdlg")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(160, 40)
+theme = ExtResource("4_bpdlg")
+
+[node name="ButtonBestechen" parent="Panel/NinePatchRect/BestechenBox" instance=ExtResource("5_bpdlg")]
+layout_mode = 0
+offset_left = 210.0
+offset_top = 320.0
+offset_right = 510.0
+offset_bottom = 375.0
+text = "Bestechen"
+
+[node name="ButtonAbbrechen" parent="Panel/NinePatchRect/BestechenBox" instance=ExtResource("3_bpdlg")]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 390.0
+offset_right = 450.0
+offset_bottom = 425.0
+theme = ExtResource("4_bpdlg")
+text = "Zurück"
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_bpdlg")]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 470.0
+offset_right = 440.0
+offset_bottom = 505.0
+theme = ExtResource("4_bpdlg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/OptionenBox/LinkKarten" to="." method="_on_link_karten_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/OptionenBox/LinkBestechen" to="." method="_on_link_bestechen_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/BestechenBox/ButtonBestechen" to="." method="_on_button_bestechen_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/BestechenBox/ButtonAbbrechen" to="." method="_on_button_abbrechen_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
