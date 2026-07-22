@@ -237,6 +237,10 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		{
 			_personenModus = false;
 			_listeButton.Visible = false;
+
+			// Einen offenen Anschwärz-Vorgang beim Schließen der Karte verwerfen (wie im Original).
+			SW.Dynamisch.SetAnschwaerzID(0);
+
 			_personenKarte?.TrySetResult(true);
 			_personenKarte = null;
 			return;
