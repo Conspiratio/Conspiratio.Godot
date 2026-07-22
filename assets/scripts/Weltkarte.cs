@@ -37,6 +37,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	private int _personenModusModus;
 	private controls.ButtonWithSounds _listeButton;
 	private TaskCompletionSource<int> _stadtWahl;
+	private TaskCompletionSource<bool> _personenKarte;
 
 	private readonly HandelsManager _handelsManager = new HandelsManager();
 	private Main _main;
@@ -159,23 +160,40 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Personen-Ziel-Modi (Prozess initiieren = 8, Hand des Henkers = 13): Karte öffnen und das Ziel
-		// über eine angeklickte Stadt/Land/Reich (Ämter-Ebene) oder die Kontrahenten-Liste wählen.
-		if (mod == 8 || mod == 13)
+		// Personen-Ziel-Modi: Privilegien (Prozess = 8, Henkershand = 13) und Hinterzimmer
+		// (Beziehungen = 0, Sabotage = 1, Anschwärzen = 2, Spionage = 3, Ermordung = 4, Erpressung = 5).
+		// Über die Interface-Methode (Privilegien) wird die Karte im Hintergrund geöffnet (fire-and-forget).
+		if (mod >= 0 && mod <= 5 || mod == 8 || mod == 13)
 		{
-			_personenModus = true;
-			_personenModusModus = mod;
-			_handelsModus = false;
-			_preisModus = false;
-			_stadtWahl = null;
-			_nurStaedteMarkieren = false; // Länder und Reich sind ebenfalls anklickbar
-
-			OeffneKarte(false);
+			_ = OeffnePersonenKarteIntern(mod, flaggenEinblenden);
 			return;
 		}
 
 		// Übrige (noch nicht migrierte) Modi.
 		_ = SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+	}
+
+	/// <summary>
+	/// Öffnet die Karte in einem Personen-Ziel-Modus und liefert einen Task, der beim Schließen der
+	/// Karte abgeschlossen wird (für das Hinterzimmer, das danach wieder erscheinen soll).
+	/// </summary>
+	public Task OeffnePersonenKarte(int modus, bool flaggenEinblenden = false)
+	{
+		return OeffnePersonenKarteIntern(modus, flaggenEinblenden);
+	}
+
+	private Task OeffnePersonenKarteIntern(int modus, bool flaggenEinblenden)
+	{
+		_personenModus = true;
+		_personenModusModus = modus;
+		_handelsModus = false;
+		_preisModus = false;
+		_stadtWahl = null;
+		_nurStaedteMarkieren = false; // Länder und Reich sind ebenfalls anklickbar
+
+		_personenKarte = new TaskCompletionSource<bool>();
+		OeffneKarte(flaggenEinblenden);
+		return _personenKarte.Task;
 	}
 
 	private void OeffneKarte(bool flaggenEinblenden)
@@ -219,6 +237,8 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		{
 			_personenModus = false;
 			_listeButton.Visible = false;
+			_personenKarte?.TrySetResult(true);
+			_personenKarte = null;
 			return;
 		}
 
@@ -241,13 +261,12 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Personen-Modus: Stadt anklicken öffnet die städtische Ämter-Ebene (Stufe 0). Nach dem
-		// Schließen der Ämter-Ebene schließt sich – wie im Original – auch die Karte.
+		// Personen-Modus: Stadt anklicken öffnet die städtische Ämter-Ebene (Stufe 0).
 		if (_personenModus)
 		{
 			SetProcessInput(false);
 			await _main.AemterEbeneDialog.ShowDialog(stadtId, 0, _personenModusModus);
-			Schliessen();
+			NachAemterEbene();
 			return;
 		}
 
@@ -279,8 +298,19 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 		else if (region == 201)
 			await _main.AemterEbeneDialog.ShowDialog(1, 2, _personenModusModus);
 
-		// Wie im Original schließt sich nach der Ämter-Ebene auch die Karte.
-		Schliessen();
+		NachAemterEbene();
+	}
+
+	/// <summary>
+	/// Verhalten nach dem Schließen der Ämter-Ebene: Bei den Privilegien (Prozess = 8, Henkershand = 13)
+	/// schließt sich – wie im Original – auch die Karte; bei den Hinterzimmer-Modi bleibt sie offen.
+	/// </summary>
+	private void NachAemterEbene()
+	{
+		if (_personenModusModus == 8 || _personenModusModus == 13)
+			Schliessen();
+		else if (Visible)
+			SetProcessInput(true);
 	}
 
 	private async void OnListePressed()

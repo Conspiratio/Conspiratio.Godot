@@ -265,11 +265,18 @@ public partial class Kontor : Control
 		_main.Kirche.ShowKirche();
 	}
 
+	private void _on_area_hinterzimmer_pressed()
+	{
+		SetProcessInput(false);
+		Hide();
+		_main.Hinterzimmer.ShowHinterzimmer();
+	}
+
 	private async void _on_area_nicht_implementiert_pressed()
 	{
 		SetProcessInput(false);
 
-		// TODO: Hinterzimmer, Schreibstube, Kirche, Söldner & Räuber und Geld-aus-dem-Fenster migrieren
+		// TODO: Söldner & Räuber und Geld-aus-dem-Fenster migrieren
 		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
 
 		if (Visible)

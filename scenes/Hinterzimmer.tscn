@@ -1,0 +1,144 @@
+[gd_scene load_steps=3 format=3 uid="uid://hinterzimmer001"]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintHinterzimmer.png" id="1_hzbg"]
+[ext_resource type="Script" path="res://assets/scripts/Hinterzimmer.cs" id="1_hzscr"]
+
+[node name="Hinterzimmer" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_hzscr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_hzbg")
+
+[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 11.0
+offset_right = 672.0
+offset_bottom = 45.0
+text = "Spielername"
+
+[node name="LabelPlaceDate" type="Label" parent="."]
+layout_mode = 0
+offset_left = 672.0
+offset_top = 11.0
+offset_right = 928.0
+offset_bottom = 45.0
+text = "Hinterzimmer A.D. 1600"
+horizontal_alignment = 1
+
+[node name="LabelTaler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1248.0
+offset_top = 11.0
+offset_right = 1568.0
+offset_bottom = 45.0
+text = "1000 Taler"
+horizontal_alignment = 2
+
+[node name="AreaBeziehungen" type="Button" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 430.0
+offset_right = 328.0
+offset_bottom = 900.0
+flat = true
+
+[node name="LabelBeziehungen" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 60.0
+offset_top = 396.0
+offset_right = 268.0
+offset_bottom = 428.0
+text = "Beziehungen"
+horizontal_alignment = 1
+
+[node name="AreaSabotage" type="Button" parent="."]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 484.0
+offset_right = 560.0
+offset_bottom = 626.0
+flat = true
+
+[node name="LabelSabotage" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 400.0
+offset_top = 450.0
+offset_right = 575.0
+offset_bottom = 482.0
+text = "Sabotage"
+horizontal_alignment = 1
+
+[node name="AreaAnschwaerzen" type="Button" parent="."]
+layout_mode = 0
+offset_left = 640.0
+offset_top = 431.0
+offset_right = 827.0
+offset_bottom = 711.0
+flat = true
+
+[node name="LabelAnschwaerzen" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 620.0
+offset_top = 397.0
+offset_right = 847.0
+offset_bottom = 429.0
+text = "Anschwärzen"
+horizontal_alignment = 1
+
+[node name="AreaSpionage" type="Button" parent="."]
+layout_mode = 0
+offset_left = 480.0
+offset_top = 220.0
+offset_right = 964.0
+offset_bottom = 330.0
+flat = true
+
+[node name="LabelSpionage" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 620.0
+offset_top = 186.0
+offset_right = 824.0
+offset_bottom = 218.0
+text = "Spione"
+horizontal_alignment = 1
+
+[node name="AreaErmordung" type="Button" parent="."]
+layout_mode = 0
+offset_left = 1081.0
+offset_top = 412.0
+offset_right = 1356.0
+offset_bottom = 648.0
+flat = true
+
+[node name="LabelErmordung" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 1115.0
+offset_top = 378.0
+offset_right = 1322.0
+offset_bottom = 410.0
+text = "Ermordung"
+horizontal_alignment = 1
+
+[connection signal="pressed" from="AreaBeziehungen" to="." method="_on_area_beziehungen_pressed"]
+[connection signal="pressed" from="AreaSabotage" to="." method="_on_area_sabotage_pressed"]
+[connection signal="pressed" from="AreaAnschwaerzen" to="." method="_on_area_anschwaerzen_pressed"]
+[connection signal="pressed" from="AreaSpionage" to="." method="_on_area_spionage_pressed"]
+[connection signal="pressed" from="AreaErmordung" to="." method="_on_area_ermordung_pressed"]
