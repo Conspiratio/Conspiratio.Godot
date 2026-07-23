@@ -406,7 +406,10 @@ public partial class Kontor : Control
 		// Verdeckte Zugende-Ereignisse (in der Reihenfolge des Originals)
 		await ZeigeVerdeckteEreignisse(zugNachrichten);
 
-		// TODO: Weitere Zugereignisse migrieren (Kartenspiel, Gericht, Zufallsereignisse, ...)
+		// Jährliche Zufallsereignisse (Finanz-, Ansehens-, Gesundheits- und Datumsereignisse)
+		await ZeigeZufallsereignisse();
+
+		// TODO: Weitere Zugereignisse migrieren (Kartenspiel, Gericht, ...)
 
 		// Sterbeprüfung
 		if (zugNachrichten.StirbtAktiverSpieler())
@@ -530,6 +533,22 @@ public partial class Kontor : Control
 		{
 			foreach (string meldung in vergifteterWein)
 				await SW.UI.ShowText.ShowDialog("Vergifteter Wein\n\n" + meldung);
+		}
+	}
+
+	/// <summary>
+	/// Zeigt die jährlichen Zufallsereignisse des Spielers (Finanz-, Ansehens-, Gesundheits- und
+	/// Datumsereignisse). Die Auswirkungen sind bereits im Manager verbucht; hier werden nur die
+	/// Meldungen angezeigt und die Spielerleiste aktualisiert.
+	/// </summary>
+	private async Task ZeigeZufallsereignisse()
+	{
+		var meldungen = new Conspiratio.Lib.Gameplay.Ereignisse.ZufallsereignisseManager().ErmittleEreignisse();
+
+		foreach (var meldung in meldungen)
+		{
+			UpdateHud();
+			await SW.UI.ShowText.ShowDialog(meldung.Ueberschrift + "\n\n" + meldung.Text);
 		}
 	}
 
