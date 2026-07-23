@@ -1,4 +1,4 @@
-[gd_scene load_steps=42 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=43 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -41,6 +41,7 @@
 [ext_resource type="PackedScene" uid="uid://stuetzverwalten1" path="res://scenes/StuetzpunktVerwalten.tscn" id="39_sv"]
 [ext_resource type="PackedScene" uid="uid://stuetzpunktkaufdlg1" path="res://scenes/dialogs/StuetzpunktKaufenDialog.tscn" id="38_skdlg"]
 [ext_resource type="PackedScene" uid="uid://kartenspieldlg1" path="res://scenes/dialogs/KartenspielDialog.tscn" id="40_ksdlg"]
+[ext_resource type="PackedScene" uid="uid://gerichtdlg1" path="res://scenes/GerichtDialog.tscn" id="41_grdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -76,6 +77,7 @@ SoeldnerRaeuberKartePath = NodePath("SoeldnerRaeuberKarte")
 StuetzpunktVerwaltenPath = NodePath("StuetzpunktVerwalten")
 StuetzpunktKaufenDialogPath = NodePath("StuetzpunktKaufenDialog")
 KartenspielDialogPath = NodePath("KartenspielDialog")
+GerichtDialogPath = NodePath("GerichtDialog")
 TestamentDialogPath = NodePath("TestamentDialog")
 BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
 GeburtDialogPath = NodePath("GeburtDialog")
@@ -226,6 +228,10 @@ visible = false
 layout_mode = 1
 
 [node name="KartenspielDialog" parent="." instance=ExtResource("40_ksdlg")]
+visible = false
+layout_mode = 1
+
+[node name="GerichtDialog" parent="." instance=ExtResource("41_grdlg")]
 visible = false
 layout_mode = 1
 

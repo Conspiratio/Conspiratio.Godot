@@ -413,7 +413,10 @@ public partial class Kontor : Control
 		// Jährliche Zufallsereignisse (Finanz-, Ansehens-, Gesundheits- und Datumsereignisse)
 		await ZeigeZufallsereignisse();
 
-		// TODO: Weitere Zugereignisse migrieren (Kartenspiel, Gericht, ...)
+		// Anklagen der KI-Spieler erzeugen und die Gerichtsverhandlungen mit dem Spieler abwickeln
+		SW.Dynamisch.AnklagenVonKISpielernErstellen();
+		await _main.GerichtDialog.ShowGericht();
+		UpdateHud();
 
 		// Sterbeprüfung
 		if (zugNachrichten.StirbtAktiverSpieler())
