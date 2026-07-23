@@ -52,7 +52,7 @@ public partial class Mainmenu : Control
 
 	private void _on_button_credits_pressed()
 	{
-		// TODO: Implement
+		_main.CreditsDialog.ShowDialog();
 	}
 
 	private async void _on_link_button_version_pressed()
