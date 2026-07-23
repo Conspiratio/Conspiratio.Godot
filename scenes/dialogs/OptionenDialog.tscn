@@ -1,0 +1,159 @@
+[gd_scene load_steps=6 format=3 uid="uid://optionendlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/OptionenDialog.cs" id="1_optdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_optdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_optdlg"]
+[ext_resource type="PackedScene" uid="uid://du838v21rp67t" path="res://scenes/controls/CheckBoxWithSounds.tscn" id="4_optdlg"]
+
+[sub_resource type="ButtonGroup" id="ButtonGroup_agg"]
+
+[node name="OptionenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_optdlg")
+script = ExtResource("1_optdlg")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -500.0
+offset_top = -320.0
+offset_right = 500.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_optdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 30.0
+offset_right = 950.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 40
+text = "Einstellungen"
+horizontal_alignment = 1
+
+[node name="VBoxChecks" type="VBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 120.0
+offset_right = 500.0
+offset_bottom = 400.0
+theme_override_constants/separation = 14
+
+[node name="CheckMusikAus" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Musik ausschalten"
+
+[node name="CheckTipps" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Tipps anzeigen"
+
+[node name="CheckStatistik" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Statistik anzeigen"
+
+[node name="CheckStuetzpunkt" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Stützpunktereignisse der KI anzeigen"
+
+[node name="CheckMilitaer" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Militärereignisse der KI anzeigen"
+
+[node name="VBoxSlider" type="VBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 560.0
+offset_top = 120.0
+offset_right = 940.0
+offset_bottom = 400.0
+theme_override_constants/separation = 8
+
+[node name="LabelMusik" type="Label" parent="Rahmen/VBoxSlider"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Musik Lautstärke - 100 %"
+
+[node name="SliderMusik" type="HSlider" parent="Rahmen/VBoxSlider"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+
+[node name="LabelEffekt" type="Label" parent="Rahmen/VBoxSlider"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Effekt Lautstärke - 100 %"
+
+[node name="SliderEffekt" type="HSlider" parent="Rahmen/VBoxSlider"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+
+[node name="LabelStimmen" type="Label" parent="Rahmen/VBoxSlider"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Stimmen Lautstärke - 100 %"
+
+[node name="SliderStimmen" type="HSlider" parent="Rahmen/VBoxSlider"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+max_value = 100.0
+value = 100.0
+
+[node name="LabelAgg" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 470.0
+offset_right = 500.0
+offset_bottom = 502.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Aggressivität der KI-Spieler:"
+
+[node name="HBoxAgg" type="HBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 510.0
+offset_right = 700.0
+offset_bottom = 550.0
+theme_override_constants/separation = 40
+
+[node name="CheckNiedrig" parent="Rahmen/HBoxAgg" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+button_group = SubResource("ButtonGroup_agg")
+text = "Niedrig"
+
+[node name="CheckMittel" parent="Rahmen/HBoxAgg" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+button_group = SubResource("ButtonGroup_agg")
+text = "Mittel"
+
+[node name="CheckHoch" parent="Rahmen/HBoxAgg" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+button_group = SubResource("ButtonGroup_agg")
+text = "Hoch"

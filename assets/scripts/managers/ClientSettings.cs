@@ -21,18 +21,93 @@ public static class ClientSettings
 
 	public static string LetzterSpielstand
 	{
-		get
-		{
-			var config = new ConfigFile();
-			config.Load(ConfigPath);
-			return (string)config.GetValue("spiel", "letzter_spielstand", "");
-		}
-		set
-		{
-			var config = new ConfigFile();
-			config.Load(ConfigPath);
-			config.SetValue("spiel", "letzter_spielstand", value);
-			config.Save(ConfigPath);
-		}
+		get => GetString("spiel", "letzter_spielstand", "");
+		set => SetValue("spiel", "letzter_spielstand", value);
+	}
+
+	// --- Optionen (Pendant zum WinForms-Einstellungsfenster) ---
+
+	public static bool MusikAusschalten
+	{
+		get => GetBool("optionen", "musik_ausschalten", false);
+		set => SetValue("optionen", "musik_ausschalten", value);
+	}
+
+	public static bool TippsAnzeigen
+	{
+		get => GetBool("optionen", "tipps_anzeigen", true);
+		set => SetValue("optionen", "tipps_anzeigen", value);
+	}
+
+	public static bool StatistikAnzeigen
+	{
+		get => GetBool("optionen", "statistik_anzeigen", true);
+		set => SetValue("optionen", "statistik_anzeigen", value);
+	}
+
+	public static bool StuetzpunktereignisseKiAnzeigen
+	{
+		get => GetBool("optionen", "stuetzpunktereignisse_ki_anzeigen", true);
+		set => SetValue("optionen", "stuetzpunktereignisse_ki_anzeigen", value);
+	}
+
+	public static bool MilitaerereignisseKiAnzeigen
+	{
+		get => GetBool("optionen", "militaerereignisse_ki_anzeigen", true);
+		set => SetValue("optionen", "militaerereignisse_ki_anzeigen", value);
+	}
+
+	public static int MusikLautstaerke
+	{
+		get => GetInt("optionen", "musik_lautstaerke", 100);
+		set => SetValue("optionen", "musik_lautstaerke", value);
+	}
+
+	public static int EffektLautstaerke
+	{
+		get => GetInt("optionen", "effekt_lautstaerke", 100);
+		set => SetValue("optionen", "effekt_lautstaerke", value);
+	}
+
+	public static int StimmenLautstaerke
+	{
+		get => GetInt("optionen", "stimmen_lautstaerke", 100);
+		set => SetValue("optionen", "stimmen_lautstaerke", value);
+	}
+
+	/// <summary>KI-Aggressivität als Vorgabe für neue Spiele (0 = Niedrig, 1 = Mittel, 2 = Hoch).</summary>
+	public static int KiAggressivitaet
+	{
+		get => GetInt("optionen", "ki_aggressivitaet", 1);
+		set => SetValue("optionen", "ki_aggressivitaet", value);
+	}
+
+	private static string GetString(string section, string key, string standard)
+	{
+		var config = new ConfigFile();
+		config.Load(ConfigPath);
+		return (string)config.GetValue(section, key, standard);
+	}
+
+	private static bool GetBool(string section, string key, bool standard)
+	{
+		var config = new ConfigFile();
+		config.Load(ConfigPath);
+		return (bool)config.GetValue(section, key, standard);
+	}
+
+	private static int GetInt(string section, string key, int standard)
+	{
+		var config = new ConfigFile();
+		config.Load(ConfigPath);
+		return (int)config.GetValue(section, key, standard);
+	}
+
+	private static void SetValue(string section, string key, Variant wert)
+	{
+		var config = new ConfigFile();
+		config.Load(ConfigPath);
+		config.SetValue(section, key, wert);
+		config.Save(ConfigPath);
 	}
 }

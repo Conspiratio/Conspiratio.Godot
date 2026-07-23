@@ -36,6 +36,9 @@ public partial class SoundManager : Node
 		_audioStreamPlayerCheckBoxClick = GetNode<AudioStreamPlayer>(AudioStreamPlayerCheckBoxClick);
 		_audioStreamPlayerIntro = GetNode<AudioStreamPlayer>(AudioStreamPlayerIntroPath);
 		_audioStreamPlayerCoins = GetNode<AudioStreamPlayer>(AudioStreamPlayerCoinsPath);
+
+		// Gespeicherte Lautstärke-Einstellungen auf die Audio-Busse anwenden.
+		AudioEinstellungen.AlleAnwenden();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.

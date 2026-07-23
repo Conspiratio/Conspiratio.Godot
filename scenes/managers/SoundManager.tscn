@@ -17,15 +17,20 @@ AudioStreamPlayerCoinsPath = NodePath("AudioStreamPlayerCoins")
 
 [node name="AudioStreamPlayerLeftClick" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("2_1q1uq")
+bus = &"Effekt"
 
 [node name="AudioStreamPlayerRightClick" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("3_sde8w")
+bus = &"Effekt"
 
 [node name="AudioStreamPlayerCheckBoxClick" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_6r0dd")
+bus = &"Effekt"
 
 [node name="AudioStreamPlayerIntro" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("4_508bk")
+bus = &"Musik"
 
 [node name="AudioStreamPlayerCoins" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_coins")
+bus = &"Effekt"

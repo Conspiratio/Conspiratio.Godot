@@ -1,6 +1,8 @@
 using System.IO;
 using Conspiratio.Godot.assets.scripts.controls;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Einstellungen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -98,6 +100,9 @@ public partial class NewLocalGameMenu : Control
 			await SW.UI.ShowText.ShowDialog(error);
 			return;
 		}
+
+		// Die in den Optionen gewählte KI-Aggressivität als Vorgabe für dieses Spiel übernehmen
+		SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler = (EnumSchwierigkeitsgrad)ClientSettings.KiAggressivitaet;
 
 		HideAndDisableInput();
 		_main.NewPlayerMenu.StartPlayerSetup();

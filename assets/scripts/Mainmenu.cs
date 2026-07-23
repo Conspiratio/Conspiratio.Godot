@@ -47,7 +47,7 @@ public partial class Mainmenu : Control
 	
 	private void _on_button_options_pressed()
 	{
-		// TODO: Implement
+		_main.OptionenDialog.ShowDialog();
 	}
 
 	private void _on_button_credits_pressed()
