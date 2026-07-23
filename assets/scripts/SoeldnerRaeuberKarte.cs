@@ -17,10 +17,21 @@ public partial class SoeldnerRaeuberKarte : Control
 	private const float ScaleX = 1600f / 2560f;
 	private const float ScaleY = 900f / 1440f;
 
+	// Räuberlager-Platzhalter-Icons (wie im Original) an den Stützpunkten, die im Kartenbild kein
+	// eigenes Symbol tragen. Offsets und Größe stammen aus dem 1366×768-Formraum des Originals und
+	// werden auf die 1600×900-Auflösung hochskaliert.
+	private const float PlatzhalterFaktor = 1600f / 1366f;
+
+	private static readonly (int Id, float OffsetX, float OffsetY)[] PlatzhalterDaten =
+	{
+		(3, 45, 30), (5, 40, 30), (6, 40, 30), (7, 40, 30), (8, 30, 23)
+	};
+
 	private TextureRect _background;
 	private Panel _hoverRect;
 	private Rect2[] _rechtecke;
 	private TextureRect[] _flaggen;
+	private TextureRect[] _platzhalter;
 
 	private int _hoverStuetzpunkt;
 	private readonly SoeldnerRaeuberManager _manager = new SoeldnerRaeuberManager();
@@ -67,6 +78,7 @@ public partial class SoeldnerRaeuberKarte : Control
 	public void ZeigeKarte()
 	{
 		BerechneRechtecke();
+		PlatzhalterEinblenden();
 		FlaggenAktualisieren();
 
 		_hoverStuetzpunkt = 0;
@@ -123,6 +135,38 @@ public partial class SoeldnerRaeuberKarte : Control
 			float unten = _manager.GetRechteck(id, 3) * ScaleY;
 
 			_rechtecke[id] = new Rect2(links, oben, rechts - links, unten - oben);
+		}
+	}
+
+	private void PlatzhalterEinblenden()
+	{
+		if (_platzhalter == null)
+		{
+			var textur = GD.Load<Texture2D>("res://assets/images/symbole/RaeuberlagerPlatzhalter.png");
+			_platzhalter = new TextureRect[PlatzhalterDaten.Length];
+
+			for (int i = 0; i < PlatzhalterDaten.Length; i++)
+			{
+				var platzhalter = new TextureRect
+				{
+					Texture = textur,
+					ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+					StretchMode = TextureRect.StretchModeEnum.Scale,
+					MouseFilter = MouseFilterEnum.Ignore,
+					Size = new Vector2(40 * PlatzhalterFaktor, 44 * PlatzhalterFaktor)
+				};
+
+				_platzhalter[i] = platzhalter;
+				AddChild(platzhalter);
+			}
+		}
+
+		for (int i = 0; i < PlatzhalterDaten.Length; i++)
+		{
+			var daten = PlatzhalterDaten[i];
+			var rechteck = _rechtecke[daten.Id];
+			_platzhalter[i].Position = rechteck.Position
+				+ new Vector2(daten.OffsetX * PlatzhalterFaktor, daten.OffsetY * PlatzhalterFaktor);
 		}
 	}
 
