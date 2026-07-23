@@ -403,7 +403,10 @@ public partial class Kontor : Control
 		foreach (string meldung in zugNachrichten.AktualisiereAnwesen())
 			await SW.UI.ShowText.ShowDialog("Eigentümer\n\n" + meldung);
 
-		// TODO: Weitere Zugereignisse migrieren (Hinterzimmer, Kartenspiel, Feste, Gericht, Zufallsereignisse, ...)
+		// Verdeckte Zugende-Ereignisse (in der Reihenfolge des Originals)
+		await ZeigeVerdeckteEreignisse(zugNachrichten);
+
+		// TODO: Weitere Zugereignisse migrieren (Kartenspiel, Gericht, Zufallsereignisse, ...)
 
 		// Sterbeprüfung
 		if (zugNachrichten.StirbtAktiverSpieler())
@@ -474,6 +477,60 @@ public partial class Kontor : Control
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Zeigt die verdeckten Zugende-Ereignisse in der Reihenfolge des Originals: Korruptions- und
+	/// Schmuggelgelder, Kerkerklatsch, Spionage- und Sabotage-Meldungen, eine beauftragte Ermordung
+	/// sowie einen beauftragten vergifteten Wein.
+	/// </summary>
+	private async Task ZeigeVerdeckteEreignisse(ZugNachrichtenManager zugNachrichten)
+	{
+		string korruption = zugNachrichten.KassiereKorruptionsgelder();
+
+		if (korruption != null)
+		{
+			UpdateHud();
+			SoundManager.Instance.PlayCoins();
+			await SW.UI.ShowText.ShowDialog("Korruptionsgelder\n\n" + korruption);
+		}
+
+		string schmuggel = zugNachrichten.KassiereSchmuggelgelder();
+
+		if (schmuggel != null)
+		{
+			UpdateHud();
+			SoundManager.Instance.PlayCoins();
+			await SW.UI.ShowText.ShowDialog("Schmuggel\n\n" + schmuggel);
+		}
+
+		string kerkerklatsch = zugNachrichten.ErmittleKerkerklatsch();
+
+		if (kerkerklatsch != null)
+			await SW.UI.ShowText.ShowDialog("Kerkerklatsch\n\n" + kerkerklatsch);
+
+		string spionage = zugNachrichten.ErmittleSpionageNachrichten();
+
+		if (spionage != null)
+			await SW.UI.ShowText.ShowDialog("Spionage\n\n" + spionage);
+
+		string sabotage = zugNachrichten.ErmittleSabotageNachrichten();
+
+		if (sabotage != null)
+			await SW.UI.ShowText.ShowDialog("Sabotage\n\n" + sabotage);
+
+		string ermordung = zugNachrichten.FuehreErmordungDurch();
+
+		if (ermordung != null)
+			await SW.UI.ShowText.ShowDialog("Ermordung\n\n" + ermordung);
+
+		var vergifteterWein = zugNachrichten.FuehreVergiftetenWeinDurch();
+
+		if (vergifteterWein != null)
+		{
+			foreach (string meldung in vergifteterWein)
+				await SW.UI.ShowText.ShowDialog("Vergifteter Wein\n\n" + meldung);
+		}
 	}
 
 	/// <summary>
