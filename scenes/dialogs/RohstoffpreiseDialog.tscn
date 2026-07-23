@@ -1,8 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://rohstoffpreisedlg1"]
+[gd_scene load_steps=5 format=3 uid="uid://rohstoffpreisedlg1"]
 
 [ext_resource type="Script" path="res://assets/scripts/RohstoffpreiseDialog.cs" id="1_rpdlg"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_rpdlg"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_rpdlg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
 
 [node name="RohstoffpreiseDialog" type="Control" groups=["Dialogs"]]
 layout_mode = 3
@@ -25,6 +27,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
 layout_mode = 1

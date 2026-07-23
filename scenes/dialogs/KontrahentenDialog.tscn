@@ -1,9 +1,11 @@
-[gd_scene load_steps=5 format=3 uid="uid://kontrahentendlg1"]
+[gd_scene load_steps=6 format=3 uid="uid://kontrahentendlg1"]
 
 [ext_resource type="Script" path="res://assets/scripts/KontrahentenDialog.cs" id="1_kodlg"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_kodlg"]
 [ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_kodlg"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_kodlg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
 
 [node name="KontrahentenDialog" type="Control" groups=["Dialogs"]]
 layout_mode = 3
@@ -26,6 +28,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
 layout_mode = 1

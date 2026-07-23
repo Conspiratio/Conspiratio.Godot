@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://beziehungpflegdlg1"]
+[gd_scene load_steps=8 format=3 uid="uid://beziehungpflegdlg1"]
 
 [ext_resource type="Script" path="res://assets/scripts/BeziehungenPflegenDialog.cs" id="1_bpdlg"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_bpdlg"]
@@ -6,6 +6,8 @@
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_bpdlg"]
 [ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_bpdlg"]
 [ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="6_bpdlg"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_panel"]
 
 [node name="BeziehungenPflegenDialog" type="Control" groups=["Dialogs"]]
 layout_mode = 3
@@ -30,6 +32,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_panel")
 
 [node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
 layout_mode = 1

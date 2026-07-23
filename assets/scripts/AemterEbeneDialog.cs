@@ -137,6 +137,14 @@ public partial class AemterEbeneDialog : Control
 		button.Size = new Vector2(ButtonBreite, ButtonHoehe);
 		button.AutowrapMode = TextServer.AutowrapMode.WordSmart;
 		button.Disabled = !amt.Besetzt;
+
+		// Wie im Original: klickbarer Text auf dem Pergament (kein Button-Kasten), dunkle Schrift.
+		button.Flat = true;
+		button.AddThemeColorOverride("font_color", new Color(0.12f, 0.06f, 0.02f));
+		button.AddThemeColorOverride("font_hover_color", new Color(0.55f, 0.2f, 0f));
+		button.AddThemeColorOverride("font_pressed_color", new Color(0.55f, 0.2f, 0f));
+		button.AddThemeColorOverride("font_disabled_color", new Color(0.4f, 0.34f, 0.28f));
+
 		int holderId = amt.HolderId;
 		button.Pressed += () => OnAmtPressed(holderId);
 		zelle.AddChild(button);
