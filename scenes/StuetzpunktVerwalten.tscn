@@ -1,0 +1,89 @@
+[gd_scene load_steps=4 format=3 uid="uid://stuetzverwalten1"]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/BackgroundStadt.png" id="1_svbg"]
+[ext_resource type="Script" path="res://assets/scripts/StuetzpunktVerwalten.cs" id="1_svscr"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="2_svth"]
+
+[node name="StuetzpunktVerwalten" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_svth")
+script = ExtResource("1_svscr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_svbg")
+
+[node name="LabelName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 20.0
+offset_right = 900.0
+offset_bottom = 66.0
+text = "Stützpunkt"
+
+[node name="LabelTaler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1248.0
+offset_top = 20.0
+offset_right = 1568.0
+offset_bottom = 54.0
+text = "1000 Taler"
+horizontal_alignment = 2
+
+[node name="HBoxEinheiten" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -520.0
+offset_top = -150.0
+offset_right = 520.0
+offset_bottom = 90.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 60
+alignment = 1
+
+[node name="HBoxUpgrades" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -150.0
+offset_right = 400.0
+offset_bottom = -66.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="LabelHinweis" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "Rechtsklick kehrt zur Karte zurück."
+horizontal_alignment = 1

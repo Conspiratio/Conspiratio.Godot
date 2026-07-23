@@ -90,17 +90,25 @@ public partial class SoeldnerRaeuberKarte : Control
 
 		if (_manager.GehoertAktivemSpieler(stuetzpunktId))
 		{
-			// TODO: Stützpunkt-Verwaltung (frmStuetzpunktVerwalten) migrieren
-			await SW.UI.ShowText.ShowDialog("Die Verwaltung des Stützpunkts ist noch nicht verfügbar.");
+			// Eigener Stützpunkt: die Verwaltung öffnen (die Karte wird ausgeblendet).
+			Hide();
+			_main.StuetzpunktVerwalten.ZeigeVerwaltung(stuetzpunktId);
+			return;
 		}
-		else
-		{
-			await _main.StuetzpunktKaufenDialog.ShowDialog(stuetzpunktId);
-			FlaggenAktualisieren();
-		}
+
+		await _main.StuetzpunktKaufenDialog.ShowDialog(stuetzpunktId);
+		FlaggenAktualisieren();
 
 		if (Visible)
 			SetProcessInput(true);
+	}
+
+	/// <summary>Kehrt aus der Stützpunkt-Verwaltung zur Karte zurück.</summary>
+	public void ReturnFromVerwaltung()
+	{
+		FlaggenAktualisieren();
+		Show();
+		SetProcessInput(true);
 	}
 
 	private void BerechneRechtecke()
