@@ -30,10 +30,14 @@ public partial class StuetzpunktVerwalten : Control
 	private PackedScene _buttonScene;
 	private PackedScene _numericScene;
 
+	private VBoxContainer _vboxAktionen;
+
 	private Main _main;
 	private StuetzpunktVerwaltenManager _manager;
+	private StuetzpunktAktionenManager _aktionenManager;
 	private int[] _aktuelleAnzahl;
 	private controls.NumericButtonWithSounds[] _numerics;
+	private controls.NumericButtonWithSounds[][] _aktionsNumerics;
 
 	public override void _Ready()
 	{
@@ -41,6 +45,7 @@ public partial class StuetzpunktVerwalten : Control
 		_labelTaler = GetNode<Label>("LabelTaler");
 		_hboxEinheiten = GetNode<HBoxContainer>("HBoxEinheiten");
 		_hboxUpgrades = GetNode<HBoxContainer>("HBoxUpgrades");
+		_vboxAktionen = GetNode<VBoxContainer>("VBoxAktionen");
 		_buttonScene = GD.Load<PackedScene>("res://scenes/controls/ButtonWithSounds.tscn");
 		_numericScene = GD.Load<PackedScene>("res://scenes/controls/NumericButtonWithSounds.tscn");
 
@@ -61,10 +66,12 @@ public partial class StuetzpunktVerwalten : Control
 	public void ZeigeVerwaltung(int stuetzpunktId)
 	{
 		_manager = new StuetzpunktVerwaltenManager(stuetzpunktId);
+		_aktionenManager = new StuetzpunktAktionenManager(stuetzpunktId);
 		_labelName.Text = _manager.Name;
 
 		BaueEinheiten();
 		BaueUpgrades();
+		BaueAktionen();
 		UpdateHud();
 
 		Show();
@@ -193,9 +200,107 @@ public partial class StuetzpunktVerwalten : Control
 		}
 
 		UpdateHud();
+		BaueAktionen(); // die verfügbaren Truppen für die Aufträge haben sich geändert
 
 		if (Visible)
 			SetProcessInput(true);
+	}
+
+	private void BaueAktionen()
+	{
+		foreach (Node child in _vboxAktionen.GetChildren())
+		{
+			_vboxAktionen.RemoveChild(child);
+			child.QueueFree();
+		}
+
+		_aktionsNumerics = new controls.NumericButtonWithSounds[_aktionenManager.AktionenAnzahl][];
+
+		for (int slot = 0; slot < _aktionenManager.AktionenAnzahl; slot++)
+		{
+			int s = slot;
+
+			var reihe = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+			reihe.AddThemeConstantOverride("separation", 12);
+
+			// Aktionsart umschalten
+			var artButton = _buttonScene.Instantiate<controls.ButtonWithSounds>();
+			artButton.CustomMinimumSize = new Vector2(200, 40);
+			artButton.Text = _aktionenManager.GetAktionsartName(slot);
+			artButton.Pressed += () => { _aktionenManager.ZyklusAktionsart(s); BaueAktionen(); };
+			reihe.AddChild(artButton);
+
+			// Ziel: Grafschaft (Überwachen/Plündern) oder Stützpunkt (Truppen schicken)
+			if (_aktionenManager.ZielIstGrafschaft(slot))
+				reihe.AddChild(ZielButton(s, true));
+			else if (_aktionenManager.ZielIstStuetzpunkt(slot))
+				reihe.AddChild(ZielButton(s, false));
+
+			// Einheiten-Zuteilung (nur wenn ein Auftrag gewählt ist)
+			_aktionsNumerics[slot] = new controls.NumericButtonWithSounds[_aktionenManager.EinheitenAnzahl];
+
+			if (_aktionenManager.GetAktionsartName(slot) != "Kein Auftrag")
+			{
+				for (int u = 0; u < _aktionenManager.EinheitenAnzahl; u++)
+				{
+					int unit = u;
+					var numeric = _numericScene.Instantiate<controls.NumericButtonWithSounds>();
+					numeric.CustomMinimumSize = new Vector2(84, 40);
+					numeric.TooltipText = _aktionenManager.GetEinheitName(u);
+					numeric.MinimalerWert = 0;
+					numeric.MaximalerWert = _aktionenManager.GetMaxEinheitInAktion(slot, u);
+					numeric.Wert = _aktionenManager.GetEinheitInAktion(slot, u);
+					numeric.WertChanged += _ => OnAktionsEinheitChanged(s, unit);
+					_aktionsNumerics[slot][u] = numeric;
+					reihe.AddChild(numeric);
+				}
+			}
+
+			_vboxAktionen.AddChild(reihe);
+		}
+	}
+
+	private controls.ButtonWithSounds ZielButton(int slot, bool grafschaft)
+	{
+		var button = _buttonScene.Instantiate<controls.ButtonWithSounds>();
+		button.CustomMinimumSize = new Vector2(220, 40);
+		button.Text = grafschaft ? _aktionenManager.GetZielLandName(slot) : _aktionenManager.GetZielStuetzpunktName(slot);
+
+		button.Pressed += () =>
+		{
+			if (grafschaft)
+			{
+				int naechste = _aktionenManager.GetZielLand(slot) + 1;
+				if (naechste > _aktionenManager.LandMax)
+					naechste = _aktionenManager.LandMin;
+				_aktionenManager.SetZielLand(slot, naechste);
+			}
+			else
+			{
+				int naechste = _aktionenManager.GetZielStuetzpunkt(slot) + 1;
+				if (naechste > _aktionenManager.StuetzpunktMax)
+					naechste = _aktionenManager.StuetzpunktMin;
+				_aktionenManager.SetZielStuetzpunkt(slot, naechste);
+			}
+
+			BaueAktionen();
+		};
+
+		return button;
+	}
+
+	private void OnAktionsEinheitChanged(int slot, int unit)
+	{
+		_aktionenManager.SetEinheitInAktion(slot, unit, _aktionsNumerics[slot][unit].Wert);
+
+		// Die Obergrenzen des jeweils anderen Slots aktualisieren.
+		int anderer = slot == 0 ? 1 : 0;
+		if (_aktionsNumerics[anderer] != null)
+		{
+			for (int u = 0; u < _aktionenManager.EinheitenAnzahl; u++)
+				if (_aktionsNumerics[anderer][u] != null)
+					_aktionsNumerics[anderer][u].MaximalerWert = _aktionenManager.GetMaxEinheitInAktion(anderer, u);
+		}
 	}
 
 	private async void OnManoeverPressed()

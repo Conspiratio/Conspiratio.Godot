@@ -41,19 +41,30 @@ text = "1000 Taler"
 horizontal_alignment = 2
 
 [node name="HBoxEinheiten" type="HBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -520.0
-offset_top = -150.0
-offset_right = 520.0
-offset_bottom = 90.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
+offset_left = 280.0
+offset_top = 90.0
+offset_right = 1320.0
+offset_bottom = 330.0
 theme_override_constants/separation = 60
+alignment = 1
+
+[node name="LabelAktionenTitel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 280.0
+offset_top = 360.0
+offset_right = 1320.0
+offset_bottom = 394.0
+text = "Aufträge"
+horizontal_alignment = 1
+
+[node name="VBoxAktionen" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 400.0
+offset_right = 1400.0
+offset_bottom = 560.0
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="HBoxUpgrades" type="HBoxContainer" parent="."]
