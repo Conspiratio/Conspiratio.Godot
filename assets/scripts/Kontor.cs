@@ -427,6 +427,7 @@ public partial class Kontor : Control
 		// Sterbeprüfung
 		if (zugNachrichten.StirbtAktiverSpieler())
 		{
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Tod);
 			await SW.UI.ShowText.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
 
 			string name = SW.Dynamisch.GetAktHum().GetName();
@@ -573,21 +574,25 @@ public partial class Kontor : Control
 	{
 		var familie = new FamilieManager();
 
-		// Geburt eines Kindes
+		// Geburt eines Kindes (mit passender Ereignis-Musik)
 		if (familie.StehtGeburtAn())
 		{
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Geburt);
 			await _main.GeburtDialog.ShowDialog(familie);
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 			UpdateHud();
 		}
 
-		// Hochzeit, wenn der umworbene Partner voll verliebt ist
+		// Hochzeit, wenn der umworbene Partner voll verliebt ist (mit passender Ereignis-Musik)
 		if (familie.StehtHochzeitAn())
 		{
 			var hochzeit = familie.FuehreHochzeitDurch();
 			string angebeteter = hochzeit.PartnerMaennlich ? "Euer Angebeteter " : "Eure Angebetete ";
 
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Hochzeit);
 			await SW.UI.ShowText.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
 			                                " hat sich endlich bereit erklärt, Euch zu heiraten. Ihr schwebt im siebten Himmel...");
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 			UpdateHud();
 		}
 

@@ -33,6 +33,7 @@ public partial class SoundManager : Node
 
 	private const string BusEffekt = "Effekt";
 	private const string BusMusik = "Musik";
+	private const string BusStimmen = "Stimmen";
 	private const int SfxPoolGroesse = 8;
 	private const float StilleDb = -40f;
 	private const double UeberblendDauer = 1.5;
@@ -120,6 +121,7 @@ public partial class SoundManager : Node
 	private AudioStreamPlayer[] _sfxPool;
 	private int _sfxNaechster;
 
+	private AudioStreamPlayer _stimme;
 	private AudioStreamPlayer _musik;
 	private MusikKategorie _aktuelleKategorie = MusikKategorie.Keine;
 	private Tween _musikTween;
@@ -144,6 +146,9 @@ public partial class SoundManager : Node
 			AddChild(player);
 			_sfxPool[i] = player;
 		}
+
+		_stimme = new AudioStreamPlayer { Bus = BusStimmen };
+		AddChild(_stimme);
 
 		_musik = new AudioStreamPlayer { Bus = BusMusik };
 		AddChild(_musik);
@@ -175,6 +180,18 @@ public partial class SoundManager : Node
 
 		player.Stream = stream;
 		player.Play();
+	}
+
+	/// <summary>Spielt eine Sprachausgabe (Stimmen-Bus) vom angegebenen Ressourcenpfad; ein noch laufender Voice wird ersetzt.</summary>
+	public void SpieleStimme(string pfad)
+	{
+		var stream = GD.Load<AudioStream>(pfad);
+
+		if (stream == null)
+			return;
+
+		_stimme.Stream = stream;
+		_stimme.Play();
 	}
 
 	// --- Musik ---
