@@ -272,6 +272,13 @@ public partial class Kontor : Control
 		_main.Hinterzimmer.ShowHinterzimmer();
 	}
 
+	private void _on_area_kampf_pressed()
+	{
+		SetProcessInput(false);
+		Hide();
+		_main.SoeldnerRaeuberKarte.ZeigeKarte();
+	}
+
 	/// <summary>
 	/// "Geld zum Fenster rauswerfen": der Spieler zieht sich freiwillig aus dem Spiel zurück. Die
 	/// Bestätigung und das Entfernen erledigt die Lib; danach folgt entweder der nächste Spieler oder –

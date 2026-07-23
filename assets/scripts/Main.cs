@@ -110,6 +110,12 @@ public partial class Main : Control
 	[Export]
 	public NodePath BeziehungenPflegenDialogPath { get; set; }
 
+	[Export]
+	public NodePath SoeldnerRaeuberKartePath { get; set; }
+
+	[Export]
+	public NodePath StuetzpunktKaufenDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -143,6 +149,8 @@ public partial class Main : Control
 	public AemterEbeneDialog AemterEbeneDialog;
 	public Hinterzimmer Hinterzimmer;
 	public BeziehungenPflegenDialog BeziehungenPflegenDialog;
+	public SoeldnerRaeuberKarte SoeldnerRaeuberKarte;
+	public StuetzpunktKaufenDialog StuetzpunktKaufenDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -182,6 +190,8 @@ public partial class Main : Control
 		AemterEbeneDialog = GetNode<AemterEbeneDialog>(AemterEbeneDialogPath);
 		Hinterzimmer = GetNode<Hinterzimmer>(HinterzimmerPath);
 		BeziehungenPflegenDialog = GetNode<BeziehungenPflegenDialog>(BeziehungenPflegenDialogPath);
+		SoeldnerRaeuberKarte = GetNode<SoeldnerRaeuberKarte>(SoeldnerRaeuberKartePath);
+		StuetzpunktKaufenDialog = GetNode<StuetzpunktKaufenDialog>(StuetzpunktKaufenDialogPath);
 
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, BeziehungenPflegenDialog, BauwerkStiftenDialog, FestGebenDialog,

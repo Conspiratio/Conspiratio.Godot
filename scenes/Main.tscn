@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=40 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -37,6 +37,8 @@
 [ext_resource type="PackedScene" uid="uid://kontrahentendlg1" path="res://scenes/dialogs/KontrahentenDialog.tscn" id="33_kodlg"]
 [ext_resource type="PackedScene" uid="uid://aemterebenedlg1" path="res://scenes/dialogs/AemterEbeneDialog.tscn" id="34_aedlg"]
 [ext_resource type="PackedScene" uid="uid://beziehungpflegdlg1" path="res://scenes/dialogs/BeziehungenPflegenDialog.tscn" id="36_bpdlg"]
+[ext_resource type="PackedScene" uid="uid://soeldnerraeuber1" path="res://scenes/SoeldnerRaeuberKarte.tscn" id="37_srk"]
+[ext_resource type="PackedScene" uid="uid://stuetzpunktkaufdlg1" path="res://scenes/dialogs/StuetzpunktKaufenDialog.tscn" id="38_skdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -68,6 +70,8 @@ WahlDialogPath = NodePath("WahlDialog")
 KirchePath = NodePath("Kirche")
 HinterzimmerPath = NodePath("Hinterzimmer")
 BeziehungenPflegenDialogPath = NodePath("BeziehungenPflegenDialog")
+SoeldnerRaeuberKartePath = NodePath("SoeldnerRaeuberKarte")
+StuetzpunktKaufenDialogPath = NodePath("StuetzpunktKaufenDialog")
 TestamentDialogPath = NodePath("TestamentDialog")
 BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
 GeburtDialogPath = NodePath("GeburtDialog")
@@ -137,6 +141,10 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
+[node name="SoeldnerRaeuberKarte" parent="." instance=ExtResource("37_srk")]
+visible = false
+layout_mode = 1
+
 [node name="TestamentDialog" parent="." instance=ExtResource("22_tsdlg")]
 visible = false
 layout_mode = 1
@@ -202,6 +210,10 @@ visible = false
 layout_mode = 1
 
 [node name="BeziehungenPflegenDialog" parent="." instance=ExtResource("36_bpdlg")]
+visible = false
+layout_mode = 1
+
+[node name="StuetzpunktKaufenDialog" parent="." instance=ExtResource("38_skdlg")]
 visible = false
 layout_mode = 1
 
