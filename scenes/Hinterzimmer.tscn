@@ -58,6 +58,7 @@ flat = true
 [node name="LabelBeziehungen" type="Label" parent="."]
 visible = false
 layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 offset_left = 60.0
 offset_top = 396.0
 offset_right = 268.0
@@ -76,6 +77,7 @@ flat = true
 [node name="LabelSabotage" type="Label" parent="."]
 visible = false
 layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 offset_left = 400.0
 offset_top = 450.0
 offset_right = 575.0
@@ -94,6 +96,7 @@ flat = true
 [node name="LabelAnschwaerzen" type="Label" parent="."]
 visible = false
 layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 offset_left = 620.0
 offset_top = 397.0
 offset_right = 847.0
@@ -112,6 +115,7 @@ flat = true
 [node name="LabelSpionage" type="Label" parent="."]
 visible = false
 layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 offset_left = 620.0
 offset_top = 186.0
 offset_right = 824.0
@@ -130,6 +134,7 @@ flat = true
 [node name="LabelErmordung" type="Label" parent="."]
 visible = false
 layout_mode = 0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
 offset_left = 1115.0
 offset_top = 378.0
 offset_right = 1322.0
