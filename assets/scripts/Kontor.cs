@@ -469,6 +469,7 @@ public partial class Kontor : Control
 			await HalteWahlenAb();
 			await ZeigeKiTodesfaelle();
 			new FamilieManager().VerheirateKis();
+			await ZeigeKampfereignisse();
 		}
 
 		_rundenManager.SchalteZumNaechstenSpieler();
@@ -545,5 +546,17 @@ public partial class Kontor : Control
 			int anzahl = System.Math.Min(10, meldungen.Count - i);
 			await SW.UI.ShowText.ShowDialog("Todesfälle in diesem Jahr\n\n" + string.Join("\n", meldungen.GetRange(i, anzahl)));
 		}
+	}
+
+	/// <summary>
+	/// Militärische Ereignisse am Jahresende (Migration von frmKampfereignisse): die KI-Stützpunkt-Aktionen
+	/// und die stattfindenden Kämpfe werden abgewickelt und der Reihe nach angezeigt.
+	/// </summary>
+	private async Task ZeigeKampfereignisse()
+	{
+		var meldungen = new Conspiratio.Lib.Gameplay.Kampf.KampfereignisseManager().ErmittleEreignisse();
+
+		foreach (string meldung in meldungen)
+			await SW.UI.ShowText.ShowDialog("Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr() + "\n\n" + meldung);
 	}
 }
