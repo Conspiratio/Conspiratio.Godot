@@ -272,11 +272,41 @@ public partial class Kontor : Control
 		_main.Hinterzimmer.ShowHinterzimmer();
 	}
 
+	/// <summary>
+	/// "Geld zum Fenster rauswerfen": der Spieler zieht sich freiwillig aus dem Spiel zurück. Die
+	/// Bestätigung und das Entfernen erledigt die Lib; danach folgt entweder der nächste Spieler oder –
+	/// wenn niemand mehr übrig ist – das Spielende (zurück ins Hauptmenü).
+	/// </summary>
+	private async void _on_area_fenster_pressed()
+	{
+		SetProcessInput(false);
+
+		bool? ergebnis = await SW.Dynamisch.AktivenSpielerEntfernen();
+
+		if (ergebnis == null)
+		{
+			// Abgebrochen – der Spieler bleibt im Spiel.
+			if (Visible)
+				SetProcessInput(true);
+			return;
+		}
+
+		if (ergebnis.Value)
+		{
+			// Kein Mitstreiter mehr übrig – zurück ins Hauptmenü.
+			HideAndDisableInput();
+			return;
+		}
+
+		// Der Spieler wurde entfernt, der nächste ist bereits aktiv.
+		await NaechstenSpielerAnkuendigen();
+	}
+
 	private async void _on_area_nicht_implementiert_pressed()
 	{
 		SetProcessInput(false);
 
-		// TODO: Söldner & Räuber und Geld-aus-dem-Fenster migrieren
+		// TODO: Söldner & Räuber migrieren (AreaKampf)
 		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
 
 		if (Visible)
