@@ -192,14 +192,21 @@ public partial class AemterEbeneDialog : Control
 
 	private static TextureRect SymbolRect(Texture2D textur, Vector2 position, Vector2 groesse)
 	{
-		return new TextureRect
+		// Wichtig: ExpandMode VOR Size setzen. Bei Default (KeepSize) ist die Mindestgröße die native
+		// Texturgröße (z. B. SymbRel1 mit 650×900); ein danach gesetztes Size würde hochgeklemmt und
+		// von einem späteren IgnoreSize nicht mehr verkleinert – die Symbole erschienen dann viel zu groß.
+		var rect = new TextureRect
 		{
-			Texture = textur,
-			Position = position,
-			Size = groesse,
+			ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
 			StretchMode = TextureRect.StretchModeEnum.Scale,
+			Texture = textur,
 			MouseFilter = MouseFilterEnum.Ignore
 		};
+
+		rect.Position = position;
+		rect.Size = groesse;
+
+		return rect;
 	}
 
 	private async void OnAmtPressed(int holderId)

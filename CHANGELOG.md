@@ -58,6 +58,7 @@ _Unreleased_
 - Beim Spielstart und nach dem Laden eines Spielstands erschien bei Rechtsklick fälschlicherweise oft der Dialog "Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?" – das Menü "Neues lokales Spiel" verarbeitete die Eingabe auch dann, wenn es gar nicht sichtbar war
 - In der Spielerleiste oben rechts stand "Taler" doppelt (z. B. "1.000 Taler Taler")
 - Beim Klick auf "Spiel fortsetzen" blieb der "Lokales Spiel"-Dialog während der Ladebestätigung sichtbar; er wird jetzt sofort geschlossen
+- In der Ämter-Ebene der Weltkarte wurden die Statussymbole (Konfession, Ehe, Sabotage/Spionage) viel zu groß dargestellt und überlappten – der TextureRect erzwang die native Texturgröße; jetzt werden sie wieder in ihrer vorgesehenen kleinen Größe angezeigt
 
 ### [EN]
 
@@ -110,3 +111,4 @@ _Unreleased_
 - On starting a game and after loading a savegame, right-clicking wrongly showed the dialog "Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?" quite often – the "new local game" menu processed input even while it was not visible
 - The player bar at the top right showed "Taler" twice (e.g. "1,000 Taler Taler")
 - When clicking "Spiel fortsetzen" the "local game" dialog stayed visible during the load confirmation; it is now closed immediately
+- In the world map's office layer the status symbols (confession, marriage, sabotage/espionage) were shown far too large and overlapped – the TextureRect enforced the native texture size; they are now shown again in their intended small size
