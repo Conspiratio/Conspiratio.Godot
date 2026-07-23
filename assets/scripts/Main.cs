@@ -125,6 +125,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath GerichtDialogPath { get; set; }
 
+	[Export]
+	public NodePath TitelVerleihDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -163,6 +166,7 @@ public partial class Main : Control
 	public StuetzpunktVerwalten StuetzpunktVerwalten;
 	public KartenspielDialog KartenspielDialog;
 	public GerichtDialog GerichtDialog;
+	public TitelVerleihDialog TitelVerleihDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -207,6 +211,7 @@ public partial class Main : Control
 		StuetzpunktVerwalten = GetNode<StuetzpunktVerwalten>(StuetzpunktVerwaltenPath);
 		KartenspielDialog = GetNode<KartenspielDialog>(KartenspielDialogPath);
 		GerichtDialog = GetNode<GerichtDialog>(GerichtDialogPath);
+		TitelVerleihDialog = GetNode<TitelVerleihDialog>(TitelVerleihDialogPath);
 
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, BeziehungenPflegenDialog, BauwerkStiftenDialog, FestGebenDialog,

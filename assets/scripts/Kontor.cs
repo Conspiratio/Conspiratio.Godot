@@ -3,6 +3,7 @@ using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
+using Conspiratio.Lib.Gameplay.Titel;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -367,7 +368,10 @@ public partial class Kontor : Control
 	{
 		var zugNachrichten = new ZugNachrichtenManager();
 
-		// Familienereignisse zu Zugbeginn (Geburt, Hochzeit, Kindestod, Brautwerbung)
+		// Prüfen, ob dem Spieler dieses Jahr ein höherer Titel zusteht (die Verleihung folgt nach der Hochzeit)
+		SW.Dynamisch.VersuchTitelVerleihen(SW.Dynamisch.GetAktiverSpieler());
+
+		// Familienereignisse zu Zugbeginn (Geburt, Hochzeit, Titelverleihung, Kindestod, Brautwerbung)
 		await ZeigeFamilienereignisse();
 
 		// Fällt in diesem Jahr ein geplantes Fest an, wird es gefeiert
@@ -582,6 +586,15 @@ public partial class Kontor : Control
 
 			await SW.UI.ShowText.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
 			                                " hat sich endlich bereit erklärt, Euch zu heiraten. Ihr schwebt im siebten Himmel...");
+			UpdateHud();
+		}
+
+		// Titelverleihung, sofern dem Spieler ein höherer Titel zusteht und es einen Regenten gibt
+		var titelManager = new TitelVerleihungManager();
+
+		if (titelManager.StehtTitelverleihungAn())
+		{
+			await _main.TitelVerleihDialog.ShowDialog(titelManager.Vollziehe());
 			UpdateHud();
 		}
 
