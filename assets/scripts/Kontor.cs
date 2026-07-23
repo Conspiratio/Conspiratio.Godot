@@ -403,6 +403,10 @@ public partial class Kontor : Control
 		foreach (string meldung in zugNachrichten.AktualisiereAnwesen())
 			await SW.UI.ShowText.ShowDialog("Eigentümer\n\n" + meldung);
 
+		// Kartenspiel "17 und 4" gegen eine im Hinterzimmer eingeladene KI
+		await _main.KartenspielDialog.ShowKartenspiel();
+		UpdateHud();
+
 		// Verdeckte Zugende-Ereignisse (in der Reihenfolge des Originals)
 		await ZeigeVerdeckteEreignisse(zugNachrichten);
 
