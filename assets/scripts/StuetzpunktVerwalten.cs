@@ -25,6 +25,7 @@ public partial class StuetzpunktVerwalten : Control
 
 	private Label _labelName;
 	private Label _labelTaler;
+	private Label _labelOrtJahr;
 	private HBoxContainer _hboxEinheiten;
 	private HBoxContainer _hboxUpgrades;
 	private PackedScene _buttonScene;
@@ -43,6 +44,7 @@ public partial class StuetzpunktVerwalten : Control
 	{
 		_labelName = GetNode<Label>("LabelName");
 		_labelTaler = GetNode<Label>("LabelTaler");
+		_labelOrtJahr = GetNode<Label>("LabelOrtJahr");
 		_hboxEinheiten = GetNode<HBoxContainer>("HBoxEinheiten");
 		_hboxUpgrades = GetNode<HBoxContainer>("HBoxUpgrades");
 		_vboxAktionen = GetNode<VBoxContainer>("VBoxAktionen");
@@ -67,7 +69,6 @@ public partial class StuetzpunktVerwalten : Control
 	{
 		_manager = new StuetzpunktVerwaltenManager(stuetzpunktId);
 		_aktionenManager = new StuetzpunktAktionenManager(stuetzpunktId);
-		_labelName.Text = _manager.Name;
 
 		BaueEinheiten();
 		BaueUpgrades();
@@ -87,7 +88,23 @@ public partial class StuetzpunktVerwalten : Control
 
 	private void UpdateHud()
 	{
-		_labelTaler.Text = SW.Dynamisch.GetAktHum().GetTalerFormatiert();
+		var spieler = SW.Dynamisch.GetAktHum();
+		_labelTaler.Text = spieler.GetTalerFormatiert();
+		_labelName.Text = spieler.GetKompletterName();
+		_labelOrtJahr.Text = _manager.Name + " A.D. " + SW.Dynamisch.GetAktuellesJahr();
+	}
+
+	private static StyleBoxFlat GoldRahmen()
+	{
+		return new StyleBoxFlat
+		{
+			BgColor = new Color(0, 0, 0, 0.15f),
+			BorderColor = new Color(0.83f, 0.68f, 0.21f),
+			BorderWidthTop = 3,
+			BorderWidthBottom = 3,
+			BorderWidthLeft = 3,
+			BorderWidthRight = 3
+		};
 	}
 
 	private void BaueEinheiten()
@@ -109,28 +126,31 @@ public partial class StuetzpunktVerwalten : Control
 			var zelle = new VBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
 			zelle.AddThemeConstantOverride("separation", 6);
 
+			// Icon-Button mit goldenem Rahmen (wie im Original).
 			var iconButton = _buttonScene.Instantiate<controls.ButtonWithSounds>();
 			iconButton.CustomMinimumSize = new Vector2(96, 96);
 			iconButton.Icon = GD.Load<Texture2D>("res://assets/images/symbole/" + icons[i] + ".png");
 			iconButton.ExpandIcon = true;
-			iconButton.Flat = true;
 			iconButton.TooltipText = _manager.GetEinheitName(i);
+			var rahmen = GoldRahmen();
+			iconButton.AddThemeStyleboxOverride("normal", rahmen);
+			iconButton.AddThemeStyleboxOverride("hover", rahmen);
+			iconButton.AddThemeStyleboxOverride("pressed", rahmen);
+			iconButton.AddThemeStyleboxOverride("focus", rahmen);
 			iconButton.Pressed += () => OnEinheitPressed(index);
 
-			var label = new Label { Text = _manager.GetEinheitName(i), HorizontalAlignment = HorizontalAlignment.Center };
-			label.AddThemeColorOverride("font_color", new Color(1, 0.843137f, 0, 1));
-
+			// Anzahl-Zahlenfeld darunter in Gold.
 			var numeric = _numericScene.Instantiate<controls.NumericButtonWithSounds>();
 			numeric.CustomMinimumSize = new Vector2(96, 40);
 			numeric.MinimalerWert = 0;
 			numeric.MaximalerWert = _manager.Kapazitaet;
 			numeric.Wert = _manager.GetAnzahl(i);
+			numeric.AddThemeColorOverride("font_color", new Color(1, 0.843137f, 0, 1));
 
 			_aktuelleAnzahl[i] = _manager.GetAnzahl(i);
 			_numerics[i] = numeric;
 
 			zelle.AddChild(iconButton);
-			zelle.AddChild(label);
 			zelle.AddChild(numeric);
 			_hboxEinheiten.AddChild(zelle);
 		}
@@ -220,6 +240,15 @@ public partial class StuetzpunktVerwalten : Control
 		{
 			int s = slot;
 
+			// Zusammenfassungszeile des Auftrags (wie im Original), z. B. "Überwacht Grafschaft mit 5 + 2 + 0 + 1 Truppen".
+			var zusammenfassung = new Label
+			{
+				Text = GetAktionsZusammenfassung(slot),
+				HorizontalAlignment = HorizontalAlignment.Center
+			};
+			zusammenfassung.AddThemeColorOverride("font_color", new Color(1, 0.843137f, 0, 1));
+			_vboxAktionen.AddChild(zusammenfassung);
+
 			var reihe = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
 			reihe.AddThemeConstantOverride("separation", 12);
 
@@ -258,6 +287,23 @@ public partial class StuetzpunktVerwalten : Control
 
 			_vboxAktionen.AddChild(reihe);
 		}
+	}
+
+	private string GetAktionsZusammenfassung(int slot)
+	{
+		string art = _aktionenManager.GetAktionsartName(slot);
+		if (art == "Kein Auftrag")
+			return "Auftrag " + (slot + 1) + ": Kein Auftrag";
+
+		var teile = new System.Collections.Generic.List<string>();
+		for (int u = 0; u < _aktionenManager.EinheitenAnzahl; u++)
+			teile.Add(_aktionenManager.GetEinheitInAktion(slot, u).ToString());
+		string truppen = string.Join(" + ", teile);
+
+		if (_aktionenManager.ZielIstStuetzpunkt(slot))
+			return art + " an " + _aktionenManager.GetZielStuetzpunktName(slot) + ": " + truppen + " Truppen";
+
+		return art + " " + _aktionenManager.GetZielLandName(slot) + " mit " + truppen + " Truppen";
 	}
 
 	private controls.ButtonWithSounds ZielButton(int slot, bool grafschaft)

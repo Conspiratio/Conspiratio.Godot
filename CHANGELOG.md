@@ -45,6 +45,7 @@ _Unreleased_
 
 #### Geändert
 - Verbliebene Spiellogik aus dem Frontend in die Lib verlagert (der Godot-Client enthält jetzt nur noch UI-Logik): die "Präsenz in Stadt"-Regel der Weltkarten-Banner, das Weiterschalten von Produktions- und Verkaufsrohstoff sowie der Verkaufs-Zielstadt in der Stadtansicht, der Jahreswechsel-Check und die Haus-Symbol-Auswahl laufen jetzt über HandelsManager/AnwesenManager/RundenManager (Conspiratio.Lib 3.17.0)
+- Design-Feinschliff der Stützpunkt-Verwaltung (Abgleich mit dem Original-Screenshot): der Bildschirm nutzt jetzt den Original-Hintergrund mit den eingebrannten Pergament-Bannern; die Kopfzeile zeigt Taler (links), Spielernamen (Mitte) und Stützpunktname mit Jahr (rechts); die vier Einheitentypen erscheinen als goldgerahmte Symbole mit Anzahl-Zahlenfeld statt mit Namenslabel; und jeder der beiden Aufträge trägt eine goldene Zusammenfassungszeile (z. B. "Überwacht Grafschaft mit 5 + 2 + 0 + 1 Truppen")
 
 #### Behoben
 - Beim Spielstart und nach dem Laden eines Spielstands erschien bei Rechtsklick fälschlicherweise oft der Dialog "Wollt Ihr die Erstellung eines neuen Spiels wirklich abbrechen?" – das Menü "Neues lokales Spiel" verarbeitete die Eingabe auch dann, wenn es gar nicht sichtbar war
