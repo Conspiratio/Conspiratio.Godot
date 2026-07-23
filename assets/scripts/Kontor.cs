@@ -118,6 +118,7 @@ public partial class Kontor : Control
 	private async Task NaechstenSpielerAnkuendigen()
 	{
 		UpdateHud();
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 
 		var spieler = SW.Dynamisch.GetAktHum();
 		await SW.UI.ShowText.ShowDialog("Nächster Spieler\n\n" + spieler.GetTitelGegendert() + " " + spieler.GetName() +
@@ -239,6 +240,7 @@ public partial class Kontor : Control
 	public void ReturnFromStadt()
 	{
 		UpdateHud();
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 		Show();
 		SetProcessInput(true);
 	}

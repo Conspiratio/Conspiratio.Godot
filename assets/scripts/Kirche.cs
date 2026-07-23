@@ -117,6 +117,7 @@ public partial class Kirche : Control
 
 		UpdateHud();
 
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kirche);
 		Show();
 		SetProcessInput(true);
 	}

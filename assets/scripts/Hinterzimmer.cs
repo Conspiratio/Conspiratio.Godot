@@ -58,6 +58,7 @@ public partial class Hinterzimmer : Control
 	public void ShowHinterzimmer()
 	{
 		UpdateHud();
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Hinterzimmer);
 		Show();
 		SetProcessInput(true);
 	}

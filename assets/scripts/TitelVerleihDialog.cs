@@ -40,6 +40,8 @@ public partial class TitelVerleihDialog : Control
 	{
 		_labelText.Text = ergebnis.UrkundenText;
 
+		SoundManager.Instance.PlayFanfare();
+
 		Show();
 		SetProcessInput(true);
 

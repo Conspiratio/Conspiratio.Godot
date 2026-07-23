@@ -84,6 +84,7 @@ public partial class SoeldnerRaeuberKarte : Control
 		_hoverStuetzpunkt = 0;
 		_hoverRect.Visible = false;
 
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
 		Show();
 		SetProcessInput(true);
 	}

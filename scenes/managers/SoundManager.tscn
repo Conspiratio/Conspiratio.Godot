@@ -1,36 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://de5tq8e2xo1h0"]
+[gd_scene load_steps=2 format=3 uid="uid://de5tq8e2xo1h0"]
 
 [ext_resource type="Script" path="res://assets/scripts/managers/SoundManager.cs" id="1_kahqt"]
-[ext_resource type="AudioStream" uid="uid://dlgprinhglsqk" path="res://assets/sounds/bongo_hell.wav" id="2_1q1uq"]
-[ext_resource type="AudioStream" uid="uid://dxh5y0okk4geh" path="res://assets/sounds/bongo_dunkel.wav" id="3_sde8w"]
-[ext_resource type="AudioStream" uid="uid://bd6527l0exjuc" path="res://assets/sounds/checkbox_click.wav" id="4_6r0dd"]
-[ext_resource type="AudioStream" uid="uid://nenujd1k1fic" path="res://assets/music/Song_Intro_BigHornsIntro2.mp3" id="4_508bk"]
-[ext_resource type="AudioStream" path="res://assets/sounds/muenzen.wav" id="5_coins"]
 
 [node name="SoundManager" type="Node"]
 script = ExtResource("1_kahqt")
-AudioStreamPlayerLeftClickPath = NodePath("AudioStreamPlayerLeftClick")
-AudioStreamPlayerRightClickPath = NodePath("AudioStreamPlayerRightClick")
-AudioStreamPlayerCheckBoxClick = NodePath("AudioStreamPlayerCheckBoxClick")
-AudioStreamPlayerIntroPath = NodePath("AudioStreamPlayerIntro")
-AudioStreamPlayerCoinsPath = NodePath("AudioStreamPlayerCoins")
-
-[node name="AudioStreamPlayerLeftClick" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("2_1q1uq")
-bus = &"Effekt"
-
-[node name="AudioStreamPlayerRightClick" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_sde8w")
-bus = &"Effekt"
-
-[node name="AudioStreamPlayerCheckBoxClick" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_6r0dd")
-bus = &"Effekt"
-
-[node name="AudioStreamPlayerIntro" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_508bk")
-bus = &"Musik"
-
-[node name="AudioStreamPlayerCoins" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_coins")
-bus = &"Effekt"
