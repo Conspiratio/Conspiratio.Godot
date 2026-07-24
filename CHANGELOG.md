@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Hinzugefügt
+- Spielerstatistik beim Spielende (Migration von FormStatistik): verlässt der Spieler das Spiel zum Hauptmenü, wird – sofern die Option "Statistik anzeigen" aktiv ist – die Statistik gezeigt: je Spieler zwei Spalten mit allen gesammelten Werten (Spionagen, Sabotagen, Anschläge, Bestechungen, Ablässe, Hochzeiten, Wahlen, verkaufte/eingekaufte Waren, Steuern/Zölle, Gesetzesverstöße, höchstes Amt, Gesamtvermögen, Taler u. a.); bei mehreren Spielern wird über die Banner am oberen Rand umgeschaltet, der Rechtsklick schließt
 - Lagerraum kaufen in der Stadtansicht (Migration von WerkstaettenForm/LagerraumKaufen): ein Klick auf eine eigene Werkstätte öffnet jetzt den Lagerraum-Kauf – drei Angebote für zusätzlichen Lagerraum (Fläche in m² und Preis, abhängig vom Reichtum der Stadt); ein Klick kauft ein Angebot bei ausreichendem Guthaben (Münz-Sound), der Rechtsklick schließt. Damit ist der bisherige Platzhalter der Werkstätten-Verwaltung ersetzt (die restlichen Werkstatt-Ausbauten waren auch im Original ohne Funktion)
 - Erste Version des MVP (Minimum Viable Product)
 - Neuer Dialog "TextDialog" zur Anzeige von Text- und Fehlermeldungen
@@ -68,6 +69,7 @@ _Unreleased_
 ### [EN]
 
 #### Added
+- Player statistics at the end of the game (migration of FormStatistik): when the player leaves the game to the main menu, the statistics are shown – if the "show statistics" option is on: two columns per player with all collected values (espionage, sabotage, assassinations, bribes, indulgences, weddings, elections, goods sold/bought, taxes/tolls, law violations, highest office, total assets, Taler, etc.); with multiple players you switch via the banners at the top, right click closes
 - Buy storage in the town view (migration of WerkstaettenForm/LagerraumKaufen): clicking one of your own workshops now opens the storage purchase – three offers for additional storage (area in m² and price, depending on the town's wealth); a click buys an offer with sufficient funds (coin sound), right click closes. This replaces the previous workshop-management placeholder (the remaining workshop upgrades were non-functional in the original as well)
 - First version of MVP (Minimum Viable Product)
 - New dialog "TextDialog" for showing text and error messages

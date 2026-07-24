@@ -1,4 +1,4 @@
-[gd_scene load_steps=48 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=49 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -47,6 +47,7 @@
 [ext_resource type="PackedScene" uid="uid://creditsdlg1" path="res://scenes/dialogs/CreditsDialog.tscn" id="44_crdlg"]
 [ext_resource type="PackedScene" uid="uid://handelszertdlg1" path="res://scenes/dialogs/HandelszertifikatDialog.tscn" id="45_hzdlg"]
 [ext_resource type="PackedScene" uid="uid://lagerraumdlg1" path="res://scenes/dialogs/LagerraumKaufenDialog.tscn" id="46_lrdlg"]
+[ext_resource type="PackedScene" uid="uid://statistikdlg1" path="res://scenes/dialogs/StatistikDialog.tscn" id="47_stdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -88,6 +89,7 @@ OptionenDialogPath = NodePath("OptionenDialog")
 CreditsDialogPath = NodePath("CreditsDialog")
 HandelszertifikatDialogPath = NodePath("HandelszertifikatDialog")
 LagerraumKaufenDialogPath = NodePath("LagerraumKaufenDialog")
+StatistikDialogPath = NodePath("StatistikDialog")
 TestamentDialogPath = NodePath("TestamentDialog")
 BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
 GeburtDialogPath = NodePath("GeburtDialog")
@@ -262,6 +264,10 @@ visible = false
 layout_mode = 1
 
 [node name="LagerraumKaufenDialog" parent="." instance=ExtResource("46_lrdlg")]
+visible = false
+layout_mode = 1
+
+[node name="StatistikDialog" parent="." instance=ExtResource("47_stdlg")]
 visible = false
 layout_mode = 1
 

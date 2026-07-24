@@ -87,7 +87,15 @@ public partial class Kontor : Control
 			}
 		}
 
+		await ZeigeStatistikWennAktiv();
 		Hide();
+	}
+
+	/// <summary>Zeigt am Spielende die Spielerstatistik, sofern die Option "Statistik anzeigen" aktiv ist.</summary>
+	private async Task ZeigeStatistikWennAktiv()
+	{
+		if (ClientSettings.StatistikAnzeigen)
+			await _main.StatistikDialog.ShowDialog();
 	}
 
 	/// <summary>
