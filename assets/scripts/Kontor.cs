@@ -169,6 +169,10 @@ public partial class Kontor : Control
 
 		_geradeGeladen = false;
 
+		// Spieltipp zu Zugbeginn, sofern die Option "Tipps anzeigen" aktiv ist
+		if (ClientSettings.TippsAnzeigen)
+			await _main.TippsDialog.ShowDialog();
+
 		// Automatisch speichern (wie im Original zu Beginn jedes Zugs)
 		if (_speicherManager.Autosave(out string autosaveFehler))
 			ClientSettings.LetzterSpielstand = _speicherManager.GetAutosaveName();
