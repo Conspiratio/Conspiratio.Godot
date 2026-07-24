@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=47 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -45,6 +45,7 @@
 [ext_resource type="PackedScene" uid="uid://titelverleihdlg1" path="res://scenes/dialogs/TitelVerleihDialog.tscn" id="42_tvdlg"]
 [ext_resource type="PackedScene" uid="uid://optionendlg1" path="res://scenes/dialogs/OptionenDialog.tscn" id="43_optdlg"]
 [ext_resource type="PackedScene" uid="uid://creditsdlg1" path="res://scenes/dialogs/CreditsDialog.tscn" id="44_crdlg"]
+[ext_resource type="PackedScene" uid="uid://handelszertdlg1" path="res://scenes/dialogs/HandelszertifikatDialog.tscn" id="45_hzdlg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -84,6 +85,7 @@ GerichtDialogPath = NodePath("GerichtDialog")
 TitelVerleihDialogPath = NodePath("TitelVerleihDialog")
 OptionenDialogPath = NodePath("OptionenDialog")
 CreditsDialogPath = NodePath("CreditsDialog")
+HandelszertifikatDialogPath = NodePath("HandelszertifikatDialog")
 TestamentDialogPath = NodePath("TestamentDialog")
 BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
 GeburtDialogPath = NodePath("GeburtDialog")
@@ -250,6 +252,10 @@ visible = false
 layout_mode = 1
 
 [node name="CreditsDialog" parent="." instance=ExtResource("44_crdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HandelszertifikatDialog" parent="." instance=ExtResource("45_hzdlg")]
 visible = false
 layout_mode = 1
 

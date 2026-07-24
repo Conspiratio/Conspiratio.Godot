@@ -122,6 +122,7 @@ public partial class SoundManager : Node
 	private int _sfxNaechster;
 
 	private AudioStreamPlayer _stimme;
+	private readonly Queue<string> _stimmenQueue = new();
 	private AudioStreamPlayer _musik;
 	private MusikKategorie _aktuelleKategorie = MusikKategorie.Keine;
 	private Tween _musikTween;
@@ -149,6 +150,7 @@ public partial class SoundManager : Node
 
 		_stimme = new AudioStreamPlayer { Bus = BusStimmen };
 		AddChild(_stimme);
+		_stimme.Finished += NaechsteStimme;
 
 		_musik = new AudioStreamPlayer { Bus = BusMusik };
 		AddChild(_musik);
@@ -182,13 +184,32 @@ public partial class SoundManager : Node
 		player.Play();
 	}
 
-	/// <summary>Spielt eine Sprachausgabe (Stimmen-Bus) vom angegebenen Ressourcenpfad; ein noch laufender Voice wird ersetzt.</summary>
-	public void SpieleStimme(string pfad)
+	/// <summary>Spielt eine einzelne Sprachausgabe (Stimmen-Bus).</summary>
+	public void SpieleStimme(string pfad) => SpieleStimmen(pfad);
+
+	/// <summary>Spielt mehrere Sprachausgaben nacheinander ab (der Reihe nach auf dem Stimmen-Bus).</summary>
+	public void SpieleStimmen(params string[] pfade)
 	{
-		var stream = GD.Load<AudioStream>(pfad);
+		_stimmenQueue.Clear();
+
+		foreach (string pfad in pfade)
+			_stimmenQueue.Enqueue(pfad);
+
+		NaechsteStimme();
+	}
+
+	private void NaechsteStimme()
+	{
+		if (_stimmenQueue.Count == 0)
+			return;
+
+		var stream = GD.Load<AudioStream>(_stimmenQueue.Dequeue());
 
 		if (stream == null)
+		{
+			NaechsteStimme();
 			return;
+		}
 
 		_stimme.Stream = stream;
 		_stimme.Play();

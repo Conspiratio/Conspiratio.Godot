@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
+using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Conspiratio.Lib.Gameplay.Titel;
 using Godot;
@@ -144,6 +145,18 @@ public partial class Kontor : Control
 			var buch = new BuchManager().ErstelleJahresbuchFuerAktivenSpieler();
 			UpdateHud();
 			await ZeigeBuch(buch);
+		}
+
+		// Handelszertifikat-Verleihung (falls dem Spieler eines zusteht) – wie im Original zu Zugbeginn
+		if (_geradeGeladen == false)
+		{
+			var zertifikatManager = new HandelszertifikatManager();
+
+			if (zertifikatManager.StehtZertifikatverleihungAn())
+			{
+				await _main.HandelszertifikatDialog.ShowDialog(zertifikatManager.Vollziehe());
+				UpdateHud();
+			}
 		}
 
 		_geradeGeladen = false;
