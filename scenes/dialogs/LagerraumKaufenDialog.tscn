@@ -1,0 +1,70 @@
+[gd_scene load_steps=5 format=3 uid="uid://lagerraumdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/LagerraumKaufenDialog.cs" id="1_lrdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_lrdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_lrdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_lrdlg"]
+
+[node name="LagerraumKaufenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_lrdlg")
+script = ExtResource("1_lrdlg")
+LabelAktuellPath = NodePath("Rahmen/LabelAktuell")
+VBoxAngebotePath = NodePath("Rahmen/VBoxAngebote")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -260.0
+offset_right = 360.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_lrdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 680.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 34
+text = "Lagerraum kaufen"
+horizontal_alignment = 1
+
+[node name="LabelAktuell" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 110.0
+offset_right = 680.0
+offset_bottom = 150.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 24
+text = "Aktueller Lagerraum: 0 m²"
+horizontal_alignment = 1
+
+[node name="VBoxAngebote" type="VBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 190.0
+offset_right = 580.0
+offset_bottom = 460.0
+theme_override_constants/separation = 20
+alignment = 1

@@ -388,9 +388,8 @@ public partial class Stadt : Control
 
 		if (_handelsManager.HatWerkstatt(_stadtId, nr))
 		{
-			// TODO: Werkstätten-Details (Fähigkeiten, Lagerraum kaufen) migrieren
-			await SW.UI.ShowText.ShowDialog(_handelsManager.GetLagerplatzInfo(_stadtId, nr) +
-			                                "\n\nDie Werkstätten-Verwaltung ist noch nicht verfügbar.\nRechtsklick auf die Werkstätte verkauft sie.");
+			// Eigene Werkstätte: den Lagerraum-Kauf öffnen (Rechtsklick auf die Werkstätte verkauft sie).
+			await _main.LagerraumKaufenDialog.ShowDialog(_stadtId, nr);
 		}
 		else
 		{

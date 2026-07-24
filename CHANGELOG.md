@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Hinzugefügt
+- Lagerraum kaufen in der Stadtansicht (Migration von WerkstaettenForm/LagerraumKaufen): ein Klick auf eine eigene Werkstätte öffnet jetzt den Lagerraum-Kauf – drei Angebote für zusätzlichen Lagerraum (Fläche in m² und Preis, abhängig vom Reichtum der Stadt); ein Klick kauft ein Angebot bei ausreichendem Guthaben (Münz-Sound), der Rechtsklick schließt. Damit ist der bisherige Platzhalter der Werkstätten-Verwaltung ersetzt (die restlichen Werkstatt-Ausbauten waren auch im Original ohne Funktion)
 - Erste Version des MVP (Minimum Viable Product)
 - Neuer Dialog "TextDialog" zur Anzeige von Text- und Fehlermeldungen
 - Neues Spiel erstellen: Spieleranzahl, Cheatmodus, Testmodus und Todesfälle anzeigen werden übernommen; Fehlermeldungen werden angezeigt; Enter bestätigt die Eingabe
@@ -67,6 +68,7 @@ _Unreleased_
 ### [EN]
 
 #### Added
+- Buy storage in the town view (migration of WerkstaettenForm/LagerraumKaufen): clicking one of your own workshops now opens the storage purchase – three offers for additional storage (area in m² and price, depending on the town's wealth); a click buys an offer with sufficient funds (coin sound), right click closes. This replaces the previous workshop-management placeholder (the remaining workshop upgrades were non-functional in the original as well)
 - First version of MVP (Minimum Viable Product)
 - New dialog "TextDialog" for showing text and error messages
 - Create new game: player count, cheat mode, test mode and show deaths are applied; error messages are shown; Enter confirms the input
