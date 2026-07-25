@@ -27,6 +27,24 @@ Headless smoke test (verifies scene loading and all `_Ready()` wiring; clean out
 
 There are no automated tests in this repo. Playing requires the Godot 4.7 (.NET) editor; scenes (`.tscn`) and `project.godot` are edited there. When editing `.tscn` files textually, be careful: signal connections and NodePath exports live there.
 
+### Verifying a change (the standard loop)
+
+Since there are no tests and the game needs the editor to play, changes are verified in three complementary ways:
+
+1. **Console harness for Lib managers** — before wiring a new Lib manager into a view, verify it in isolation with a throwaway console project that references the same `Conspiratio.Lib` version and exercises the manager against a real game state:
+   ```csharp
+   SW.Statisch.Initialisieren();
+   var ngm = new NewGameManager(@"C:\temp");
+   ngm.CreateNewGame("Test", 1, false, true, false, out _);
+   var setup = new PlayerSetupManager(); setup.Starte();
+   setup.ErstelleSpieler("Alrik", true, 3, SW.Statisch.GetRelKathID(), 5, true, 1); setup.Beende();
+   SW.Dynamisch.SetAktiverSpieler(1);
+   // ... now construct and print the manager's output
+   ```
+   (`using Conspiratio.Lib.Allgemein;` for the game-setup managers.)
+2. **Headless smoke test** (above) — catches broken scene loading, missing UIDs, and `_Ready()` NodePath wiring errors after every change.
+3. **Preview render** for a new dialog's layout — instantiate the dialog scene from a temporary `_preview_*.cs`/`.tscn`, set up a game (as in step 1), call its `ShowDialog(...)`, wait a few `ProcessFrame`s, then `GetViewport().GetTexture().GetImage().SavePng("user://preview_*.png")` and read the PNG back. **Run this one windowed (no `--headless`)** — headless has no rendering server and produces a blank/erroring image. Delete the `_preview_*` files afterward.
+
 ### Conspiratio.Lib dependency
 
 The Lib is pulled from a **local NuGet feed**: `D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib\bin\Debug` (configured in the user-level `NuGet.Config`; the Lib has `GeneratePackageOnBuild`). To change game logic:
@@ -58,11 +76,16 @@ Godot dialog scripts implement these interfaces and are registered once in `Main
 
 - **Scripts** live in `assets/scripts/` (namespace mirrors folders: `Conspiratio.Godot.assets.scripts[.controls|.managers]`), **scenes** in `scenes/`. Godot signal handlers use the snake_case naming from the editor (`_on_button_start_game_pressed`) and are connected in the `.tscn`, not in code.
 - **Node wiring**: `[Export] public NodePath XPath { get; set; }` + `GetNode<T>(XPath)` in `_Ready()`.
-- **Async dialogs**: dialogs return `Task<DialogResultGame>` via a `TaskCompletionSource` that is resolved when a button closes the dialog (see `YesNoDialog.cs`). Callers `await SW.UI.YesNoQuestion.ShowDialogText(...)`.
+- **Async dialogs**: dialogs return `Task<DialogResultGame>` (or `Task`) via a `TaskCompletionSource` that is resolved when a button closes the dialog (see `YesNoDialog.cs`). Callers `await SW.UI.YesNoQuestion.ShowDialogText(...)` or `await _main.SomeDialog.ShowDialog(...)`.
+- **Parchment dialog pattern**: most content dialogs are a `NinePatchRect` named `Rahmen` using `BackgroundDialog.png` (`uid://cq1th2hp46uxa`) with `patch_margin` 15 on all sides, dark text `Color(0.16, 0.11, 0.05)`, on the shared theme (`uid://bkne0d4c2vxts`). `ShowDialog()` shows the node + `SetProcessInput(true)` + returns a fresh `TaskCompletionSource.Task`; `_Input` closes on `ui_next_or_close`. Copy an existing one (`StatistikDialog`, `StadtInformationenDialog`) rather than starting fresh. For data-driven icon grids, author static labels in the `.tscn` and add the icons in code from the manager's data, scaling the WinForms Designer coordinates by a constant factor into the parchment.
+- **`TextureRect` sizing gotcha**: the default `ExpandMode.KeepSize` forces the texture's native size as the control minimum. To size an icon freely, set `ExpandMode = IgnoreSize` **before** assigning `Size` (object-initializer order matters — the initializer runs before post-construction assignments).
+- **Settings**: `ClientSettings` (`assets/scripts/managers/ClientSettings.cs`) wraps a Godot `ConfigFile` at `user://client.cfg` (audio volumes, feature toggles like `StatistikAnzeigen`/`TippsAnzeigen` that gate optional turn events). Audio runs through buses `Musik`/`Effekt`/`Stimmen` defined in `default_bus_layout.tres`; `AudioEinstellungen` applies the saved volumes.
 - **Show/hide pattern**: dialogs implement `ShowAndEnableInput()` / `HideAndDisableInput()` (visibility + `SetProcessInput`). The input action `ui_next_or_close` (right mouse button or Esc) closes/cancels the active dialog — every dialog handles it in `_Input`.
 - **Sounds**: `SoundManager` is an autoload singleton (`SoundManager.Instance`). UI controls must use the sound-enabled variants in `scenes/controls/` (`ButtonWithSounds`, `CheckBoxWithSounds`, `LinkButtonWithSounds`) instead of plain Godot controls.
 - **Theming**: global theme at `assets/resources/standard_theme.tres`. The **design resolution is 1600×900** — all scenes are laid out in these coordinates; `canvas_items` stretch (aspect `keep`) scales the whole UI to the actual window size, so never write resolution-dependent code.
 
 ### Versioning / changelog
 
-Version lives in `project.godot` (`application/config/version`, e.g. `0.1.0.0-godot`). `CHANGELOG.md` is maintained bilingually (DE and EN sections) — update both when adding user-visible changes.
+Version lives in `project.godot` (`application/config/version`, e.g. `0.1.0.0-godot`) — not bumped per feature. `CHANGELOG.md` is maintained bilingually (DE and EN sections) — update both when adding user-visible changes. The Lib keeps its own `CHANGELOG.md` (single German+English entry per `<Version>`).
+
+A feature that touches both repos is committed **Lib first, then Godot**: the two are separate git repos on their own feature branches (Lib on `feature/player-setup-manager`, Godot on `feature/new-game`), and the Godot commit's subject references the Lib version it depends on (e.g. `… (Conspiratio.Lib 3.46.0)`). Commit only when asked.
