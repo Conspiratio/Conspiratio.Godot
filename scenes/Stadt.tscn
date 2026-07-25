@@ -24,31 +24,31 @@ grow_vertical = 2
 pivot_offset = Vector2(800, 450)
 texture = ExtResource("1_stbg")
 
-[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+[node name="LabelTaler" type="Label" parent="."]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 11.0
-offset_right = 672.0
-offset_bottom = 45.0
-text = "Spielername"
+offset_left = 40.0
+offset_top = 18.0
+offset_right = 470.0
+offset_bottom = 52.0
+text = "1000 Taler"
 
 [node name="LabelPlaceDate" type="Label" parent="."]
 layout_mode = 0
-offset_left = 672.0
-offset_top = 11.0
-offset_right = 928.0
-offset_bottom = 45.0
+offset_left = 1130.0
+offset_top = 18.0
+offset_right = 1560.0
+offset_bottom = 52.0
 text = "Stadt A.D. 1600"
-horizontal_alignment = 1
-
-[node name="LabelTaler" type="Label" parent="."]
-layout_mode = 0
-offset_left = 1248.0
-offset_top = 11.0
-offset_right = 1568.0
-offset_bottom = 45.0
-text = "1000 Taler"
 horizontal_alignment = 2
+
+[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+layout_mode = 0
+offset_left = 350.0
+offset_top = 54.0
+offset_right = 1250.0
+offset_bottom = 92.0
+text = "Spielername"
+horizontal_alignment = 1
 
 [node name="ButtonWs1" type="TextureButton" parent="."]
 layout_mode = 0
@@ -287,17 +287,17 @@ stretch_mode = 0
 [node name="ButtonTaetigkeit0" parent="." instance=ExtResource("2_stbtn")]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 691.0
+offset_top = 664.0
 offset_right = 346.0
-offset_bottom = 737.0
+offset_bottom = 710.0
 text = "Kein Auftrag"
 
 [node name="HBoxDetail0" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 107.0
-offset_top = 742.0
+offset_top = 714.0
 offset_right = 1360.0
-offset_bottom = 782.0
+offset_bottom = 754.0
 theme_override_constants/separation = 6
 
 [node name="ButtonProdukt" parent="HBoxDetail0" instance=ExtResource("2_stbtn")]
@@ -330,17 +330,17 @@ size_flags_vertical = 4
 [node name="ButtonTaetigkeit1" parent="." instance=ExtResource("2_stbtn")]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 773.0
+offset_top = 782.0
 offset_right = 346.0
-offset_bottom = 819.0
+offset_bottom = 828.0
 text = "Kein Auftrag"
 
 [node name="HBoxDetail1" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 107.0
-offset_top = 824.0
+offset_top = 832.0
 offset_right = 1360.0
-offset_bottom = 864.0
+offset_bottom = 872.0
 theme_override_constants/separation = 6
 
 [node name="ButtonProdukt" parent="HBoxDetail1" instance=ExtResource("2_stbtn")]
