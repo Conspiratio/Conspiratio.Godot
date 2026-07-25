@@ -84,6 +84,16 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 	public override void _Input(InputEvent @event)
 	{
+		// Rechtsklick auf eine Stadt in der Handelsansicht öffnet ihre Stadtinformationen (wie im Original);
+		// nur außerhalb einer Stadt schließt der Rechtsklick die Karte.
+		if (_handelsModus && _hoverStadt != 0 &&
+		    @event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Right })
+		{
+			GetViewport().SetInputAsHandled();
+			_ = ZeigeStadtinformationen(_hoverStadt);
+			return;
+		}
+
 		if (Input.IsActionPressed("ui_next_or_close"))
 		{
 			SoundManager.Instance.PlayRightClick();
@@ -286,6 +296,18 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 		if (_handelsModus)
 			_main.Stadt.ShowStadt(stadtId);
+	}
+
+	// Öffnet die Stadtinformationen über der geöffneten Handelskarte; danach bleibt die Karte offen.
+	private async Task ZeigeStadtinformationen(int stadtId)
+	{
+		SoundManager.Instance.PlayRightClick();
+
+		SetProcessInput(false);
+		await _main.StadtInformationenDialog.ShowDialog(stadtId);
+
+		if (Visible)
+			SetProcessInput(true);
 	}
 
 	/// <summary>

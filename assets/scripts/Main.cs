@@ -146,6 +146,9 @@ public partial class Main : Control
 	[Export]
 	public NodePath TippsDialogPath { get; set; }
 
+	[Export]
+	public NodePath StadtInformationenDialogPath { get; set; }
+
 	public LocalGameDialog LocalGameDialog;
 	public NewLocalGameMenu NewLocalGameMenu;
 	public NewPlayerMenu NewPlayerMenu;
@@ -191,6 +194,7 @@ public partial class Main : Control
 	public LagerraumKaufenDialog LagerraumKaufenDialog;
 	public StatistikDialog StatistikDialog;
 	public TippsDialog TippsDialog;
+	public StadtInformationenDialog StadtInformationenDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -242,6 +246,7 @@ public partial class Main : Control
 		LagerraumKaufenDialog = GetNode<LagerraumKaufenDialog>(LagerraumKaufenDialogPath);
 		StatistikDialog = GetNode<StatistikDialog>(StatistikDialogPath);
 		TippsDialog = GetNode<TippsDialog>(TippsDialogPath);
+		StadtInformationenDialog = GetNode<StadtInformationenDialog>(StadtInformationenDialogPath);
 
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, BeziehungenPflegenDialog, BauwerkStiftenDialog, FestGebenDialog,
