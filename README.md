@@ -40,10 +40,9 @@ Automatisierte Tests gibt es in diesem Repository nicht.
 
 ### Abhängigkeit Conspiratio.Lib
 
-Die gesamte Spiellogik befindet sich in `Conspiratio.Lib` (netstandard2.0) und wird hier als NuGet-Paket eingebunden. Das Paket wird über einen **lokalen NuGet-Feed** bezogen (`Conspiratio.Lib/bin/Debug`, konfiguriert in der benutzerweiten `NuGet.Config`; die Lib baut mit `GeneratePackageOnBuild`). Zum Ändern der Spiellogik:
+Die gesamte Spiellogik befindet sich in `Conspiratio.Lib` (netstandard2.0) und wird hier als **offizielles NuGet-Paket von [nuget.org](https://www.nuget.org/packages/Conspiratio.Lib/)** eingebunden. Die ins Repo eingecheckte `nuget.config` legt nuget.org als einzige Paketquelle fest (`<clear/>` verwirft evtl. geerbte Feeds), damit der Build bei allen Mitwirkenden reproduzierbar ist. Um neue Spiellogik zu übernehmen, die `PackageReference`-Version von `Conspiratio.Lib` in `Conspiratio.Godot.csproj` auf eine auf nuget.org veröffentlichte Version anheben.
 
-1. In `Conspiratio.Lib` bearbeiten, `<Version>` in `Conspiratio.Lib.csproj` erhöhen und bauen – dabei entsteht ein neues `.nupkg` im Feed-Ordner.
-2. Die `PackageReference`-Version von `Conspiratio.Lib` in `Conspiratio.Godot.csproj` anpassen.
+Zum **lokalen Entwickeln an der Lib vor einem Release**: Die Lib baut mit `GeneratePackageOnBuild` und legt ein `.nupkg` unter `…/Conspiratio.Lib/bin/Debug` ab. Diesen Ordner während der Entwicklung vorübergehend als Paketquelle ergänzen (lokaler `<add>` in der `nuget.config` oder der benutzerweiten `NuGet.Config`) und danach wieder entfernen – die lokale Quelle nicht in die eingecheckte `nuget.config` committen.
 
 Grundsatz: **Spiellogik gehört in die Lib, nicht in den Client.** Das etablierte Muster ist, die Logik aus dem WinForms-Client in eine Lib-Manager-Klasse zu extrahieren und darauf eine dünne Godot-Ansicht zu bauen.
 

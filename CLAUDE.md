@@ -47,10 +47,9 @@ Since there are no tests and the game needs the editor to play, changes are veri
 
 ### Conspiratio.Lib dependency
 
-The Lib is pulled from a **local NuGet feed**: `D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib\bin\Debug` (configured in the user-level `NuGet.Config`; the Lib has `GeneratePackageOnBuild`). To change game logic:
+The Lib is consumed as the **released NuGet package from nuget.org**. The repo's `nuget.config` pins the source to nuget.org only (`<clear/>` drops any inherited feeds, e.g. a local Lib feed in the user-level `NuGet.Config`), so the build is reproducible for every contributor. To pick up new game logic, bump the `Conspiratio.Lib` `PackageReference` version in `Conspiratio.Godot.csproj` to a version that is published on nuget.org.
 
-1. Edit the Lib, bump `<Version>` in `Conspiratio.Lib.csproj`, build it (`dotnet build` in the Lib solution) — this drops the new `.nupkg` into the feed folder.
-2. Update the `Conspiratio.Lib` `PackageReference` version in `Conspiratio.Godot.csproj`.
+To **iterate on the Lib locally before a release**: the Lib builds with `GeneratePackageOnBuild`, dropping a `.nupkg` into `…\Conspiratio.Lib\bin\Debug`. Add that folder as a package source (a local `<add>` in this repo's `nuget.config` or the user-level `NuGet.Config`) while developing, then remove it again — don't commit the local source into the checked-in `nuget.config`.
 
 Game logic belongs in the Lib, not here. The established pattern: extract logic from the WinForms client into a Lib manager class (e.g. `NewGameManager`), then build a thin Godot view on top.
 

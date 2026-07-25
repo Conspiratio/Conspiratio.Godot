@@ -40,10 +40,9 @@ There are no automated tests in this repository.
 
 ### Conspiratio.Lib dependency
 
-All game logic lives in `Conspiratio.Lib` (netstandard2.0) and is consumed here as a NuGet package. The package is served from a **local NuGet feed** (`Conspiratio.Lib/bin/Debug`, configured in the user-level `NuGet.Config`; the library builds with `GeneratePackageOnBuild`). To change game logic:
+All game logic lives in `Conspiratio.Lib` (netstandard2.0) and is consumed here as the **official NuGet package from [nuget.org](https://www.nuget.org/packages/Conspiratio.Lib/)**. The `nuget.config` checked into the repo pins nuget.org as the only package source (`<clear/>` drops any inherited feeds), so the build is reproducible for every contributor. To pick up new game logic, bump the `Conspiratio.Lib` `PackageReference` version in `Conspiratio.Godot.csproj` to a version published on nuget.org.
 
-1. Edit `Conspiratio.Lib`, bump `<Version>` in `Conspiratio.Lib.csproj` and build it – this drops a new `.nupkg` into the feed folder.
-2. Update the `Conspiratio.Lib` `PackageReference` version in `Conspiratio.Godot.csproj`.
+To **develop the library locally before a release**: the library builds with `GeneratePackageOnBuild` and drops a `.nupkg` into `…/Conspiratio.Lib/bin/Debug`. Add that folder as a package source temporarily while developing (a local `<add>` in `nuget.config` or the user-level `NuGet.Config`) and remove it afterwards – don't commit the local source into the checked-in `nuget.config`.
 
 Principle: **game logic belongs in the library, not in the client.** The established pattern is to extract the logic from the WinForms client into a library manager class and build a thin Godot view on top of it.
 

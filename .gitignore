@@ -1,4 +1,6 @@
 # Godot 4+ specific ignores
+# Enthaelt den Import-Cache (.godot/imported/) – nur Quell-Assets und *.import-Metadaten
+# gehoeren ins Repo, nicht der generierte Cache.
 .godot/
 
 # Godot-specific ignores
@@ -15,6 +17,9 @@ mono_crash.*.json
 
 # Visual Studio
 .vs
+
+# JetBrains Rider / IntelliJ
+.idea/
 
 # Godot Exports
 bin
