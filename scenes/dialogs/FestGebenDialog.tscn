@@ -1,0 +1,117 @@
+[gd_scene load_steps=6 format=3 uid="uid://festgebendlg01"]
+
+[ext_resource type="Script" path="res://assets/scripts/FestGebenDialog.cs" id="1_fgdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_fgdlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_fgdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_fgdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_fgdlg"]
+
+[node name="FestGebenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_fgdlg")
+LinkOrtPath = NodePath("Panel/NinePatchRect/VBox/LinkOrt")
+LinkGroessePath = NodePath("Panel/NinePatchRect/VBox/LinkGroesse")
+LinkMusikerPath = NodePath("Panel/NinePatchRect/VBox/LinkMusiker")
+LinkJahrPath = NodePath("Panel/NinePatchRect/VBox/LinkJahr")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -280.0
+offset_right = 360.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_fgdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = 678.0
+offset_bottom = 66.0
+text = "Ein Fest geben"
+horizontal_alignment = 1
+
+[node name="LabelHinweis" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 80.0
+offset_right = 670.0
+offset_bottom = 150.0
+text = "Plant ein rauschendes Fest, um Euer Ansehen zu mehren. Sorgt dafür, dass die Lager der Stadt im Festjahr gut gefüllt sind."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VBox" type="VBoxContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 210.0
+offset_top = 170.0
+offset_right = 510.0
+offset_bottom = 400.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="LinkOrt" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_fgdlg")]
+layout_mode = 2
+theme = ExtResource("4_fgdlg")
+text = "Ort:"
+
+[node name="LinkGroesse" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_fgdlg")]
+layout_mode = 2
+theme = ExtResource("4_fgdlg")
+text = "Größe:"
+
+[node name="LinkMusiker" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_fgdlg")]
+layout_mode = 2
+theme = ExtResource("4_fgdlg")
+text = "Musiker:"
+
+[node name="LinkJahr" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_fgdlg")]
+layout_mode = 2
+theme = ExtResource("4_fgdlg")
+text = "Jahr:"
+
+[node name="ButtonPlanen" parent="Panel/NinePatchRect" instance=ExtResource("5_fgdlg")]
+layout_mode = 0
+offset_left = 210.0
+offset_top = 420.0
+offset_right = 510.0
+offset_bottom = 480.0
+text = "Fest planen"
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_fgdlg")]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 500.0
+offset_right = 450.0
+offset_bottom = 540.0
+theme = ExtResource("4_fgdlg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/ButtonPlanen" to="." method="_on_button_planen_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]

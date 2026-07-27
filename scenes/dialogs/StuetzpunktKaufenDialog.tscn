@@ -1,0 +1,161 @@
+[gd_scene load_steps=8 format=3 uid="uid://stuetzpunktkaufdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/StuetzpunktKaufenDialog.cs" id="1_skdlg"]
+[ext_resource type="Texture2D" uid="uid://c8rujxgjtlltn" path="res://assets/backgrounds/HintAemter.png" id="2_skdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_skdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_skdlg"]
+[ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="5_skdlg"]
+[ext_resource type="Texture2D" uid="uid://be7lnr0853wu6" path="res://assets/images/symbole/SymbDoor.png" id="6_skdlg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gold"]
+bg_color = Color(0.878431, 0.741176, 0.470588, 1)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(0.827451, 0.678431, 0.211765, 1)
+
+[node name="StuetzpunktKaufenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_skdlg")
+script = ExtResource("1_skdlg")
+LabelNamePath = NodePath("Zentrum/LabelName")
+LabelBeschreibungPath = NodePath("Zentrum/LabelBeschreibung")
+LabelWertPath = NodePath("Zentrum/LabelWert")
+LabelZustandPath = NodePath("Zentrum/LabelZustand")
+LabelSicherheitPath = NodePath("Zentrum/LabelSicherheit")
+NumericAngebotPath = NodePath("Zentrum/HBoxAngebot/NumericAngebot")
+
+[node name="Zentrum" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -235.0
+offset_right = 360.0
+offset_bottom = 235.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="Zentrum"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_skdlg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LabelName" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 30.0
+offset_right = 390.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+theme_override_font_sizes/font_size = 30
+text = "Stützpunkt"
+vertical_alignment = 1
+
+[node name="LabelBeschreibung" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 92.0
+offset_right = 390.0
+offset_bottom = 300.0
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+theme_override_font_sizes/font_size = 22
+text = "Beschreibung"
+autowrap_mode = 3
+
+[node name="LabelWert" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 305.0
+offset_right = 390.0
+offset_bottom = 343.0
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+theme_override_font_sizes/font_size = 22
+text = "Wert:"
+
+[node name="GoldRahmen" type="Panel" parent="Zentrum"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 36.0
+offset_right = 675.0
+offset_bottom = 288.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_gold")
+
+[node name="ImageDoor" type="TextureRect" parent="Zentrum/GoldRahmen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_skdlg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LabelZustand" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 300.0
+offset_right = 690.0
+offset_bottom = 334.0
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+theme_override_font_sizes/font_size = 22
+text = "Zustand:"
+
+[node name="LabelSicherheit" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 415.0
+offset_top = 338.0
+offset_right = 690.0
+offset_bottom = 372.0
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+theme_override_font_sizes/font_size = 22
+text = "Sicherheit:"
+
+[node name="HBoxAngebot" type="HBoxContainer" parent="Zentrum"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 400.0
+offset_right = 680.0
+offset_bottom = 448.0
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="ButtonKaufangebot" parent="Zentrum/HBoxAngebot" instance=ExtResource("4_skdlg")]
+custom_minimum_size = Vector2(300, 44)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+text = "Kaufangebot machen:"
+flat = true
+
+[node name="NumericAngebot" parent="Zentrum/HBoxAngebot" instance=ExtResource("5_skdlg")]
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+size_flags_vertical = 4
+theme = ExtResource("3_skdlg")
+theme_override_colors/font_color = Color(0.14, 0.09, 0.04, 1)
+flat = true
+
+[connection signal="pressed" from="Zentrum/HBoxAngebot/ButtonKaufangebot" to="." method="_on_button_kaufangebot_pressed"]

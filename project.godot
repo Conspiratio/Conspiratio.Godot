@@ -8,18 +8,27 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="Conspiratio.Godot"
 config/version="0.1.0.0-godot"
 run/main_scene="res://scenes/Title.tscn"
-config/features=PackedStringArray("4.3", "C#")
+config/features=PackedStringArray("4.7", "C#")
 config/icon="res://assets/icons/IconC.ico"
+
+[autoload]
+
+SoundManager="*res://scenes/managers/SoundManager.tscn"
 
 [display]
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
+window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="res://assets/cursor/CurSword-32x32x24.png"
 window/size/width=1600
 window/size/height=900
@@ -28,9 +37,14 @@ window/size/height=900
 
 project/assembly_name="Conspiratio.Godot"
 
+[global_group]
+
+Dialogs="all dialog scenes"
+Controls="all customized controls"
+
 [gui]
 
-theme/custom="res://assets/standard_theme.tres"
+theme/custom="res://assets/resources/standard_theme.tres"
 common/drop_mouse_on_gui_input_disabled=true
 
 [input]

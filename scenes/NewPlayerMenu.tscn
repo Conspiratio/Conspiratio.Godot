@@ -1,0 +1,273 @@
+[gd_scene load_steps=19 format=3 uid="uid://bnpm7k2q4x8rd"]
+
+[ext_resource type="Texture2D" uid="uid://bvl5do8sb0xrg" path="res://assets/backgrounds/BackgroundBookOpen.png" id="1_npbg"]
+[ext_resource type="Script" path="res://assets/scripts/NewPlayerMenu.cs" id="1_npscr"]
+[ext_resource type="PackedScene" uid="uid://du838v21rp67t" path="res://scenes/controls/CheckBoxWithSounds.tscn" id="2_npcbx"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="3_npbtn"]
+[ext_resource type="Texture2D" uid="uid://dh1nmt80m62mm" path="res://assets/images/banner/ban1.png" id="4_ban1"]
+[ext_resource type="Texture2D" uid="uid://cg7vov64bhpm6" path="res://assets/images/banner/ban2.png" id="5_ban2"]
+[ext_resource type="Texture2D" uid="uid://oba7xwb0un0q" path="res://assets/images/banner/ban3.png" id="6_ban3"]
+[ext_resource type="Texture2D" uid="uid://ceu8uqlcjwohx" path="res://assets/images/banner/ban4.png" id="7_ban4"]
+[ext_resource type="Texture2D" uid="uid://ykkatd15asuh" path="res://assets/images/banner/ban5.png" id="8_ban5"]
+[ext_resource type="Texture2D" uid="uid://bsp2qn2h8eche" path="res://assets/images/banner/ban6.png" id="9_ban6"]
+[ext_resource type="Texture2D" uid="uid://by8mmvsmhu06n" path="res://assets/images/banner/ban7.png" id="10_ban7"]
+[ext_resource type="Texture2D" uid="uid://cm2pdwtqcn7xo" path="res://assets/images/banner/ban8.png" id="11_ban8"]
+[ext_resource type="Texture2D" uid="uid://b0brjefkjrtb" path="res://assets/images/banner/ban9.png" id="12_ban9"]
+[ext_resource type="Texture2D" uid="uid://brgxislrixc44" path="res://assets/images/banner/ban10.png" id="13_ban10"]
+[ext_resource type="Texture2D" uid="uid://545euxhljoen" path="res://assets/images/banner/ban11.png" id="14_ban11"]
+[ext_resource type="Texture2D" uid="uid://dgvj7audptao5" path="res://assets/images/banner/ban12.png" id="15_ban12"]
+[ext_resource type="Texture2D" uid="uid://2u3i40yscr15" path="res://assets/images/banner/ban13.png" id="16_ban13"]
+[ext_resource type="Texture2D" uid="uid://cuqgrxb41a2hs" path="res://assets/images/banner/ban14.png" id="17_ban14"]
+
+[node name="NewPlayerMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_npscr")
+LabelTitlePath = NodePath("LabelTitle")
+LineEditPlayerNamePath = NodePath("LineEditPlayerName")
+CheckBoxMalePath = NodePath("CheckBoxMale")
+CheckBoxFemalePath = NodePath("CheckBoxFemale")
+CheckBoxReligion1Path = NodePath("CheckBoxReligion1")
+CheckBoxReligion2Path = NodePath("CheckBoxReligion2")
+GridContainerBannerPath = NodePath("GridContainerBanner")
+ButtonCityPath = NodePath("ButtonCity")
+OptionButtonResourcePath = NodePath("OptionButtonResource")
+LabelCityCostPath = NodePath("LabelCityCost")
+LabelResourceCostPath = NodePath("LabelResourceCost")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(800, 450)
+texture = ExtResource("1_npbg")
+
+[node name="LabelTitle" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.039
+anchor_top = 0.051
+anchor_right = 0.4
+anchor_bottom = 0.081
+text = "Spieler erstellen"
+
+[node name="LabelPlayerName" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.074
+anchor_top = 0.212
+anchor_right = 0.17
+anchor_bottom = 0.246
+text = "Spielername:"
+
+[node name="LineEditPlayerName" type="LineEdit" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.179
+anchor_top = 0.21
+anchor_right = 0.406
+anchor_bottom = 0.256
+placeholder_text = "Euer Name"
+
+[node name="LabelGender" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.074
+anchor_top = 0.3
+anchor_right = 0.17
+anchor_bottom = 0.334
+text = "Geschlecht:"
+
+[node name="CheckBoxMale" parent="." instance=ExtResource("2_npcbx")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.179
+anchor_top = 0.295
+anchor_right = 0.29
+anchor_bottom = 0.34
+button_pressed = true
+text = "Männlich"
+
+[node name="CheckBoxFemale" parent="." instance=ExtResource("2_npcbx")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.295
+anchor_right = 0.41
+anchor_bottom = 0.34
+text = "Weiblich"
+
+[node name="LabelReligion" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.074
+anchor_top = 0.39
+anchor_right = 0.17
+anchor_bottom = 0.424
+text = "Religion:"
+
+[node name="CheckBoxReligion1" parent="." instance=ExtResource("2_npcbx")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.179
+anchor_top = 0.385
+anchor_right = 0.29
+anchor_bottom = 0.43
+button_pressed = true
+text = "Katholisch"
+
+[node name="CheckBoxReligion2" parent="." instance=ExtResource("2_npcbx")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.385
+anchor_right = 0.41
+anchor_bottom = 0.43
+text = "Evangelisch"
+
+[node name="LabelBanner" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.074
+anchor_top = 0.48
+anchor_right = 0.17
+anchor_bottom = 0.514
+text = "Banner:"
+
+[node name="GridContainerBanner" type="GridContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.074
+anchor_top = 0.53
+anchor_right = 0.44
+anchor_bottom = 0.78
+columns = 7
+
+[node name="CheckBoxBanner1" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("4_ban1")
+
+[node name="CheckBoxBanner2" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("5_ban2")
+
+[node name="CheckBoxBanner3" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("6_ban3")
+
+[node name="CheckBoxBanner4" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("7_ban4")
+
+[node name="CheckBoxBanner5" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("8_ban5")
+
+[node name="CheckBoxBanner6" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("9_ban6")
+
+[node name="CheckBoxBanner7" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("10_ban7")
+
+[node name="CheckBoxBanner8" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("11_ban8")
+
+[node name="CheckBoxBanner9" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("12_ban9")
+
+[node name="CheckBoxBanner10" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("13_ban10")
+
+[node name="CheckBoxBanner11" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("14_ban11")
+
+[node name="CheckBoxBanner12" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("15_ban12")
+
+[node name="CheckBoxBanner13" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("16_ban13")
+
+[node name="CheckBoxBanner14" parent="GridContainerBanner" instance=ExtResource("2_npcbx")]
+layout_mode = 2
+icon = ExtResource("17_ban14")
+
+[node name="LabelCity" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.212
+anchor_right = 0.68
+anchor_bottom = 0.246
+text = "Heimatstadt:"
+
+[node name="ButtonCity" parent="." instance=ExtResource("3_npbtn")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.702
+anchor_top = 0.206
+anchor_right = 0.937
+anchor_bottom = 0.257
+text = "Wählen"
+
+[node name="LabelCityCost" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.262
+anchor_right = 0.937
+anchor_bottom = 0.296
+text = "Freie Wahl kostet Taler, zufällig ist kostenlos"
+
+[node name="LabelResource" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.35
+anchor_right = 0.68
+anchor_bottom = 0.384
+text = "Rohstoff:"
+
+[node name="OptionButtonResource" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.702
+anchor_top = 0.344
+anchor_right = 0.937
+anchor_bottom = 0.395
+
+[node name="LabelResourceCost" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.4
+anchor_right = 0.937
+anchor_bottom = 0.434
+text = "Freie Wahl kostet Taler, zufällig ist kostenlos"
+
+[node name="ButtonCreatePlayer" parent="." instance=ExtResource("3_npbtn")]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.72
+anchor_top = 0.847
+anchor_right = 0.937
+anchor_bottom = 0.913
+text = "Spieler erstellen"
+
+[connection signal="text_submitted" from="LineEditPlayerName" to="." method="_on_line_edit_player_name_text_submitted"]
+[connection signal="pressed" from="ButtonCity" to="." method="_on_button_city_pressed"]
+[connection signal="pressed" from="ButtonCreatePlayer" to="." method="_on_button_create_player_pressed"]

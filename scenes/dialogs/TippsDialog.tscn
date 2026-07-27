@@ -1,0 +1,85 @@
+[gd_scene load_steps=5 format=3 uid="uid://tippsdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/TippsDialog.cs" id="1_tpdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_tpdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_tpdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_tpdlg"]
+
+[node name="TippsDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_tpdlg")
+script = ExtResource("1_tpdlg")
+LabelUeberschriftPath = NodePath("Rahmen/LabelUeberschrift")
+LabelTextPath = NodePath("Rahmen/LabelText")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -240.0
+offset_right = 400.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_tpdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelUeberschrift" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 760.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 34
+text = "Tipp #1"
+horizontal_alignment = 1
+
+[node name="LabelText" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 110.0
+offset_right = 730.0
+offset_bottom = 380.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 24
+text = "Tipp"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="HBoxButtons" type="HBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 400.0
+offset_right = 600.0
+offset_bottom = 448.0
+theme_override_constants/separation = 30
+alignment = 1
+
+[node name="ButtonZurueck" parent="Rahmen/HBoxButtons" instance=ExtResource("4_tpdlg")]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Zurück"
+
+[node name="ButtonWeiter" parent="Rahmen/HBoxButtons" instance=ExtResource("4_tpdlg")]
+custom_minimum_size = Vector2(160, 44)
+layout_mode = 2
+text = "Weiter"
+
+[connection signal="pressed" from="Rahmen/HBoxButtons/ButtonZurueck" to="." method="_on_button_zurueck_pressed"]
+[connection signal="pressed" from="Rahmen/HBoxButtons/ButtonWeiter" to="." method="_on_button_weiter_pressed"]

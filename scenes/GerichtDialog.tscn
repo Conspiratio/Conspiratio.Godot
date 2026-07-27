@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3 uid="uid://gerichtdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/GerichtDialog.cs" id="1_grdlg"]
+[ext_resource type="Texture2D" uid="uid://cfggelcyfpaak" path="res://assets/backgrounds/HintGericht.png" id="2_grdlg"]
+
+[node name="GerichtDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_grdlg")
+LabelHauptPath = NodePath("TextureRect/LabelHaupt")
+LabelUrteilePath = NodePath("TextureRect/LabelUrteile")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_grdlg")
+
+[node name="LabelUrteile" type="Label" parent="TextureRect"]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 330.0
+offset_right = 1000.0
+offset_bottom = 620.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+vertical_alignment = 0
+
+[node name="LabelHaupt" type="Label" parent="TextureRect"]
+layout_mode = 0
+offset_left = 200.0
+offset_top = 690.0
+offset_right = 1400.0
+offset_bottom = 885.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
+theme_override_font_sizes/font_size = 26
+text = "Gericht"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

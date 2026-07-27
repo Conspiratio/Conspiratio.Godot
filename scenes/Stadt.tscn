@@ -1,0 +1,372 @@
+[gd_scene load_steps=5 format=3 uid="uid://bstadtszene01"]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/BackgroundStadt.png" id="1_stbg"]
+[ext_resource type="Script" path="res://assets/scripts/Stadt.cs" id="1_stscr"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="2_stbtn"]
+[ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="3_stnum"]
+
+[node name="Stadt" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stscr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(800, 450)
+texture = ExtResource("1_stbg")
+
+[node name="LabelTaler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 18.0
+offset_right = 470.0
+offset_bottom = 52.0
+text = "1000 Taler"
+
+[node name="LabelPlaceDate" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1130.0
+offset_top = 18.0
+offset_right = 1560.0
+offset_bottom = 52.0
+text = "Stadt A.D. 1600"
+horizontal_alignment = 2
+
+[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+layout_mode = 0
+offset_left = 350.0
+offset_top = 54.0
+offset_right = 1250.0
+offset_bottom = 92.0
+text = "Spielername"
+horizontal_alignment = 1
+
+[node name="ButtonWs1" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 234.0
+offset_right = 320.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs2" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 234.0
+offset_right = 532.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs3" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 234.0
+offset_right = 744.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs4" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 234.0
+offset_right = 956.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs5" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 234.0
+offset_right = 1168.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonWs6" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 234.0
+offset_right = 1380.0
+offset_bottom = 334.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LabelPreis1" type="Label" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 346.0
+offset_right = 320.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 346.0
+offset_right = 532.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 346.0
+offset_right = 744.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis4" type="Label" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 346.0
+offset_right = 956.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis5" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 346.0
+offset_right = 1168.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="LabelPreis6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 346.0
+offset_right = 1380.0
+offset_bottom = 372.0
+horizontal_alignment = 1
+
+[node name="ButtonRoh1" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 382.0
+offset_right = 320.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh2" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 432.0
+offset_top = 382.0
+offset_right = 532.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh3" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 644.0
+offset_top = 382.0
+offset_right = 744.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh4" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 856.0
+offset_top = 382.0
+offset_right = 956.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh5" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1068.0
+offset_top = 382.0
+offset_right = 1168.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonRoh6" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1280.0
+offset_top = 382.0
+offset_right = 1380.0
+offset_bottom = 482.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="LabelBestand1" type="Label" parent="."]
+layout_mode = 0
+offset_left = 227.0
+offset_top = 492.0
+offset_right = 313.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 439.0
+offset_top = 492.0
+offset_right = 525.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 651.0
+offset_top = 492.0
+offset_right = 737.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand4" type="Label" parent="."]
+layout_mode = 0
+offset_left = 863.0
+offset_top = 492.0
+offset_right = 949.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand5" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1075.0
+offset_top = 492.0
+offset_right = 1161.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="LabelBestand6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1287.0
+offset_top = 492.0
+offset_right = 1373.0
+offset_bottom = 518.0
+mouse_filter = 0
+text = "000.000"
+horizontal_alignment = 1
+
+[node name="ButtonHaus" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1380.0
+offset_top = 790.0
+offset_right = 1480.0
+offset_bottom = 890.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonTransport" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 1490.0
+offset_top = 790.0
+offset_right = 1590.0
+offset_bottom = 890.0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="ButtonTaetigkeit0" parent="." instance=ExtResource("2_stbtn")]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 691.0
+offset_right = 346.0
+offset_bottom = 737.0
+text = "Kein Auftrag"
+
+[node name="HBoxDetail0" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 742.0
+offset_right = 1360.0
+offset_bottom = 782.0
+theme_override_constants/separation = 6
+
+[node name="ButtonProdukt" parent="HBoxDetail0" instance=ExtResource("2_stbtn")]
+layout_mode = 2
+size_flags_vertical = 4
+flat = true
+
+[node name="NumericMenge" parent="HBoxDetail0" instance=ExtResource("3_stnum")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(146, 40)
+
+[node name="LabelText1" type="Label" parent="HBoxDetail0"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="NumericStaette" parent="HBoxDetail0" instance=ExtResource("3_stnum")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(60, 40)
+
+[node name="LabelText2" type="Label" parent="HBoxDetail0"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="LabelKosten" type="Label" parent="HBoxDetail0"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="ButtonTaetigkeit1" parent="." instance=ExtResource("2_stbtn")]
+layout_mode = 0
+offset_left = 72.0
+offset_top = 773.0
+offset_right = 346.0
+offset_bottom = 819.0
+text = "Kein Auftrag"
+
+[node name="HBoxDetail1" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 107.0
+offset_top = 824.0
+offset_right = 1360.0
+offset_bottom = 864.0
+theme_override_constants/separation = 6
+
+[node name="ButtonProdukt" parent="HBoxDetail1" instance=ExtResource("2_stbtn")]
+layout_mode = 2
+size_flags_vertical = 4
+flat = true
+
+[node name="NumericMenge" parent="HBoxDetail1" instance=ExtResource("3_stnum")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(146, 40)
+
+[node name="LabelText1" type="Label" parent="HBoxDetail1"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="NumericStaette" parent="HBoxDetail1" instance=ExtResource("3_stnum")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(60, 40)
+
+[node name="LabelText2" type="Label" parent="HBoxDetail1"]
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="LabelKosten" type="Label" parent="HBoxDetail1"]
+layout_mode = 2
+size_flags_vertical = 4
+

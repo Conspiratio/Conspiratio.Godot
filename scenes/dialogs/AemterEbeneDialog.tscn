@@ -1,0 +1,83 @@
+[gd_scene load_steps=6 format=3 uid="uid://aemterebenedlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/AemterEbeneDialog.cs" id="1_aedlg"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintAemter.png" id="2_aedlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_aedlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_aedlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_aedlg"]
+
+[node name="AemterEbeneDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("4_aedlg")
+script = ExtResource("1_aedlg")
+LabelTitelPath = NodePath("Zentrum/LabelTitel")
+ButtonWechselPath = NodePath("Zentrum/ButtonWechsel")
+VBoxAemterPath = NodePath("Zentrum/VBoxAemter")
+
+[node name="Zentrum" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -520.0
+offset_top = -370.0
+offset_right = 520.0
+offset_bottom = 370.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="Zentrum"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_aedlg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LabelTitel" type="Label" parent="Zentrum"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 24.0
+offset_right = 980.0
+offset_bottom = 62.0
+text = "Ämter"
+horizontal_alignment = 1
+
+[node name="ButtonWechsel" parent="Zentrum" instance=ExtResource("5_aedlg")]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 66.0
+offset_right = 660.0
+offset_bottom = 108.0
+text = "Politische Ebene"
+
+[node name="VBoxAemter" type="VBoxContainer" parent="Zentrum"]
+layout_mode = 0
+offset_left = 70.0
+offset_top = 130.0
+offset_right = 970.0
+offset_bottom = 640.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="LinkButtonClose" parent="Zentrum" instance=ExtResource("3_aedlg")]
+layout_mode = 0
+offset_left = 440.0
+offset_top = 690.0
+offset_right = 600.0
+offset_bottom = 728.0
+text = "Schließen"
+
+[connection signal="pressed" from="Zentrum/LinkButtonClose" to="." method="_on_link_button_close_pressed"]

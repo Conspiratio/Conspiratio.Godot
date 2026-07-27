@@ -1,0 +1,86 @@
+[gd_scene load_steps=4 format=3 uid="uid://stuetzverwalten1"]
+
+[ext_resource type="Texture2D" path="res://assets/backgrounds/BackgroundStuetzpunkt.png" id="1_svbg"]
+[ext_resource type="Script" path="res://assets/scripts/StuetzpunktVerwalten.cs" id="1_svscr"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="2_svth"]
+
+[node name="StuetzpunktVerwalten" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_svth")
+script = ExtResource("1_svscr")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_svbg")
+
+[node name="LabelTaler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 22.0
+offset_right = 400.0
+offset_bottom = 60.0
+text = "1000 Taler"
+
+[node name="LabelName" type="Label" parent="."]
+layout_mode = 0
+offset_left = 430.0
+offset_top = 30.0
+offset_right = 1170.0
+offset_bottom = 68.0
+text = "Spieler"
+horizontal_alignment = 1
+
+[node name="LabelOrtJahr" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1200.0
+offset_top = 22.0
+offset_right = 1545.0
+offset_bottom = 60.0
+text = "Stützpunkt A.D. 1600"
+horizontal_alignment = 2
+
+[node name="HBoxEinheiten" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 165.0
+offset_right = 1540.0
+offset_bottom = 320.0
+theme_override_constants/separation = 300
+alignment = 1
+
+[node name="HBoxUpgrades" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 470.0
+offset_right = 1100.0
+offset_bottom = 560.0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="LabelAktionenTitel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 645.0
+offset_right = 1120.0
+offset_bottom = 679.0
+text = "Aufträge"
+horizontal_alignment = 1
+
+[node name="VBoxAktionen" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 80.0
+offset_top = 685.0
+offset_right = 1120.0
+offset_bottom = 860.0
+theme_override_constants/separation = 10
+alignment = 1

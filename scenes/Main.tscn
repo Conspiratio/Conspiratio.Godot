@@ -1,10 +1,57 @@
-[gd_scene load_steps=6 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=53 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
 [ext_resource type="PackedScene" uid="uid://ds67imhsxoxlo" path="res://scenes/dialogs/YesNoDialog.tscn" id="2_bp0or"]
-[ext_resource type="AudioStream" uid="uid://dlgprinhglsqk" path="res://assets/sounds/bongo_hell.wav" id="4_75uap"]
-[ext_resource type="AudioStream" uid="uid://dxh5y0okk4geh" path="res://assets/sounds/bongo_dunkel.wav" id="5_8bflw"]
+[ext_resource type="PackedScene" uid="uid://cgpptn2amibrs" path="res://scenes/NewLocalGameMenu.tscn" id="3_weydb"]
+[ext_resource type="PackedScene" uid="uid://bkcwpr7dk0e5m" path="res://scenes/dialogs/LocalGameDialog.tscn" id="4_mf33r"]
+[ext_resource type="PackedScene" uid="uid://c5o8kkuxg2tqd" path="res://scenes/dialogs/TextDialog.tscn" id="5_txtdg"]
+[ext_resource type="PackedScene" uid="uid://bnpm7k2q4x8rd" path="res://scenes/NewPlayerMenu.tscn" id="6_npmnu"]
+[ext_resource type="PackedScene" uid="uid://dkq8x2mkontor" path="res://scenes/Kontor.tscn" id="7_kontr"]
+[ext_resource type="PackedScene" uid="uid://babrechnungdg" path="res://scenes/dialogs/AbrechnungDialog.tscn" id="8_abrdg"]
+[ext_resource type="PackedScene" uid="uid://bstadtszene01" path="res://scenes/Stadt.tscn" id="9_stadt"]
+[ext_resource type="PackedScene" uid="uid://loadgamedlg01" path="res://scenes/dialogs/LoadGameDialog.tscn" id="10_ldgdg"]
+[ext_resource type="PackedScene" uid="uid://schreibstube1" path="res://scenes/Schreibstube.tscn" id="11_schrb"]
+[ext_resource type="PackedScene" uid="uid://kreditbuchdlg" path="res://scenes/dialogs/KreditbuchDialog.tscn" id="12_krbdg"]
+[ext_resource type="PackedScene" uid="uid://gesetzedlg001" path="res://scenes/dialogs/GesetzeDialog.tscn" id="13_gsdg"]
+[ext_resource type="PackedScene" uid="uid://weltkarte0001" path="res://scenes/Weltkarte.tscn" id="14_wkart"]
+[ext_resource type="PackedScene" uid="uid://hausverwaltungdlg" path="res://scenes/dialogs/HausVerwaltungDialog.tscn" id="15_hvdlg"]
+[ext_resource type="PackedScene" uid="uid://hauswaehlendlg" path="res://scenes/dialogs/HausWaehlenDialog.tscn" id="16_hwdlg"]
+[ext_resource type="PackedScene" uid="uid://hauserweiterungdlg" path="res://scenes/dialogs/HausErweiterungenDialog.tscn" id="17_hedlg"]
+[ext_resource type="PackedScene" uid="uid://bewerbdlg001" path="res://scenes/dialogs/BewerbDialog.tscn" id="18_bwdlg"]
+[ext_resource type="PackedScene" uid="uid://bewerbinfosdlg" path="res://scenes/dialogs/BewerbInfosDialog.tscn" id="19_bidlg"]
+[ext_resource type="PackedScene" uid="uid://wahldlg0001" path="res://scenes/dialogs/WahlDialog.tscn" id="20_wahl"]
+[ext_resource type="PackedScene" uid="uid://kirche0000001" path="res://scenes/Kirche.tscn" id="21_kirch"]
+[ext_resource type="PackedScene" uid="uid://hinterzimmer001" path="res://scenes/Hinterzimmer.tscn" id="35_hzimm"]
+[ext_resource type="PackedScene" uid="uid://testamentdlg01" path="res://scenes/dialogs/TestamentDialog.tscn" id="22_tsdlg"]
+[ext_resource type="PackedScene" uid="uid://brautwerbungdlg" path="res://scenes/dialogs/BrautwerbungDialog.tscn" id="23_bwdlg"]
+[ext_resource type="PackedScene" uid="uid://geburtdlg0001" path="res://scenes/dialogs/GeburtDialog.tscn" id="24_gbdlg"]
+[ext_resource type="PackedScene" uid="uid://kirchgang000001" path="res://scenes/Kirchgang.tscn" id="25_kgdlg"]
+[ext_resource type="PackedScene" uid="uid://konfessionslos1" path="res://scenes/dialogs/KonfessionslosDialog.tscn" id="26_kfdlg"]
+[ext_resource type="PackedScene" uid="uid://privilegiendlg1" path="res://scenes/dialogs/PrivilegienDialog.tscn" id="27_prdlg"]
+[ext_resource type="PackedScene" uid="uid://festgebendlg01" path="res://scenes/dialogs/FestGebenDialog.tscn" id="28_fgdlg"]
+[ext_resource type="PackedScene" uid="uid://bauwerkstiftdlg1" path="res://scenes/dialogs/BauwerkStiftenDialog.tscn" id="29_bsdlg"]
+[ext_resource type="PackedScene" uid="uid://prozentwertdlg1" path="res://scenes/dialogs/ProzentwertFestlegenDialog.tscn" id="30_pwdlg"]
+[ext_resource type="PackedScene" uid="uid://untergebenedlg1" path="res://scenes/dialogs/UntergebeneDialog.tscn" id="31_ugdlg"]
+[ext_resource type="PackedScene" uid="uid://rohstoffpreisedlg1" path="res://scenes/dialogs/RohstoffpreiseDialog.tscn" id="32_rpdlg"]
+[ext_resource type="PackedScene" uid="uid://kontrahentendlg1" path="res://scenes/dialogs/KontrahentenDialog.tscn" id="33_kodlg"]
+[ext_resource type="PackedScene" uid="uid://aemterebenedlg1" path="res://scenes/dialogs/AemterEbeneDialog.tscn" id="34_aedlg"]
+[ext_resource type="PackedScene" uid="uid://beziehungpflegdlg1" path="res://scenes/dialogs/BeziehungenPflegenDialog.tscn" id="36_bpdlg"]
+[ext_resource type="PackedScene" uid="uid://soeldnerraeuber1" path="res://scenes/SoeldnerRaeuberKarte.tscn" id="37_srk"]
+[ext_resource type="PackedScene" uid="uid://stuetzverwalten1" path="res://scenes/StuetzpunktVerwalten.tscn" id="39_sv"]
+[ext_resource type="PackedScene" uid="uid://stuetzpunktkaufdlg1" path="res://scenes/dialogs/StuetzpunktKaufenDialog.tscn" id="38_skdlg"]
+[ext_resource type="PackedScene" uid="uid://kartenspieldlg1" path="res://scenes/dialogs/KartenspielDialog.tscn" id="40_ksdlg"]
+[ext_resource type="PackedScene" uid="uid://gerichtdlg1" path="res://scenes/GerichtDialog.tscn" id="41_grdlg"]
+[ext_resource type="PackedScene" uid="uid://titelverleihdlg1" path="res://scenes/dialogs/TitelVerleihDialog.tscn" id="42_tvdlg"]
+[ext_resource type="PackedScene" uid="uid://optionendlg1" path="res://scenes/dialogs/OptionenDialog.tscn" id="43_optdlg"]
+[ext_resource type="PackedScene" uid="uid://creditsdlg1" path="res://scenes/dialogs/CreditsDialog.tscn" id="44_crdlg"]
+[ext_resource type="PackedScene" uid="uid://handelszertdlg1" path="res://scenes/dialogs/HandelszertifikatDialog.tscn" id="45_hzdlg"]
+[ext_resource type="PackedScene" uid="uid://lagerraumdlg1" path="res://scenes/dialogs/LagerraumKaufenDialog.tscn" id="46_lrdlg"]
+[ext_resource type="PackedScene" uid="uid://statistikdlg1" path="res://scenes/dialogs/StatistikDialog.tscn" id="47_stdlg"]
+[ext_resource type="PackedScene" uid="uid://tippsdlg1" path="res://scenes/dialogs/TippsDialog.tscn" id="48_tpdlg"]
+[ext_resource type="PackedScene" uid="uid://stadtinfodlg1" path="res://scenes/dialogs/StadtInformationenDialog.tscn" id="49_sidlg"]
+[ext_resource type="PackedScene" uid="uid://naechsterspieler1" path="res://scenes/dialogs/NaechsterSpielerDialog.tscn" id="50_nsp"]
+[ext_resource type="PackedScene" uid="uid://ingamemenu0001" path="res://scenes/dialogs/IngameMenuDialog.tscn" id="51_igm"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -15,10 +62,234 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_72k8v")
 YesNoDialogPath = NodePath("YesNoDialog")
-AudioStreamPlayerLeftClickPath = NodePath("AudioStreamPlayerLeftClick")
-AudioStreamPlayerRightClickPath = NodePath("AudioStreamPlayerRightClick")
+TextDialogPath = NodePath("TextDialog")
+LocalGameDialogPath = NodePath("LocalGameDialog")
+NewLocalGameMenuPath = NodePath("NewLocalGameMenu")
+NewPlayerMenuPath = NodePath("NewPlayerMenu")
+KontorPath = NodePath("Kontor")
+AbrechnungDialogPath = NodePath("AbrechnungDialog")
+StadtPath = NodePath("Stadt")
+LoadGameDialogPath = NodePath("LoadGameDialog")
+SchreibstubePath = NodePath("Schreibstube")
+KreditbuchDialogPath = NodePath("KreditbuchDialog")
+GesetzeDialogPath = NodePath("GesetzeDialog")
+WeltkartePath = NodePath("Weltkarte")
+HausVerwaltungDialogPath = NodePath("HausVerwaltungDialog")
+HausWaehlenDialogPath = NodePath("HausWaehlenDialog")
+HausErweiterungenDialogPath = NodePath("HausErweiterungenDialog")
+BewerbDialogPath = NodePath("BewerbDialog")
+BewerbInfosDialogPath = NodePath("BewerbInfosDialog")
+WahlDialogPath = NodePath("WahlDialog")
+KirchePath = NodePath("Kirche")
+HinterzimmerPath = NodePath("Hinterzimmer")
+BeziehungenPflegenDialogPath = NodePath("BeziehungenPflegenDialog")
+SoeldnerRaeuberKartePath = NodePath("SoeldnerRaeuberKarte")
+StuetzpunktVerwaltenPath = NodePath("StuetzpunktVerwalten")
+StuetzpunktKaufenDialogPath = NodePath("StuetzpunktKaufenDialog")
+KartenspielDialogPath = NodePath("KartenspielDialog")
+GerichtDialogPath = NodePath("GerichtDialog")
+TitelVerleihDialogPath = NodePath("TitelVerleihDialog")
+OptionenDialogPath = NodePath("OptionenDialog")
+CreditsDialogPath = NodePath("CreditsDialog")
+HandelszertifikatDialogPath = NodePath("HandelszertifikatDialog")
+LagerraumKaufenDialogPath = NodePath("LagerraumKaufenDialog")
+StatistikDialogPath = NodePath("StatistikDialog")
+TippsDialogPath = NodePath("TippsDialog")
+StadtInformationenDialogPath = NodePath("StadtInformationenDialog")
+NaechsterSpielerDialogPath = NodePath("NaechsterSpielerDialog")
+IngameMenuDialogPath = NodePath("IngameMenuDialog")
+TestamentDialogPath = NodePath("TestamentDialog")
+BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
+GeburtDialogPath = NodePath("GeburtDialog")
+KirchgangPath = NodePath("Kirchgang")
+KonfessionslosDialogPath = NodePath("KonfessionslosDialog")
+PrivilegienDialogPath = NodePath("PrivilegienDialog")
+FestGebenDialogPath = NodePath("FestGebenDialog")
+BauwerkStiftenDialogPath = NodePath("BauwerkStiftenDialog")
+ProzentwertFestlegenDialogPath = NodePath("ProzentwertFestlegenDialog")
+UntergebeneDialogPath = NodePath("UntergebeneDialog")
+RohstoffpreiseDialogPath = NodePath("RohstoffpreiseDialog")
+KontrahentenDialogPath = NodePath("KontrahentenDialog")
+AemterEbeneDialogPath = NodePath("AemterEbeneDialog")
 
 [node name="Mainmenu" parent="." instance=ExtResource("1_6ai1b")]
+layout_mode = 1
+
+[node name="NewLocalGameMenu" parent="." instance=ExtResource("3_weydb")]
+visible = false
+layout_mode = 1
+
+[node name="NewPlayerMenu" parent="." instance=ExtResource("6_npmnu")]
+visible = false
+layout_mode = 1
+
+[node name="Kontor" parent="." instance=ExtResource("7_kontr")]
+visible = false
+layout_mode = 1
+
+[node name="Stadt" parent="." instance=ExtResource("9_stadt")]
+visible = false
+layout_mode = 1
+
+[node name="Schreibstube" parent="." instance=ExtResource("11_schrb")]
+visible = false
+layout_mode = 1
+
+[node name="HausVerwaltungDialog" parent="." instance=ExtResource("15_hvdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HausWaehlenDialog" parent="." instance=ExtResource("16_hwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HausErweiterungenDialog" parent="." instance=ExtResource("17_hedlg")]
+visible = false
+layout_mode = 1
+
+[node name="BewerbDialog" parent="." instance=ExtResource("18_bwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BewerbInfosDialog" parent="." instance=ExtResource("19_bidlg")]
+visible = false
+layout_mode = 1
+
+[node name="WahlDialog" parent="." instance=ExtResource("20_wahl")]
+visible = false
+layout_mode = 1
+
+[node name="Kirche" parent="." instance=ExtResource("21_kirch")]
+visible = false
+layout_mode = 1
+
+[node name="Hinterzimmer" parent="." instance=ExtResource("35_hzimm")]
+visible = false
+layout_mode = 1
+
+[node name="SoeldnerRaeuberKarte" parent="." instance=ExtResource("37_srk")]
+visible = false
+layout_mode = 1
+
+[node name="StuetzpunktVerwalten" parent="." instance=ExtResource("39_sv")]
+visible = false
+layout_mode = 1
+
+[node name="TestamentDialog" parent="." instance=ExtResource("22_tsdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BrautwerbungDialog" parent="." instance=ExtResource("23_bwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="GeburtDialog" parent="." instance=ExtResource("24_gbdlg")]
+visible = false
+layout_mode = 1
+
+[node name="Kirchgang" parent="." instance=ExtResource("25_kgdlg")]
+visible = false
+layout_mode = 1
+
+[node name="KonfessionslosDialog" parent="." instance=ExtResource("26_kfdlg")]
+visible = false
+layout_mode = 1
+
+[node name="PrivilegienDialog" parent="." instance=ExtResource("27_prdlg")]
+visible = false
+layout_mode = 1
+
+[node name="FestGebenDialog" parent="." instance=ExtResource("28_fgdlg")]
+visible = false
+layout_mode = 1
+
+[node name="BauwerkStiftenDialog" parent="." instance=ExtResource("29_bsdlg")]
+visible = false
+layout_mode = 1
+
+[node name="ProzentwertFestlegenDialog" parent="." instance=ExtResource("30_pwdlg")]
+visible = false
+layout_mode = 1
+
+[node name="UntergebeneDialog" parent="." instance=ExtResource("31_ugdlg")]
+visible = false
+layout_mode = 1
+
+[node name="KreditbuchDialog" parent="." instance=ExtResource("12_krbdg")]
+visible = false
+layout_mode = 1
+
+[node name="GesetzeDialog" parent="." instance=ExtResource("13_gsdg")]
+visible = false
+layout_mode = 1
+
+[node name="Weltkarte" parent="." instance=ExtResource("14_wkart")]
+visible = false
+layout_mode = 1
+
+[node name="RohstoffpreiseDialog" parent="." instance=ExtResource("32_rpdlg")]
+visible = false
+layout_mode = 1
+
+[node name="KontrahentenDialog" parent="." instance=ExtResource("33_kodlg")]
+visible = false
+layout_mode = 1
+
+[node name="AemterEbeneDialog" parent="." instance=ExtResource("34_aedlg")]
+visible = false
+layout_mode = 1
+
+[node name="BeziehungenPflegenDialog" parent="." instance=ExtResource("36_bpdlg")]
+visible = false
+layout_mode = 1
+
+[node name="StuetzpunktKaufenDialog" parent="." instance=ExtResource("38_skdlg")]
+visible = false
+layout_mode = 1
+
+[node name="KartenspielDialog" parent="." instance=ExtResource("40_ksdlg")]
+visible = false
+layout_mode = 1
+
+[node name="GerichtDialog" parent="." instance=ExtResource("41_grdlg")]
+visible = false
+layout_mode = 1
+
+[node name="TitelVerleihDialog" parent="." instance=ExtResource("42_tvdlg")]
+visible = false
+layout_mode = 1
+
+[node name="OptionenDialog" parent="." instance=ExtResource("43_optdlg")]
+visible = false
+layout_mode = 1
+
+[node name="CreditsDialog" parent="." instance=ExtResource("44_crdlg")]
+visible = false
+layout_mode = 1
+
+[node name="HandelszertifikatDialog" parent="." instance=ExtResource("45_hzdlg")]
+visible = false
+layout_mode = 1
+
+[node name="LagerraumKaufenDialog" parent="." instance=ExtResource("46_lrdlg")]
+visible = false
+layout_mode = 1
+
+[node name="StatistikDialog" parent="." instance=ExtResource("47_stdlg")]
+visible = false
+layout_mode = 1
+
+[node name="StadtInformationenDialog" parent="." instance=ExtResource("49_sidlg")]
+visible = false
+
+[node name="NaechsterSpielerDialog" parent="." instance=ExtResource("50_nsp")]
+visible = false
+
+[node name="IngameMenuDialog" parent="." instance=ExtResource("51_igm")]
+visible = false
+
+[node name="TippsDialog" parent="." instance=ExtResource("48_tpdlg")]
+visible = false
 layout_mode = 1
 
 [node name="YesNoDialog" parent="." instance=ExtResource("2_bp0or")]
@@ -26,8 +297,18 @@ visible = false
 layout_mode = 1
 offset_top = -0.449997
 
-[node name="AudioStreamPlayerLeftClick" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("4_75uap")
+[node name="TextDialog" parent="." instance=ExtResource("5_txtdg")]
+visible = false
+layout_mode = 1
 
-[node name="AudioStreamPlayerRightClick" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("5_8bflw")
+[node name="AbrechnungDialog" parent="." instance=ExtResource("8_abrdg")]
+visible = false
+layout_mode = 1
+
+[node name="LoadGameDialog" parent="." instance=ExtResource("10_ldgdg")]
+visible = false
+layout_mode = 1
+
+[node name="LocalGameDialog" parent="." instance=ExtResource("4_mf33r")]
+visible = false
+layout_mode = 1

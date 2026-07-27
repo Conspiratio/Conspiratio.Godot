@@ -1,0 +1,114 @@
+[gd_scene load_steps=6 format=3 uid="uid://bauwerkstiftdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/BauwerkStiftenDialog.cs" id="1_bsdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_bsdlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_bsdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_bsdlg"]
+
+[node name="BauwerkStiftenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_bsdlg")
+LinkStadtPath = NodePath("Panel/NinePatchRect/LinkStadt")
+BauwerkeContainerPath = NodePath("Panel/NinePatchRect/VBox")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -280.0
+offset_right = 360.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bsdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = 678.0
+offset_bottom = 66.0
+text = "Ein Bauwerk stiften"
+horizontal_alignment = 1
+
+[node name="LabelHinweis" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 80.0
+offset_right = 670.0
+offset_bottom = 150.0
+text = "Stiftet einer Stadt ein Bauwerk und mehrt so dauerhaft Euer Ansehen. Wählt zunächst die Stadt, dann das Bauwerk."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LinkStadt" parent="Panel/NinePatchRect" instance=ExtResource("3_bsdlg")]
+layout_mode = 0
+offset_left = 210.0
+offset_top = 160.0
+offset_right = 510.0
+offset_bottom = 200.0
+theme = ExtResource("4_bsdlg")
+text = "Stadt:"
+
+[node name="VBox" type="VBoxContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 220.0
+offset_right = 560.0
+offset_bottom = 460.0
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="LinkBauwerk0" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_bsdlg")]
+layout_mode = 2
+theme = ExtResource("4_bsdlg")
+text = "eine Kirche"
+
+[node name="LinkBauwerk1" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_bsdlg")]
+layout_mode = 2
+theme = ExtResource("4_bsdlg")
+text = "einen Kerker"
+
+[node name="LinkBauwerk2" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_bsdlg")]
+layout_mode = 2
+theme = ExtResource("4_bsdlg")
+text = "eine Feuerwehr"
+
+[node name="LinkBauwerk3" parent="Panel/NinePatchRect/VBox" instance=ExtResource("3_bsdlg")]
+layout_mode = 2
+theme = ExtResource("4_bsdlg")
+text = "ein Hospital"
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_bsdlg")]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 490.0
+offset_right = 450.0
+offset_bottom = 530.0
+theme = ExtResource("4_bsdlg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]

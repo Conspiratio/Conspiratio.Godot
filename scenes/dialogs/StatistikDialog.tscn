@@ -1,0 +1,115 @@
+[gd_scene load_steps=4 format=3 uid="uid://statistikdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/StatistikDialog.cs" id="1_stdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_stdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_stdlg"]
+
+[node name="StatistikDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_stdlg")
+script = ExtResource("1_stdlg")
+LabelNamePath = NodePath("Rahmen/LabelName")
+HBoxBannerPath = NodePath("Rahmen/HBoxBanner")
+LinksBeschriftungPath = NodePath("Rahmen/LinksBeschriftung")
+LinksWertPath = NodePath("Rahmen/LinksWert")
+RechtsBeschriftungPath = NodePath("Rahmen/RechtsBeschriftung")
+RechtsWertPath = NodePath("Rahmen/RechtsWert")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -560.0
+offset_top = -380.0
+offset_right = 560.0
+offset_bottom = 380.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_stdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 26.0
+offset_right = 1060.0
+offset_bottom = 74.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 38
+text = "Statistik"
+horizontal_alignment = 1
+
+[node name="HBoxBanner" type="HBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 84.0
+offset_right = 760.0
+offset_bottom = 138.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LabelName" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 144.0
+offset_right = 1060.0
+offset_bottom = 184.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 26
+text = "Spieler"
+horizontal_alignment = 1
+
+[node name="LinksBeschriftung" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 210.0
+offset_right = 400.0
+offset_bottom = 720.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 20
+text = "Links"
+
+[node name="LinksWert" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 400.0
+offset_top = 210.0
+offset_right = 540.0
+offset_bottom = 720.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 20
+text = "0"
+horizontal_alignment = 2
+
+[node name="RechtsBeschriftung" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 590.0
+offset_top = 210.0
+offset_right = 900.0
+offset_bottom = 720.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 20
+text = "Rechts"
+
+[node name="RechtsWert" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 900.0
+offset_top = 210.0
+offset_right = 1050.0
+offset_bottom = 720.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 20
+text = "0"
+horizontal_alignment = 2

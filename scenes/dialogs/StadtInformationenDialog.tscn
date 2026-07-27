@@ -1,0 +1,162 @@
+[gd_scene load_steps=4 format=3 uid="uid://stadtinfodlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/StadtInformationenDialog.cs" id="1_sidlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_sidlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_sidlg"]
+
+[node name="StadtInformationenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_sidlg")
+script = ExtResource("1_sidlg")
+TitelPath = NodePath("Rahmen/LabelTitel")
+UmsatzWertPath = NodePath("Rahmen/LabelUmsatzWert")
+EinwohnerWertPath = NodePath("Rahmen/LabelEinwohnerWert")
+IconEbenePath = NodePath("Rahmen/IconEbene")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -442.0
+offset_top = -417.0
+offset_right = 443.0
+offset_bottom = 418.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_sidlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 845.0
+offset_bottom = 88.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 36
+text = "Stadt"
+horizontal_alignment = 1
+
+[node name="LabelReichtum" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 126.0
+offset_right = 400.0
+offset_bottom = 162.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Reichtum"
+
+[node name="LabelUmsatzsteuer" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 194.0
+offset_right = 400.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Umsatzsteuer"
+
+[node name="LabelUmsatzWert" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 421.0
+offset_top = 194.0
+offset_right = 669.0
+offset_bottom = 230.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "15 %"
+horizontal_alignment = 1
+
+[node name="LabelEinwohnerLabel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 254.0
+offset_right = 400.0
+offset_bottom = 290.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Einwohner"
+
+[node name="LabelEinwohnerWert" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 421.0
+offset_top = 254.0
+offset_right = 669.0
+offset_bottom = 290.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "10.000"
+horizontal_alignment = 1
+
+[node name="LabelKriminalitaet" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 320.0
+offset_right = 400.0
+offset_bottom = 356.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Kriminalität"
+
+[node name="LabelProduktion" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 394.0
+offset_right = 410.0
+offset_bottom = 430.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Haupt-/Nebenproduktion"
+
+[node name="LabelNachfrage" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 478.0
+offset_right = 400.0
+offset_bottom = 514.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Nachfrage"
+
+[node name="LabelWerkstaetten" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 49.0
+offset_top = 562.0
+offset_right = 400.0
+offset_bottom = 598.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Werkstätten für"
+
+[node name="LabelLagerstand" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 52.0
+offset_top = 642.0
+offset_right = 400.0
+offset_bottom = 678.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Lagerstand"
+
+[node name="IconEbene" type="Control" parent="Rahmen"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

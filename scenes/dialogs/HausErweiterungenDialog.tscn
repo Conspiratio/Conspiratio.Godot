@@ -1,0 +1,75 @@
+[gd_scene load_steps=5 format=3 uid="uid://hauserweiterungdlg"]
+
+[ext_resource type="Script" path="res://assets/scripts/HausErweiterungenDialog.cs" id="1_hedlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_hedlg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_hedlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_hedlg"]
+
+[node name="HausErweiterungenDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_hedlg")
+LabelTitlePath = NodePath("Panel/NinePatchRect/LabelTitle")
+VBoxErweiterungenPath = NodePath("Panel/NinePatchRect/VBoxErweiterungen")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -280.0
+offset_right = 400.0
+offset_bottom = 280.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_hedlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 30.0
+offset_right = 758.0
+offset_bottom = 90.0
+text = "Welche Erweiterung wollt Ihr anbauen?"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="VBoxErweiterungen" type="VBoxContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 160.0
+offset_top = 110.0
+offset_right = 640.0
+offset_bottom = 470.0
+theme_override_constants/separation = 10
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_hedlg")]
+layout_mode = 0
+offset_left = 310.0
+offset_top = 485.0
+offset_right = 490.0
+offset_bottom = 525.0
+theme = ExtResource("4_hedlg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
