@@ -67,13 +67,35 @@ public partial class Kontor : Control
 
 		SetProcessInput(false);
 
-		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr das Spiel verlassen und zum Hauptmenü zurückkehren?") !=
-		    DialogResultGame.Yes)
-		{
-			SetProcessInput(true);
-			return;
-		}
+		// Esc/Rechtsklick öffnet das Ingame-Menü (Optionen, Spieler hinauswerfen, Hauptmenü).
+		var ergebnis = await _main.IngameMenuDialog.ShowDialog();
 
+		switch (ergebnis)
+		{
+			case IngameMenuDialog.Ergebnis.ZumHauptmenue:
+				await ZumHauptmenue();
+				break;
+
+			case IngameMenuDialog.Ergebnis.SpielerEntferntEnde:
+				// Kein menschlicher Spieler mehr übrig: Spiel beenden (Statistik, zurück zum Hauptmenü).
+				await ZeigeStatistikWennAktiv();
+				Hide();
+				break;
+
+			case IngameMenuDialog.Ergebnis.SpielerEntferntWeiter:
+				// Der aktive Slot wird jetzt vom nächsten Spieler eingenommen: dessen Zug ankündigen.
+				await NaechstenSpielerAnkuendigen();
+				break;
+
+			default:  // WeiterSpielen
+				SetProcessInput(true);
+				break;
+		}
+	}
+
+	/// <summary>Der bisherige Weg zurück ins Hauptmenü (mit optionalem Speichern und Statistik).</summary>
+	private async Task ZumHauptmenue()
+	{
 		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Euer Spiel vorher speichern?") == DialogResultGame.Yes)
 		{
 			if (_speicherManager.Speichern(SW.Dynamisch.SpielName, out string fehler))

@@ -1,0 +1,81 @@
+[gd_scene load_steps=5 format=3 uid="uid://ingamemenu0001"]
+
+[ext_resource type="Script" path="res://assets/scripts/IngameMenuDialog.cs" id="1_igm"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_igm"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_igm"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_igm"]
+
+[node name="IngameMenuDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_igm")
+script = ExtResource("1_igm")
+ButtonWeiterPath = NodePath("Rahmen/VBox/ButtonWeiter")
+ButtonOptionenPath = NodePath("Rahmen/VBox/ButtonOptionen")
+ButtonSpielerRausPath = NodePath("Rahmen/VBox/ButtonSpielerRaus")
+ButtonHauptmenuePath = NodePath("Rahmen/VBox/ButtonHauptmenue")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -260.0
+offset_right = 320.0
+offset_bottom = 260.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_igm")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 34.0
+offset_right = 600.0
+offset_bottom = 82.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 34
+text = "Spielmenü"
+horizontal_alignment = 1
+
+[node name="VBox" type="VBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 120.0
+offset_right = 520.0
+offset_bottom = 480.0
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="ButtonWeiter" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Weiter spielen"
+
+[node name="ButtonOptionen" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Optionen"
+
+[node name="ButtonSpielerRaus" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Spieler hinauswerfen"
+
+[node name="ButtonHauptmenue" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Zum Hauptmenü"

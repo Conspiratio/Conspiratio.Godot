@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Godot;
 
@@ -29,6 +30,7 @@ public partial class OptionenDialog : Control
 	private controls.CheckBoxWithSounds _checkHoch;
 
 	private bool _laedt;
+	private TaskCompletionSource<bool> _dialogClosed;
 
 	public override void _Ready()
 	{
@@ -75,10 +77,11 @@ public partial class OptionenDialog : Control
 		SoundManager.Instance.PlayRightClick();
 		Hide();
 		SetProcessInput(false);
+		_dialogClosed?.TrySetResult(true);
 	}
 
 	/// <summary>Öffnet das Einstellungsfenster und lädt die aktuellen Werte in die Steuerelemente.</summary>
-	public void ShowDialog()
+	public Task ShowDialog()
 	{
 		_laedt = true;
 
@@ -103,6 +106,9 @@ public partial class OptionenDialog : Control
 
 		Show();
 		SetProcessInput(true);
+
+		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+		return _dialogClosed.Task;
 	}
 
 	private void OnMusikAusgeschaltet(bool ausgeschaltet)

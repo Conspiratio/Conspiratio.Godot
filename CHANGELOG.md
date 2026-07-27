@@ -15,6 +15,7 @@ _Unreleased_
 - Lagerraum-Kauf-Dialog: Rechtsklick schließt den Dialog jetzt zuverlässig (das Eingabe-Ereignis wird als behandelt markiert und die Stadtansicht reaktiviert ihre Eingabe erst nach dem Input-Frame).
 
 #### Hinzugefügt
+- Ingame-Menü im laufenden Spiel (Esc bzw. Rechtsklick im Kontor): ein Pergament-Menü mit "Weiter spielen", "Optionen" (öffnet das Einstellungsfenster), "Spieler hinauswerfen" (entfernt den aktiven Spieler nach Rückfrage – bei letztem Spieler endet das Spiel, sonst ist der nächste am Zug) und "Zum Hauptmenü" (mit optionalem Speichern). Ersetzt das bisherige direkte Zurückspringen ins Hauptmenü
 - Vollbild-Ankündigung des nächsten Spielers zu Zugbeginn (Migration von HintNaechsterSpieler): statt einer Textmeldung erscheint nun der Tor-Bildschirm mit goldenem "Nächster Spieler" sowie Name und Amt des Spielers; der Rechtsklick öffnet den Zug
 - Stadtinformationen (Migration von StadtInformationen): In der Handelskarte öffnet ein Rechtsklick auf eine Stadt ein Pergament mit ihren Kenndaten – Reichtum (Münzen), Umsatzsteuer, Einwohner, Kriminalität (Dolche), Haupt-/Nebenproduktion, Nachfrage, mögliche Werkstätten und der farbig bewertete Lagerstand (rot/orange/grün) je Rohstoff; Rechtsklick schließt wieder. Die fehlenden Symbole (SymbCrime, SymbReichtum) und das Rohstoff-Icon Roh21 wurden aus dem WinForms-Client konvertiert.
 - Spieltipps zu Zugbeginn (Migration von TippsAnzeigen): ist die Option "Tipps anzeigen" aktiv, erscheint zu Beginn jedes Zugs ein zufälliger Spieltipp; über "Zurück"/"Weiter" lässt sich durch die Tipps blättern, der Rechtsklick schließt
@@ -88,6 +89,7 @@ _Unreleased_
 - Storage-purchase dialog: right click now reliably closes the dialog (the input event is marked handled and the city view re-enables its input only after the input frame).
 
 #### Added
+- In-game menu during a running game (Esc or right click in the Kontor): a parchment menu with "continue playing", "options" (opens the settings window), "remove player" (removes the active player after confirmation – with the last player the game ends, otherwise the next player is up) and "to main menu" (with optional saving). Replaces the previous direct jump back to the main menu
 - Full-screen announcement of the next player at the start of the turn (migration of HintNaechsterSpieler): instead of a text message, the gate screen now appears with a golden "next player" as well as the player's name and office; a right click opens the turn
 - City information (migration of StadtInformationen): on the trade map, right clicking a city opens a parchment with its key data – wealth (coins), sales tax, population, crime (daggers), main/secondary production, demand, possible workshops and the colour-rated stock (red/orange/green) per resource; right click closes it again. The missing symbols (SymbCrime, SymbReichtum) and the resource icon Roh21 were converted from the WinForms client.
 - Game tips at the start of the turn (migration of TippsAnzeigen): if the "show tips" option is on, a random game tip appears at the start of each turn; "back"/"next" let you browse the tips, right click closes
