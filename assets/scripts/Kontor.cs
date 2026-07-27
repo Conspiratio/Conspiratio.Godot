@@ -204,8 +204,11 @@ public partial class Kontor : Control
 
 		_geradeGeladen = false;
 
-		// Eingegangene Kaufangebote für eigene Stützpunkte prüfen (Handel zwischen Spielern)
-		await new SoeldnerRaeuberManager().VerarbeiteEingehendeKaufangebote();
+		// Stützpunkt-Handel zwischen Spielern: erst die Ergebnisse eigener Angebote melden,
+		// dann eingegangene Kaufangebote für eigene Stützpunkte prüfen.
+		var soeldnerManager = new SoeldnerRaeuberManager();
+		await soeldnerManager.ZeigeHandelsnachrichten();
+		await soeldnerManager.VerarbeiteEingehendeKaufangebote();
 		UpdateHud();
 
 		// Spieltipp zu Zugbeginn, sofern die Option "Tipps anzeigen" aktiv ist
