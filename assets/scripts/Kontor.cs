@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
+using Conspiratio.Lib.Gameplay.Kampf;
 using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Conspiratio.Lib.Gameplay.Titel;
@@ -202,6 +203,10 @@ public partial class Kontor : Control
 		}
 
 		_geradeGeladen = false;
+
+		// Eingegangene Kaufangebote für eigene Stützpunkte prüfen (Handel zwischen Spielern)
+		await new SoeldnerRaeuberManager().VerarbeiteEingehendeKaufangebote();
+		UpdateHud();
 
 		// Spieltipp zu Zugbeginn, sofern die Option "Tipps anzeigen" aktiv ist
 		if (ClientSettings.TippsAnzeigen)
