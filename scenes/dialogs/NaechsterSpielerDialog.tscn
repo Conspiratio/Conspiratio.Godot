@@ -1,0 +1,50 @@
+[gd_scene load_steps=3 format=3 uid="uid://naechsterspieler1"]
+
+[ext_resource type="Script" path="res://assets/scripts/NaechsterSpielerDialog.cs" id="1_nsp"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintNaechsterSpieler.png" id="2_nsp"]
+
+[node name="NaechsterSpielerDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_nsp")
+LabelSpielerPath = NodePath("LabelSpieler")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_nsp")
+
+[node name="LabelUeberschrift" type="Label" parent="."]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 135.0
+offset_right = 1100.0
+offset_bottom = 180.0
+theme_override_colors/font_color = Color(0.95, 0.8, 0.15, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 30
+text = "Nächster Spieler"
+horizontal_alignment = 1
+
+[node name="LabelSpieler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 200.0
+offset_right = 1100.0
+offset_bottom = 320.0
+theme_override_colors/font_color = Color(0.95, 0.8, 0.15, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 36
+text = "Spielername,
+Amt"
+horizontal_alignment = 1

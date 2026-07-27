@@ -130,8 +130,8 @@ public partial class Kontor : Control
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 
 		var spieler = SW.Dynamisch.GetAktHum();
-		await SW.UI.ShowText.ShowDialog("Nächster Spieler\n\n" + spieler.GetTitelGegendert() + " " + spieler.GetName() +
-		                                ",\n" + spieler.GetAmtNameUndOrt());
+		await _main.NaechsterSpielerDialog.ShowDialog(spieler.GetTitelGegendert() + " " + spieler.GetName() +
+		                                              ",\n" + spieler.GetAmtNameUndOrt());
 
 		_rundenManager.BeginneZug();
 
