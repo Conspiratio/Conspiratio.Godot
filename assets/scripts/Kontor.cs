@@ -14,6 +14,7 @@ public partial class Kontor : Control
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
 	private Label _labelTaler;
+	private Color _talerStandardFarbe;
 
 	private RundenManager _rundenManager;
 	private SpeicherManager _speicherManager;
@@ -35,6 +36,14 @@ public partial class Kontor : Control
 		_labelPlayerNameAndOffice = GetNode<Label>(LabelPlayerNameAndOfficePath);
 		_labelPlaceDate = GetNode<Label>(LabelPlaceDatePath);
 		_labelTaler = GetNode<Label>(LabelTalerPath);
+
+		// Klick auf die Taler öffnet – wie im Original – die politische Weltkarte im Beziehungs-/
+		// Bestechungsmodus (Personen-Modus 0). MouseOver hebt die Zahl golden hervor.
+		_labelTaler.MouseFilter = Control.MouseFilterEnum.Stop;
+		_talerStandardFarbe = _labelTaler.GetThemeColor("font_color");
+		_labelTaler.GuiInput += OnTalerGuiInput;
+		_labelTaler.MouseEntered += () => _labelTaler.AddThemeColorOverride("font_color", new Color(0.8f, 0.05f, 0.05f));
+		_labelTaler.MouseExited += () => _labelTaler.AddThemeColorOverride("font_color", _talerStandardFarbe);
 
 		_main = GetParent<Main>();
 
@@ -62,9 +71,12 @@ public partial class Kontor : Control
 
 	public override async void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		// Nur auf das diskrete Drücken reagieren (@event statt globalem Input.IsActionPressed), sonst
+		// öffnet ein einzelner Tastendruck das Menü mehrfach und es "flackert".
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
+		GetViewport().SetInputAsHandled();
 		SetProcessInput(false);
 
 		// Esc/Rechtsklick öffnet das Ingame-Menü (Optionen, Spieler hinauswerfen, Hauptmenü).
@@ -299,6 +311,24 @@ public partial class Kontor : Control
 
 		// Wie im Original führt der Handel zunächst auf die politische Weltkarte zur Stadtwahl
 		_main.Weltkarte.ZeigeHandelskarte();
+	}
+
+	private void OnTalerGuiInput(InputEvent @event)
+	{
+		if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left })
+			OnTalerAngeklickt();
+	}
+
+	// Klick auf die Taler öffnet die politische Weltkarte im Beziehungs-/Bestechungsmodus (Personen-Modus 0).
+	private async void OnTalerAngeklickt()
+	{
+		SoundManager.Instance.PlayLeftClick();
+		SetProcessInput(false);
+		Hide();
+
+		await _main.Weltkarte.OeffnePersonenKarte(0, true);
+
+		ReturnFromStadt();
 	}
 
 	private void _on_area_schreibstube_pressed()

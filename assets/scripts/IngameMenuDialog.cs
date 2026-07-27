@@ -51,8 +51,9 @@ public partial class IngameMenuDialog : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		// Esc/Rechtsklick schließt das Menü wie "Weiter".
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		// Nur auf das diskrete Drücken reagieren (@event statt globalem Input.IsActionPressed), sonst
+		// feuert die Aktion mehrfach pro Tastendruck und das Menü "flackert".
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		GetViewport().SetInputAsHandled();
@@ -63,20 +64,31 @@ public partial class IngameMenuDialog : Control
 	public Task<Ergebnis> ShowDialog()
 	{
 		Show();
-		SetProcessInput(true);
+
+		// Eingabe erst nach dem aktuellen Input-Frame aktivieren, damit das öffnende Esc/Rechtsklick
+		// nicht sofort wieder ankommt und das Menü schließt.
+		SetProcessInput(false);
+		CallDeferred(MethodName.AktiviereEingabe);
 
 		_dialogClosed = new TaskCompletionSource<Ergebnis>(TaskCreationOptions.RunContinuationsAsynchronously);
 		return _dialogClosed.Task;
 	}
 
+	private void AktiviereEingabe()
+	{
+		if (Visible)
+			SetProcessInput(true);
+	}
+
 	private async void OnOptionen()
 	{
 		SetProcessInput(false);
-		await _main.OptionenDialog.ShowDialog();
 
-		// Nach den Optionen bleibt das Menü offen.
-		if (Visible)
-			SetProcessInput(true);
+		// Das Menü ausblenden, damit die Optionen im Vordergrund erscheinen; danach wieder anzeigen.
+		Hide();
+		await _main.OptionenDialog.ShowDialog();
+		Show();
+		CallDeferred(MethodName.AktiviereEingabe);
 	}
 
 	private async void OnSpielerRaus()
