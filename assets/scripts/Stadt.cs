@@ -19,6 +19,12 @@ public partial class Stadt : Control
 	private const int MaxRohstoffIcons = 20;
 	private const float BestandLabelOriginalBreite = 86;  // Breite des WinForms-Labels, auf die sich die Ziffern-Klickzonen beziehen
 
+	// Rohstoffbereich (Preis/Bestand) liegt auf der Steinwand: Gold mit dunklem Rand für Lesbarkeit.
+	private static readonly Color GoldFarbe = new(1f, 0.85f, 0.15f);
+	private static readonly Color OutlineDunkel = new(0.12f, 0.08f, 0.03f);
+	// Produktionszeilen liegen auf dem Pergament: dunkles Braun-Schwarz (wie in den Dialogen).
+	private static readonly Color PergamentText = new(0.16f, 0.11f, 0.05f);
+
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
 	private Label _labelTaler;
@@ -71,6 +77,14 @@ public partial class Stadt : Control
 			_labelsPreis[i] = GetNode<Label>("LabelPreis" + i);
 			_labelsBestand[i] = GetNode<Label>("LabelBestand" + i);
 
+			// Rohstoffbereich (auf Steinwand): Gold mit dunklem Rand statt des schwarzen Theme-Defaults.
+			foreach (var label in new[] { _labelsPreis[i], _labelsBestand[i] })
+			{
+				label.AddThemeColorOverride("font_color", GoldFarbe);
+				label.AddThemeColorOverride("font_outline_color", OutlineDunkel);
+				label.AddThemeConstantOverride("outline_size", 4);
+			}
+
 			int nr = i;
 			_buttonsWerkstatt[i].Pressed += () => OnWerkstattPressed(nr);
 			_buttonsRohstoff[i].Pressed += () => OnRohstoffPressed(nr);
@@ -88,6 +102,12 @@ public partial class Stadt : Control
 			_labelsText1[slot] = _detailRows[slot].GetNode<Label>("LabelText1");
 			_labelsText2[slot] = _detailRows[slot].GetNode<Label>("LabelText2");
 			_labelsKosten[slot] = _detailRows[slot].GetNode<Label>("LabelKosten");
+
+			// Produktionszeile liegt auf dem Pergament: Produkt- und Zahlen-Buttons (Theme-Default gold)
+			// auf das dunkle Pergament-Schwarz setzen; die Wort-Labels sind bereits schwarz.
+			_buttonsProdukt[slot].AddThemeColorOverride("font_color", PergamentText);
+			_numericsMenge[slot].AddThemeColorOverride("font_color", PergamentText);
+			_numericsStaette[slot].AddThemeColorOverride("font_color", PergamentText);
 
 			int slotKopie = slot;
 			_buttonsTaetigkeit[slot].Pressed += () => OnTaetigkeitPressed(slotKopie);
@@ -317,6 +337,10 @@ public partial class Stadt : Control
 			_numericsStaette[slot].MaximaleStellen = 2;
 			_numericsStaette[slot].Wert = produktionsslot.GetProduktionStaetten();
 
+			// Ungültige (nicht produzierende) Werte rot einfärben – wie im Original das rote "0 Bottichen".
+			FaerbeNumeric(_numericsMenge[slot], produktionsslot.GetProduktionArbeiter() > 0);
+			FaerbeNumeric(_numericsStaette[slot], produktionsslot.GetProduktionStaetten() > 0);
+
 			_labelsText2[slot].Text = produktionsslot.GetProduktionStaetten() != 1 ? staetteMehrzahl : staetteEinzahl;
 			_labelsText2[slot].Visible = true;
 
@@ -350,6 +374,10 @@ public partial class Stadt : Control
 			_numericsStaette[slot].Wert = produktionsslot.GetVerkaufStadt();
 			_numericsStaette[slot].Text = "in " + SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()).GetGebietsName();
 
+			// Verkaufsmenge 0 = kein Verkauf: rot; sonst schwarz. Die Zielstadt bleibt schwarz.
+			FaerbeNumeric(_numericsMenge[slot], produktionsslot.GetVerkaufAnzahl() > 0);
+			FaerbeNumeric(_numericsStaette[slot], true);
+
 			_labelsText2[slot].Visible = false;
 
 			// Reihenfolge wie im Original: "Verkauft", Anzahl, Rohstoff, Zielstadt, Kosten
@@ -361,6 +389,12 @@ public partial class Stadt : Control
 		}
 
 		_labelsKosten[slot].Text = "für " + _handelsManager.BerechneKosten(_stadtId, slot).ToStringGeld();
+	}
+
+	// Färbt einen Zahlen-Button je nach Gültigkeit: schwarz auf Pergament bzw. rot bei ungültigem (0-)Wert.
+	private void FaerbeNumeric(NumericButtonWithSounds numeric, bool gueltig)
+	{
+		numeric.AddThemeColorOverride("font_color", gueltig ? PergamentText : new Color(0.65f, 0.05f, 0.05f));
 	}
 
 	private static string AktionsartAlsText(EnumProduktionsslotAktionsart aktionsart)

@@ -287,17 +287,17 @@ stretch_mode = 0
 [node name="ButtonTaetigkeit0" parent="." instance=ExtResource("2_stbtn")]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 664.0
+offset_top = 691.0
 offset_right = 346.0
-offset_bottom = 710.0
+offset_bottom = 737.0
 text = "Kein Auftrag"
 
 [node name="HBoxDetail0" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 107.0
-offset_top = 714.0
+offset_top = 742.0
 offset_right = 1360.0
-offset_bottom = 754.0
+offset_bottom = 782.0
 theme_override_constants/separation = 6
 
 [node name="ButtonProdukt" parent="HBoxDetail0" instance=ExtResource("2_stbtn")]
@@ -330,17 +330,17 @@ size_flags_vertical = 4
 [node name="ButtonTaetigkeit1" parent="." instance=ExtResource("2_stbtn")]
 layout_mode = 0
 offset_left = 72.0
-offset_top = 782.0
+offset_top = 773.0
 offset_right = 346.0
-offset_bottom = 828.0
+offset_bottom = 819.0
 text = "Kein Auftrag"
 
 [node name="HBoxDetail1" type="HBoxContainer" parent="."]
 layout_mode = 0
 offset_left = 107.0
-offset_top = 832.0
+offset_top = 824.0
 offset_right = 1360.0
-offset_bottom = 872.0
+offset_bottom = 864.0
 theme_override_constants/separation = 6
 
 [node name="ButtonProdukt" parent="HBoxDetail1" instance=ExtResource("2_stbtn")]

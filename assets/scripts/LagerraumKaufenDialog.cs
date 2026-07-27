@@ -42,6 +42,10 @@ public partial class LagerraumKaufenDialog : Control
 		if (!Input.IsActionPressed("ui_next_or_close"))
 			return;
 
+		// Event als behandelt markieren, damit der Rechtsklick nicht zusätzlich an die
+		// dahinterliegende Stadtansicht durchschlägt (die sonst den Klick mitverarbeiten könnte).
+		GetViewport().SetInputAsHandled();
+
 		SoundManager.Instance.PlayRightClick();
 		CloseDialog();
 	}
@@ -57,7 +61,9 @@ public partial class LagerraumKaufenDialog : Control
 		Show();
 		SetProcessInput(true);
 
-		_dialogClosed = new TaskCompletionSource<bool>();
+		// RunContinuationsAsynchronously: der Aufrufer (Stadt.OnWerkstattPressed) aktiviert seine Eingabe
+		// erst nach Abschluss des aktuellen Input-Frames wieder, nicht synchron im selben Rechtsklick.
+		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 		return _dialogClosed.Task;
 	}
 

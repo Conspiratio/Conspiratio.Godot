@@ -7,7 +7,12 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
-- Stadt-/Produktionsansicht optisch an die WinForms-Vorlage angeglichen: Kopfzeile in der richtigen Reihenfolge (Taler links, Ort und Datum rechts, Spielername samt Amt zentriert in einer zweiten Zeile darunter) und im Fußbereich zwei volle Pergament-Banner statt eines schmalen – je Produktionszeile eines. Die Kopfzeile des Kontors wurde entsprechend angeglichen (gleiches Layout).
+- Stadt-/Produktionsansicht optisch an die WinForms-Vorlage angeglichen: Kopfzeile in der richtigen Reihenfolge (Taler links, Ort und Datum rechts, Spielername samt Amt zentriert in einer zweiten Zeile darunter). Die Kopfzeile des Kontors wurde entsprechend angeglichen (gleiches Layout).
+- Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
+
+#### Behoben
+- Startmusik (Intro) und Abschlussmusik (Outro) laufen nicht mehr in Endlosschleife, sondern spielen wie vorgesehen einmalig.
+- Lagerraum-Kauf-Dialog: Rechtsklick schließt den Dialog jetzt zuverlässig (das Eingabe-Ereignis wird als behandelt markiert und die Stadtansicht reaktiviert ihre Eingabe erst nach dem Input-Frame).
 
 #### Hinzugefügt
 - Stadtinformationen (Migration von StadtInformationen): In der Handelskarte öffnet ein Rechtsklick auf eine Stadt ein Pergament mit ihren Kenndaten – Reichtum (Münzen), Umsatzsteuer, Einwohner, Kriminalität (Dolche), Haupt-/Nebenproduktion, Nachfrage, mögliche Werkstätten und der farbig bewertete Lagerstand (rot/orange/grün) je Rohstoff; Rechtsklick schließt wieder. Die fehlenden Symbole (SymbCrime, SymbReichtum) und das Rohstoff-Icon Roh21 wurden aus dem WinForms-Client konvertiert.
@@ -74,7 +79,12 @@ _Unreleased_
 ### [EN]
 
 #### Changed
-- City/production view aligned visually with the WinForms original: header in the correct order (taler on the left, place and date on the right, player name incl. office centred on a second line below) and two full parchment banners at the bottom instead of one narrow one – one per production line. The Kontor header was aligned accordingly (same layout).
+- City/production view aligned visually with the WinForms original: header in the correct order (taler on the left, place and date on the right, player name incl. office centred on a second line below). The Kontor header was aligned accordingly (same layout).
+- Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
+
+#### Fixed
+- Intro and outro music no longer loop endlessly but play once as intended.
+- Storage-purchase dialog: right click now reliably closes the dialog (the input event is marked handled and the city view re-enables its input only after the input frame).
 
 #### Added
 - City information (migration of StadtInformationen): on the trade map, right clicking a city opens a parchment with its key data – wealth (coins), sales tax, population, crime (daggers), main/secondary production, demand, possible workshops and the colour-rated stock (red/orange/green) per resource; right click closes it again. The missing symbols (SymbCrime, SymbReichtum) and the resource icon Roh21 were converted from the WinForms client.

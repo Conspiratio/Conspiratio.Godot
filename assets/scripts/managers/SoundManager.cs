@@ -263,7 +263,14 @@ public partial class SoundManager : Node
 
 	private void OnMusikstueckFertig()
 	{
-		// Am Stückende nahtlos das nächste zufällige Stück derselben Kategorie anspielen.
+		// Intro und Outro sind einmalige Stücke: am Ende nicht wiederholen, sondern verstummen.
+		if (_aktuelleKategorie is MusikKategorie.Intro or MusikKategorie.Outro)
+		{
+			_aktuelleKategorie = MusikKategorie.Keine;
+			return;
+		}
+
+		// Hintergrundmusik: am Stückende nahtlos das nächste zufällige Stück derselben Kategorie anspielen.
 		if (Musikstuecke.TryGetValue(_aktuelleKategorie, out var pfade) && pfade.Length > 0)
 			StarteStueck(LadeZufallsstueck(pfade), 0f);
 	}
