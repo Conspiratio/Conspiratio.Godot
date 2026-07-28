@@ -177,6 +177,26 @@ public partial class StuetzpunktVerwalten : Control
 
 		var manoever = UpgradeButtonNode("Roh17", "Manöver durchführen");
 		manoever.Pressed += OnManoeverPressed;
+
+		// Zum Verkauf anbieten: KI-Spieler unterbreiten dann gelegentlich Kaufangebote.
+		var verkauf = UpgradeButtonNode("SymbFinanzen",
+			_manager.ZumVerkaufAngeboten ? "Wird zum Verkauf angeboten (Klick nimmt zurück)" : "Zum Verkauf anbieten");
+		if (_manager.ZumVerkaufAngeboten)
+		{
+			var rahmen = GoldRahmen();
+			verkauf.Flat = false;
+			verkauf.AddThemeStyleboxOverride("normal", rahmen);
+			verkauf.AddThemeStyleboxOverride("hover", rahmen);
+			verkauf.AddThemeStyleboxOverride("pressed", rahmen);
+			verkauf.AddThemeStyleboxOverride("focus", rahmen);
+		}
+		verkauf.Pressed += OnZumVerkaufPressed;
+	}
+
+	private void OnZumVerkaufPressed()
+	{
+		_manager.ZumVerkaufAngeboten = !_manager.ZumVerkaufAngeboten;
+		BaueUpgrades();
 	}
 
 	private void UpgradeButton(string icon, string tooltip, System.Action aktion)

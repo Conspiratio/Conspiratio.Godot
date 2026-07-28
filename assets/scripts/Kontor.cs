@@ -208,6 +208,7 @@ public partial class Kontor : Control
 		// dann eingegangene Kaufangebote für eigene Stützpunkte prüfen.
 		var soeldnerManager = new SoeldnerRaeuberManager();
 		await soeldnerManager.ZeigeHandelsnachrichten();
+		soeldnerManager.GeneriereKiKaufangebote();  // zufällige KI-Angebote für zum Verkauf angebotene Stützpunkte
 		await soeldnerManager.VerarbeiteEingehendeKaufangebote();
 		UpdateHud();
 
