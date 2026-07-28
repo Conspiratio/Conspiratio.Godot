@@ -207,6 +207,7 @@ public partial class Kontor : Control
 		// Stützpunkt-Handel zwischen Spielern: erst die Ergebnisse eigener Angebote melden,
 		// dann eingegangene Kaufangebote für eigene Stützpunkte prüfen.
 		var soeldnerManager = new SoeldnerRaeuberManager();
+		await soeldnerManager.ZeigeZolleinnahmen();  // eingenommene Zölle der eigenen Zollburgen melden
 		await soeldnerManager.ZeigeHandelsnachrichten();
 		soeldnerManager.GeneriereKiKaufangebote();  // zufällige KI-Angebote für zum Verkauf angebotene Stützpunkte
 		await soeldnerManager.VerarbeiteEingehendeKaufangebote();
@@ -745,7 +746,13 @@ public partial class Kontor : Control
 	{
 		var meldungen = new Conspiratio.Lib.Gameplay.Kampf.KampfereignisseManager().ErmittleEreignisse();
 
+		// Während der militärischen Meldungen (Rechtsklick-Wartezeiten) läuft die Kampfmusik als Schleife.
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
+
 		foreach (string meldung in meldungen)
 			await SW.UI.ShowText.ShowDialog("Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr() + "\n\n" + meldung);
+
+		// Danach zurück zur normalen Hintergrundmusik.
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 	}
 }
