@@ -101,8 +101,8 @@ public partial class NewLocalGameMenu : Control
 			return;
 		}
 
-		// Die in den Optionen gewählte KI-Aggressivität als Vorgabe für dieses Spiel übernehmen
-		SW.Dynamisch.Spielstand.Einstellungen.AggressivitaetKISpieler = (EnumSchwierigkeitsgrad)ClientSettings.KiAggressivitaet;
+		// Die in den Optionen gewählte KI-Aktivität (Prozent) als Vorgabe für dieses Spiel übernehmen
+		SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent = ClientSettings.KiAktivitaetProzent;
 
 		HideAndDisableInput();
 		_main.NewPlayerMenu.StartPlayerSetup();

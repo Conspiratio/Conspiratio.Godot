@@ -25,9 +25,8 @@ public partial class OptionenDialog : Control
 	private Label _labelEffekt;
 	private Label _labelStimmen;
 
-	private controls.CheckBoxWithSounds _checkNiedrig;
-	private controls.CheckBoxWithSounds _checkMittel;
-	private controls.CheckBoxWithSounds _checkHoch;
+	private HSlider _sliderKiAktivitaet;
+	private Label _labelAgg;
 
 	private bool _laedt;
 	private TaskCompletionSource<bool> _dialogClosed;
@@ -47,9 +46,8 @@ public partial class OptionenDialog : Control
 		_labelEffekt = GetNode<Label>("Rahmen/VBoxSlider/LabelEffekt");
 		_labelStimmen = GetNode<Label>("Rahmen/VBoxSlider/LabelStimmen");
 
-		_checkNiedrig = GetNode<controls.CheckBoxWithSounds>("Rahmen/HBoxAgg/CheckNiedrig");
-		_checkMittel = GetNode<controls.CheckBoxWithSounds>("Rahmen/HBoxAgg/CheckMittel");
-		_checkHoch = GetNode<controls.CheckBoxWithSounds>("Rahmen/HBoxAgg/CheckHoch");
+		_sliderKiAktivitaet = GetNode<HSlider>("Rahmen/SliderKiAktivitaet");
+		_labelAgg = GetNode<Label>("Rahmen/LabelAgg");
 
 		_checkMusikAus.Toggled += OnMusikAusgeschaltet;
 		_checkTipps.Toggled += an => ClientSettings.TippsAnzeigen = an;
@@ -61,9 +59,7 @@ public partial class OptionenDialog : Control
 		_sliderEffekt.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusEffekt, (int)wert);
 		_sliderStimmen.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusStimmen, (int)wert);
 
-		_checkNiedrig.Toggled += an => OnAggressivitaet(an, 0);
-		_checkMittel.Toggled += an => OnAggressivitaet(an, 1);
-		_checkHoch.Toggled += an => OnAggressivitaet(an, 2);
+		_sliderKiAktivitaet.ValueChanged += OnKiAktivitaetGeaendert;
 
 		Hide();
 		SetProcessInput(false);
@@ -98,9 +94,8 @@ public partial class OptionenDialog : Control
 		AktualisiereLautstaerkeLabel(_labelEffekt, "Effekt", ClientSettings.EffektLautstaerke);
 		AktualisiereLautstaerkeLabel(_labelStimmen, "Stimmen", ClientSettings.StimmenLautstaerke);
 
-		_checkNiedrig.ButtonPressed = ClientSettings.KiAggressivitaet == 0;
-		_checkMittel.ButtonPressed = ClientSettings.KiAggressivitaet == 1;
-		_checkHoch.ButtonPressed = ClientSettings.KiAggressivitaet == 2;
+		_sliderKiAktivitaet.Value = ClientSettings.KiAktivitaetProzent;
+		AktualisiereKiAktivitaetLabel(ClientSettings.KiAktivitaetProzent);
 
 		_laedt = false;
 
@@ -148,12 +143,20 @@ public partial class OptionenDialog : Control
 			AudioEinstellungen.AlleAnwenden();
 	}
 
-	private void OnAggressivitaet(bool angewaehlt, int stufe)
+	private void OnKiAktivitaetGeaendert(double wert)
 	{
-		if (_laedt || !angewaehlt)
+		int prozent = (int)wert;
+		AktualisiereKiAktivitaetLabel(prozent);
+
+		if (_laedt)
 			return;
 
-		ClientSettings.KiAggressivitaet = stufe;
+		ClientSettings.KiAktivitaetProzent = prozent;
+	}
+
+	private void AktualisiereKiAktivitaetLabel(int prozent)
+	{
+		_labelAgg.Text = "Aktivität der KI-Spieler: " + prozent + " %";
 	}
 
 	private static void AktualisiereLautstaerkeLabel(Label label, string typ, int prozent)

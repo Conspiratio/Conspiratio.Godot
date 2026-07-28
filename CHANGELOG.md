@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
+- KI-Aktivität als Schieberegler (Issue #16 „Räuber/Söldner Teil 2"): Im Optionsfenster ersetzt ein 1–100-%-Regler (Standard 50 %) die bisherige Dreistufen-Auswahl (Niedrig/Mittel/Hoch) für die Aktivität der KI-Spieler in den Militärstützpunkten. Benötigt Conspiratio.Lib 3.51.0
 - Stadt-/Produktionsansicht optisch an die WinForms-Vorlage angeglichen: Kopfzeile in der richtigen Reihenfolge (Taler links, Ort und Datum rechts, Spielername samt Amt zentriert in einer zweiten Zeile darunter). Die Kopfzeile des Kontors wurde entsprechend angeglichen (gleiches Layout).
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
@@ -87,6 +88,7 @@ _Unreleased_
 ### [EN]
 
 #### Changed
+- AI activity as a slider (issue #16 "Robbers/Mercenaries Part 2"): in the options window a 1–100 % slider (default 50 %) replaces the previous three-level choice (low/medium/high) for the activity of the AI players in the military bases. Requires Conspiratio.Lib 3.51.0
 - City/production view aligned visually with the WinForms original: header in the correct order (taler on the left, place and date on the right, player name incl. office centred on a second line below). The Kontor header was aligned accordingly (same layout).
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 

@@ -75,11 +75,11 @@ public static class ClientSettings
 		set => SetValue("optionen", "stimmen_lautstaerke", value);
 	}
 
-	/// <summary>KI-Aggressivität als Vorgabe für neue Spiele (0 = Niedrig, 1 = Mittel, 2 = Hoch).</summary>
-	public static int KiAggressivitaet
+	/// <summary>Aktivität der KI-Spieler als Vorgabe für neue Spiele in Prozent (1–100, Standard 50).</summary>
+	public static int KiAktivitaetProzent
 	{
-		get => GetInt("optionen", "ki_aggressivitaet", 1);
-		set => SetValue("optionen", "ki_aggressivitaet", value);
+		get => GetInt("optionen", "ki_aktivitaet_prozent", 50);
+		set => SetValue("optionen", "ki_aktivitaet_prozent", value);
 	}
 
 	private static string GetString(string section, string key, string standard)
