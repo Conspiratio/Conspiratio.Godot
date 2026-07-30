@@ -1,0 +1,81 @@
+using System.Threading.Tasks;
+using Conspiratio.Godot.assets.scripts.managers;
+using Conspiratio.Lib.Allgemein;
+using Godot;
+
+namespace Conspiratio.Godot.assets.scripts;
+
+/// <summary>
+/// Vollbild-Nachrichtenschirm für die Zug- und Rundenende-Ereignisse (Migration des WinForms-Bildschirms
+/// "Ort_Nachrichten" bzw. frmKampfereignisse): zeigt vor dem Hintergrundbild HintRundenNachrichten einen
+/// gestylten Titel oben und den Meldungstext darunter auf dem Pergament. Ein Rechtsklick (oder Esc) blättert
+/// weiter. Wird für die eigentlichen Spielereignisse verwendet – generische Bestätigungen/Fehler laufen
+/// weiterhin über den kleinen <see cref="TextDialog"/>.
+/// </summary>
+public partial class RundenNachrichtenDialog : Control, IShowText
+{
+	[Export]
+	public NodePath LabelTitelPath { get; set; }
+
+	[Export]
+	public NodePath LabelTextPath { get; set; }
+
+	private Label _labelTitel;
+	private Label _labelText;
+	private TaskCompletionSource<bool> _dialogClosed;
+
+	public override void _Ready()
+	{
+		_labelTitel = GetNode<Label>(LabelTitelPath);
+		_labelText = GetNode<Label>(LabelTextPath);
+
+		Hide();
+		SetProcessInput(false);
+	}
+
+	public override void _Input(InputEvent @event)
+	{
+		if (!Input.IsActionPressed("ui_next_or_close"))
+			return;
+
+		GetViewport().SetInputAsHandled();
+		SoundManager.Instance.PlayRightClick();
+		CloseDialog();
+	}
+
+	/// <summary>
+	/// Zeigt eine Meldung. Der Text folgt der Konvention "Titel\n\nText": Alles vor der ersten Leerzeile
+	/// wird als Überschrift dargestellt, der Rest als Fließtext. Fehlt die Leerzeile, gibt es keine
+	/// Überschrift und der gesamte Text erscheint im Textbereich.
+	/// </summary>
+	public Task ShowDialog(string text)
+	{
+		int trenner = text.IndexOf("\n\n", System.StringComparison.Ordinal);
+
+		if (trenner >= 0)
+		{
+			_labelTitel.Text = text.Substring(0, trenner);
+			_labelText.Text = text.Substring(trenner + 2);
+		}
+		else
+		{
+			_labelTitel.Text = "";
+			_labelText.Text = text;
+		}
+
+		_labelTitel.Visible = _labelTitel.Text.Length > 0;
+
+		Show();
+		SetProcessInput(true);
+
+		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+		return _dialogClosed.Task;
+	}
+
+	private void CloseDialog()
+	{
+		Hide();
+		SetProcessInput(false);
+		_dialogClosed?.TrySetResult(true);
+	}
+}

@@ -173,7 +173,7 @@ public partial class Kontor : Control
 		if (_rundenManager.SitztAktiverSpielerImKerker())
 		{
 			_rundenManager.KerkerAufenthaltAbschliessen();
-			await SW.UI.ShowText.ShowDialog("Ihr verbringt dieses Jahr im Schuldturm...");
+			await _main.RundenNachrichtenDialog.ShowDialog("Ihr verbringt dieses Jahr im Schuldturm...");
 
 			// Im Schuldturm wird der Zug übersprungen (der Spieler altert dabei nicht)
 			_rundenManager.SchalteZumNaechstenSpieler();
@@ -226,7 +226,7 @@ public partial class Kontor : Control
 		SetProcessInput(true);
 	}
 
-	private static async Task ZeigeBuch(BuchErgebnis buch)
+	private async Task ZeigeBuch(BuchErgebnis buch)
 	{
 		string produktion;
 
@@ -260,7 +260,7 @@ public partial class Kontor : Control
 			}
 		}
 
-		await SW.UI.ShowText.ShowDialog(produktion);
+		await _main.RundenNachrichtenDialog.ShowDialog(produktion);
 
 		string exporte;
 
@@ -294,7 +294,7 @@ public partial class Kontor : Control
 		if (buch.EtwasExportiert)
 			SoundManager.Instance.PlayCoins();
 
-		await SW.UI.ShowText.ShowDialog(exporte);
+		await _main.RundenNachrichtenDialog.ShowDialog(exporte);
 	}
 
 	private void HideAndDisableInput()
@@ -469,14 +469,14 @@ public partial class Kontor : Control
 		if (festMeldung != null)
 		{
 			UpdateHud();
-			await SW.UI.ShowText.ShowDialog("Fest\n\n" + festMeldung);
+			await _main.RundenNachrichtenDialog.ShowDialog("Fest\n\n" + festMeldung);
 		}
 
 		// Gesetzesverstöße mit Strafen
 		foreach (string meldung in zugNachrichten.PruefeVerbrechen())
 		{
 			UpdateHud();
-			await SW.UI.ShowText.ShowDialog(meldung);
+			await _main.RundenNachrichtenDialog.ShowDialog(meldung);
 		}
 
 		zugNachrichten.ErweitereStatistik();
@@ -488,13 +488,13 @@ public partial class Kontor : Control
 		{
 			UpdateHud();
 			SoundManager.Instance.PlayCoins();
-			await SW.UI.ShowText.ShowDialog("Einkommen\n\nAls " + SW.Dynamisch.GetAmtsnameVonSPIDx(SW.Dynamisch.GetAktiverSpieler()) +
+			await _main.RundenNachrichtenDialog.ShowDialog("Einkommen\n\nAls " + SW.Dynamisch.GetAmtsnameVonSPIDx(SW.Dynamisch.GetAktiverSpieler()) +
 			                                " verdient Ihr dieses Jahr " + einkommen.ToStringGeld() + ".");
 		}
 
 		// Anwesen (Bauzeit, Zustand, Renovierung)
 		foreach (string meldung in zugNachrichten.AktualisiereAnwesen())
-			await SW.UI.ShowText.ShowDialog("Eigentümer\n\n" + meldung);
+			await _main.RundenNachrichtenDialog.ShowDialog("Eigentümer\n\n" + meldung);
 
 		// Kartenspiel "17 und 4" gegen eine im Hinterzimmer eingeladene KI
 		await _main.KartenspielDialog.ShowKartenspiel();
@@ -515,18 +515,18 @@ public partial class Kontor : Control
 		if (zugNachrichten.StirbtAktiverSpieler())
 		{
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Tod);
-			await SW.UI.ShowText.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
+			await _main.RundenNachrichtenDialog.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
 
 			string name = SW.Dynamisch.GetAktHum().GetName();
 
 			// Testament vollstrecken: Ohne Erben scheidet der Spieler aus, mit Erben führt dieser die Dynastie fort
 			var familie = new FamilieManager();
 			var testament = familie.FuehreTestamentAus();
-			await SW.UI.ShowText.ShowDialog("Hier das Testament...\n\nEuer Vermächtnis geht an: " + testament.ErbeBezeichnung);
+			await _main.RundenNachrichtenDialog.ShowDialog("Hier das Testament...\n\nEuer Vermächtnis geht an: " + testament.ErbeBezeichnung);
 
 			if (testament.SpielVorbei)
 			{
-				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\nDa niemand als Erbe bestimmt war, befinden sich keine weiteren\nMitstreiter in diesem Spiel. Das Spiel wird daher beendet.");
+				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben.\nDa niemand als Erbe bestimmt war, befinden sich keine weiteren\nMitstreiter in diesem Spiel. Das Spiel wird daher beendet.");
 				return true;
 			}
 
@@ -534,12 +534,12 @@ public partial class Kontor : Control
 			{
 				// Der Erbe übernimmt die Identität im selben Slot – der Zug endet und schaltet normal weiter
 				UpdateHud();
-				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben.\n" + SW.Dynamisch.GetAktHum().GetName() +
+				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben.\n" + SW.Dynamisch.GetAktHum().GetName() +
 				                                " tritt das Erbe an und führt die Dynastie fort.");
 			}
 			else
 			{
-				await SW.UI.ShowText.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
+				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
 
 				// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
 				return false;
@@ -548,7 +548,7 @@ public partial class Kontor : Control
 		// Schuldenprozess (nur für einen lebenden Spieler)
 		else if (zugNachrichten.MussSichVorGlaeubigernVerantworten())
 		{
-			await SW.UI.ShowText.ShowDialog("Wegen Euren zahlreichen Schulden müsst Ihr Euch nun vor Euren Gläubigern verantworten!");
+			await _main.RundenNachrichtenDialog.ShowDialog("Wegen Euren zahlreichen Schulden müsst Ihr Euch nun vor Euren Gläubigern verantworten!");
 
 			var prozess = zugNachrichten.FuehreSchuldenProzessDurch();
 
@@ -557,16 +557,16 @@ public partial class Kontor : Control
 			for (int i = 0; i < prozess.GeschworenenNamen.Count; i++)
 				urteile += prozess.GeschworenenNamen[i] + ": " + (prozess.Urteile[i] ? "schuldig!" : "nicht schuldig!") + "\n";
 
-			await SW.UI.ShowText.ShowDialog(urteile);
+			await _main.RundenNachrichtenDialog.ShowDialog(urteile);
 
-			await SW.UI.ShowText.ShowDialog(prozess.Schuldig
+			await _main.RundenNachrichtenDialog.ShowDialog(prozess.Schuldig
 				? "Aufgrund Eurer zahlreichen Schulden müsst Ihr nächstes\nJahr im Schuldturm verbringen"
 				: "Ihr seid noch einmal mit dem Schrecken davon gekommen...");
 
 			UpdateHud();
 		}
 
-		await SW.UI.ShowText.ShowDialog("Resümee\n\nIn diesem Jahr gab es keine weiteren besonderen Vorkommnisse");
+		await _main.RundenNachrichtenDialog.ShowDialog("Resümee\n\nIn diesem Jahr gab es keine weiteren besonderen Vorkommnisse");
 
 		// Hat der letzte Spieler seinen Zug beendet, folgen vor dem Jahreswechsel die Rundenende-Ereignisse:
 		// zuerst die Wahlen (solange die KI-Kandidaten noch gemeldet sind), dann die Todesfälle unter den KIs
@@ -596,7 +596,7 @@ public partial class Kontor : Control
 		{
 			UpdateHud();
 			SoundManager.Instance.PlayCoins();
-			await SW.UI.ShowText.ShowDialog("Korruptionsgelder\n\n" + korruption);
+			await _main.RundenNachrichtenDialog.ShowDialog("Korruptionsgelder\n\n" + korruption);
 		}
 
 		string schmuggel = zugNachrichten.KassiereSchmuggelgelder();
@@ -605,35 +605,35 @@ public partial class Kontor : Control
 		{
 			UpdateHud();
 			SoundManager.Instance.PlayCoins();
-			await SW.UI.ShowText.ShowDialog("Schmuggel\n\n" + schmuggel);
+			await _main.RundenNachrichtenDialog.ShowDialog("Schmuggel\n\n" + schmuggel);
 		}
 
 		string kerkerklatsch = zugNachrichten.ErmittleKerkerklatsch();
 
 		if (kerkerklatsch != null)
-			await SW.UI.ShowText.ShowDialog("Kerkerklatsch\n\n" + kerkerklatsch);
+			await _main.RundenNachrichtenDialog.ShowDialog("Kerkerklatsch\n\n" + kerkerklatsch);
 
 		string spionage = zugNachrichten.ErmittleSpionageNachrichten();
 
 		if (spionage != null)
-			await SW.UI.ShowText.ShowDialog("Spionage\n\n" + spionage);
+			await _main.RundenNachrichtenDialog.ShowDialog("Spionage\n\n" + spionage);
 
 		string sabotage = zugNachrichten.ErmittleSabotageNachrichten();
 
 		if (sabotage != null)
-			await SW.UI.ShowText.ShowDialog("Sabotage\n\n" + sabotage);
+			await _main.RundenNachrichtenDialog.ShowDialog("Sabotage\n\n" + sabotage);
 
 		string ermordung = zugNachrichten.FuehreErmordungDurch();
 
 		if (ermordung != null)
-			await SW.UI.ShowText.ShowDialog("Ermordung\n\n" + ermordung);
+			await _main.RundenNachrichtenDialog.ShowDialog("Ermordung\n\n" + ermordung);
 
 		var vergifteterWein = zugNachrichten.FuehreVergiftetenWeinDurch();
 
 		if (vergifteterWein != null)
 		{
 			foreach (string meldung in vergifteterWein)
-				await SW.UI.ShowText.ShowDialog("Vergifteter Wein\n\n" + meldung);
+				await _main.RundenNachrichtenDialog.ShowDialog("Vergifteter Wein\n\n" + meldung);
 		}
 	}
 
@@ -649,7 +649,7 @@ public partial class Kontor : Control
 		foreach (var meldung in meldungen)
 		{
 			UpdateHud();
-			await SW.UI.ShowText.ShowDialog(meldung.Ueberschrift + "\n\n" + meldung.Text);
+			await _main.RundenNachrichtenDialog.ShowDialog(meldung.Ueberschrift + "\n\n" + meldung.Text);
 		}
 	}
 
@@ -677,7 +677,7 @@ public partial class Kontor : Control
 			string angebeteter = hochzeit.PartnerMaennlich ? "Euer Angebeteter " : "Eure Angebetete ";
 
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Hochzeit);
-			await SW.UI.ShowText.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
+			await _main.RundenNachrichtenDialog.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
 			                                " hat sich endlich bereit erklärt, Euch zu heiraten. Ihr schwebt im siebten Himmel...");
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 			UpdateHud();
@@ -694,7 +694,7 @@ public partial class Kontor : Control
 
 		// Kindestode
 		foreach (string meldung in familie.PruefeKindestode())
-			await SW.UI.ShowText.ShowDialog(meldung);
+			await _main.RundenNachrichtenDialog.ShowDialog(meldung);
 
 		// Jährliche Brautwerbung um den umworbenen Partner
 		if (familie.StehtBrautwerbungAn())
@@ -734,7 +734,7 @@ public partial class Kontor : Control
 		for (int i = 0; i < meldungen.Count; i += 10)
 		{
 			int anzahl = System.Math.Min(10, meldungen.Count - i);
-			await SW.UI.ShowText.ShowDialog("Todesfälle in diesem Jahr\n\n" + string.Join("\n", meldungen.GetRange(i, anzahl)));
+			await _main.RundenNachrichtenDialog.ShowDialog("Todesfälle in diesem Jahr\n\n" + string.Join("\n", meldungen.GetRange(i, anzahl)));
 		}
 	}
 
@@ -753,7 +753,7 @@ public partial class Kontor : Control
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
 
 		foreach (string meldung in meldungen)
-			await SW.UI.ShowText.ShowDialog("Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr() + "\n\n" + meldung);
+			await _main.RundenNachrichtenDialog.ShowDialog("Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr() + "\n\n" + meldung);
 
 		// Danach zurück zur normalen Hintergrundmusik.
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);

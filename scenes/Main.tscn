@@ -51,6 +51,7 @@
 [ext_resource type="PackedScene" uid="uid://tippsdlg1" path="res://scenes/dialogs/TippsDialog.tscn" id="48_tpdlg"]
 [ext_resource type="PackedScene" uid="uid://stadtinfodlg1" path="res://scenes/dialogs/StadtInformationenDialog.tscn" id="49_sidlg"]
 [ext_resource type="PackedScene" uid="uid://naechsterspieler1" path="res://scenes/dialogs/NaechsterSpielerDialog.tscn" id="50_nsp"]
+[ext_resource type="PackedScene" uid="uid://rundennachrichten1" path="res://scenes/dialogs/RundenNachrichtenDialog.tscn" id="52_rndn"]
 [ext_resource type="PackedScene" uid="uid://ingamemenu0001" path="res://scenes/dialogs/IngameMenuDialog.tscn" id="51_igm"]
 
 [node name="Main" type="Control"]
@@ -97,6 +98,7 @@ StatistikDialogPath = NodePath("StatistikDialog")
 TippsDialogPath = NodePath("TippsDialog")
 StadtInformationenDialogPath = NodePath("StadtInformationenDialog")
 NaechsterSpielerDialogPath = NodePath("NaechsterSpielerDialog")
+RundenNachrichtenDialogPath = NodePath("RundenNachrichtenDialog")
 IngameMenuDialogPath = NodePath("IngameMenuDialog")
 TestamentDialogPath = NodePath("TestamentDialog")
 BrautwerbungDialogPath = NodePath("BrautwerbungDialog")
@@ -283,6 +285,9 @@ layout_mode = 1
 visible = false
 
 [node name="NaechsterSpielerDialog" parent="." instance=ExtResource("50_nsp")]
+visible = false
+
+[node name="RundenNachrichtenDialog" parent="." instance=ExtResource("52_rndn")]
 visible = false
 
 [node name="IngameMenuDialog" parent="." instance=ExtResource("51_igm")]
