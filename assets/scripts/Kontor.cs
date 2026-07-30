@@ -744,7 +744,10 @@ public partial class Kontor : Control
 	/// </summary>
 	private async Task ZeigeKampfereignisse()
 	{
-		var meldungen = new Conspiratio.Lib.Gameplay.Kampf.KampfereignisseManager().ErmittleEreignisse();
+		// Filter aus den Optionen: KI-Stützpunktereignisse ganz ausblenden bzw. Militärereignisse nur bei
+		// menschlicher Beteiligung zeigen (die Aktionen/Kämpfe werden unabhängig davon immer abgewickelt).
+		var meldungen = new Conspiratio.Lib.Gameplay.Kampf.KampfereignisseManager().ErmittleEreignisse(
+			ClientSettings.StuetzpunktereignisseKiAnzeigen, ClientSettings.MilitaerereignisseKiAnzeigen);
 
 		// Während der militärischen Meldungen (Rechtsklick-Wartezeiten) läuft die Kampfmusik als Schleife.
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
