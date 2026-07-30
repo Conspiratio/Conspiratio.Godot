@@ -191,12 +191,38 @@ public partial class StuetzpunktVerwalten : Control
 			verkauf.AddThemeStyleboxOverride("focus", rahmen);
 		}
 		verkauf.Pressed += OnZumVerkaufPressed;
+
+		// Moral-Bonus vor dem Kampf: hebt die Kampfmoral der Truppen, wird bei einem Sieg zurückerstattet.
+		var moral = UpgradeButtonNode("SymbOffizier",
+			_manager.MoralBonusBezahlt ? "Moral-Bonus bezahlt (Rückerstattung bei Sieg)" : "Moral-Bonus vor dem Kampf zahlen");
+		if (_manager.MoralBonusBezahlt)
+		{
+			var rahmen = GoldRahmen();
+			moral.Flat = false;
+			moral.AddThemeStyleboxOverride("normal", rahmen);
+			moral.AddThemeStyleboxOverride("hover", rahmen);
+			moral.AddThemeStyleboxOverride("pressed", rahmen);
+			moral.AddThemeStyleboxOverride("focus", rahmen);
+		}
+		moral.Pressed += OnMoralBonusPressed;
 	}
 
 	private void OnZumVerkaufPressed()
 	{
 		_manager.ZumVerkaufAngeboten = !_manager.ZumVerkaufAngeboten;
 		BaueUpgrades();
+	}
+
+	private async void OnMoralBonusPressed()
+	{
+		SetProcessInput(false);
+
+		await _manager.MoralBonusZahlen();
+		UpdateHud();
+		BaueUpgrades();
+
+		if (Visible)
+			SetProcessInput(true);
 	}
 
 	private void UpgradeButton(string icon, string tooltip, System.Action aktion)
