@@ -712,8 +712,12 @@ public partial class Kontor : Control
 	{
 		var aemterManager = new AemterManager();
 
+		// Wahlen nach Amtsstufe absteigend (höchstes Amt zuerst). Gewinnt der Spieler ein höheres Amt,
+		// zieht er sich aus den niedrigeren Wahlen zurück – diese werden dann hier übersprungen und weiter
+		// unten per FuelleRestlicheAemter mit einem KI-Gewinner ausgezählt.
 		foreach (int wahlId in aemterManager.GetWahlenMitMenschlicherBeteiligung())
-			await _main.WahlDialog.ShowWahl(aemterManager, wahlId);
+			if (aemterManager.HatMenschlicheBeteiligung(wahlId))
+				await _main.WahlDialog.ShowWahl(aemterManager, wahlId);
 
 		aemterManager.FuelleRestlicheAemter();
 	}
