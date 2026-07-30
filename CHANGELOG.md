@@ -16,6 +16,7 @@ _Unreleased_
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
 #### Behoben
+- Wahlen: Bei frei gewordenen Ämtern traten teils völlig unpassende KI-Kandidaten an (z. B. ein amtsloser Spieler als Kandidat für den Regenten). Die Kandidatensuche lockert die strenge Stufenregel jetzt nur noch behutsam, statt sie ganz zu ignorieren – Amtslose kandidieren nicht mehr für höhere Ämter. Benötigt Conspiratio.Lib 3.60.0
 - Zölle (Issue #16 „Räuber/Söldner Teil 2"): Ist der handelnde Spieler zollfrei (Privileg), erhalten nun auch die Zollburg-Besitzer keinen Zollanteil mehr – zuvor wurde ihnen der Zoll gutgeschrieben, obwohl der Händler nichts zahlte. Benötigt Conspiratio.Lib 3.58.0
 - Ingame-Menü (Esc): Das Menü "flackerte" gelegentlich, weil ein einzelner Tastendruck die Aktion mehrfach auslöste – jetzt wird nur noch auf das diskrete Drücken reagiert und die Menü-Eingabe erst nach dem öffnenden Input-Frame aktiviert.
 - Ingame-Menü: Beim Öffnen der Optionen bleibt das Menü nicht mehr im Vordergrund, sondern wird ausgeblendet, solange das Optionsfenster offen ist.
@@ -105,6 +106,7 @@ _Unreleased_
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 
 #### Fixed
+- Elections: for vacated offices, entirely unsuitable AI candidates could stand (e.g. a player without any office running for regent). The candidate search now only gently relaxes the strict level rule instead of ignoring it completely – office-less players no longer run for higher offices. Requires Conspiratio.Lib 3.60.0
 - Tolls (issue #16 "Robbers/Mercenaries Part 2"): if the trading player is toll-free (privilege), the toll castle owners no longer receive a toll share either – previously the toll was credited to them even though the trader paid nothing. Requires Conspiratio.Lib 3.58.0
 - In-game menu (Esc): the menu occasionally "flickered" because a single key press triggered the action several times – it now only reacts to the discrete press and enables the menu input only after the opening input frame.
 - In-game menu: when opening the options, the menu no longer stays in front but is hidden while the options window is open.
