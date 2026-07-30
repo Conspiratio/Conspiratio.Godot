@@ -1,6 +1,5 @@
 using System.Text;
 using System.Threading.Tasks;
-using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -17,7 +16,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Spielernamen sind im Meldungstext mit |...|-Markern (der Markup-Konvention der Lib) versehen und werden
 /// wie im WinForms-Original hervorgehoben: fett und – bei menschlichen Spielern – zusätzlich dunkelrot.
 /// </summary>
-public partial class RundenNachrichtenDialog : Control, IShowText
+public partial class RundenNachrichtenDialog : DialogBase, IShowText
 {
 	/// <summary>Dunkelrot (WinForms Color.DarkRed) für die Namen menschlicher Spieler.</summary>
 	private const string FarbeMensch = "#8b0000";
@@ -30,25 +29,11 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 
 	private Label _labelTitel;
 	private RichTextLabel _labelText;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelTitel = GetNode<Label>(LabelTitelPath);
 		_labelText = GetNode<RichTextLabel>(LabelTextPath);
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		GetViewport().SetInputAsHandled();
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -73,11 +58,7 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 
 		_labelTitel.Visible = _labelTitel.Text.Length > 0;
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	/// <summary>
@@ -126,11 +107,4 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 
 	/// <summary>Maskiert eckige Klammern, damit Meldungstext nicht versehentlich als BBCode interpretiert wird.</summary>
 	private static string EscapeBbcode(string text) => text.Replace("[", "[lb]");
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
-	}
 }
