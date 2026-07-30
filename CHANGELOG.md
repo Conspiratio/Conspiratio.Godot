@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
+- Stützpunkt-Angriffe (Issue #16 „Räuber/Söldner Teil 2"): KI-Spieler greifen sich nicht mehr gegenseitig an – die KI wählt nur noch Stützpunkte menschlicher Spieler als Angriffsziel. Benötigt Conspiratio.Lib 3.57.0
 - Filterung der militärischen Ereignisse (Issue #16 „Räuber/Söldner Teil 2"): Die Optionen „Stützpunktereignisse der KI anzeigen" und „Militärereignisse der KI anzeigen" wirken jetzt tatsächlich – ist Erstere aus, werden KI-Stützpunkt-Meldungen (Ausbau, neue Rekruten) ausgeblendet; ist Letztere aus, erscheinen Kämpfe nur noch bei menschlicher Beteiligung. Die Aktionen und Kämpfe werden dabei weiterhin abgewickelt. Benötigt Conspiratio.Lib 3.55.0
 - KI-Aktivität als Schieberegler (Issue #16 „Räuber/Söldner Teil 2"): Im Optionsfenster ersetzt ein 1–100-%-Regler (Standard 50 %) die bisherige Dreistufen-Auswahl (Niedrig/Mittel/Hoch) für die Aktivität der KI-Spieler in den Militärstützpunkten. Benötigt Conspiratio.Lib 3.51.0
 - Stadt-/Produktionsansicht optisch an die WinForms-Vorlage angeglichen: Kopfzeile in der richtigen Reihenfolge (Taler links, Ort und Datum rechts, Spielername samt Amt zentriert in einer zweiten Zeile darunter). Die Kopfzeile des Kontors wurde entsprechend angeglichen (gleiches Layout).
@@ -92,6 +93,7 @@ _Unreleased_
 ### [EN]
 
 #### Changed
+- Base attacks (issue #16 "Robbers/Mercenaries Part 2"): AI players no longer attack each other – the AI only picks bases owned by human players as an attack target. Requires Conspiratio.Lib 3.57.0
 - Filtering of the military events (issue #16 "Robbers/Mercenaries Part 2"): the options "show AI base events" and "show AI military events" now actually take effect – if the former is off, AI base messages (expansion, new recruits) are hidden; if the latter is off, battles only appear when a human player is involved. The actions and battles are still carried out. Requires Conspiratio.Lib 3.55.0
 - AI activity as a slider (issue #16 "Robbers/Mercenaries Part 2"): in the options window a 1–100 % slider (default 50 %) replaces the previous three-level choice (low/medium/high) for the activity of the AI players in the military bases. Requires Conspiratio.Lib 3.51.0
 - City/production view aligned visually with the WinForms original: header in the correct order (taler on the left, place and date on the right, player name incl. office centred on a second line below). The Kontor header was aligned accordingly (same layout).
