@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Partner mit einem von drei zufälligen Geschenken (oder gar keinem); je nach Gefallen steigt die
 /// Verliebtheit. Nach der Reaktion schließt der Dialog.
 /// </summary>
-public partial class BrautwerbungDialog : Control
+public partial class BrautwerbungDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelFragePath { get; set; }
@@ -25,20 +25,18 @@ public partial class BrautwerbungDialog : Control
 	private PackedScene _linkButtonScene;
 
 	private FamilieManager _familieManager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelFrage = GetNode<Label>(LabelFragePath);
 		_vBoxGeschenke = GetNode<VBoxContainer>(VBoxGeschenkePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
 	}
 
-	// Bewusst kein _Input: In der Brautwerbung muss wie im Original ein Knopf gewählt werden.
+	// Bewusst kein Schließen per Rechtsklick: es muss wie im Original ein Knopf gewählt werden.
+	protected override void OnNextOrClose() { }
 
-	public async Task ShowDialog(FamilieManager familieManager)
+	public Task ShowDialog(FamilieManager familieManager)
 	{
 		_familieManager = familieManager;
 
@@ -67,9 +65,7 @@ public partial class BrautwerbungDialog : Control
 		buttonKeins.Pressed += OnKeinGeschenk;
 		_vBoxGeschenke.AddChild(buttonKeins);
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		return ShowAndAwait();
 	}
 
 	private async void OnGeschenkGewaehlt(WerbeGeschenk geschenk)
@@ -80,7 +76,7 @@ public partial class BrautwerbungDialog : Control
 		SoundManager.Instance.PlayCoins();
 
 		await SW.UI.ShowText.ShowDialog(ergebnis.ReaktionsText);
-		CloseDialog();
+		Close(DialogResultGame.OK);
 	}
 
 	private async void OnKeinGeschenk()
@@ -90,24 +86,6 @@ public partial class BrautwerbungDialog : Control
 		var ergebnis = _familieManager.GibKeinGeschenk();
 
 		await SW.UI.ShowText.ShowDialog(ergebnis.ReaktionsText);
-		CloseDialog();
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

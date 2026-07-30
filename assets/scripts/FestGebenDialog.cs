@@ -14,7 +14,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Größe, Musiker und Jahr wählt. Das Fest wird im gewählten Jahr zu Zugbeginn automatisch gefeiert
 /// (siehe Kontor). Die Logik liegt im FestManager der Lib.
 /// </summary>
-public partial class FestGebenDialog : Control, IFestGebenDialog
+public partial class FestGebenDialog : DialogBase, IFestGebenDialog
 {
 	[Export]
 	public NodePath LinkOrtPath { get; set; }
@@ -35,9 +35,8 @@ public partial class FestGebenDialog : Control, IFestGebenDialog
 
 	private FestManager _festManager;
 	private int _jahr;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_linkOrt = GetNode<controls.LinkButtonWithSounds>(LinkOrtPath);
 		_linkGroesse = GetNode<controls.LinkButtonWithSounds>(LinkGroessePath);
@@ -48,17 +47,6 @@ public partial class FestGebenDialog : Control, IFestGebenDialog
 		_linkGroesse.Pressed += OnGroessePressed;
 		_linkMusiker.Pressed += OnMusikerPressed;
 		_linkJahr.Pressed += OnJahrPressed;
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -78,9 +66,7 @@ public partial class FestGebenDialog : Control, IFestGebenDialog
 
 		UpdateAnzeige();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void UpdateAnzeige()
@@ -128,7 +114,7 @@ public partial class FestGebenDialog : Control, IFestGebenDialog
 			string message = _festManager.ErstelleNeuesFest(_festManager.StadtID, _festManager.Groesse, _festManager.Musiker, _jahr);
 			SoundManager.Instance.PlayLeftClick();
 			await SW.UI.ShowText.ShowDialog(message);
-			CloseDialog();
+			Close(DialogResultGame.OK);
 			return;
 		}
 		catch (Exception ex)
@@ -141,26 +127,8 @@ public partial class FestGebenDialog : Control, IFestGebenDialog
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

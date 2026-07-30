@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Gameplay.Privilegien.Weltkarte;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -13,7 +14,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// durch die Ebenen; ein Klick auf einen Amtsinhaber führt die Modus-Aktion aus (Prozess/Henkershand).
 /// Die Struktur liegt im AemterEbeneManager der Lib.
 /// </summary>
-public partial class AemterEbeneDialog : Control
+public partial class AemterEbeneDialog : DialogBase
 {
 	// Anzeigegrößen der Symbole (aus dem Original, auf 1600×900 skaliert).
 	private static readonly Vector2 GroesseSabo = new(27, 27);
@@ -48,9 +49,8 @@ public partial class AemterEbeneDialog : Control
 	private AemterEbeneManager _manager;
 	private int _modus;
 	private int _ebene;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelTitel = GetNode<Label>(LabelTitelPath);
 		_buttonWechsel = GetNode<controls.ButtonWithSounds>(ButtonWechselPath);
@@ -64,17 +64,6 @@ public partial class AemterEbeneDialog : Control
 		_texRelEvan = GD.Load<Texture2D>("res://assets/images/symbole/SymbRel2.png");
 
 		_buttonWechsel.Pressed += OnWechselPressed;
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Ämter-Ebene für ein Gebiet (Stufe 0/1/2 = Stadt/Land/Reich) im gegebenen Modus.</summary>
@@ -87,11 +76,7 @@ public partial class AemterEbeneDialog : Control
 		_labelTitel.Text = _manager.GetTitel(modus);
 		Fill();
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void OnWechselPressed()
@@ -221,7 +206,7 @@ public partial class AemterEbeneDialog : Control
 		// Wie im Original: nach dem Prozess (Modus 8) schließt die Ämter-Ebene; sonst bleibt sie offen.
 		if (_modus == 8)
 		{
-			CloseDialog();
+			Close(DialogResultGame.OK);
 			return;
 		}
 
@@ -232,20 +217,8 @@ public partial class AemterEbeneDialog : Control
 		}
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
+		Close(DialogResultGame.OK);
 	}
 }

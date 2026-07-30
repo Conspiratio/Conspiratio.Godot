@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -10,7 +11,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// die KI-Aggressivität als Vorgabe für neue Spiele. Die Werte werden in den ClientSettings gespeichert;
 /// die Lautstärke wird sofort auf die Audio-Busse angewendet. Der Rechtsklick schließt das Fenster.
 /// </summary>
-public partial class OptionenDialog : Control
+public partial class OptionenDialog : DialogBase
 {
 	private controls.CheckBoxWithSounds _checkMusikAus;
 	private controls.CheckBoxWithSounds _checkTipps;
@@ -29,9 +30,8 @@ public partial class OptionenDialog : Control
 	private Label _labelAgg;
 
 	private bool _laedt;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_checkMusikAus = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckMusikAus");
 		_checkTipps = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckTipps");
@@ -60,20 +60,6 @@ public partial class OptionenDialog : Control
 		_sliderStimmen.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusStimmen, (int)wert);
 
 		_sliderKiAktivitaet.ValueChanged += OnKiAktivitaetGeaendert;
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
 	}
 
 	/// <summary>Öffnet das Einstellungsfenster und lädt die aktuellen Werte in die Steuerelemente.</summary>
@@ -99,11 +85,7 @@ public partial class OptionenDialog : Control
 
 		_laedt = false;
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void OnMusikAusgeschaltet(bool ausgeschaltet)

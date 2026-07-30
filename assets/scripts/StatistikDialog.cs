@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// gesammelten Statistikwerte in zwei Spalten. Über die Banner am oberen Rand wird zwischen den
 /// Spielern umgeschaltet. Der Rechtsklick schließt die Anzeige. Die Werte liefert der StatistikManager.
 /// </summary>
-public partial class StatistikDialog : Control
+public partial class StatistikDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelNamePath { get; set; }
@@ -40,9 +40,8 @@ public partial class StatistikDialog : Control
 	private Label _rechtsWert;
 
 	private StatistikManager _manager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelName = GetNode<Label>(LabelNamePath);
 		_hboxBanner = GetNode<HBoxContainer>(HBoxBannerPath);
@@ -50,18 +49,6 @@ public partial class StatistikDialog : Control
 		_linksWert = GetNode<Label>(LinksWertPath);
 		_rechtsBeschriftung = GetNode<Label>(RechtsBeschriftungPath);
 		_rechtsWert = GetNode<Label>(RechtsWertPath);
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Statistik und zeigt zunächst den ersten menschlichen Spieler.</summary>
@@ -75,11 +62,7 @@ public partial class StatistikDialog : Control
 		if (ids.Count > 0)
 			ZeigeSpieler(ids[0]);
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void BaueBannerButtons(IReadOnlyList<int> ids)
@@ -127,12 +110,5 @@ public partial class StatistikDialog : Control
 		_linksWert.Text = string.Join("\n", seite.Links.Select(eintrag => eintrag.Wert));
 		_rechtsBeschriftung.Text = string.Join("\n", seite.Rechts.Select(eintrag => eintrag.Beschriftung));
 		_rechtsWert.Text = string.Join("\n", seite.Rechts.Select(eintrag => eintrag.Wert));
-	}
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
 	}
 }

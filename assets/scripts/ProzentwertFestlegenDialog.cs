@@ -4,6 +4,7 @@ using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Privilegien;
 using Conspiratio.Lib.Gameplay.Privilegien.ProzentwertFestlegen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -14,7 +15,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// verbessert Sicherheit/Zustand/Kapazität eines Stützpunkts fest. Steuer/Zoll werden live übernommen,
 /// die Stützpunkt-Verbesserungen kosten Taler und werden per Auftrag ausgeführt. Logik: Lib-Manager.
 /// </summary>
-public partial class ProzentwertFestlegenDialog : Control, IProzentwertFestlegenDialog
+public partial class ProzentwertFestlegenDialog : DialogBase, IProzentwertFestlegenDialog
 {
 	[Export]
 	public NodePath LabelTextPath { get; set; }
@@ -39,9 +40,8 @@ public partial class ProzentwertFestlegenDialog : Control, IProzentwertFestlegen
 
 	private ProzentwertFestlegenManager _manager;
 	private int _aktuelleKosten;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelText = GetNode<Label>(LabelTextPath);
 		_numericWert = GetNode<controls.NumericButtonWithSounds>(NumericWertPath);
@@ -51,17 +51,6 @@ public partial class ProzentwertFestlegenDialog : Control, IProzentwertFestlegen
 
 		_numericWert.WertChanged += OnWertChanged;
 		_buttonAuftrag.Pressed += OnAuftragPressed;
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -93,9 +82,7 @@ public partial class ProzentwertFestlegenDialog : Control, IProzentwertFestlegen
 		if (kostenModus)
 			_labelKosten.Text = "Kosten: " + 0.ToStringGeld();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void OnWertChanged(int neuerWert)
@@ -129,29 +116,11 @@ public partial class ProzentwertFestlegenDialog : Control, IProzentwertFestlegen
 
 		string meldung = _manager.FuehreAuftragAus(_numericWert.Wert, _aktuelleKosten);
 		await SW.UI.ShowText.ShowDialog(meldung);
-		CloseDialog();
+		Close(DialogResultGame.OK);
 	}
 
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

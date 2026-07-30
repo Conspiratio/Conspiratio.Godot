@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Godot;
 
@@ -9,7 +8,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Die Geburt eines Kindes (Migration von Ereignis_Geburt): verkündet Sohn oder Tochter und lässt den
 /// Spieler den Namen eingeben, unter dem das Kind angelegt wird.
 /// </summary>
-public partial class GeburtDialog : Control
+public partial class GeburtDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelTextPath { get; set; }
@@ -22,17 +21,17 @@ public partial class GeburtDialog : Control
 
 	private FamilieManager _familieManager;
 	private bool _maennlich;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelText = GetNode<Label>(LabelTextPath);
 		_lineEditName = GetNode<LineEdit>(LineEditNamePath);
-
-		HideAndDisableInput();
 	}
 
-	public async Task ShowDialog(FamilieManager familieManager)
+	// Bewusst kein Schließen per Rechtsklick: es muss wie im Original ein Name eingegeben werden.
+	protected override void OnNextOrClose() { }
+
+	public Task ShowDialog(FamilieManager familieManager)
 	{
 		_familieManager = familieManager;
 		_maennlich = _familieManager.ErmittleGeburtGeschlecht();
@@ -47,9 +46,7 @@ public partial class GeburtDialog : Control
 		_lineEditName.Clear();
 		_lineEditName.GrabFocus();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		return ShowAndAwait();
 	}
 
 	private static bool SW_IstSpielerMaennlich()
@@ -63,19 +60,6 @@ public partial class GeburtDialog : Control
 
 		_familieManager.FuehreGeburtDurch(_maennlich, name);
 
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

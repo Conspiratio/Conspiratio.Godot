@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// abhängig vom eigenen Reichtum) und "Bestechen" (eine frei wählbare Taler-Summe zukommen lassen).
 /// Die Logik liegt in der Lib (KartenSpielen/Bestechen).
 /// </summary>
-public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
+public partial class BeziehungenPflegenDialog : DialogBase, IBeziehungPflegen
 {
 	[Export]
 	public NodePath LabelErklaerungPath { get; set; }
@@ -32,25 +32,13 @@ public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
 	private controls.NumericButtonWithSounds _numericTaler;
 
 	private int _spielerId;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelErklaerung = GetNode<Label>(LabelErklaerungPath);
 		_optionenBox = GetNode<Control>(OptionenBoxPath);
 		_bestechenBox = GetNode<Control>(BestechenBoxPath);
 		_numericTaler = GetNode<controls.NumericButtonWithSounds>(NumericTalerPath);
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Aufruf über das Beziehungen-pflegen-Privileg (Modus 0). Fire-and-forget, da synchron.</summary>
@@ -66,9 +54,7 @@ public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
 
 		ZeigeOptionen();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void ZeigeOptionen()
@@ -83,7 +69,7 @@ public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
 
 		// Wie im Original: nur bei erfolgreichem Kartenspiel schließt der Dialog.
 		if (gespielt)
-			CloseDialog();
+			Close(DialogResultGame.OK);
 	}
 
 	private void _on_link_bestechen_pressed()
@@ -104,7 +90,7 @@ public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
 			return;
 
 		SW.Dynamisch.Bestechen(_spielerId, wert);
-		CloseDialog();
+		Close(DialogResultGame.OK);
 	}
 
 	private void _on_button_abbrechen_pressed()
@@ -112,26 +98,8 @@ public partial class BeziehungenPflegenDialog : Control, IBeziehungPflegen
 		ZeigeOptionen();
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

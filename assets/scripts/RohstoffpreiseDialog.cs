@@ -14,7 +14,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// (Kaufmann) und Level 2 (Großkaufmann) erlauben je einmal pro Jahr eine Preis-Beeinflussung.
 /// Die Logik liegt im RohstoffpreiseManager der Lib.
 /// </summary>
-public partial class RohstoffpreiseDialog : Control
+public partial class RohstoffpreiseDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelUeberschriftPath { get; set; }
@@ -27,23 +27,11 @@ public partial class RohstoffpreiseDialog : Control
 
 	private RohstoffpreiseManager _manager;
 	private readonly Dictionary<int, Label> _preisLabels = new();
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelUeberschrift = GetNode<Label>(LabelUeberschriftPath);
 		_grid = GetNode<GridContainer>(GridPath);
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Preisansicht für eine Stadt in der angegebenen Einflussstufe.</summary>
@@ -54,11 +42,7 @@ public partial class RohstoffpreiseDialog : Control
 
 		BaueRaster();
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void BaueRaster()
@@ -146,17 +130,5 @@ public partial class RohstoffpreiseDialog : Control
 
 		if (Visible)
 			SetProcessInput(true);
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
 	}
 }

@@ -11,7 +11,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Auswahl eines Wohnsitzes zum Bauen (modus 0) oder Umbauen (modus 1), wie HausWaehlen im WinForms-Client.
 /// Jeder Haustyp wird mit seinem (beim Umbauen reduzierten) Preis angeboten.
 /// </summary>
-public partial class HausWaehlenDialog : Control
+public partial class HausWaehlenDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelTitlePath { get; set; }
@@ -26,24 +26,12 @@ public partial class HausWaehlenDialog : Control
 	private AnwesenManager _anwesenManager;
 	private int _stadtId;
 	private int _modus;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelTitle = GetNode<Label>(LabelTitlePath);
 		_vBoxHaeuser = GetNode<VBoxContainer>(VBoxHaeuserPath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -58,9 +46,7 @@ public partial class HausWaehlenDialog : Control
 		_labelTitle.Text = modus == 1 ? "Wohin wollt Ihr Euren Wohnsitz umbauen lassen?" : "Welchen Wohnsitz wollt Ihr errichten lassen?";
 		FillHaeuser();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void FillHaeuser()
@@ -99,7 +85,7 @@ public partial class HausWaehlenDialog : Control
 		{
 			_anwesenManager.BaueHaus(_stadtId, angebot);
 			SoundManager.Instance.PlayCoins();
-			CloseDialog();
+			Close(DialogResultGame.OK);
 			return;
 		}
 
@@ -107,26 +93,8 @@ public partial class HausWaehlenDialog : Control
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

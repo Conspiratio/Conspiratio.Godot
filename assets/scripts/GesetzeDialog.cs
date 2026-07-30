@@ -9,7 +9,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Die Gesetzesanzeige: die drei Ebenen Finanzen, Justiz und Kirche mit ihrer
 /// Strenge-Bewertung und den jeweils zehn Gesetzestexten (wie im WinForms-Original).
 /// </summary>
-public partial class GesetzeDialog : Control
+public partial class GesetzeDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelUeberschriftPath { get; set; }
@@ -21,24 +21,12 @@ public partial class GesetzeDialog : Control
 	private VBoxContainer _vBoxGesetze;
 	private SchreibstubeManager _schreibstubeManager;
 
-	private TaskCompletionSource<bool> _dialogClosed;
 
 	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelUeberschrift = GetNode<Label>(LabelUeberschriftPath);
 		_vBoxGesetze = GetNode<VBoxContainer>(VBoxGesetzePath);
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	public async Task ShowDialog(SchreibstubeManager schreibstubeManager)
@@ -46,9 +34,7 @@ public partial class GesetzeDialog : Control
 		_schreibstubeManager = schreibstubeManager;
 		ZeigeEbene(0);
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void ZeigeEbene(int ebene)
@@ -89,23 +75,5 @@ public partial class GesetzeDialog : Control
 	{
 		SoundManager.Instance.PlayLeftClick();
 		ZeigeEbene(2);
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
 	}
 }

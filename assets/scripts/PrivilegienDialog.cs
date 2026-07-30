@@ -10,7 +10,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Spieler durch Amt, Titel und Familienstand besitzt. Ein Klick führt das Privileg aus – passive
 /// Privilegien zeigen eine Information, aktionierbare öffnen den zugehörigen Dialog.
 /// </summary>
-public partial class PrivilegienDialog : Control
+public partial class PrivilegienDialog : DialogBase
 {
 	[Export]
 	public NodePath VBoxPrivilegienPath { get; set; }
@@ -23,24 +23,12 @@ public partial class PrivilegienDialog : Control
 	private PackedScene _linkButtonScene;
 
 	private PrivilegienManager _privilegienManager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_vBoxPrivilegien = GetNode<VBoxContainer>(VBoxPrivilegienPath);
 		_labelKeine = GetNode<Label>(LabelKeinePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	public async Task ShowDialog(PrivilegienManager privilegienManager)
@@ -49,9 +37,7 @@ public partial class PrivilegienDialog : Control
 		_privilegienManager.AktualisierePrivilegien();
 		Fill();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void Fill()
@@ -87,26 +73,8 @@ public partial class PrivilegienDialog : Control
 		Fill();
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

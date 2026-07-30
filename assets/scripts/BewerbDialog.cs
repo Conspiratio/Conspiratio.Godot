@@ -11,7 +11,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Spieler bewerben kann. Ein Klick meldet ihn für die Wahl an oder wieder ab (nur eine Bewerbung
 /// gleichzeitig); "Info" zeigt Wähler und Mitbewerber der jeweiligen Wahl.
 /// </summary>
-public partial class BewerbDialog : Control
+public partial class BewerbDialog : DialogBase
 {
 	[Export]
 	public NodePath VBoxAemterPath { get; set; }
@@ -25,26 +25,14 @@ public partial class BewerbDialog : Control
 
 	private AemterManager _aemterManager;
 	private Main _main;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_vBoxAemter = GetNode<VBoxContainer>(VBoxAemterPath);
 		_labelKeineAemter = GetNode<Label>(LabelKeineAemterPath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
 
 		_main = GetParent<Main>();
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	public async Task ShowDialog(AemterManager aemterManager)
@@ -52,9 +40,7 @@ public partial class BewerbDialog : Control
 		_aemterManager = aemterManager;
 		Fill();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void Fill()
@@ -127,26 +113,8 @@ public partial class BewerbDialog : Control
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Angebote für zusätzlichen Lagerraum (Fläche und Preis) angeboten; ein Klick kauft das Angebot, sofern
 /// genügend Taler vorhanden sind. Der Rechtsklick schließt den Dialog. Die Logik liegt im LagerraumManager.
 /// </summary>
-public partial class LagerraumKaufenDialog : Control
+public partial class LagerraumKaufenDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelAktuellPath { get; set; }
@@ -25,29 +25,12 @@ public partial class LagerraumKaufenDialog : Control
 	private PackedScene _buttonScene;
 
 	private LagerraumManager _manager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelAktuell = GetNode<Label>(LabelAktuellPath);
 		_vBoxAngebote = GetNode<VBoxContainer>(VBoxAngebotePath);
 		_buttonScene = GD.Load<PackedScene>("res://scenes/controls/ButtonWithSounds.tscn");
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		// Event als behandelt markieren, damit der Rechtsklick nicht zusätzlich an die
-		// dahinterliegende Stadtansicht durchschlägt (die sonst den Klick mitverarbeiten könnte).
-		GetViewport().SetInputAsHandled();
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet den Lagerraum-Kauf für die angegebene Werkstätte in der Stadt.</summary>
@@ -58,13 +41,7 @@ public partial class LagerraumKaufenDialog : Control
 		AktualisiereAktuell();
 		BaueAngebote();
 
-		Show();
-		SetProcessInput(true);
-
-		// RunContinuationsAsynchronously: der Aufrufer (Stadt.OnWerkstattPressed) aktiviert seine Eingabe
-		// erst nach Abschluss des aktuellen Input-Frames wieder, nicht synchron im selben Rechtsklick.
-		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void AktualisiereAktuell()
@@ -120,12 +97,5 @@ public partial class LagerraumKaufenDialog : Control
 
 		if (Visible)
 			SetProcessInput(true);
-	}
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
 	}
 }

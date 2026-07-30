@@ -37,13 +37,20 @@ public abstract partial class DialogBase : Control
 		if (!Input.IsActionPressed("ui_next_or_close"))
 			return;
 
-		GetViewport().SetInputAsHandled();
-		SoundManager.Instance.PlayRightClick();
 		OnNextOrClose();
 	}
 
-	/// <summary>Reaktion auf Rechtsklick/Esc. Standard: Schließen mit <see cref="DialogResultGame.Cancel"/>.</summary>
-	protected virtual void OnNextOrClose() => Close(DialogResultGame.Cancel);
+	/// <summary>
+	/// Reaktion auf Rechtsklick/Esc. Standard: Eingabe als behandelt markieren, Klick-Sound spielen und
+	/// mit <see cref="DialogResultGame.Cancel"/> schließen. Dialoge, die eine Knopfauswahl erzwingen, können
+	/// dies mit einem leeren Override abschalten.
+	/// </summary>
+	protected virtual void OnNextOrClose()
+	{
+		GetViewport().SetInputAsHandled();
+		SoundManager.Instance.PlayRightClick();
+		Close(DialogResultGame.Cancel);
+	}
 
 	/// <summary>Blendet den Dialog ein, aktiviert die Eingabe und liefert die abzuwartende Aufgabe.</summary>
 	protected Task<DialogResultGame> ShowAndAwait()

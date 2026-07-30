@@ -13,7 +13,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Untergebenen des aktiven Spielers (durch dessen Amt bestimmt). Ein Klick öffnet die Optionen, deren
 /// einzige echte Aktion die Einleitung einer Amtsenthebung ist. Die Logik liegt im UntergebeneManager.
 /// </summary>
-public partial class UntergebeneDialog : Control, IUntergebeneDialog
+public partial class UntergebeneDialog : DialogBase, IUntergebeneDialog
 {
 	[Export]
 	public NodePath VBoxUntergebenePath { get; set; }
@@ -26,24 +26,12 @@ public partial class UntergebeneDialog : Control, IUntergebeneDialog
 	private PackedScene _linkButtonScene;
 
 	private UntergebeneManager _manager;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_vBoxUntergebene = GetNode<VBoxContainer>(VBoxUntergebenePath);
 		_labelKeine = GetNode<Label>(LabelKeinePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -61,9 +49,7 @@ public partial class UntergebeneDialog : Control, IUntergebeneDialog
 		_manager = new UntergebeneManager();
 		Fill();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void Fill()
@@ -107,29 +93,11 @@ public partial class UntergebeneDialog : Control, IUntergebeneDialog
 		}
 
 		// Wie im Original: nach der Optionsauswahl wird die Liste geschlossen.
-		CloseDialog();
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
+		Close(DialogResultGame.OK);
 	}
 
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// (kein Haus / im Bau / fertig) und bietet je nach Zustand Bauen bzw. Umbauen, Renovieren, Erweitern
 /// und Verkaufen an. Die eigentliche Logik liegt im AnwesenManager der Lib.
 /// </summary>
-public partial class HausVerwaltungDialog : Control
+public partial class HausVerwaltungDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelTextPath { get; set; }
@@ -50,9 +50,8 @@ public partial class HausVerwaltungDialog : Control
 	private Main _main;
 	private AnwesenManager _anwesenManager;
 	private int _stadtId;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelText = GetNode<Label>(LabelTextPath);
 		_hausBild = GetNode<TextureRect>(HausBildPath);
@@ -72,17 +71,6 @@ public partial class HausVerwaltungDialog : Control
 		_linkVerkaufen.Pressed += OnVerkaufenPressed;
 
 		_main = GetParent<Main>();
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>
@@ -95,9 +83,7 @@ public partial class HausVerwaltungDialog : Control
 
 		Refresh();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void Refresh()
@@ -228,26 +214,8 @@ public partial class HausVerwaltungDialog : Control
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

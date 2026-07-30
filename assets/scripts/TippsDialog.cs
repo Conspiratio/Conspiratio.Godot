@@ -10,7 +10,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// und "Weiter" lässt sich durch die Tipps blättern. Der Rechtsklick schließt die Anzeige. Die Tipps
 /// liefert der TippsManager der Lib.
 /// </summary>
-public partial class TippsDialog : Control
+public partial class TippsDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelUeberschriftPath { get; set; }
@@ -23,24 +23,11 @@ public partial class TippsDialog : Control
 
 	private readonly TippsManager _manager = new TippsManager();
 	private int _index;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelUeberschrift = GetNode<Label>(LabelUeberschriftPath);
 		_labelText = GetNode<Label>(LabelTextPath);
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Tipp-Anzeige mit einem zufälligen Tipp.</summary>
@@ -49,11 +36,7 @@ public partial class TippsDialog : Control
 		_index = _manager.ZufaelligerIndex();
 		ZeigeTipp();
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void ZeigeTipp()
@@ -72,12 +55,5 @@ public partial class TippsDialog : Control
 	{
 		_index = _manager.NaechsterIndex(_index);
 		ZeigeTipp();
-	}
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
 	}
 }

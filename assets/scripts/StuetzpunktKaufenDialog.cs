@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Kampf;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -11,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Zustand und Sicherheit/Tarnung eines fremden Stützpunkts und lässt den Spieler dem Besitzer ein
 /// Kaufangebot unterbreiten (nur einmal pro Jahr). Die Logik liegt im SoeldnerRaeuberManager der Lib.
 /// </summary>
-public partial class StuetzpunktKaufenDialog : Control
+public partial class StuetzpunktKaufenDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelNamePath { get; set; }
@@ -40,9 +41,8 @@ public partial class StuetzpunktKaufenDialog : Control
 
 	private readonly SoeldnerRaeuberManager _manager = new SoeldnerRaeuberManager();
 	private int _stuetzpunktId;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelName = GetNode<Label>(LabelNamePath);
 		_labelBeschreibung = GetNode<Label>(LabelBeschreibungPath);
@@ -50,17 +50,6 @@ public partial class StuetzpunktKaufenDialog : Control
 		_labelZustand = GetNode<Label>(LabelZustandPath);
 		_labelSicherheit = GetNode<Label>(LabelSicherheitPath);
 		_numericAngebot = GetNode<controls.NumericButtonWithSounds>(NumericAngebotPath);
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet den Kauf-Dialog für den angegebenen Stützpunkt.</summary>
@@ -79,11 +68,7 @@ public partial class StuetzpunktKaufenDialog : Control
 		_numericAngebot.MaximalerWert = _manager.GetSpielerTaler();
 		_numericAngebot.Wert = info.Wert;
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private async void _on_button_kaufangebot_pressed()
@@ -94,23 +79,11 @@ public partial class StuetzpunktKaufenDialog : Control
 
 		if (erfolg)
 		{
-			CloseDialog();
+			Close(DialogResultGame.OK);
 			return;
 		}
 
 		if (Visible)
 			SetProcessInput(true);
-	}
-
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
 	}
 }

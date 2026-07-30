@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Gameplay.Titel;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -12,7 +13,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// passende Sprachausgabe. Der Rechtsklick (bzw. Esc) schließt die Urkunde. Der neue Titel wird bereits vom
 /// TitelVerleihungManager der Lib gesetzt.
 /// </summary>
-public partial class TitelVerleihDialog : Control
+public partial class TitelVerleihDialog : DialogBase
 {
 	// Zu jedem Titel-Typ die Sprachausgabe-Datei (männlich, weiblich) – wie im Original.
 	private static readonly Dictionary<string, (string Maennlich, string Weiblich)> VoiceDateien = new()
@@ -32,23 +33,10 @@ public partial class TitelVerleihDialog : Control
 	public NodePath LabelTextPath { get; set; }
 
 	private Label _labelText;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelText = GetNode<Label>(LabelTextPath);
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Zeigt die Urkunde der Titelverleihung und schließt sie beim Rechtsklick.</summary>
@@ -59,11 +47,7 @@ public partial class TitelVerleihDialog : Control
 		SoundManager.Instance.PlayFanfare();
 		SpieleSprachausgabe(ergebnis);
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	/// <summary>Spielt zum verliehenen Titel die passende Sprachausgabe (nach der Fanfare).</summary>
@@ -74,12 +58,5 @@ public partial class TitelVerleihDialog : Control
 
 		string stamm = ergebnis.Maennlich ? dateien.Maennlich : dateien.Weiblich;
 		SoundManager.Instance.SpieleStimme("res://assets/voice/31_wir_verfuegen_hiermit_" + stamm + ".wav");
-	}
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
 	}
 }

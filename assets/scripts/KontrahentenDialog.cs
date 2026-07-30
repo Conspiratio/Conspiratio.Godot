@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Gameplay.Privilegien.Weltkarte;
+using Conspiratio.Lib.Allgemein;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -12,7 +13,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Menschliche Mitspieler stehen zuerst (dunkelrot), danach die KI. Die Logik liegt im
 /// KontrahentenManager der Lib.
 /// </summary>
-public partial class KontrahentenDialog : Control
+public partial class KontrahentenDialog : DialogBase
 {
 	private const int EintraegeProSeite = 10;
 
@@ -31,24 +32,12 @@ public partial class KontrahentenDialog : Control
 	private int _modus;
 	private int _seite;
 	private int _maxSeite;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_vBoxEintraege = GetNode<VBoxContainer>(VBoxEintraegePath);
 		_labelSeite = GetNode<Label>(LabelSeitePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Kontrahenten-Liste für den angegebenen Weltkarte-Modus.</summary>
@@ -62,11 +51,7 @@ public partial class KontrahentenDialog : Control
 
 		Fill();
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	private void Fill()
@@ -123,20 +108,8 @@ public partial class KontrahentenDialog : Control
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
+		Close(DialogResultGame.OK);
 	}
 }

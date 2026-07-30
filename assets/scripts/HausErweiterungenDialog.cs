@@ -10,7 +10,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// <summary>
 /// Auswahl einer Hauserweiterung (Garten, Teich, ...) für den Wohnsitz, wie HausErweiterungen im WinForms-Client.
 /// </summary>
-public partial class HausErweiterungenDialog : Control
+public partial class HausErweiterungenDialog : DialogBase
 {
 	[Export]
 	public NodePath LabelTitlePath { get; set; }
@@ -24,24 +24,12 @@ public partial class HausErweiterungenDialog : Control
 
 	private AnwesenManager _anwesenManager;
 	private int _stadtId;
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_labelTitle = GetNode<Label>(LabelTitlePath);
 		_vBoxErweiterungen = GetNode<VBoxContainer>(VBoxErweiterungenPath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
-
-		HideAndDisableInput();
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	public async Task ShowDialog(AnwesenManager anwesenManager, int stadtId)
@@ -52,9 +40,7 @@ public partial class HausErweiterungenDialog : Control
 		_labelTitle.Text = "Welche Erweiterung wollt Ihr an " + _anwesenManager.GetNameInklPronomen(stadtId, false, false) + " anbauen?";
 		FillErweiterungen();
 
-		Show();
-		SetProcessInput(true);
-		await CloseDialogTask();
+		await ShowAndAwait();
 	}
 
 	private void FillErweiterungen()
@@ -89,7 +75,7 @@ public partial class HausErweiterungenDialog : Control
 		{
 			_anwesenManager.BaueErweiterung(_stadtId, angebot);
 			SoundManager.Instance.PlayCoins();
-			CloseDialog();
+			Close(DialogResultGame.OK);
 			return;
 		}
 
@@ -97,26 +83,8 @@ public partial class HausErweiterungenDialog : Control
 			SetProcessInput(true);
 	}
 
-	private void HideAndDisableInput()
-	{
-		Hide();
-		SetProcessInput(false);
-	}
-
 	private void _on_link_button_close_pressed()
 	{
-		CloseDialog();
-	}
-
-	private void CloseDialog()
-	{
-		HideAndDisableInput();
-		_dialogClosed?.TrySetResult(true);
-	}
-
-	private Task CloseDialogTask()
-	{
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		Close(DialogResultGame.OK);
 	}
 }

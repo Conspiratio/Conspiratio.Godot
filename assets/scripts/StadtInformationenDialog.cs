@@ -12,7 +12,7 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Lagerstand des Landes je Rohstoff. Die Icon-Reihen werden – wie im Original – aus den Daten
 /// des StadtInformationenManager aufgebaut. Der Rechtsklick schließt die Anzeige.
 /// </summary>
-public partial class StadtInformationenDialog : Control
+public partial class StadtInformationenDialog : DialogBase
 {
 	// Alle Layout-Koordinaten stammen aus dem WinForms-Original (Entwurf 632×596) und werden
 	// mit diesem Faktor auf die feste Godot-Auflösung skaliert (Pergament 885×835).
@@ -39,9 +39,8 @@ public partial class StadtInformationenDialog : Control
 	private Texture2D _symbReichtum;
 	private Texture2D _symbCrime;
 
-	private TaskCompletionSource<bool> _dialogClosed;
 
-	public override void _Ready()
+	protected override void OnReady()
 	{
 		_titel = GetNode<Label>(TitelPath);
 		_umsatzWert = GetNode<Label>(UmsatzWertPath);
@@ -50,18 +49,6 @@ public partial class StadtInformationenDialog : Control
 
 		_symbReichtum = GD.Load<Texture2D>("res://assets/images/symbole/SymbReichtum.png");
 		_symbCrime = GD.Load<Texture2D>("res://assets/images/symbole/SymbCrime.png");
-
-		Hide();
-		SetProcessInput(false);
-	}
-
-	public override void _Input(InputEvent @event)
-	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
-			return;
-
-		SoundManager.Instance.PlayRightClick();
-		CloseDialog();
 	}
 
 	/// <summary>Öffnet die Stadtinformationen für die angegebene Stadt.</summary>
@@ -84,11 +71,7 @@ public partial class StadtInformationenDialog : Control
 		BaueRohstoffreihe(mgr.Werkstaetten, 301, 391, 46, 52);
 		BaueLagerstand(mgr.Lagerstand);
 
-		Show();
-		SetProcessInput(true);
-
-		_dialogClosed = new TaskCompletionSource<bool>();
-		return _dialogClosed.Task;
+		return ShowAndAwait();
 	}
 
 	#region Icon-Reihen
@@ -212,11 +195,4 @@ public partial class StadtInformationenDialog : Control
 	};
 
 	#endregion
-
-	private void CloseDialog()
-	{
-		Hide();
-		SetProcessInput(false);
-		_dialogClosed?.TrySetResult(true);
-	}
 }
