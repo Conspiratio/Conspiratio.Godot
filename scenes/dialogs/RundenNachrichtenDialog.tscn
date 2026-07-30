@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3 uid="uid://rundennachrichten1"]
+[gd_scene load_steps=6 format=3 uid="uid://rundennachrichten1"]
 
 [ext_resource type="Script" path="res://assets/scripts/RundenNachrichtenDialog.cs" id="1_rndn"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/HintRundenNachrichten.png" id="2_rndn"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_rndn"]
+[ext_resource type="FontFile" uid="uid://y0nrm4mf1pvt" path="res://assets/fonts/OLDENGL.TTF" id="4_rndn"]
+
+[sub_resource type="FontVariation" id="FontVariation_bold"]
+base_font = ExtResource("4_rndn")
+variation_embolden = 0.6
 
 [node name="RundenNachrichtenDialog" type="Control" groups=["Dialogs"]]
 layout_mode = 3
@@ -37,15 +42,17 @@ text = "Titel"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="LabelText" type="Label" parent="."]
+[node name="LabelText" type="RichTextLabel" parent="."]
 layout_mode = 0
 offset_left = 340.0
 offset_top = 215.0
 offset_right = 1260.0
 offset_bottom = 790.0
-theme_override_colors/font_color = Color(0.12, 0.08, 0.03, 1)
-theme_override_font_sizes/font_size = 30
-text = "Text der Ereignisse ...
-Zeile 2 usw."
-horizontal_alignment = 1
-autowrap_mode = 2
+theme_override_colors/default_color = Color(0.12, 0.08, 0.03, 1)
+theme_override_fonts/normal_font = ExtResource("4_rndn")
+theme_override_fonts/bold_font = SubResource("FontVariation_bold")
+theme_override_font_sizes/normal_font_size = 30
+theme_override_font_sizes/bold_font_size = 30
+bbcode_enabled = true
+scroll_active = false
+text = "[center]Text der Ereignisse[/center]"

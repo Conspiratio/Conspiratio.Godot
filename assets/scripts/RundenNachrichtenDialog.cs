@@ -1,6 +1,8 @@
+using System.Text;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -11,9 +13,15 @@ namespace Conspiratio.Godot.assets.scripts;
 /// gestylten Titel oben und den Meldungstext darunter auf dem Pergament. Ein Rechtsklick (oder Esc) blättert
 /// weiter. Wird für die eigentlichen Spielereignisse verwendet – generische Bestätigungen/Fehler laufen
 /// weiterhin über den kleinen <see cref="TextDialog"/>.
+///
+/// Spielernamen sind im Meldungstext mit |...|-Markern (der Markup-Konvention der Lib) versehen und werden
+/// wie im WinForms-Original hervorgehoben: fett und – bei menschlichen Spielern – zusätzlich dunkelrot.
 /// </summary>
 public partial class RundenNachrichtenDialog : Control, IShowText
 {
+	/// <summary>Dunkelrot (WinForms Color.DarkRed) für die Namen menschlicher Spieler.</summary>
+	private const string FarbeMensch = "#8b0000";
+
 	[Export]
 	public NodePath LabelTitelPath { get; set; }
 
@@ -21,13 +29,13 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 	public NodePath LabelTextPath { get; set; }
 
 	private Label _labelTitel;
-	private Label _labelText;
+	private RichTextLabel _labelText;
 	private TaskCompletionSource<bool> _dialogClosed;
 
 	public override void _Ready()
 	{
 		_labelTitel = GetNode<Label>(LabelTitelPath);
-		_labelText = GetNode<Label>(LabelTextPath);
+		_labelText = GetNode<RichTextLabel>(LabelTextPath);
 
 		Hide();
 		SetProcessInput(false);
@@ -55,12 +63,12 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 		if (trenner >= 0)
 		{
 			_labelTitel.Text = text.Substring(0, trenner);
-			_labelText.Text = text.Substring(trenner + 2);
+			_labelText.Text = FormatiereMarkup(text.Substring(trenner + 2));
 		}
 		else
 		{
 			_labelTitel.Text = "";
-			_labelText.Text = text;
+			_labelText.Text = FormatiereMarkup(text);
 		}
 
 		_labelTitel.Visible = _labelTitel.Text.Length > 0;
@@ -71,6 +79,53 @@ public partial class RundenNachrichtenDialog : Control, IShowText
 		_dialogClosed = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
 		return _dialogClosed.Task;
 	}
+
+	/// <summary>
+	/// Wandelt den Meldungstext in BBCode für das RichTextLabel um: Spielernamen zwischen |...|-Markern
+	/// werden fett dargestellt, menschliche Spieler zusätzlich dunkelrot. Der gesamte Text wird zentriert.
+	/// </summary>
+	private static string FormatiereMarkup(string text)
+	{
+		var sb = new StringBuilder("[center]");
+
+		// An den |-Markern trennen: Segmente an ungeraden Positionen sind Spielernamen.
+		string[] teile = text.Split('|');
+
+		for (int i = 0; i < teile.Length; i++)
+		{
+			if (i % 2 == 1)
+			{
+				bool mensch = IstMenschlicherSpielername(teile[i]);
+				sb.Append("[b]");
+				if (mensch)
+					sb.Append("[color=").Append(FarbeMensch).Append(']');
+				sb.Append(EscapeBbcode(teile[i]));
+				if (mensch)
+					sb.Append("[/color]");
+				sb.Append("[/b]");
+			}
+			else
+			{
+				sb.Append(EscapeBbcode(teile[i]));
+			}
+		}
+
+		sb.Append("[/center]");
+		return sb.ToString();
+	}
+
+	/// <summary>Prüft, ob der Name zu einem der menschlichen Spieler gehört (wie im WinForms-Original).</summary>
+	private static bool IstMenschlicherSpielername(string name)
+	{
+		for (int i = 1; i <= SW.Dynamisch.GetAktivSpielerAnzahl(); i++)
+			if (SW.Dynamisch.GetSpWithID(i).GetKompletterName() == name)
+				return true;
+
+		return false;
+	}
+
+	/// <summary>Maskiert eckige Klammern, damit Meldungstext nicht versehentlich als BBCode interpretiert wird.</summary>
+	private static string EscapeBbcode(string text) => text.Replace("[", "[lb]");
 
 	private void CloseDialog()
 	{
