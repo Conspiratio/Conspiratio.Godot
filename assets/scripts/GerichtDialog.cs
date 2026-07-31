@@ -111,6 +111,14 @@ public partial class GerichtDialog : Control
 		// dem Urteil die Richter (und später die Zeugen) bestechen.
 		await WickleBestechungAb(manager);
 
+		// Zeugenaussagen (Issue #18): Jeder Zeuge sagt aus – Verhältnis (und ggf. Bestechung) bestimmen,
+		// ob für oder gegen den Angeklagten. Muss nach der Bestechung erfolgen (sie kann Zeugen umstimmen).
+		foreach (var zeugenAussage in manager.ErmittleZeugenAussagen())
+		{
+			SetzeHaupt(zeugenAussage.Text);
+			await WarteAufWeiter();
+		}
+
 		// Zeugen vernommen, Entscheidung
 		SetzeHaupt("Das hohe Gericht hat alle Zeugen vernommen.\n Es kommt nun zu einer Entscheidung durch das Gericht.");
 		await WarteAufWeiter();
@@ -184,8 +192,8 @@ public partial class GerichtDialog : Control
 
 	/// <summary>
 	/// Bietet dem Spieler, wenn er Partei ist, vor dem Urteil die Bestechung an: erst die Richter, dann –
-	/// sobald es Zeugen gibt (Schritt 5) – die Zeugen. Nur bezahlbare Stufen werden angeboten; die Wahl
-	/// zieht den Betrag sofort ab.
+	/// sofern Zeugen aussagen – die Zeugen. Nur bezahlbare Stufen werden angeboten; die Wahl zieht den
+	/// Betrag sofort ab.
 	/// </summary>
 	private async Task WickleBestechungAb(GerichtsverhandlungManager manager)
 	{
@@ -204,7 +212,7 @@ public partial class GerichtDialog : Control
 			manager.SetzeRichterBestechung(richterOptionen[index].Betrag);
 		}
 
-		// Zeugen-Bestechung: erst mit echten Zeugen (Schritt 5).
+		// Zeugen-Bestechung: nur wenn Zeugen aussagen.
 		if (manager.GetZeugenAnzahl() > 0)
 		{
 			var zeugenOptionen = manager.GetZeugenBestechungsOptionen();
