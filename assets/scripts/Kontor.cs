@@ -774,8 +774,10 @@ public partial class Kontor : Control
 		// Während der militärischen Meldungen (Rechtsklick-Wartezeiten) läuft die Kampfmusik als Schleife.
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
 
-		foreach (string meldung in meldungen)
-			await _main.RundenNachrichtenDialog.ShowDialog("Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr() + "\n\n" + meldung);
+		// Wie im Original: alle Meldungen auf einer Seite, per Rechtsklick nacheinander angehängt
+		// (durch eine Leerzeile getrennt); bei Überlauf scrollt der Text ans Ende.
+		await _main.RundenNachrichtenDialog.ShowKampfereignisse(
+			"Militärische Ereignisse " + SW.Dynamisch.GetAktuellesJahr(), meldungen);
 
 		// Danach zurück zur normalen Hintergrundmusik.
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);

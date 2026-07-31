@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -30,10 +32,32 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 	private Label _labelTitel;
 	private RichTextLabel _labelText;
 
+	/// <summary>Ist gesetzt, solange die Kampfereignisse Meldung für Meldung durchgeblättert werden.</summary>
+	private TaskCompletionSource<bool> _weiterKlick;
+
 	protected override void OnReady()
 	{
 		_labelTitel = GetNode<Label>(LabelTitelPath);
 		_labelText = GetNode<RichTextLabel>(LabelTextPath);
+	}
+
+	/// <summary>
+	/// Im Kampfereignis-Modus blättert ein Rechtsklick zur nächsten Meldung, statt den Dialog zu schließen.
+	/// </summary>
+	protected override void OnNextOrClose()
+	{
+		if (_weiterKlick != null)
+		{
+			GetViewport().SetInputAsHandled();
+			SoundManager.Instance.PlayRightClick();
+
+			var klick = _weiterKlick;
+			_weiterKlick = null;
+			klick.TrySetResult(true);
+			return;
+		}
+
+		base.OnNextOrClose();
 	}
 
 	/// <summary>
@@ -45,15 +69,17 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 	{
 		int trenner = text.IndexOf("\n\n", System.StringComparison.Ordinal);
 
+		_labelText.ScrollActive = false;
+
 		if (trenner >= 0)
 		{
 			_labelTitel.Text = text.Substring(0, trenner);
-			_labelText.Text = FormatiereMarkup(text.Substring(trenner + 2));
+			_labelText.Text = "[center]" + MarkupInhalt(text.Substring(trenner + 2)) + "[/center]";
 		}
 		else
 		{
 			_labelTitel.Text = "";
-			_labelText.Text = FormatiereMarkup(text);
+			_labelText.Text = "[center]" + MarkupInhalt(text) + "[/center]";
 		}
 
 		_labelTitel.Visible = _labelTitel.Text.Length > 0;
@@ -62,12 +88,60 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 	}
 
 	/// <summary>
-	/// Wandelt den Meldungstext in BBCode für das RichTextLabel um: Spielernamen zwischen |...|-Markern
-	/// werden fett dargestellt, menschliche Spieler zusätzlich dunkelrot. Der gesamte Text wird zentriert.
+	/// Zeigt die militärischen Ereignisse wie im WinForms-Original auf einer einzigen Seite: Der Titel bleibt
+	/// oben stehen, die Meldungen werden – durch eine Leerzeile getrennt – nacheinander per Rechtsklick
+	/// angehängt. Läuft der Text über, scrollt er ohne sichtbare Scrollbar ans Ende, sodass die neueste
+	/// Meldung unten vollständig sichtbar ist und oben abgeschnitten wird. Der letzte Rechtsklick schließt.
 	/// </summary>
-	private static string FormatiereMarkup(string text)
+	public async Task ShowKampfereignisse(string titel, IReadOnlyList<string> meldungen)
 	{
-		var sb = new StringBuilder("[center]");
+		_labelTitel.Text = titel;
+		_labelTitel.Visible = true;
+
+		// Scrollen aktivieren, aber die Scrollbar unsichtbar machen (transparent, damit sie das erneute
+		// Setzen des Textes übersteht – .Visible würde vom RichTextLabel wieder zurückgesetzt).
+		_labelText.ScrollActive = true;
+		_labelText.GetVScrollBar().SelfModulate = new Color(1, 1, 1, 0);
+
+		var sb = new StringBuilder();
+
+		Show();
+		SetProcessInput(true);
+
+		for (int i = 0; i < meldungen.Count; i++)
+		{
+			if (i > 0)
+				sb.Append("\n\n");
+
+			sb.Append(MarkupInhalt(meldungen[i]));
+			_labelText.Text = "[center]" + sb + "[/center]";
+
+			// Erst nach dem Layout ans Ende scrollen, damit die neueste Meldung unten vollständig sichtbar ist.
+			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+			ScrolleAnsEnde();
+
+			await AufNaechstenKlickWarten();
+		}
+
+		HideAndDisableInput();
+	}
+
+	private Task AufNaechstenKlickWarten()
+	{
+		_weiterKlick = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+		return _weiterKlick.Task;
+	}
+
+	private void ScrolleAnsEnde()
+	{
+		var scrollbar = _labelText.GetVScrollBar();
+		scrollbar.Value = scrollbar.MaxValue;
+	}
+
+	/// <summary>Umrahmt den Meldungstext für die zentrierte Darstellung inkl. Namens-Hervorhebung.</summary>
+	private static string MarkupInhalt(string text)
+	{
+		var sb = new StringBuilder();
 
 		// An den |-Markern trennen: Segmente an ungeraden Positionen sind Spielernamen.
 		string[] teile = text.Split('|');
@@ -91,7 +165,6 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 			}
 		}
 
-		sb.Append("[/center]");
 		return sb.ToString();
 	}
 

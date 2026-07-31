@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
+- Militärische Ereignisse werden jetzt wie im Original auf einer einzigen Seite dargestellt: Die Meldungen werden – durch eine Leerzeile getrennt – per Rechtsklick nacheinander angehängt (statt je Meldung eine neue Seite). Läuft der Text über, scrollt er ohne sichtbare Scrollbar ans Ende, sodass die neueste Meldung unten vollständig sichtbar ist und ältere oben abgeschnitten werden.
 - Gerichtsverhandlung (Issue #18): KI-Spieler begehen jetzt zum Rundenende zufällig echte Straftaten (häufiger bei boshafteren KI), die per Spione als Beweise erkennbar sind und bei einer Anklage vor Gericht herangezogen werden – statt der bisherigen Zufallsermittlung erst im Prozess. Benötigt Conspiratio.Lib 3.63.0
 - Gerichtsverhandlung (Issue #18): Klagt man einen KI-Spieler an, zählen jetzt die von den eigenen Spionen gesammelten Beweise – je mehr Beweise, desto eher verurteilen die Richter den Angeklagten. Benötigt Conspiratio.Lib 3.62.0
 - Militärische Ereignisse: Spielernamen werden in den Kampfmeldungen jetzt wie im WinForms-Original hervorgehoben – fett, menschliche Spieler zusätzlich dunkelrot (der Nachrichtentext nutzt dafür einen RichText-Bereich, der die `|`-Marker der Lib in BBCode umsetzt). Benötigt Conspiratio.Lib 3.59.0
@@ -106,6 +107,7 @@ _Unreleased_
 ### [EN]
 
 #### Changed
+- Military events are now shown on a single page like in the original: the messages are appended one after another via right-click, separated by a blank line (instead of a new page per message). If the text overflows, it scrolls to the bottom without a visible scrollbar, so the newest message is fully visible at the bottom and older ones are cut off at the top.
 - Court trial (issue #18): AI players now commit real random crimes at round end (more often for more malicious AI), which are detectable as evidence by spies and are drawn on in court when accused – instead of the previous random determination only during the trial. Requires Conspiratio.Lib 3.63.0
 - Court trial (issue #18): when you accuse an AI player, the evidence gathered by your own spies now counts – the more evidence, the more likely the judges convict the defendant. Requires Conspiratio.Lib 3.62.0
 - Military events: player names in the battle messages are now highlighted like in the WinForms original – bold, human players additionally in dark red (the message text uses a rich-text area that converts the Lib's `|` markers into BBCode). Requires Conspiratio.Lib 3.59.0
