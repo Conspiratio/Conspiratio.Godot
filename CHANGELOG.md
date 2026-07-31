@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
+- Gerichtsverhandlung (Issue #18): Die Verurteilungsrate wurde an echte Beweise angepasst. Bei tatsächlich begangenen Delikten führt eine Anklage jetzt im Schnitt zu ~80 % zur Verurteilung, gestaffelt nach Anzahl der Delikte (1 Delikt ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, ab 4 ≈ 95 %+); bei falscher Anklage ohne Beweise bleibt eine Verurteilung selten (≈ 5 %, mit Leugnen praktisch ausgeschlossen). Zuvor wurde selbst bei klarer Beweislage kaum verurteilt. Benötigt Conspiratio.Lib 3.65.0
 - Militärische Ereignisse werden jetzt wie im Original auf einer einzigen Seite dargestellt: Die Meldungen werden – durch eine Leerzeile getrennt – per Rechtsklick nacheinander angehängt (statt je Meldung eine neue Seite). Läuft der Text über, scrollt er ohne sichtbare Scrollbar ans Ende, sodass die neueste Meldung unten vollständig sichtbar ist und ältere oben abgeschnitten werden.
 - Gerichtsverhandlung (Issue #18): KI-Spieler begehen jetzt zum Rundenende zufällig echte Straftaten (häufiger bei boshafteren KI), die per Spione als Beweise erkennbar sind und bei einer Anklage vor Gericht herangezogen werden – statt der bisherigen Zufallsermittlung erst im Prozess. Benötigt Conspiratio.Lib 3.63.0
 - Gerichtsverhandlung (Issue #18): Klagt man einen KI-Spieler an, zählen jetzt die von den eigenen Spionen gesammelten Beweise – je mehr Beweise, desto eher verurteilen die Richter den Angeklagten. Benötigt Conspiratio.Lib 3.62.0
@@ -108,6 +109,7 @@ _Unreleased_
 ### [EN]
 
 #### Changed
+- Court trial (issue #18): the conviction rate was rebalanced against real evidence. With actually committed offences a charge now leads to a conviction ~80 % of the time on average, graduated by the number of offences (1 offence ≈ 31 %, 2 ≈ 63 %, 3 ≈ 84 %, 4+ ≈ 95 %+); with a false accusation and no evidence a conviction stays rare (≈ 5 %, practically ruled out by denial). Previously even a clear case rarely led to a conviction. Requires Conspiratio.Lib 3.65.0
 - Military events are now shown on a single page like in the original: the messages are appended one after another via right-click, separated by a blank line (instead of a new page per message). If the text overflows, it scrolls to the bottom without a visible scrollbar, so the newest message is fully visible at the bottom and older ones are cut off at the top.
 - Court trial (issue #18): AI players now commit real random crimes at round end (more often for more malicious AI), which are detectable as evidence by spies and are drawn on in court when accused – instead of the previous random determination only during the trial. Requires Conspiratio.Lib 3.63.0
 - Court trial (issue #18): when you accuse an AI player, the evidence gathered by your own spies now counts – the more evidence, the more likely the judges convict the defendant. Requires Conspiratio.Lib 3.62.0
