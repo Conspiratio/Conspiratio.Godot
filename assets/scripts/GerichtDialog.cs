@@ -31,7 +31,7 @@ public partial class GerichtDialog : Control
 	private PackedScene _linkButtonScene;
 
 	private TaskCompletionSource<bool> _weiter;
-	private TaskCompletionSource<AussageOption> _aussageGewaehlt;
+	private TaskCompletionSource<int> _optionGewaehlt;
 
 	public override void _Ready()
 	{
@@ -107,9 +107,20 @@ public partial class GerichtDialog : Control
 
 		await WarteAufWeiter();
 
+		// Bestechung (Issue #18): Ist der aktive Spieler Partei (Angeklagter oder Kläger), kann er vor
+		// dem Urteil die Richter (und später die Zeugen) bestechen.
+		await WickleBestechungAb(manager);
+
 		// Zeugen vernommen, Entscheidung
 		SetzeHaupt("Das hohe Gericht hat alle Zeugen vernommen.\n Es kommt nun zu einer Entscheidung durch das Gericht.");
 		await WarteAufWeiter();
+
+		// Offenlegung, ob in diesem Verfahren bestochen wurde
+		if (manager.WurdeBestochen())
+		{
+			SetzeHaupt(manager.GetBestechungsOffenlegung());
+			await WarteAufWeiter();
+		}
 
 		// Die drei Richter stimmen ab
 		_labelUrteile.Text = "";
@@ -166,27 +177,73 @@ public partial class GerichtDialog : Control
 	/// </summary>
 	private async Task<AussageOption> WaehleAussage(GerichtsverhandlungManager manager)
 	{
-		SetzeHaupt("Wie wollt Ihr Euch zu den Vorwürfen äußern?");
+		var optionen = manager.GetAussageOptionen();
+		int index = await WaehleOption("Wie wollt Ihr Euch zu den Vorwürfen äußern?", optionen.Select(o => o.ButtonText).ToList());
+		return optionen[index];
+	}
+
+	/// <summary>
+	/// Bietet dem Spieler, wenn er Partei ist, vor dem Urteil die Bestechung an: erst die Richter, dann –
+	/// sobald es Zeugen gibt (Schritt 5) – die Zeugen. Nur bezahlbare Stufen werden angeboten; die Wahl
+	/// zieht den Betrag sofort ab.
+	/// </summary>
+	private async Task WickleBestechungAb(GerichtsverhandlungManager manager)
+	{
+		if (!manager.KannBestechen())
+			return;
+
+		var richterOptionen = manager.GetRichterBestechungsOptionen();
+
+		if (richterOptionen.Count > 1)
+		{
+			string frage = manager.IstAngeklagterAktiverSpieler()
+				? "Wollt Ihr die Richter bestechen, um einen Freispruch zu erwirken?"
+				: "Wollt Ihr die Richter bestechen, um eine Verurteilung zu erwirken?";
+
+			int index = await WaehleOption(frage, richterOptionen.Select(o => o.ButtonText).ToList());
+			manager.SetzeRichterBestechung(richterOptionen[index].Betrag);
+		}
+
+		// Zeugen-Bestechung: erst mit echten Zeugen (Schritt 5).
+		if (manager.GetZeugenAnzahl() > 0)
+		{
+			var zeugenOptionen = manager.GetZeugenBestechungsOptionen();
+
+			if (zeugenOptionen.Count > 1)
+			{
+				int index = await WaehleOption("Wollt Ihr die Zeugen bestechen?", zeugenOptionen.Select(o => o.ButtonText).ToList());
+				manager.SetzeZeugenBestechung(zeugenOptionen[index].Betrag);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Zeigt eine Frage samt Auswahl-Knöpfen und wartet auf den Klick; liefert den Index der gewählten Option.
+	/// Kein Rechtsklick-Weiter in diesem Schritt – es muss ein Knopf gedrückt werden.
+	/// </summary>
+	private async Task<int> WaehleOption(string frage, System.Collections.Generic.IReadOnlyList<string> buttonTexte)
+	{
+		SetzeHaupt(frage);
 		LeereAussageAuswahl();
 
-		_aussageGewaehlt = new TaskCompletionSource<AussageOption>(TaskCreationOptions.RunContinuationsAsynchronously);
+		_optionGewaehlt = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-		foreach (AussageOption option in manager.GetAussageOptionen())
+		for (int i = 0; i < buttonTexte.Count; i++)
 		{
 			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
-			button.Text = option.ButtonText;
+			button.Text = buttonTexte[i];
 
-			var kopie = option;
-			button.Pressed += () => _aussageGewaehlt?.TrySetResult(kopie);
+			int index = i;
+			button.Pressed += () => _optionGewaehlt?.TrySetResult(index);
 
 			_aussageAuswahl.AddChild(button);
 		}
 
 		_aussageAuswahl.Visible = true;
 
-		AussageOption gewaehlt = await _aussageGewaehlt.Task;
+		int gewaehlt = await _optionGewaehlt.Task;
 
-		_aussageGewaehlt = null;
+		_optionGewaehlt = null;
 		_aussageAuswahl.Visible = false;
 		LeereAussageAuswahl();
 
