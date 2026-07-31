@@ -18,6 +18,8 @@ _Unreleased_
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
 #### Behoben
+- Rundenende: Das Jahr blieb stehen (keine Spielerankündigung), weil die neue KI-Straftaten-Ermittlung mit einer NullReferenceException abstürzte, sobald ein geladener Spielstand im Spiel war. Behoben. Benötigt Conspiratio.Lib 3.63.1
+- Titelverleihung: Die Urkunde ist wieder ein zentriertes Dialogfenster (statt Vollbild) und zeigt die Schriftrolle unverzerrt im richtigen Seitenverhältnis.
 - Titelverleihung: Die Urkunde nutzt jetzt die richtige Schriftrolle mit Siegel (aus dem WinForms-Original `pergament_klein`) statt des generischen Dialog-Pergaments.
 - Titelverleihung: Fanfare und Sprachausgabe überlappen sich nicht mehr – die Sprachausgabe beginnt erst, nachdem die Fanfare verklungen ist (wie im Original).
 - Kontor: Ein Rechtsklick auf einen freien Bereich beendet jetzt den Zug (wie im Original); das Ingame-Menü öffnet sich nur noch mit Esc.
@@ -115,6 +117,8 @@ _Unreleased_
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 
 #### Fixed
+- Round end: the year stopped advancing (no player announcement) because the new AI-offence determination crashed with a NullReferenceException once a loaded savegame was in play. Fixed. Requires Conspiratio.Lib 3.63.1
+- Title award: the certificate is a centered dialog window again (instead of fullscreen) and shows the scroll undistorted at the correct aspect ratio.
 - Title award: the certificate now uses the correct scroll with seal (from the WinForms original `pergament_klein`) instead of the generic dialog parchment.
 - Title award: the fanfare and the voice-over no longer overlap – the voice-over only starts after the fanfare has faded (as in the original).
 - Counting house: a right-click on an empty area now ends the turn (as in the original); the in-game menu only opens with Esc.
