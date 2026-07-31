@@ -172,6 +172,9 @@ public partial class SoundManager : Node
 
 	public void PlayFanfare() => SpieleEffekt(_sfxFanfare);
 
+	/// <summary>Länge der Fanfare in Sekunden – z. B. um eine Sprachausgabe erst danach zu starten.</summary>
+	public double GetFanfareLaenge() => _sfxFanfare?.GetLength() ?? 0;
+
 	/// <summary>Startet die Titelmusik (wird vom Titelbildschirm aufgerufen).</summary>
 	public void PlayIntro() => SpieleMusik(MusikKategorie.Intro);
 

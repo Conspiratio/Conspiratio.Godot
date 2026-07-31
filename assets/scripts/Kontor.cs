@@ -78,9 +78,17 @@ public partial class Kontor : Control
 			return;
 
 		GetViewport().SetInputAsHandled();
+
+		// Rechtsklick auf einen freien Bereich beendet den Zug (wie im Original), Esc öffnet das Ingame-Menü.
+		if (@event is InputEventMouseButton)
+		{
+			await BeendeZug();
+			return;
+		}
+
 		SetProcessInput(false);
 
-		// Esc/Rechtsklick öffnet das Ingame-Menü (Optionen, Spieler hinauswerfen, Hauptmenü).
+		// Esc öffnet das Ingame-Menü (Optionen, Spieler hinauswerfen, Hauptmenü).
 		var ergebnis = await _main.IngameMenuDialog.ShowDialog();
 
 		switch (ergebnis)
@@ -420,6 +428,13 @@ public partial class Kontor : Control
 	}
 
 	private async void _on_button_end_turn_pressed()
+	{
+		await BeendeZug();
+	}
+
+	/// <summary>Beendet den Zug des Spielers (Abrechnung, Zugnachrichten, nächster Spieler). Wird vom
+	/// "Runde beenden"-Bereich und vom Rechtsklick auf einen freien Bereich ausgelöst.</summary>
+	private async Task BeendeZug()
 	{
 		SetProcessInput(false);
 

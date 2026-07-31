@@ -49,12 +49,11 @@ patch_margin_bottom = 15
 [node name="LabelQuestion" type="Label" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 42.0
-offset_top = 36.0
+offset_top = 30.0
 offset_right = 671.0
-offset_bottom = 190.0
-text = "Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird. Dies ist eine längere Frage um zu sehen, wie der Text vom Label abgeschnitten wird."
+offset_bottom = 250.0
+text = "Dies ist eine längere Frage um zu sehen, wie der Text vom Label umgebrochen wird."
 autowrap_mode = 2
-clip_text = true
 
 [node name="LinkButtonYes" parent="Panel/NinePatchRect" instance=ExtResource("3_a7ax2")]
 layout_mode = 0

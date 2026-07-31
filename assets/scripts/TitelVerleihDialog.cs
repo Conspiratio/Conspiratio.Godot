@@ -44,10 +44,24 @@ public partial class TitelVerleihDialog : DialogBase
 	{
 		_labelText.Text = ergebnis.UrkundenText;
 
-		SoundManager.Instance.PlayFanfare();
-		SpieleSprachausgabe(ergebnis);
+		SpieleFanfareUndSprachausgabe(ergebnis);
 
 		return ShowAndAwait();
+	}
+
+	/// <summary>
+	/// Spielt zuerst die Fanfare und – erst nachdem diese verklungen ist – die Sprachausgabe, damit sich
+	/// beide wie im Original nicht überlappen.
+	/// </summary>
+	private async void SpieleFanfareUndSprachausgabe(TitelverleihungErgebnis ergebnis)
+	{
+		SoundManager.Instance.PlayFanfare();
+
+		double fanfareLaenge = SoundManager.Instance.GetFanfareLaenge();
+		if (fanfareLaenge > 0)
+			await ToSignal(GetTree().CreateTimer(fanfareLaenge), SceneTreeTimer.SignalName.Timeout);
+
+		SpieleSprachausgabe(ergebnis);
 	}
 
 	/// <summary>Spielt zum verliehenen Titel die passende Sprachausgabe (nach der Fanfare).</summary>
