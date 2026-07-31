@@ -7,6 +7,7 @@ _Unreleased_
 ### [DE]
 
 #### Geändert
+- Gerichtsverhandlung (Issue #18): KI-Spieler begehen jetzt zum Rundenende zufällig echte Straftaten (häufiger bei boshafteren KI), die per Spione als Beweise erkennbar sind und bei einer Anklage vor Gericht herangezogen werden – statt der bisherigen Zufallsermittlung erst im Prozess. Benötigt Conspiratio.Lib 3.63.0
 - Gerichtsverhandlung (Issue #18): Klagt man einen KI-Spieler an, zählen jetzt die von den eigenen Spionen gesammelten Beweise – je mehr Beweise, desto eher verurteilen die Richter den Angeklagten. Benötigt Conspiratio.Lib 3.62.0
 - Militärische Ereignisse: Spielernamen werden in den Kampfmeldungen jetzt wie im WinForms-Original hervorgehoben – fett, menschliche Spieler zusätzlich dunkelrot (der Nachrichtentext nutzt dafür einen RichText-Bereich, der die `|`-Marker der Lib in BBCode umsetzt). Benötigt Conspiratio.Lib 3.59.0
 - Zug- und Rundenende-Ereignisse werden jetzt wie im WinForms-Original als Vollbildschirm dargestellt (Migration des Nachrichtenbildschirms bzw. frmKampfereignisse): vor dem Hintergrundbild `HintRundenNachrichten` erscheinen eine Überschrift oben und der Meldungstext darunter auf dem Pergament, statt der bisherigen kleinen Textbox. Betroffen sind u. a. Jahresbuch (Produktion/Exporte), Fest, Einkommen, Eigentümer-, Zufalls-, verdeckte und militärische Ereignisse, Todesfälle sowie Todes-/Testamentsmeldungen. Generische Bestätigungen (Speichern, Fehler) nutzen weiterhin den kleinen Dialog. Das Hintergrundbild `HintRundenNachrichten` wurde aus dem WinForms-Client konvertiert.
@@ -99,6 +100,7 @@ _Unreleased_
 ### [EN]
 
 #### Changed
+- Court trial (issue #18): AI players now commit real random crimes at round end (more often for more malicious AI), which are detectable as evidence by spies and are drawn on in court when accused – instead of the previous random determination only during the trial. Requires Conspiratio.Lib 3.63.0
 - Court trial (issue #18): when you accuse an AI player, the evidence gathered by your own spies now counts – the more evidence, the more likely the judges convict the defendant. Requires Conspiratio.Lib 3.62.0
 - Military events: player names in the battle messages are now highlighted like in the WinForms original – bold, human players additionally in dark red (the message text uses a rich-text area that converts the Lib's `|` markers into BBCode). Requires Conspiratio.Lib 3.59.0
 - Turn and round-end events are now shown fullscreen like in the WinForms original (migration of the messages screen / frmKampfereignisse): a heading at the top and the message body below appear on the parchment in front of the `HintRundenNachrichten` background image, instead of the previous small text box. This affects, among others, the year book (production/exports), feast, income, property, random, covert and military events, deaths as well as death/testament messages. Generic confirmations (saving, errors) still use the small dialog. The `HintRundenNachrichten` background image was converted from the WinForms client.

@@ -574,6 +574,9 @@ public partial class Kontor : Control
 		if (_rundenManager.IstLetzterSpielerImJahr())
 		{
 			await HalteWahlenAb();
+			// KI-Spieler begehen zufällig Straftaten (Issue #18); sie werden per Spione als Beweise
+			// erkennbar und bei einer Anklage im nächsten Jahr vor Gericht herangezogen.
+			new RundenEndeManager().FuehreKiStraftatenDurch();
 			await ZeigeKiTodesfaelle();
 			new FamilieManager().VerheirateKis();
 			await ZeigeKampfereignisse();
