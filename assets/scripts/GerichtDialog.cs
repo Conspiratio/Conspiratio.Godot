@@ -22,15 +22,23 @@ public partial class GerichtDialog : Control
 	[Export]
 	public NodePath LabelUrteilePath { get; set; }
 
+	[Export]
+	public NodePath AussageAuswahlPath { get; set; }
+
 	private Label _labelHaupt;
 	private Label _labelUrteile;
+	private VBoxContainer _aussageAuswahl;
+	private PackedScene _linkButtonScene;
 
 	private TaskCompletionSource<bool> _weiter;
+	private TaskCompletionSource<AussageOption> _aussageGewaehlt;
 
 	public override void _Ready()
 	{
 		_labelHaupt = GetNode<Label>(LabelHauptPath);
 		_labelUrteile = GetNode<Label>(LabelUrteilePath);
+		_aussageAuswahl = GetNode<VBoxContainer>(AussageAuswahlPath);
+		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
 
 		Hide();
 		SetProcessInput(false);
@@ -84,8 +92,19 @@ public partial class GerichtDialog : Control
 		await ZeigeKategorie(info.StrafVorwuerfe);
 		await ZeigeKategorie(info.KirchVorwuerfe);
 
-		// Verteidigung des Angeklagten
-		SetzeHaupt(manager.GetVerteidigung());
+		// Verteidigung/Aussage des Angeklagten: Ist der aktive Spieler selbst angeklagt, wählt er eine
+		// Aussage (Issue #18), die Verurteilung und Strafmaß beeinflusst. Sonst die feste KI-Verteidigung.
+		if (manager.IstAngeklagterAktiverSpieler())
+		{
+			AussageOption gewaehlt = await WaehleAussage(manager);
+			manager.SetzeAussage(gewaehlt.Typ);
+			SetzeHaupt(gewaehlt.Spruch);
+		}
+		else
+		{
+			SetzeHaupt(manager.GetVerteidigung());
+		}
+
 		await WarteAufWeiter();
 
 		// Zeugen vernommen, Entscheidung
@@ -139,6 +158,48 @@ public partial class GerichtDialog : Control
 
 		_labelUrteile.Text = "";
 		manager.SchliesseVerhandlung();
+	}
+
+	/// <summary>
+	/// Lässt den angeklagten Spieler eine Aussage wählen: zeigt die Optionen als Knöpfe und wartet auf die
+	/// Auswahl (kein Rechtsklick-Weiter in diesem Schritt – es muss ein Knopf gedrückt werden).
+	/// </summary>
+	private async Task<AussageOption> WaehleAussage(GerichtsverhandlungManager manager)
+	{
+		SetzeHaupt("Wie wollt Ihr Euch zu den Vorwürfen äußern?");
+		LeereAussageAuswahl();
+
+		_aussageGewaehlt = new TaskCompletionSource<AussageOption>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		foreach (AussageOption option in manager.GetAussageOptionen())
+		{
+			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
+			button.Text = option.ButtonText;
+
+			var kopie = option;
+			button.Pressed += () => _aussageGewaehlt?.TrySetResult(kopie);
+
+			_aussageAuswahl.AddChild(button);
+		}
+
+		_aussageAuswahl.Visible = true;
+
+		AussageOption gewaehlt = await _aussageGewaehlt.Task;
+
+		_aussageGewaehlt = null;
+		_aussageAuswahl.Visible = false;
+		LeereAussageAuswahl();
+
+		return gewaehlt;
+	}
+
+	private void LeereAussageAuswahl()
+	{
+		foreach (Node child in _aussageAuswahl.GetChildren())
+		{
+			_aussageAuswahl.RemoveChild(child);
+			child.QueueFree();
+		}
 	}
 
 	private async Task ZeigeKategorie(VorwurfKategorie kategorie)

@@ -13,6 +13,7 @@ grow_vertical = 2
 script = ExtResource("1_grdlg")
 LabelHauptPath = NodePath("TextureRect/LabelHaupt")
 LabelUrteilePath = NodePath("TextureRect/LabelUrteile")
+AussageAuswahlPath = NodePath("TextureRect/AussageAuswahl")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -33,6 +34,16 @@ theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 0
+
+[node name="AussageAuswahl" type="VBoxContainer" parent="TextureRect"]
+visible = false
+layout_mode = 0
+offset_left = 550.0
+offset_top = 300.0
+offset_right = 1050.0
+offset_bottom = 650.0
+alignment = 1
+theme_override_constants/separation = 14
 
 [node name="LabelHaupt" type="Label" parent="TextureRect"]
 layout_mode = 0
