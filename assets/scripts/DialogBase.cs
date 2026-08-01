@@ -56,6 +56,9 @@ public abstract partial class DialogBase : Control
 	protected Task<DialogResultGame> ShowAndAwait()
 	{
 		Show();
+		// Nach vorne holen, damit der Dialog über gleichrangigen Geschwistern (z. B. einem noch offenen
+		// Menü wie dem Lade-Dialog) liegt und seine Fehlermeldung nicht dahinter verschwindet.
+		MoveToFront();
 		SetProcessInput(true);
 		_dialogClosed = new TaskCompletionSource<DialogResultGame>(TaskCreationOptions.RunContinuationsAsynchronously);
 		return _dialogClosed.Task;

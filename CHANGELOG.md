@@ -20,6 +20,7 @@ _Unreleased_
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
 #### Behoben
+- Overlay-Dialoge: Meldungen (z. B. eine Fehlermeldung beim Laden eines Spielstands) erschienen teils hinter einem noch offenen Menü – nur der Rahmen war zu sehen, nicht der Inhalt. Overlay-Dialoge holen sich beim Öffnen jetzt nach vorne (`MoveToFront`), sodass der zuletzt geöffnete Dialog immer oben liegt.
 - Spielererstellung: Die Hinweistexte zu Heimatstadt und Rohstoff auf der rechten Seite ragten einzeilig über den Pergamentrand hinaus. Sie brechen jetzt innerhalb der Seite um (Wortumbruch aktiviert).
 - Rundenende: Das Jahr blieb stehen (keine Spielerankündigung), weil die neue KI-Straftaten-Ermittlung mit einer NullReferenceException abstürzte, sobald ein geladener Spielstand im Spiel war. Behoben. Benötigt Conspiratio.Lib 3.63.1
 - Titelverleihung: Die Urkunde ist wieder ein zentriertes Dialogfenster (statt Vollbild) und zeigt die Schriftrolle unverzerrt im richtigen Seitenverhältnis.
@@ -125,6 +126,7 @@ _Unreleased_
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 
 #### Fixed
+- Overlay dialogs: messages (e.g. an error when loading a savegame) sometimes appeared behind a still-open menu – only the frame was visible, not the content. Overlay dialogs now raise themselves to the front on open (`MoveToFront`), so the most recently opened dialog is always on top.
 - Player creation: the hint texts for home town and resource on the right page overflowed past the parchment edge on a single line. They now wrap within the page (word wrap enabled).
 - Round end: the year stopped advancing (no player announcement) because the new AI-offence determination crashed with a NullReferenceException once a loaded savegame was in play. Fixed. Requires Conspiratio.Lib 3.63.1
 - Title award: the certificate is a centered dialog window again (instead of fullscreen) and shows the scroll undistorted at the correct aspect ratio.
