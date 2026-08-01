@@ -186,7 +186,11 @@ public partial class Kontor : Control
 		if (_rundenManager.SitztAktiverSpielerImKerker())
 		{
 			_rundenManager.KerkerAufenthaltAbschliessen();
-			await _main.RundenNachrichtenDialog.ShowDialog("Ihr verbringt dieses Jahr im Schuldturm...");
+
+			// Wie im Original ein eigener Vollbild-Kerkerbildschirm (HintKerker) mit dunkler Musik.
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Hinterzimmer);
+			await _main.SchuldturmDialog.ShowDialog();
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 
 			// Im Schuldturm wird der Zug übersprungen (der Spieler altert dabei nicht)
 			_rundenManager.SchalteZumNaechstenSpieler();

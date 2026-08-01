@@ -54,6 +54,7 @@ public partial class Main : Control
 	public TippsDialog TippsDialog;
 	public StadtInformationenDialog StadtInformationenDialog;
 	public NaechsterSpielerDialog NaechsterSpielerDialog;
+	public SchuldturmDialog SchuldturmDialog;
 	public RundenNachrichtenDialog RundenNachrichtenDialog;
 	public IngameMenuDialog IngameMenuDialog;
 
