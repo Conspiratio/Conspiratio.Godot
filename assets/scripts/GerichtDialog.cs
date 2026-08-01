@@ -119,6 +119,14 @@ public partial class GerichtDialog : Control
 			await WarteAufWeiter();
 		}
 
+		// Plädoyers (Issue #18): Anklage und Verteidigung tragen ihre Schlussworte vor (Ton nach
+		// Beweislast bzw. Ansehen des Angeklagten).
+		SetzeHaupt(manager.GetAnklageplaedoyer());
+		await WarteAufWeiter();
+
+		SetzeHaupt(manager.GetVerteidigungsplaedoyer());
+		await WarteAufWeiter();
+
 		// Zeugen vernommen, Entscheidung
 		SetzeHaupt("Das hohe Gericht hat alle Zeugen vernommen.\n Es kommt nun zu einer Entscheidung durch das Gericht.");
 		await WarteAufWeiter();
