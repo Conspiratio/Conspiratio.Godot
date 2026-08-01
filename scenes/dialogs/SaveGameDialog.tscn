@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://savegamedlg01"]
+[gd_scene format=3 uid="uid://cs8v21xd3rxyy"]
 
 [ext_resource type="Script" path="res://assets/scripts/SaveGameDialog.cs" id="1_svg"]
 [ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_svg"]
