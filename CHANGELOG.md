@@ -20,6 +20,7 @@ _Unreleased_
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
 #### Behoben
+- Spielererstellung: Die Hinweistexte zu Heimatstadt und Rohstoff auf der rechten Seite ragten einzeilig über den Pergamentrand hinaus. Sie brechen jetzt innerhalb der Seite um (Wortumbruch aktiviert).
 - Rundenende: Das Jahr blieb stehen (keine Spielerankündigung), weil die neue KI-Straftaten-Ermittlung mit einer NullReferenceException abstürzte, sobald ein geladener Spielstand im Spiel war. Behoben. Benötigt Conspiratio.Lib 3.63.1
 - Titelverleihung: Die Urkunde ist wieder ein zentriertes Dialogfenster (statt Vollbild) und zeigt die Schriftrolle unverzerrt im richtigen Seitenverhältnis.
 - Titelverleihung: Die Urkunde nutzt jetzt die richtige Schriftrolle mit Siegel (aus dem WinForms-Original `pergament_klein`) statt des generischen Dialog-Pergaments.
@@ -124,6 +125,7 @@ _Unreleased_
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 
 #### Fixed
+- Player creation: the hint texts for home town and resource on the right page overflowed past the parchment edge on a single line. They now wrap within the page (word wrap enabled).
 - Round end: the year stopped advancing (no player announcement) because the new AI-offence determination crashed with a NullReferenceException once a loaded savegame was in play. Fixed. Requires Conspiratio.Lib 3.63.1
 - Title award: the certificate is a centered dialog window again (instead of fullscreen) and shows the scroll undistorted at the correct aspect ratio.
 - Title award: the certificate now uses the correct scroll with seal (from the WinForms original `pergament_klein`) instead of the generic dialog parchment.

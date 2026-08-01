@@ -231,6 +231,7 @@ anchor_left = 0.551
 anchor_top = 0.262
 anchor_right = 0.937
 anchor_bottom = 0.296
+autowrap_mode = 3
 text = "Freie Wahl kostet Taler, zufällig ist kostenlos"
 
 [node name="LabelResource" type="Label" parent="."]
@@ -257,6 +258,7 @@ anchor_left = 0.551
 anchor_top = 0.4
 anchor_right = 0.937
 anchor_bottom = 0.434
+autowrap_mode = 3
 text = "Freie Wahl kostet Taler, zufällig ist kostenlos"
 
 [node name="ButtonCreatePlayer" parent="." instance=ExtResource("3_npbtn")]
