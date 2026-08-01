@@ -20,6 +20,7 @@ _Unreleased_
 - Schriftfarben in der Stadtansicht der Vorlage angepasst: Preis und Bestand im Rohstoffbereich (auf der Steinwand) jetzt in Gold mit dunklem Rand für bessere Lesbarkeit; die Produktionszeilen auf dem Pergament in Schwarz, ungültige (0-)Werte in Rot.
 
 #### Behoben
+- Spielstand laden: Spielstände mit Stützpunkt-Einheiten (Militärstützpunkte aus „Räuber/Söldner") ließen sich nicht mehr laden – es erschien „…scheint beschädigt zu sein. Fehler: Error resolving type…". Ursache war der JSON-Typ-Binder, der die aus Kompatibilitätsgründen im alten Namespace verbliebenen Einheiten-Typen ablehnte. Behoben. Benötigt Conspiratio.Lib 3.67.2
 - Overlay-Dialoge: Meldungen (z. B. eine Fehlermeldung beim Laden eines Spielstands) erschienen teils hinter einem noch offenen Menü – nur der Rahmen war zu sehen, nicht der Inhalt. Overlay-Dialoge holen sich beim Öffnen jetzt nach vorne (`MoveToFront`), sodass der zuletzt geöffnete Dialog immer oben liegt.
 - Spielererstellung: Die Hinweistexte zu Heimatstadt und Rohstoff auf der rechten Seite ragten einzeilig über den Pergamentrand hinaus. Sie brechen jetzt innerhalb der Seite um (Wortumbruch aktiviert).
 - Rundenende: Das Jahr blieb stehen (keine Spielerankündigung), weil die neue KI-Straftaten-Ermittlung mit einer NullReferenceException abstürzte, sobald ein geladener Spielstand im Spiel war. Behoben. Benötigt Conspiratio.Lib 3.63.1
@@ -126,6 +127,7 @@ _Unreleased_
 - Font colours in the city view adjusted to the original: price and stock in the resource area (on the stone wall) are now gold with a dark outline for readability; the production lines on the parchment are black, invalid (zero) values red.
 
 #### Fixed
+- Loading a savegame: savegames containing base units (military bases from "raiders/mercenaries") could no longer be loaded – "…seems corrupted. Error: Error resolving type…" appeared. The cause was the JSON type binder rejecting the unit types that deliberately remain in the old namespace for compatibility. Fixed. Requires Conspiratio.Lib 3.67.2
 - Overlay dialogs: messages (e.g. an error when loading a savegame) sometimes appeared behind a still-open menu – only the frame was visible, not the content. Overlay dialogs now raise themselves to the front on open (`MoveToFront`), so the most recently opened dialog is always on top.
 - Player creation: the hint texts for home town and resource on the right page overflowed past the parchment edge on a single line. They now wrap within the page (word wrap enabled).
 - Round end: the year stopped advancing (no player announcement) because the new AI-offence determination crashed with a NullReferenceException once a loaded savegame was in play. Fixed. Requires Conspiratio.Lib 3.63.1
