@@ -217,6 +217,12 @@ public partial class Kontor : Control
 
 		_geradeGeladen = false;
 
+		// Ankündigung der neu zu besetzenden Ämter zu Zugbeginn (wie im Original), sofern es welche gibt.
+		string aemterAnkuendigung = new AemterManager().GetFreieAemterAnkuendigung();
+
+		if (aemterAnkuendigung != null)
+			await _main.RundenNachrichtenDialog.ShowDialog("Ämterwahl\n\n" + aemterAnkuendigung);
+
 		// Stützpunkt-Handel zwischen Spielern: erst die Ergebnisse eigener Angebote melden,
 		// dann eingegangene Kaufangebote für eigene Stützpunkte prüfen.
 		var soeldnerManager = new SoeldnerRaeuberManager();
