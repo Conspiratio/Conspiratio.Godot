@@ -108,6 +108,11 @@ public partial class Kontor : Control
 				await NaechstenSpielerAnkuendigen();
 				break;
 
+			case IngameMenuDialog.Ergebnis.Geladen:
+				// Im Ingame-Menü wurde ein Spielstand geladen: das geladene Spiel fortsetzen.
+				ContinueLoadedGame();
+				break;
+
 			default:  // WeiterSpielen
 				SetProcessInput(true);
 				break;

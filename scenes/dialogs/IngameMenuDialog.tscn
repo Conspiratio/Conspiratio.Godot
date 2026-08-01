@@ -17,6 +17,8 @@ size_flags_vertical = 3
 theme = ExtResource("3_igm")
 script = ExtResource("1_igm")
 ButtonWeiterPath = NodePath("Rahmen/VBox/ButtonWeiter")
+ButtonSpeichernPath = NodePath("Rahmen/VBox/ButtonSpeichern")
+ButtonLadenPath = NodePath("Rahmen/VBox/ButtonLaden")
 ButtonOptionenPath = NodePath("Rahmen/VBox/ButtonOptionen")
 ButtonSpielerRausPath = NodePath("Rahmen/VBox/ButtonSpielerRaus")
 ButtonHauptmenuePath = NodePath("Rahmen/VBox/ButtonHauptmenue")
@@ -29,9 +31,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -320.0
-offset_top = -260.0
+offset_top = -300.0
 offset_right = 320.0
-offset_bottom = 260.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_igm")
@@ -54,16 +56,26 @@ horizontal_alignment = 1
 [node name="VBox" type="VBoxContainer" parent="Rahmen"]
 layout_mode = 0
 offset_left = 120.0
-offset_top = 120.0
+offset_top = 100.0
 offset_right = 520.0
-offset_bottom = 480.0
-theme_override_constants/separation = 22
+offset_bottom = 566.0
+theme_override_constants/separation = 18
 alignment = 1
 
 [node name="ButtonWeiter" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
 custom_minimum_size = Vector2(400, 56)
 layout_mode = 2
 text = "Weiter spielen"
+
+[node name="ButtonSpeichern" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Spiel speichern"
+
+[node name="ButtonLaden" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
+custom_minimum_size = Vector2(400, 56)
+layout_mode = 2
+text = "Spiel laden"
 
 [node name="ButtonOptionen" parent="Rahmen/VBox" instance=ExtResource("4_igm")]
 custom_minimum_size = Vector2(400, 56)

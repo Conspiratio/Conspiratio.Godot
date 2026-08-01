@@ -16,6 +16,7 @@ public partial class IngameMenuDialog : Control
 	public enum Ergebnis
 	{
 		WeiterSpielen,
+		Geladen,
 		ZumHauptmenue,
 		SpielerEntferntWeiter,
 		SpielerEntferntEnde
@@ -23,6 +24,12 @@ public partial class IngameMenuDialog : Control
 
 	[Export]
 	public NodePath ButtonWeiterPath { get; set; }
+
+	[Export]
+	public NodePath ButtonSpeichernPath { get; set; }
+
+	[Export]
+	public NodePath ButtonLadenPath { get; set; }
 
 	[Export]
 	public NodePath ButtonOptionenPath { get; set; }
@@ -39,6 +46,8 @@ public partial class IngameMenuDialog : Control
 	public override void _Ready()
 	{
 		GetNode<ButtonWithSounds>(ButtonWeiterPath).Pressed += () => Beenden(Ergebnis.WeiterSpielen);
+		GetNode<ButtonWithSounds>(ButtonSpeichernPath).Pressed += OnSpeichern;
+		GetNode<ButtonWithSounds>(ButtonLadenPath).Pressed += OnLaden;
 		GetNode<ButtonWithSounds>(ButtonOptionenPath).Pressed += OnOptionen;
 		GetNode<ButtonWithSounds>(ButtonSpielerRausPath).Pressed += OnSpielerRaus;
 		GetNode<ButtonWithSounds>(ButtonHauptmenuePath).Pressed += () => Beenden(Ergebnis.ZumHauptmenue);
@@ -87,6 +96,34 @@ public partial class IngameMenuDialog : Control
 		// Das Menü ausblenden, damit die Optionen im Vordergrund erscheinen; danach wieder anzeigen.
 		Hide();
 		await _main.OptionenDialog.ShowDialog();
+		Show();
+		CallDeferred(MethodName.AktiviereEingabe);
+	}
+
+	private async void OnSpeichern()
+	{
+		SetProcessInput(false);
+
+		// Menü ausblenden, den Speichern-Dialog im Vordergrund zeigen, danach wieder ins Menü.
+		Hide();
+		await _main.SaveGameDialog.ZeigeUndSpeichere();
+		Show();
+		CallDeferred(MethodName.AktiviereEingabe);
+	}
+
+	private async void OnLaden()
+	{
+		SetProcessInput(false);
+		Hide();
+
+		// Wird ein Spielstand geladen, meldet das Menü dem Kontor "Geladen" (es setzt das Spiel fort).
+		// Bei Abbruch kehrt der Spieler ins Menü zurück.
+		if (await _main.LoadGameDialog.ZeigeUndLade())
+		{
+			Beenden(Ergebnis.Geladen);
+			return;
+		}
+
 		Show();
 		CallDeferred(MethodName.AktiviereEingabe);
 	}

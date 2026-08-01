@@ -50,10 +50,14 @@ public partial class LocalGameDialog : Control
 		HideAndDisableInput();
 	}
 
-	private void _on_button_load_game_pressed()
+	private async void _on_button_load_game_pressed()
 	{
 		HideAndDisableInput();
-		_main.LoadGameDialog.ShowAndEnableInput();
+
+		if (await _main.LoadGameDialog.ZeigeUndLade())
+			_main.Kontor.ContinueLoadedGame();
+		else
+			ShowAndEnableInput();  // Abbruch: zurück ins lokale Spielmenü
 	}
 
 	private async void _on_button_continue_game_pressed()

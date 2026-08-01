@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -8,6 +9,8 @@ namespace Conspiratio.Godot.assets.scripts;
 
 /// <summary>
 /// Der Lade-Dialog: listet alle vorhandenen Spielstände auf und lädt oder löscht den ausgewählten.
+/// Wird sowohl aus dem lokalen Spielmenü als auch aus dem Ingame-Menü (Esc) genutzt; er navigiert
+/// nicht selbst, sondern meldet dem Aufrufer über <see cref="ZeigeUndLade"/>, ob geladen wurde.
 /// </summary>
 public partial class LoadGameDialog : Control
 {
@@ -17,15 +20,14 @@ public partial class LoadGameDialog : Control
 	private ItemList _itemListSpielstaende;
 	private readonly List<string> _spielstandNamen = new();
 
-	private Main _main;
 	private SpeicherManager _speicherManager;
+	private TaskCompletionSource<bool> _abgeschlossen;
 
-	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
 		_itemListSpielstaende = GetNode<ItemList>(ItemListSpielstaendePath);
-		_main = GetParent<Main>();
 
+		Hide();
 		SetProcessInput(false);
 	}
 
@@ -35,23 +37,32 @@ public partial class LoadGameDialog : Control
 			return;
 
 		SoundManager.Instance.PlayRightClick();
-		HideAndDisableInput();
-		_main.LocalGameDialog.ShowAndEnableInput();
+		Beenden(false);
 	}
 
-	public void ShowAndEnableInput()
+	/// <summary>
+	/// Zeigt die Spielstandliste und wartet auf die Auswahl des Spielers: liefert <c>true</c>, wenn ein
+	/// Spielstand geladen wurde (der Spielstand ist dann bereits gesetzt), sonst <c>false</c> (Abbruch).
+	/// Der Aufrufer entscheidet danach, wie es weitergeht (Spiel fortsetzen bzw. zurück ins Menü).
+	/// </summary>
+	public Task<bool> ZeigeUndLade()
 	{
 		_speicherManager = new SpeicherManager(ClientSettings.SavegamePath);
 		PopulateSpielstaende();
 
 		Show();
+		MoveToFront();
 		SetProcessInput(true);
+
+		_abgeschlossen = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+		return _abgeschlossen.Task;
 	}
 
-	private void HideAndDisableInput()
+	private void Beenden(bool geladen)
 	{
 		Hide();
 		SetProcessInput(false);
+		_abgeschlossen?.TrySetResult(geladen);
 	}
 
 	private void PopulateSpielstaende()
@@ -88,10 +99,11 @@ public partial class LoadGameDialog : Control
 		{
 			ClientSettings.LetzterSpielstand = name;
 
+			// Zuerst ausblenden, dann bestätigen (sonst bleibt der Dialog unter der Meldung sichtbar).
+			Hide();
 			await SW.UI.ShowText.ShowDialog("Ladevorgang beendet!");
 
-			HideAndDisableInput();
-			_main.Kontor.ContinueLoadedGame();
+			_abgeschlossen?.TrySetResult(true);
 			return;
 		}
 

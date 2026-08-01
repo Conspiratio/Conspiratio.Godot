@@ -13,6 +13,7 @@ public partial class Main : Control
 	public AbrechnungDialog AbrechnungDialog;
 	public Stadt Stadt;
 	public LoadGameDialog LoadGameDialog;
+	public SaveGameDialog SaveGameDialog;
 	public Schreibstube Schreibstube;
 	public KreditbuchDialog KreditbuchDialog;
 	public GesetzeDialog GesetzeDialog;

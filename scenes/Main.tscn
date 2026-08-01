@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=54 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -11,6 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://babrechnungdg" path="res://scenes/dialogs/AbrechnungDialog.tscn" id="8_abrdg"]
 [ext_resource type="PackedScene" uid="uid://bstadtszene01" path="res://scenes/Stadt.tscn" id="9_stadt"]
 [ext_resource type="PackedScene" uid="uid://loadgamedlg01" path="res://scenes/dialogs/LoadGameDialog.tscn" id="10_ldgdg"]
+[ext_resource type="PackedScene" uid="uid://savegamedlg01" path="res://scenes/dialogs/SaveGameDialog.tscn" id="53_svgdg"]
 [ext_resource type="PackedScene" uid="uid://schreibstube1" path="res://scenes/Schreibstube.tscn" id="11_schrb"]
 [ext_resource type="PackedScene" uid="uid://kreditbuchdlg" path="res://scenes/dialogs/KreditbuchDialog.tscn" id="12_krbdg"]
 [ext_resource type="PackedScene" uid="uid://gesetzedlg001" path="res://scenes/dialogs/GesetzeDialog.tscn" id="13_gsdg"]
@@ -260,6 +261,10 @@ visible = false
 layout_mode = 1
 
 [node name="LoadGameDialog" parent="." instance=ExtResource("10_ldgdg")]
+visible = false
+layout_mode = 1
+
+[node name="SaveGameDialog" parent="." instance=ExtResource("53_svgdg")]
 visible = false
 layout_mode = 1
 
