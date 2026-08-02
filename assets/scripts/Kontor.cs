@@ -246,6 +246,9 @@ public partial class Kontor : Control
 		else
 			await SW.UI.ShowText.ShowDialog(autosaveFehler);
 
+		// Einen evtl. noch sichtbaren Nachrichtenschirm ausblenden, bevor die Bedienung wieder aktiv wird.
+		DialogBase.VerbergeNachrichtenschirm();
+
 		SetProcessInput(true);
 	}
 
@@ -283,8 +286,6 @@ public partial class Kontor : Control
 			}
 		}
 
-		await _main.RundenNachrichtenDialog.ShowDialog(produktion);
-
 		string exporte;
 
 		if (buch.EtwasExportiert == false)
@@ -317,7 +318,8 @@ public partial class Kontor : Control
 		if (buch.EtwasExportiert)
 			SoundManager.Instance.PlayCoins();
 
-		await _main.RundenNachrichtenDialog.ShowDialog(exporte);
+		// Wie im Original auf dem aufgeschlagenen Buch: Produktion links, Exporte rechts.
+		await _main.JahresbuchDialog.ShowDialog("Jahresbuch A.D. " + SW.Dynamisch.GetAktuellesJahr(), produktion, exporte);
 	}
 
 	private void HideAndDisableInput()

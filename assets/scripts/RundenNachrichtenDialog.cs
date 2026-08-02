@@ -35,6 +35,9 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 	/// <summary>Ist gesetzt, solange die Kampfereignisse Meldung für Meldung durchgeblättert werden.</summary>
 	private TaskCompletionSource<bool> _weiterKlick;
 
+	// Der Nachrichtenschirm bleibt beim Weiterblättern sichtbar (kein Durchblitzen des Bildschirms dahinter).
+	protected override bool BleibtSichtbarBeimSchliessen => true;
+
 	protected override void OnReady()
 	{
 		_labelTitel = GetNode<Label>(LabelTitelPath);
@@ -105,7 +108,9 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 
 		var sb = new StringBuilder();
 
+		OffenerNachrichtenschirm = this;
 		Show();
+		MoveToFront();
 		SetProcessInput(true);
 
 		for (int i = 0; i < meldungen.Count; i++)
@@ -123,6 +128,7 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 			await AufNaechstenKlickWarten();
 		}
 
+		OffenerNachrichtenschirm = null;
 		HideAndDisableInput();
 	}
 

@@ -56,6 +56,7 @@ public partial class Main : Control
 	public NaechsterSpielerDialog NaechsterSpielerDialog;
 	public SchuldturmDialog SchuldturmDialog;
 	public RundenNachrichtenDialog RundenNachrichtenDialog;
+	public JahresbuchDialog JahresbuchDialog;
 	public IngameMenuDialog IngameMenuDialog;
 
 	// Called when the node enters the scene tree for the first time.

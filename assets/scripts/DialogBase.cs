@@ -23,6 +23,20 @@ public abstract partial class DialogBase : Control
 {
 	private TaskCompletionSource<DialogResultGame> _dialogClosed;
 
+	/// <summary>
+	/// Der aktuell sichtbare "durchgehende" Nachrichtenschirm (siehe <see cref="BleibtSichtbarBeimSchliessen"/>).
+	/// Er bleibt zwischen aufeinanderfolgenden Meldungen sichtbar; erst ein anderer Dialog oder
+	/// <see cref="VerbergeNachrichtenschirm"/> blendet ihn aus.
+	/// </summary>
+	protected static DialogBase OffenerNachrichtenschirm;
+
+	/// <summary>
+	/// Bleibt dieser Dialog beim Schließen (Weiterblättern) sichtbar, statt sich auszublenden? Nur der
+	/// Rundennachrichten-Vollbildschirm nutzt das, damit beim Durchklicken der Meldungen nicht kurz der
+	/// Bildschirm dahinter durchblitzt. Alle übrigen Dialoge blenden sich beim Schließen wie gewohnt aus.
+	/// </summary>
+	protected virtual bool BleibtSichtbarBeimSchliessen => false;
+
 	public override void _Ready()
 	{
 		HideAndDisableInput();
@@ -55,6 +69,19 @@ public abstract partial class DialogBase : Control
 	/// <summary>Blendet den Dialog ein, aktiviert die Eingabe und liefert die abzuwartende Aufgabe.</summary>
 	protected Task<DialogResultGame> ShowAndAwait()
 	{
+		if (BleibtSichtbarBeimSchliessen)
+		{
+			// Nachrichtenschirm: als aktuell offen merken, damit er beim Weiterblättern sichtbar bleibt.
+			OffenerNachrichtenschirm = this;
+		}
+		else if (OffenerNachrichtenschirm != null && OffenerNachrichtenschirm != this)
+		{
+			// Ein normaler Dialog erscheint über dem Nachrichtenschirm: diesen ausblenden, damit er beim
+			// Schließen des Dialogs nicht mit veraltetem Inhalt dahinter kurz aufblitzt.
+			OffenerNachrichtenschirm.HideAndDisableInput();
+			OffenerNachrichtenschirm = null;
+		}
+
 		Show();
 		// Nach vorne holen, damit der Dialog über gleichrangigen Geschwistern (z. B. einem noch offenen
 		// Menü wie dem Lade-Dialog) liegt und seine Fehlermeldung nicht dahinter verschwindet.
@@ -67,8 +94,27 @@ public abstract partial class DialogBase : Control
 	/// <summary>Schließt den Dialog und schließt die Aufgabe mit dem angegebenen Ergebnis ab.</summary>
 	protected void Close(DialogResultGame result)
 	{
-		HideAndDisableInput();
+		// Der Nachrichtenschirm bleibt zwischen den Meldungen sichtbar (kein Durchblitzen) – nur die Eingabe
+		// wird deaktiviert; ausgeblendet wird er erst durch den nächsten Dialog oder VerbergeNachrichtenschirm.
+		if (BleibtSichtbarBeimSchliessen)
+			SetProcessInput(false);
+		else
+			HideAndDisableInput();
+
 		_dialogClosed?.TrySetResult(result);
+	}
+
+	/// <summary>
+	/// Blendet einen noch sichtbaren "durchgehenden" Nachrichtenschirm aus. Vor der Rückkehr zur normalen
+	/// Bedienung aufzurufen, damit keine Meldung sichtbar stehen bleibt.
+	/// </summary>
+	public static void VerbergeNachrichtenschirm()
+	{
+		if (OffenerNachrichtenschirm != null)
+		{
+			OffenerNachrichtenschirm.HideAndDisableInput();
+			OffenerNachrichtenschirm = null;
+		}
 	}
 
 	/// <summary>Blendet den Dialog aus und deaktiviert die Eingabeverarbeitung.</summary>
