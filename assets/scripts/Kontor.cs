@@ -72,6 +72,19 @@ public partial class Kontor : Control
 
 	public override async void _Input(InputEvent @event)
 	{
+		// Cheatfenster mit „U" öffnen, sofern beim neuen Spiel der Cheatmodus aktiviert wurde (wie im Original).
+		if (@event is InputEventKey { Pressed: true, Echo: false, Keycode: Key.U } && SW.Dynamisch.Cheatmodus)
+		{
+			GetViewport().SetInputAsHandled();
+			SetProcessInput(false);
+			await _main.CheatDialog.ShowDialog();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
 		// Nur auf das diskrete Drücken reagieren (@event statt globalem Input.IsActionPressed), sonst
 		// öffnet ein einzelner Tastendruck das Menü mehrfach und es "flackert".
 		if (!@event.IsActionPressed("ui_next_or_close"))

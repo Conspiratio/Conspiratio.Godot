@@ -58,6 +58,7 @@ public partial class Main : Control
 	public RundenNachrichtenDialog RundenNachrichtenDialog;
 	public JahresbuchDialog JahresbuchDialog;
 	public IngameMenuDialog IngameMenuDialog;
+	public CheatDialog CheatDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
