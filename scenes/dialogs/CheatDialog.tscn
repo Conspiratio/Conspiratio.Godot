@@ -18,6 +18,11 @@ script = ExtResource("1_ch")
 LineEditTalerPath = NodePath("Rahmen/LineEditTaler")
 LineEditAnsehenPath = NodePath("Rahmen/LineEditAnsehen")
 GridRohstoffePath = NodePath("Rahmen/GridRohstoffe")
+OptionStufePath = NodePath("Rahmen/OptionStufe")
+OptionGebietPath = NodePath("Rahmen/OptionGebiet")
+OptionAmtPath = NodePath("Rahmen/OptionAmt")
+OptionStadtPath = NodePath("Rahmen/OptionStadt")
+OptionHaustypPath = NodePath("Rahmen/OptionHaustyp")
 
 [node name="Rahmen" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -26,10 +31,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -380.0
-offset_top = -310.0
-offset_right = 380.0
-offset_bottom = 310.0
+offset_left = -480.0
+offset_top = -370.0
+offset_right = 480.0
+offset_bottom = 370.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_ch")
@@ -41,99 +46,189 @@ patch_margin_bottom = 15
 [node name="LabelTitel" type="Label" parent="Rahmen"]
 layout_mode = 0
 offset_left = 40.0
-offset_top = 20.0
-offset_right = 720.0
-offset_bottom = 62.0
+offset_top = 15.0
+offset_right = 920.0
+offset_bottom = 55.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 30
 text = "Cheats"
 horizontal_alignment = 1
 
 [node name="LabelTaler" type="Label" parent="Rahmen"]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 82.0
-offset_right = 180.0
-offset_bottom = 116.0
+offset_left = 40.0
+offset_top = 76.0
+offset_right = 130.0
+offset_bottom = 108.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Taler:"
 
 [node name="LineEditTaler" type="LineEdit" parent="Rahmen"]
 layout_mode = 0
-offset_left = 185.0
-offset_top = 80.0
-offset_right = 380.0
-offset_bottom = 118.0
+offset_left = 135.0
+offset_top = 72.0
+offset_right = 300.0
+offset_bottom = 110.0
 
 [node name="LabelAnsehen" type="Label" parent="Rahmen"]
 layout_mode = 0
-offset_left = 410.0
-offset_top = 82.0
-offset_right = 540.0
-offset_bottom = 116.0
+offset_left = 40.0
+offset_top = 121.0
+offset_right = 150.0
+offset_bottom = 153.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Ansehen:"
 
 [node name="LineEditAnsehen" type="LineEdit" parent="Rahmen"]
 layout_mode = 0
-offset_left = 545.0
-offset_top = 80.0
-offset_right = 720.0
-offset_bottom = 118.0
+offset_left = 155.0
+offset_top = 117.0
+offset_right = 320.0
+offset_bottom = 155.0
 
 [node name="LabelRechte" type="Label" parent="Rahmen"]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 132.0
-offset_right = 720.0
-offset_bottom = 164.0
+offset_left = 40.0
+offset_top = 165.0
+offset_right = 470.0
+offset_bottom = 197.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Handelsrechte:"
 
 [node name="GridRohstoffe" type="GridContainer" parent="Rahmen"]
 layout_mode = 0
-offset_left = 50.0
-offset_top = 168.0
-offset_right = 720.0
-offset_bottom = 430.0
-theme_override_constants/h_separation = 20
+offset_left = 40.0
+offset_top = 200.0
+offset_right = 470.0
+offset_bottom = 610.0
+theme_override_constants/h_separation = 16
 theme_override_constants/v_separation = 4
 columns = 3
 
+[node name="LabelAktionen" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 74.0
+offset_right = 920.0
+offset_bottom = 106.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Aktionen:"
+
 [node name="ButtonKind" parent="Rahmen" instance=ExtResource("4_ch")]
-custom_minimum_size = Vector2(210, 44)
-offset_left = 50.0
-offset_top = 445.0
-offset_right = 260.0
-offset_bottom = 489.0
+custom_minimum_size = Vector2(200, 40)
+offset_left = 500.0
+offset_top = 112.0
+offset_right = 700.0
+offset_bottom = 152.0
 text = "Kind bekommen"
 
 [node name="ButtonSterben" parent="Rahmen" instance=ExtResource("4_ch")]
-custom_minimum_size = Vector2(210, 44)
-offset_left = 275.0
-offset_top = 445.0
-offset_right = 485.0
-offset_bottom = 489.0
+custom_minimum_size = Vector2(200, 40)
+offset_left = 710.0
+offset_top = 112.0
+offset_right = 910.0
+offset_bottom = 152.0
 text = "Sofort altern"
 
-[node name="ButtonAmt" parent="Rahmen" instance=ExtResource("4_ch")]
-custom_minimum_size = Vector2(210, 44)
+[node name="ButtonAmtNiederlegen" parent="Rahmen" instance=ExtResource("4_ch")]
+custom_minimum_size = Vector2(200, 40)
 offset_left = 500.0
-offset_top = 445.0
-offset_right = 710.0
-offset_bottom = 489.0
+offset_top = 158.0
+offset_right = 700.0
+offset_bottom = 198.0
 text = "Amt niederlegen"
 
+[node name="ButtonVerklagen" parent="Rahmen" instance=ExtResource("4_ch")]
+custom_minimum_size = Vector2(200, 40)
+offset_left = 710.0
+offset_top = 158.0
+offset_right = 910.0
+offset_bottom = 198.0
+text = "Verklagt werden"
+
+[node name="LabelAmt" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 214.0
+offset_right = 920.0
+offset_bottom = 246.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Amt übernehmen:"
+
+[node name="OptionStufe" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 250.0
+offset_right = 910.0
+offset_bottom = 286.0
+
+[node name="OptionGebiet" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 290.0
+offset_right = 910.0
+offset_bottom = 326.0
+
+[node name="OptionAmt" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 330.0
+offset_right = 910.0
+offset_bottom = 366.0
+
+[node name="ButtonAmtUebernehmen" parent="Rahmen" instance=ExtResource("4_ch")]
+custom_minimum_size = Vector2(410, 40)
+offset_left = 500.0
+offset_top = 372.0
+offset_right = 910.0
+offset_bottom = 412.0
+text = "Amt übernehmen"
+
+[node name="LabelHaus" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 424.0
+offset_right = 920.0
+offset_bottom = 456.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Haus bauen:"
+
+[node name="OptionStadt" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 460.0
+offset_right = 910.0
+offset_bottom = 496.0
+
+[node name="OptionHaustyp" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 500.0
+offset_right = 910.0
+offset_bottom = 536.0
+
+[node name="ButtonHausBauen" parent="Rahmen" instance=ExtResource("4_ch")]
+custom_minimum_size = Vector2(410, 40)
+offset_left = 500.0
+offset_top = 540.0
+offset_right = 910.0
+offset_bottom = 580.0
+text = "Haus bauen"
+
 [node name="LinkButtonClose" parent="Rahmen" instance=ExtResource("5_ch")]
-offset_left = 300.0
-offset_top = 520.0
-offset_right = 460.0
-offset_bottom = 560.0
+offset_left = 400.0
+offset_top = 645.0
+offset_right = 560.0
+offset_bottom = 685.0
 text = "Schließen"
 
 [connection signal="text_submitted" from="Rahmen/LineEditTaler" to="." method="_on_line_edit_taler_text_submitted"]
 [connection signal="text_submitted" from="Rahmen/LineEditAnsehen" to="." method="_on_line_edit_ansehen_text_submitted"]
+[connection signal="item_selected" from="Rahmen/OptionStufe" to="." method="_on_option_stufe_item_selected"]
 [connection signal="pressed" from="Rahmen/ButtonKind" to="." method="_on_button_kind_pressed"]
 [connection signal="pressed" from="Rahmen/ButtonSterben" to="." method="_on_button_sterben_pressed"]
-[connection signal="pressed" from="Rahmen/ButtonAmt" to="." method="_on_button_amt_niederlegen_pressed"]
+[connection signal="pressed" from="Rahmen/ButtonAmtNiederlegen" to="." method="_on_button_amt_niederlegen_pressed"]
+[connection signal="pressed" from="Rahmen/ButtonVerklagen" to="." method="_on_button_verklagen_pressed"]
+[connection signal="pressed" from="Rahmen/ButtonAmtUebernehmen" to="." method="_on_button_amt_uebernehmen_pressed"]
+[connection signal="pressed" from="Rahmen/ButtonHausBauen" to="." method="_on_button_haus_bauen_pressed"]
 [connection signal="pressed" from="Rahmen/LinkButtonClose" to="." method="_on_link_button_close_pressed"]
