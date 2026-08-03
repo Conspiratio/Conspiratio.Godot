@@ -69,25 +69,39 @@ public partial class AhnentafelBaum : Control
 
 			float paarBreite = g.Ehepartner != null ? CardW * 2 + CoupleGap : CardW;
 			float paarLinks = mitteX - paarBreite / 2f;
-
-			// Verbindung von der vorigen Generation zum Oberhaupt dieser Generation.
-			if (vorigerAusgang.HasValue)
-				_linien.Add((vorigerAusgang.Value, new Vector2(mitteX, y)));
-
-			// Oberhaupt-Karte (bei Paar linksbündig, sonst mittig).
 			float oberhauptLinks = g.Ehepartner != null ? paarLinks : mitteX - CardW / 2f;
+			float oberhauptMitteX = oberhauptLinks + CardW / 2f;
+
+			// Dynastielinie von der vorigen Generation an die Oberkante des Oberhaupts dieser Generation.
+			if (vorigerAusgang.HasValue)
+				_linien.Add((vorigerAusgang.Value, new Vector2(oberhauptMitteX, y)));
+
 			ErzeugeKarte(g.Oberhaupt, new Vector2(oberhauptLinks, y), CardW, CardH, false, lebend);
+
+			float midY = y + CardH / 2f;
+			float paarUntenY = y + CardH;
+
+			// Startpunkt der Abwärtslinie zu den Kindern und Ausgangspunkt der Dynastielinie.
+			float abstiegX = oberhauptMitteX;
+			float abstiegStartY = paarUntenY;
+			Vector2 ausgang = new(oberhauptMitteX, paarUntenY);   // Standard: Unterkante des Oberhaupts.
 
 			// Ehepartner-Karte + Heiratslinie.
 			if (g.Ehepartner != null)
 			{
 				float partnerLinks = paarLinks + CardW + CoupleGap;
+				float partnerMitteX = partnerLinks + CardW / 2f;
 				ErzeugeKarte(g.Ehepartner, new Vector2(partnerLinks, y), CardW, CardH, g.EhepartnerErbte, lebend);
-				_linien.Add((new Vector2(oberhauptLinks + CardW, y + CardH / 2f), new Vector2(partnerLinks, y + CardH / 2f)));
-			}
 
-			float paarUntenY = y + CardH;
-			Vector2 ausgang = new(mitteX, paarUntenY);   // Standard-Ausgang: Mitte unter dem Paar.
+				// Heiratslinie auf halber Höhe zwischen den beiden Karten; die Kinderlinie hängt an ihrer Mitte.
+				_linien.Add((new Vector2(oberhauptLinks + CardW, midY), new Vector2(partnerLinks, midY)));
+				abstiegX = mitteX;
+				abstiegStartY = midY;
+
+				// Erbt der Ehepartner, geht die Dynastielinie von seiner Unterkante aus.
+				if (g.EhepartnerErbte)
+					ausgang = new Vector2(partnerMitteX, paarUntenY);
+			}
 
 			if (g.Kinder.Count > 0)
 			{
@@ -96,8 +110,8 @@ public partial class AhnentafelBaum : Control
 				float startX = mitteX - kinderBreite / 2f;
 				float leisteY = paarUntenY + ChildTopGap / 2f;
 
-				// Abstieg vom Paar zur Geschwisterleiste.
-				_linien.Add((new Vector2(mitteX, paarUntenY), new Vector2(mitteX, leisteY)));
+				// Abstieg von der Heiratslinie (bzw. Oberhaupt-Unterkante) zur Geschwisterleiste.
+				_linien.Add((new Vector2(abstiegX, abstiegStartY), new Vector2(abstiegX, leisteY)));
 
 				float ersteMitte = startX + KindCardW / 2f;
 				float letzteMitte = startX + (g.Kinder.Count - 1) * (KindCardW + ChildHGap) + KindCardW / 2f;
@@ -122,10 +136,6 @@ public partial class AhnentafelBaum : Control
 			{
 				y = paarUntenY;
 			}
-
-			// Erbt der Ehepartner, geht die Dynastielinie von ihm aus.
-			if (g.EhepartnerErbte && g.Ehepartner != null)
-				ausgang = new Vector2(paarLinks + CardW + CoupleGap + CardW / 2f, y);
 
 			vorigerAusgang = ausgang;
 
