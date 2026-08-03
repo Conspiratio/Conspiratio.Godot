@@ -206,12 +206,12 @@ public partial class Schreibstube : Control
 			SetProcessInput(true);
 	}
 
-	private async void _on_area_nicht_implementiert_pressed()
+	private async void _on_area_kontrahenten_pressed()
 	{
 		SetProcessInput(false);
 
-		// TODO: Kontrahenten migrieren
-		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
+		// Reine Übersicht der Kontrahenten (Klick auf einen Namen öffnet dessen Detailfenster inkl. Beweislast).
+		await _main.KontrahentenDialog.ShowDialog(KontrahentenDialog.ModusUebersicht);
 
 		if (Visible)
 			SetProcessInput(true);

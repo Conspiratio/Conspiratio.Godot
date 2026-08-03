@@ -15,6 +15,9 @@ namespace Conspiratio.Godot.assets.scripts;
 /// </summary>
 public partial class KontrahentenDialog : DialogBase
 {
+	/// <summary>Reine Übersicht aus der Schreibstube: ein Klick öffnet die Kontrahenten-Details (wie WinForms-Modus 14).</summary>
+	public const int ModusUebersicht = 14;
+
 	private const int EintraegeProSeite = 10;
 
 	[Export]
@@ -32,12 +35,14 @@ public partial class KontrahentenDialog : DialogBase
 	private int _modus;
 	private int _seite;
 	private int _maxSeite;
+	private Main _main;
 
 	protected override void OnReady()
 	{
 		_vBoxEintraege = GetNode<VBoxContainer>(VBoxEintraegePath);
 		_labelSeite = GetNode<Label>(LabelSeitePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
+		_main = GetParentOrNull<Main>();
 	}
 
 	/// <summary>Öffnet die Kontrahenten-Liste für den angegebenen Weltkarte-Modus.</summary>
@@ -101,7 +106,11 @@ public partial class KontrahentenDialog : DialogBase
 	{
 		SetProcessInput(false);
 
-		await _manager.PersonWasMachen(id, _modus);
+		// Reine Übersicht (Schreibstube): Klick öffnet die Kontrahenten-Details statt einer Zielaktion.
+		if (_modus == ModusUebersicht)
+			await _main.KontrahentDetailsDialog.ShowDialog(id);
+		else
+			await _manager.PersonWasMachen(id, _modus);
 
 		// Wie im Original bleibt die Liste offen; erneute Aktionen fangen die Lib-Sperren ab.
 		if (Visible)

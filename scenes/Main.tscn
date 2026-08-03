@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=59 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -58,6 +58,7 @@
 [ext_resource type="PackedScene" uid="uid://rundennachrichten1" path="res://scenes/dialogs/RundenNachrichtenDialog.tscn" id="52_rndn"]
 [ext_resource type="PackedScene" uid="uid://ingamemenu0001" path="res://scenes/dialogs/IngameMenuDialog.tscn" id="51_igm"]
 [ext_resource type="PackedScene" uid="uid://cprofildlg01" path="res://scenes/dialogs/ProfilDialog.tscn" id="57_prof"]
+[ext_resource type="PackedScene" uid="uid://ckontrdetdlg01" path="res://scenes/dialogs/KontrahentDetailsDialog.tscn" id="58_kd"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -251,6 +252,9 @@ visible = false
 visible = false
 
 [node name="ProfilDialog" parent="." instance=ExtResource("57_prof")]
+visible = false
+
+[node name="KontrahentDetailsDialog" parent="." instance=ExtResource("58_kd")]
 visible = false
 
 [node name="RundenNachrichtenDialog" parent="." instance=ExtResource("52_rndn")]
