@@ -108,6 +108,10 @@ public partial class SaveGameDialog : Control
 			return;
 		}
 
+		// Vor dem Speichern die spielübergreifenden Profile werten (Delta-Fold), damit der aktualisierte
+		// Wertungs-Snapshot mit im Spielstand landet.
+		new ProfilManager(ClientSettings.SavegamePath).WerteLaufendesSpiel();
+
 		if (_speicherManager.Speichern(name, out string fehler))
 		{
 			ClientSettings.LetzterSpielstand = name;

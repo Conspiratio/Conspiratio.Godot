@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Personen;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -65,13 +66,32 @@ public partial class StatistikDialog : DialogBase
 		return ShowAndAwait();
 	}
 
-	private void BaueBannerButtons(IReadOnlyList<int> ids)
+	/// <summary>
+	/// Öffnet die Ansicht für ein spielübergreifendes Profil (ohne Banner-Umschalter, da nur ein Profil).
+	/// Nutzt dasselbe Zwei-Spalten-Pergament wie die Spielstatistik.
+	/// </summary>
+	public Task ShowProfil(Profil profil)
+	{
+		LeereBanner();
+
+		_labelName.Text = profil.Name;
+		FuelleSpalten(new ProfilStatistikManager().GetStatistik(profil));
+
+		return ShowAndAwait();
+	}
+
+	private void LeereBanner()
 	{
 		foreach (Node child in _hboxBanner.GetChildren())
 		{
 			_hboxBanner.RemoveChild(child);
 			child.QueueFree();
 		}
+	}
+
+	private void BaueBannerButtons(IReadOnlyList<int> ids)
+	{
+		LeereBanner();
 
 		// Nur bei mehreren Spielern sind die Umschalt-Banner nötig.
 		if (ids.Count < 2)
@@ -103,9 +123,11 @@ public partial class StatistikDialog : DialogBase
 	private void ZeigeSpieler(int spielerId)
 	{
 		_labelName.Text = _manager.GetName(spielerId);
+		FuelleSpalten(_manager.GetStatistik(spielerId));
+	}
 
-		var seite = _manager.GetStatistik(spielerId);
-
+	private void FuelleSpalten(StatistikSeite seite)
+	{
 		_linksBeschriftung.Text = string.Join("\n", seite.Links.Select(eintrag => eintrag.Beschriftung));
 		_linksWert.Text = string.Join("\n", seite.Links.Select(eintrag => eintrag.Wert));
 		_rechtsBeschriftung.Text = string.Join("\n", seite.Rechts.Select(eintrag => eintrag.Beschriftung));

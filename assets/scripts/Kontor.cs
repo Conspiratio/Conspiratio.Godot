@@ -137,6 +137,8 @@ public partial class Kontor : Control
 	{
 		if (await SW.UI.YesNoQuestion.ShowDialogText("Wollt Ihr Euer Spiel vorher speichern?") == DialogResultGame.Yes)
 		{
+			WerteProfileFuerSpeichern();
+
 			if (_speicherManager.Speichern(SW.Dynamisch.SpielName, out string fehler))
 			{
 				ClientSettings.LetzterSpielstand = SW.Dynamisch.SpielName;
@@ -157,6 +159,16 @@ public partial class Kontor : Control
 	{
 		if (ClientSettings.StatistikAnzeigen)
 			await _main.StatistikDialog.ShowDialog();
+	}
+
+	/// <summary>
+	/// Faltet vor jedem Speichern den Statistik-Zuwachs der menschlichen Spieler als Delta in ihre
+	/// spielübergreifenden Profile. Muss vor dem Schreiben des Spielstands laufen, damit der aktualisierte
+	/// Wertungs-Snapshot mitgespeichert wird (siehe ProfilManager.WerteLaufendesSpiel).
+	/// </summary>
+	private static void WerteProfileFuerSpeichern()
+	{
+		new ProfilManager(ClientSettings.SavegamePath).WerteLaufendesSpiel();
 	}
 
 	/// <summary>
@@ -254,6 +266,8 @@ public partial class Kontor : Control
 			await _main.TippsDialog.ShowDialog();
 
 		// Automatisch speichern (wie im Original zu Beginn jedes Zugs)
+		WerteProfileFuerSpeichern();
+
 		if (_speicherManager.Autosave(out string autosaveFehler))
 			ClientSettings.LetzterSpielstand = _speicherManager.GetAutosaveName();
 		else

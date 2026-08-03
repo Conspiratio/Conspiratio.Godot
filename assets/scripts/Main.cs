@@ -59,6 +59,7 @@ public partial class Main : Control
 	public JahresbuchDialog JahresbuchDialog;
 	public IngameMenuDialog IngameMenuDialog;
 	public CheatDialog CheatDialog;
+	public ProfilDialog ProfilDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()

@@ -61,6 +61,11 @@ layout_mode = 2
 size_flags_vertical = 3
 text = "Lokales Spiel"
 
+[node name="ButtonProfile" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Profile"
+
 [node name="ButtonHelp" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -83,6 +88,7 @@ text = "Beenden"
 
 [connection signal="pressed" from="LinkButtonVersion" to="." method="_on_link_button_version_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonLocalGame" to="." method="_on_button_local_game_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonProfile" to="." method="_on_button_profile_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonOptions" to="." method="_on_button_options_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonCredits" to="." method="_on_button_credits_pressed"]

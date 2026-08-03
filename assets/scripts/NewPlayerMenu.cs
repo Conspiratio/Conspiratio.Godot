@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using Conspiratio.Godot.assets.scripts.controls;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -16,14 +18,22 @@ public partial class NewPlayerMenu : Control
 	private GridContainer _gridContainerBanner;
 	private ButtonWithSounds _buttonCity;
 	private OptionButton _optionButtonResource;
+	private OptionButton _optionButtonProfile;
 	private Label _labelCityCost;
 	private Label _labelResourceCost;
 
 	private PlayerSetupManager _playerSetupManager;
+	private ProfilManager _profilManager;
 	private Main _main;
 	private int _zufallsStadtId;
 	private int _gewaehlteStadtId;
 	private bool _stadtGewaehlt;
+
+	// Bereits in diesem Spiel vergebene Profile (v2: ein Profil pro Spieler-Slot – keine Dubletten).
+	private readonly List<string> _vergebeneProfilIds = new();
+
+	// Zuordnung ItemIndex -> ProfilId im Profil-Dropdown (Index 0 = „Ohne Profil" -> null).
+	private readonly List<string> _profilIdsImDropdown = new();
 
 	[Export]
 	public NodePath LabelTitlePath { get; set; }
@@ -53,6 +63,9 @@ public partial class NewPlayerMenu : Control
 	public NodePath OptionButtonResourcePath { get; set; }
 
 	[Export]
+	public NodePath OptionButtonProfilePath { get; set; }
+
+	[Export]
 	public NodePath LabelCityCostPath { get; set; }
 
 	[Export]
@@ -70,6 +83,7 @@ public partial class NewPlayerMenu : Control
 		_gridContainerBanner = GetNode<GridContainer>(GridContainerBannerPath);
 		_buttonCity = GetNode<ButtonWithSounds>(ButtonCityPath);
 		_optionButtonResource = GetNode<OptionButton>(OptionButtonResourcePath);
+		_optionButtonProfile = GetNode<OptionButton>(OptionButtonProfilePath);
 		_labelCityCost = GetNode<Label>(LabelCityCostPath);
 		_labelResourceCost = GetNode<Label>(LabelResourceCostPath);
 
@@ -130,6 +144,9 @@ public partial class NewPlayerMenu : Control
 		_playerSetupManager = new PlayerSetupManager();
 		_playerSetupManager.Starte();
 
+		_profilManager = new ProfilManager(ClientSettings.SavegamePath);
+		_vergebeneProfilIds.Clear();
+
 		_checkBoxReligion1.Text = SW.Statisch.GetReligionsNamenX(SW.Statisch.GetRelKathID());
 		_checkBoxReligion2.Text = SW.Statisch.GetReligionsNamenX(SW.Statisch.GetRelEvanID());
 		_labelCityCost.Text = "Zufällig vorausgewählt und kostenlos, eine andere Stadt kostet " + SW.Statisch.GetNSPStadtwahlKosten() + " Taler";
@@ -167,6 +184,37 @@ public partial class NewPlayerMenu : Control
 		_optionButtonResource.Select(0);
 	}
 
+	/// <summary>
+	/// Füllt das Profil-Dropdown mit „Ohne Profil" plus allen in diesem Spiel noch nicht vergebenen Profilen.
+	/// Der erste Spieler wird auf das aktive Profil vorgewählt, damit der übliche Fall ein Klick weniger ist.
+	/// </summary>
+	private void UpdateProfileOptions()
+	{
+		_optionButtonProfile.Clear();
+		_profilIdsImDropdown.Clear();
+
+		_optionButtonProfile.AddItem("Ohne Profil");
+		_profilIdsImDropdown.Add(null);
+
+		int vorauswahl = 0;
+		var aktiv = _profilManager.GetAktivesProfil();
+
+		foreach (var profil in _profilManager.GetProfile())
+		{
+			if (_vergebeneProfilIds.Contains(profil.Id))
+				continue;
+
+			_optionButtonProfile.AddItem(profil.Name);
+			_profilIdsImDropdown.Add(profil.Id);
+
+			// Nur beim ersten Spieler das aktive Profil vorwählen.
+			if (_playerSetupManager.AnzahlAngelegteSpieler == 0 && aktiv != null && profil.Id == aktiv.Id)
+				vorauswahl = _profilIdsImDropdown.Count - 1;
+		}
+
+		_optionButtonProfile.Select(vorauswahl);
+	}
+
 	private void PrepareNextPlayer()
 	{
 		_labelTitle.Text = "Spieler " + (_playerSetupManager.AnzahlAngelegteSpieler + 1) + " von " +
@@ -184,6 +232,7 @@ public partial class NewPlayerMenu : Control
 		_stadtGewaehlt = false;
 		UpdateCityButton();
 		UpdateResourceOptions();
+		UpdateProfileOptions();
 
 		// Banner-Auswahl zurücksetzen und bereits vergebene Banner ausblenden
 		for (int i = 0; i < _gridContainerBanner.GetChildCount(); i++)
@@ -251,8 +300,14 @@ public partial class NewPlayerMenu : Control
 
 		int religionId = _checkBoxReligion1.ButtonPressed ? SW.Statisch.GetRelKathID() : SW.Statisch.GetRelEvanID();
 
+		string profilId = _profilIdsImDropdown[_optionButtonProfile.GetSelected()];
+
 		var ergebnis = _playerSetupManager.ErstelleSpieler(_lineEditPlayerName.Text, _checkBoxMale.ButtonPressed,
-			banner, religionId, _gewaehlteStadtId, _stadtGewaehlt, _optionButtonResource.GetSelectedId());
+			banner, religionId, _gewaehlteStadtId, _stadtGewaehlt, _optionButtonResource.GetSelectedId(), profilId);
+
+		// Vergebenes Profil für die restlichen Spieler-Slots sperren (keine Dubletten).
+		if (!string.IsNullOrEmpty(profilId))
+			_vergebeneProfilIds.Add(profilId);
 
 		await SW.UI.ShowText.ShowDialog(_lineEditPlayerName.Text + " wurde erstellt.\nHeimatstadt: " +
 		                                SW.Dynamisch.GetStadtwithID(ergebnis.StadtId).GetGebietsName() + "\nRohstoff: " +

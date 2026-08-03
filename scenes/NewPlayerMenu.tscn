@@ -36,6 +36,7 @@ CheckBoxReligion2Path = NodePath("CheckBoxReligion2")
 GridContainerBannerPath = NodePath("GridContainerBanner")
 ButtonCityPath = NodePath("ButtonCity")
 OptionButtonResourcePath = NodePath("OptionButtonResource")
+OptionButtonProfilePath = NodePath("OptionButtonProfile")
 LabelCityCostPath = NodePath("LabelCityCost")
 LabelResourceCostPath = NodePath("LabelResourceCost")
 
@@ -260,6 +261,33 @@ anchor_right = 0.937
 anchor_bottom = 0.434
 autowrap_mode = 3
 text = "Freie Wahl kostet Taler, zufällig ist kostenlos"
+
+[node name="LabelProfile" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.5
+anchor_right = 0.68
+anchor_bottom = 0.534
+text = "Profil:"
+
+[node name="OptionButtonProfile" type="OptionButton" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.702
+anchor_top = 0.494
+anchor_right = 0.937
+anchor_bottom = 0.545
+
+[node name="LabelProfileHint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.551
+anchor_top = 0.55
+anchor_right = 0.937
+anchor_bottom = 0.6
+autowrap_mode = 3
+text = "Spielübergreifende Statistik – jeder Mitspieler wählt sein eigenes Profil"
 
 [node name="ButtonCreatePlayer" parent="." instance=ExtResource("3_npbtn")]
 layout_mode = 1

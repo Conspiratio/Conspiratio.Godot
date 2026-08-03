@@ -45,6 +45,11 @@ public partial class Mainmenu : Control
 		Process.Start( new ProcessStartInfo { FileName = "https://github.com/Conspiratio/Conspiratio.Wiki/wiki", UseShellExecute = true } );
 	}
 	
+	private void _on_button_profile_pressed()
+	{
+		_main.ProfilDialog.ShowDialog();
+	}
+
 	private void _on_button_options_pressed()
 	{
 		_main.OptionenDialog.ShowDialog();
