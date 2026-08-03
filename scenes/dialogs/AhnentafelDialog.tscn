@@ -17,6 +17,7 @@ size_flags_vertical = 3
 theme = ExtResource("3_ahn")
 script = ExtResource("1_ahn")
 BaumPath = NodePath("Rahmen/ScrollContainer/AhnentafelBaum")
+LegendePath = NodePath("Rahmen/Legende")
 
 [node name="Rahmen" type="NinePatchRect" parent="."]
 layout_mode = 1
@@ -58,3 +59,11 @@ offset_bottom = 800.0
 [node name="AhnentafelBaum" type="Control" parent="Rahmen/ScrollContainer"]
 layout_mode = 2
 script = ExtResource("4_ahn")
+
+[node name="Legende" type="VBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 92.0
+offset_right = 320.0
+offset_bottom = 190.0
+theme_override_constants/separation = 8

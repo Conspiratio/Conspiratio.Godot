@@ -30,10 +30,12 @@ public partial class AhnentafelBaum : Control
 	private const float RandOben = 20f;
 
 	private static readonly Color LinienFarbe = new(0.16f, 0.11f, 0.05f);
-	private static readonly Color KarteFuellung = new(0.90f, 0.82f, 0.62f);
-	private static readonly Color KarteRand = new(0.30f, 0.20f, 0.09f);
-	private static readonly Color ErbeRand = new(0.72f, 0.53f, 0.10f);
-	private static readonly Color LebendRand = new(0.20f, 0.42f, 0.16f);
+
+	// Öffentlich, damit die Legende (AhnentafelDialog) dieselben Farben verwendet.
+	public static readonly Color KarteFuellung = new(0.90f, 0.82f, 0.62f);
+	public static readonly Color KarteRand = new(0.30f, 0.20f, 0.09f);
+	public static readonly Color ErbeRand = new(0.72f, 0.53f, 0.10f);
+	public static readonly Color LebendRand = new(0.20f, 0.42f, 0.16f);
 
 	private readonly List<(Vector2 Von, Vector2 Bis)> _linien = new();
 
