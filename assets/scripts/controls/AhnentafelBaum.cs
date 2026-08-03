@@ -14,9 +14,12 @@ namespace Conspiratio.Godot.assets.scripts.controls;
 public partial class AhnentafelBaum : Control
 {
 	private const float CardW = 168f;
-	private const float CardH = 54f;
+	private const float CardH = 62f;
 	private const float KindCardW = 148f;
-	private const float KindCardH = 50f;
+	private const float KindCardH = 58f;
+
+	/// <summary>Oberer Textabstand in der Karte; der zusätzliche Höhenzuwachs geht als Luft nach unten.</summary>
+	private const float TextRandOben = 7f;
 	private const float CoupleGap = 54f;
 	private const float ChildTopGap = 46f;
 	private const float ChildHGap = 22f;
@@ -161,9 +164,9 @@ public partial class AhnentafelBaum : Control
 		{
 			Text = person.Name + "\n" + jahre,
 			HorizontalAlignment = HorizontalAlignment.Center,
-			VerticalAlignment = VerticalAlignment.Center,
-			Position = Vector2.Zero,
-			Size = new Vector2(breite, hoehe)
+			VerticalAlignment = VerticalAlignment.Top,
+			Position = new Vector2(0, TextRandOben),
+			Size = new Vector2(breite, hoehe - TextRandOben)
 		};
 		label.AddThemeColorOverride("font_color", new Color(0.16f, 0.11f, 0.05f));
 		label.AddThemeFontSizeOverride("font_size", 15);
