@@ -14,7 +14,7 @@ namespace Conspiratio.Godot.assets.scripts.controls;
 public partial class AhnentafelBaum : Control
 {
 	private const float CardW = 168f;
-	private const float CardH = 76f;      // Oberhaupt/Ehepartner: Name + Titel + Jahre (3 Zeilen)
+	private const float CardH = 84f;      // Oberhaupt/Ehepartner: Titel + Name + Jahre (3 Zeilen)
 	private const float KindCardW = 148f;
 	private const float KindCardH = 56f;  // Kinder: Name + Jahre (2 Zeilen, kein Titel)
 
@@ -165,10 +165,8 @@ public partial class AhnentafelBaum : Control
 		AddChild(panel);
 
 		string jahre = "* " + person.Geburtsjahr + (person.Todesjahr > 0 ? "   † " + person.Todesjahr : "");
-		string text = person.Name;
-		if (!string.IsNullOrEmpty(person.Titel))
-			text += "\n" + person.Titel;
-		text += "\n" + jahre;
+		string kopf = string.IsNullOrEmpty(person.Titel) ? person.Name : person.Titel + "\n" + person.Name;
+		string text = kopf + "\n" + jahre;
 
 		var label = new Label
 		{
