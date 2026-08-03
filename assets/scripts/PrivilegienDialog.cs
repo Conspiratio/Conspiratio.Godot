@@ -23,12 +23,14 @@ public partial class PrivilegienDialog : DialogBase
 	private PackedScene _linkButtonScene;
 
 	private PrivilegienManager _privilegienManager;
+	private Main _main;
 
 	protected override void OnReady()
 	{
 		_vBoxPrivilegien = GetNode<VBoxContainer>(VBoxPrivilegienPath);
 		_labelKeine = GetNode<Label>(LabelKeinePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
+		_main = GetParentOrNull<Main>();
 	}
 
 	public async Task ShowDialog(PrivilegienManager privilegienManager)
@@ -65,8 +67,20 @@ public partial class PrivilegienDialog : DialogBase
 		}
 	}
 
-	private void OnPrivilegPressed(int privilegId)
+	private async void OnPrivilegPressed(int privilegId)
 	{
+		// Die immer verfügbare Ahnentafel ist kein echtes Lib-Privileg, sondern öffnet den Stammbaum-Dialog.
+		if (privilegId == PrivilegienManager.AhnentafelPrivilegId)
+		{
+			SetProcessInput(false);
+			await _main.AhnentafelDialog.ShowDialog();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
 		// Führt das Privileg aus (Infotext oder öffnet den zugehörigen Dialog). Anschließend die Liste
 		// neu aufbauen, da sich die Privilegien ändern können (z. B. Amt niederlegen).
 		_privilegienManager.FuehreAus(privilegId);
