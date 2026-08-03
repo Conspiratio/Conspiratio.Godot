@@ -14,9 +14,15 @@ namespace Conspiratio.Godot.assets.scripts.controls;
 public partial class AhnentafelBaum : Control
 {
 	private const float CardW = 168f;
-	private const float CardH = 58f;
+	private const float CardH = 76f;      // Oberhaupt/Ehepartner: Name + Titel + Jahre (3 Zeilen)
 	private const float KindCardW = 148f;
-	private const float KindCardH = 54f;
+	private const float KindCardH = 56f;  // Kinder: Name + Jahre (2 Zeilen, kein Titel)
+
+	/// <summary>
+	/// Kleiner Aufwärts-Versatz des Textes: Godot zentriert an der Zeilenbox, deren Oberkante durch die
+	/// große Oberlänge der Schrift optisch tiefer wirkt – dadurch scheint sonst oben mehr Luft als unten.
+	/// </summary>
+	private const float TextVersatzHoch = 4f;
 	private const float CoupleGap = 54f;
 	private const float ChildTopGap = 46f;
 	private const float ChildHGap = 22f;
@@ -122,10 +128,12 @@ public partial class AhnentafelBaum : Control
 				ausgang = new Vector2(paarLinks + CardW + CoupleGap + CardW / 2f, y);
 
 			vorigerAusgang = ausgang;
-			y += GenVGap;
+
+			if (i < generationen.Count - 1)
+				y += GenVGap;
 		}
 
-		CustomMinimumSize = new Vector2(canvasBreite, y);
+		CustomMinimumSize = new Vector2(canvasBreite, y + RandOben);
 		QueueRedraw();
 	}
 
@@ -157,12 +165,17 @@ public partial class AhnentafelBaum : Control
 		AddChild(panel);
 
 		string jahre = "* " + person.Geburtsjahr + (person.Todesjahr > 0 ? "   † " + person.Todesjahr : "");
+		string text = person.Name;
+		if (!string.IsNullOrEmpty(person.Titel))
+			text += "\n" + person.Titel;
+		text += "\n" + jahre;
+
 		var label = new Label
 		{
-			Text = person.Name + "\n" + jahre,
+			Text = text,
 			HorizontalAlignment = HorizontalAlignment.Center,
 			VerticalAlignment = VerticalAlignment.Center,
-			Position = Vector2.Zero,
+			Position = new Vector2(0, -TextVersatzHoch),
 			Size = new Vector2(breite, hoehe)
 		};
 		label.AddThemeColorOverride("font_color", new Color(0.16f, 0.11f, 0.05f));
