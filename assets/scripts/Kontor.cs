@@ -781,9 +781,19 @@ public partial class Kontor : Control
 			UpdateHud();
 		}
 
-		// Kindestode
-		foreach (string meldung in familie.PruefeKindestode())
-			await _main.RundenNachrichtenDialog.ShowDialog(meldung);
+		// Kindestode – wie im Original als eigener Vollbildschirm (HintKindStirbt) mit Todesmusik.
+		var kindestode = familie.PruefeKindestode();
+
+		if (kindestode.Count > 0)
+		{
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Tod);
+
+			foreach (string meldung in kindestode)
+				await _main.KindestodDialog.ShowDialog(meldung);
+
+			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
+			UpdateHud();
+		}
 
 		// Jährliche Brautwerbung um den umworbenen Partner
 		if (familie.StehtBrautwerbungAn())
