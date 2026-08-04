@@ -1,4 +1,4 @@
-[gd_scene load_steps=62 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=63 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -62,6 +62,7 @@
 [ext_resource type="PackedScene" uid="uid://cahnentafeldlg1" path="res://scenes/dialogs/AhnentafelDialog.tscn" id="59_ahn"]
 [ext_resource type="PackedScene" uid="uid://cspielertoddlg1" path="res://scenes/dialogs/SpielerTodDialog.tscn" id="60_tod"]
 [ext_resource type="PackedScene" uid="uid://ckindestoddlg1" path="res://scenes/dialogs/KindestodDialog.tscn" id="61_ktod"]
+[ext_resource type="PackedScene" uid="uid://diagnosedlg01" path="res://scenes/dialogs/DiagnoseDialog.tscn" id="62_diag"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -301,5 +302,9 @@ visible = false
 layout_mode = 1
 
 [node name="LocalGameDialog" parent="." instance=ExtResource("4_mf33r")]
+visible = false
+layout_mode = 1
+
+[node name="DiagnoseDialog" parent="." instance=ExtResource("62_diag")]
 visible = false
 layout_mode = 1

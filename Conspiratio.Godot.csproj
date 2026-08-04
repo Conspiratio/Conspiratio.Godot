@@ -3,12 +3,16 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12</LangVersion>
     <EnableDynamicLoading>true</EnableDynamicLoading>
+    <!-- Debug-Symbole (PDB) in die Assembly einbetten – auch im Release-Export. So enthalten
+         Stacktraces bei den Endnutzern Datei- und Zeilennummern für aussagekräftige Fehlerberichte. -->
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Conspiratio.Lib" Version="3.80.0" />
+    <PackageReference Include="Conspiratio.Lib" Version="3.81.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
   </ItemGroup>
 </Project>

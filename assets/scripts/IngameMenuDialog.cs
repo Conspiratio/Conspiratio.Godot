@@ -38,6 +38,9 @@ public partial class IngameMenuDialog : Control
 	public NodePath ButtonSpielerRausPath { get; set; }
 
 	[Export]
+	public NodePath ButtonFeedbackPath { get; set; }
+
+	[Export]
 	public NodePath ButtonHauptmenuePath { get; set; }
 
 	private Main _main;
@@ -50,6 +53,7 @@ public partial class IngameMenuDialog : Control
 		GetNode<ButtonWithSounds>(ButtonLadenPath).Pressed += OnLaden;
 		GetNode<ButtonWithSounds>(ButtonOptionenPath).Pressed += OnOptionen;
 		GetNode<ButtonWithSounds>(ButtonSpielerRausPath).Pressed += OnSpielerRaus;
+		GetNode<ButtonWithSounds>(ButtonFeedbackPath).Pressed += OnFeedback;
 		GetNode<ButtonWithSounds>(ButtonHauptmenuePath).Pressed += () => Beenden(Ergebnis.ZumHauptmenue);
 
 		_main = GetParent<Main>();
@@ -96,6 +100,17 @@ public partial class IngameMenuDialog : Control
 		// Das Menü ausblenden, damit die Optionen im Vordergrund erscheinen; danach wieder anzeigen.
 		Hide();
 		await _main.OptionenDialog.ShowDialog();
+		Show();
+		CallDeferred(MethodName.AktiviereEingabe);
+	}
+
+	private async void OnFeedback()
+	{
+		SetProcessInput(false);
+
+		// Das Menü ausblenden, den Melde-Dialog im Vordergrund zeigen, danach wieder ins Menü.
+		Hide();
+		await _main.DiagnoseDialog.ShowDialog();
 		Show();
 		CallDeferred(MethodName.AktiviereEingabe);
 	}

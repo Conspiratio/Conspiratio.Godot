@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ddiagnosemgr01"]
+
+[ext_resource type="Script" path="res://assets/scripts/managers/DiagnoseManager.cs" id="1_diag"]
+
+[node name="DiagnoseManager" type="Node"]
+script = ExtResource("1_diag")

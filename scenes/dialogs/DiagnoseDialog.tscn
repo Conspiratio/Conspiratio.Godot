@@ -1,0 +1,139 @@
+[gd_scene load_steps=7 format=3 uid="uid://diagnosedlg01"]
+
+[ext_resource type="Script" path="res://assets/scripts/DiagnoseDialog.cs" id="1_diag"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_diag"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_diag"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_diag"]
+[ext_resource type="PackedScene" uid="uid://du838v21rp67t" path="res://scenes/controls/CheckBoxWithSounds.tscn" id="5_diag"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_diag"]
+bg_color = Color(0.93, 0.87, 0.72, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.16, 0.11, 0.05, 1)
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+
+[node name="DiagnoseDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_diag")
+script = ExtResource("1_diag")
+LabelTitelPath = NodePath("Rahmen/LabelTitel")
+TextEditBeschreibungPath = NodePath("Rahmen/TextEditBeschreibung")
+CheckBoxSpielstandPath = NodePath("Rahmen/CheckBoxSpielstand")
+ButtonBerichtPath = NodePath("Rahmen/ButtonBericht")
+ButtonLogsPath = NodePath("Rahmen/ButtonLogs")
+ButtonSpielstandOrdnerPath = NodePath("Rahmen/ButtonSpielstandOrdner")
+LabelStatusPath = NodePath("Rahmen/LabelStatus")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -450.0
+offset_top = -310.0
+offset_right = 450.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_diag")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 28.0
+offset_right = 860.0
+offset_bottom = 78.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 34
+text = "Feedback & Fehler melden"
+horizontal_alignment = 1
+
+[node name="LabelHinweis" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 88.0
+offset_right = 840.0
+offset_bottom = 150.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 18
+text = "Beschreibt kurz das Problem oder Euer Feedback. Log-Dateien, der aktuelle Spielstand und Systeminfos werden automatisch beigelegt."
+autowrap_mode = 3
+
+[node name="TextEditBeschreibung" type="TextEdit" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 158.0
+offset_right = 840.0
+offset_bottom = 350.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_colors/caret_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_diag")
+theme_override_styles/focus = SubResource("StyleBoxFlat_diag")
+wrap_mode = 1
+placeholder_text = "Was ist passiert? / Euer Feedback ..."
+
+[node name="CheckBoxSpielstand" parent="Rahmen" instance=ExtResource("5_diag")]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 360.0
+offset_right = 840.0
+offset_bottom = 398.0
+button_pressed = true
+text = "Aktuellen Spielstand anhängen (empfohlen)"
+
+[node name="ButtonBericht" parent="Rahmen" instance=ExtResource("4_diag")]
+custom_minimum_size = Vector2(780, 52)
+layout_mode = 0
+offset_left = 60.0
+offset_top = 406.0
+offset_right = 840.0
+offset_bottom = 458.0
+text = "Bericht erstellen & E-Mail vorbereiten"
+
+[node name="ButtonLogs" parent="Rahmen" instance=ExtResource("4_diag")]
+custom_minimum_size = Vector2(380, 48)
+layout_mode = 0
+offset_left = 60.0
+offset_top = 468.0
+offset_right = 445.0
+offset_bottom = 516.0
+text = "Log-Ordner öffnen"
+
+[node name="ButtonSpielstandOrdner" parent="Rahmen" instance=ExtResource("4_diag")]
+custom_minimum_size = Vector2(380, 48)
+layout_mode = 0
+offset_left = 455.0
+offset_top = 468.0
+offset_right = 840.0
+offset_bottom = 516.0
+text = "Spielstand- & Profil-Ordner öffnen"
+
+[node name="LabelStatus" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 524.0
+offset_right = 840.0
+offset_bottom = 596.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 3

@@ -81,6 +81,11 @@ layout_mode = 2
 size_flags_vertical = 3
 text = "Credits"
 
+[node name="ButtonFeedback" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Feedback & Fehler melden"
+
 [node name="ButtonExit" parent="VBoxContainer" instance=ExtResource("5_8gra0")]
 layout_mode = 2
 size_flags_vertical = 3
@@ -92,4 +97,5 @@ text = "Beenden"
 [connection signal="pressed" from="VBoxContainer/ButtonHelp" to="." method="_on_button_help_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonOptions" to="." method="_on_button_options_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonCredits" to="." method="_on_button_credits_pressed"]
+[connection signal="pressed" from="VBoxContainer/ButtonFeedback" to="." method="_on_button_feedback_pressed"]
 [connection signal="pressed" from="VBoxContainer/ButtonExit" to="." method="_on_button_exit_pressed"]

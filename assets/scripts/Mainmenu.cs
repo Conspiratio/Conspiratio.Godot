@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Conspiratio.Godot.assets.scripts.controls;
+using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -21,6 +22,25 @@ public partial class Mainmenu : Control
 		linkButtonVersion.Text = "Klicken für Changelog - Version " + ProjectSettings.GetSetting("application/config/version");
 
 		_main = GetParent<Main>();
+
+		BieteCrashMeldungAn();
+	}
+
+	/// <summary>
+	/// Wurde beim letzten Lauf ein Absturz erfasst, bietet das Hauptmenü einmalig an, ihn zu melden.
+	/// Bei Zustimmung öffnet sich der Melde-Dialog im Fehlermodus; sonst wird der Absturz quittiert.
+	/// </summary>
+	private async void BieteCrashMeldungAn()
+	{
+		if (DiagnoseManager.Instance == null || !DiagnoseManager.Instance.LiegtCrashVor())
+			return;
+
+		if (await SW.UI.YesNoQuestion.ShowDialogText(
+			    "Beim letzten Start ist ein Fehler aufgetreten. Möchtet Ihr ihn an die Entwickler melden?",
+			    "Ja, melden", "Nein, verwerfen") == DialogResultGame.Yes)
+			_main.DiagnoseDialog.ShowDialog(true);
+		else
+			DiagnoseManager.Instance.CrashQuittieren();
 	}
 
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -58,6 +78,11 @@ public partial class Mainmenu : Control
 	private void _on_button_credits_pressed()
 	{
 		_main.CreditsDialog.ShowDialog();
+	}
+
+	private void _on_button_feedback_pressed()
+	{
+		_main.DiagnoseDialog.ShowDialog();
 	}
 
 	private async void _on_link_button_version_pressed()
