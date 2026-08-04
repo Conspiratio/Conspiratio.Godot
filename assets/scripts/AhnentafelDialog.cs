@@ -37,19 +37,20 @@ public partial class AhnentafelDialog : DialogBase
 
 	private void BaueLegende()
 	{
+		FuegeLegendenzeileHinzu(AhnentafelBaum.LebendRand, "Euer aktueller Charakter", AhnentafelBaum.SpielerFuellung);
 		FuegeLegendenzeileHinzu(AhnentafelBaum.LebendRand, "Lebende Generation");
 		FuegeLegendenzeileHinzu(AhnentafelBaum.ErbeRand, "Erbe der Dynastie");
 		FuegeLegendenzeileHinzu(AhnentafelBaum.KarteRand, "Verstorbene Angehörige");
 	}
 
-	private void FuegeLegendenzeileHinzu(Color randfarbe, string beschriftung)
+	private void FuegeLegendenzeileHinzu(Color randfarbe, string beschriftung, Color? fuellung = null)
 	{
 		var zeile = new HBoxContainer();
 		zeile.AddThemeConstantOverride("separation", 10);
 
 		var rahmen = new StyleBoxFlat
 		{
-			BgColor = AhnentafelBaum.KarteFuellung,
+			BgColor = fuellung ?? AhnentafelBaum.KarteFuellung,
 			BorderColor = randfarbe,
 			BorderWidthLeft = 3,
 			BorderWidthRight = 3,

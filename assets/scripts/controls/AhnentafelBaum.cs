@@ -33,6 +33,7 @@ public partial class AhnentafelBaum : Control
 
 	// Öffentlich, damit die Legende (AhnentafelDialog) dieselben Farben verwendet.
 	public static readonly Color KarteFuellung = new(0.90f, 0.82f, 0.62f);
+	public static readonly Color SpielerFuellung = new(0.80f, 0.89f, 0.72f);
 	public static readonly Color KarteRand = new(0.30f, 0.20f, 0.09f);
 	public static readonly Color ErbeRand = new(0.72f, 0.53f, 0.10f);
 	public static readonly Color LebendRand = new(0.20f, 0.42f, 0.16f);
@@ -78,7 +79,8 @@ public partial class AhnentafelBaum : Control
 			if (vorigerAusgang.HasValue)
 				_linien.Add((vorigerAusgang.Value, new Vector2(oberhauptMitteX, y)));
 
-			ErzeugeKarte(g.Oberhaupt, new Vector2(oberhauptLinks, y), CardW, CardH, false, lebend);
+			// Das Oberhaupt der lebenden (letzten) Generation ist der aktuelle Charakter des Spielers.
+			ErzeugeKarte(g.Oberhaupt, new Vector2(oberhauptLinks, y), CardW, CardH, false, lebend, lebend);
 
 			float midY = y + CardH / 2f;
 			float paarUntenY = y + CardH;
@@ -155,18 +157,18 @@ public partial class AhnentafelBaum : Control
 			DrawLine(von, bis, LinienFarbe, 2f, true);
 	}
 
-	private void ErzeugeKarte(AhnPerson person, Vector2 position, float breite, float hoehe, bool istErbe, bool lebend)
+	private void ErzeugeKarte(AhnPerson person, Vector2 position, float breite, float hoehe, bool istErbe, bool lebend, bool aktuellerSpieler = false)
 	{
 		var rahmen = new StyleBoxFlat
 		{
-			BgColor = KarteFuellung,
+			BgColor = aktuellerSpieler ? SpielerFuellung : KarteFuellung,
 			BorderColor = lebend ? LebendRand : istErbe ? ErbeRand : KarteRand,
 			CornerRadiusTopLeft = 5,
 			CornerRadiusTopRight = 5,
 			CornerRadiusBottomLeft = 5,
 			CornerRadiusBottomRight = 5
 		};
-		int rand = lebend || istErbe ? 3 : 2;
+		int rand = aktuellerSpieler ? 4 : lebend || istErbe ? 3 : 2;
 		rahmen.BorderWidthLeft = rand;
 		rahmen.BorderWidthRight = rand;
 		rahmen.BorderWidthTop = rand;
