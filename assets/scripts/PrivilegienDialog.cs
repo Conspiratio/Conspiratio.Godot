@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -74,6 +75,32 @@ public partial class PrivilegienDialog : DialogBase
 		{
 			SetProcessInput(false);
 			await _main.AhnentafelDialog.ShowDialog();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
+		// „Mätresse nehmen" (Issue #8): Rückfrage mit Kosten, dann Wirkung über den MaetresseManager.
+		if (privilegId == PrivilegienManager.MaetressePrivilegId)
+		{
+			SetProcessInput(false);
+
+			var maetresse = new MaetresseManager();
+
+			if (!maetresse.KannMaetresseNehmen(out string grund))
+			{
+				await SW.UI.ShowText.ShowDialog(grund);
+			}
+			else if (await SW.UI.YesNoQuestion.ShowDialogText(maetresse.GetAngebotstext(), "Nehmen", "Ablehnen") == DialogResultGame.Yes)
+			{
+				maetresse.NimmMaetresse();
+				SoundManager.Instance.PlayCoins();
+				await SW.UI.ShowText.ShowDialog("Ihr habt Euch eine Mätresse genommen. Euer Ansehen und Eure Lebensfreude wachsen – möge die Diskretion Euch treu bleiben.");
+			}
+
+			Fill();
 
 			if (Visible)
 				SetProcessInput(true);

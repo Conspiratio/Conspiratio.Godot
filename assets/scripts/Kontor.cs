@@ -244,6 +244,21 @@ public partial class Kontor : Control
 			}
 		}
 
+		// Mätresse: jährlicher Unterhalt und Skandal-Risiko (Issue #8).
+		if (_geradeGeladen == false)
+		{
+			var maetresse = new MaetresseManager();
+
+			if (maetresse.HatMaetresse())
+			{
+				string maetresseMeldung = maetresse.VerarbeiteJahr();
+				UpdateHud();
+
+				if (maetresseMeldung != null)
+					await _main.RundenNachrichtenDialog.ShowDialog(maetresseMeldung);
+			}
+		}
+
 		_geradeGeladen = false;
 
 		// Ankündigung der neu zu besetzenden Ämter zu Zugbeginn (wie im Original), sofern es welche gibt.
