@@ -574,32 +574,44 @@ public partial class Kontor : Control
 		if (zugNachrichten.StirbtAktiverSpieler())
 		{
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Tod);
-			await _main.RundenNachrichtenDialog.ShowDialog(zugNachrichten.GetZufaelligeTodesursache());
 
-			string name = SW.Dynamisch.GetAktHum().GetName();
+			// Daten des Verstorbenen erfassen, bevor der Erbe die Identität übernimmt.
+			var verstorbener = SW.Dynamisch.GetAktHum();
+			string name = verstorbener.GetName();
+			string titel = verstorbener.GetTitelGegendert();
+			int geburtsjahr = SW.Dynamisch.GetAktuellesJahr() - verstorbener.GetAlter();
+			int todesjahr = SW.Dynamisch.GetAktuellesJahr();
+			string todesursache = zugNachrichten.GetZufaelligeTodesursache();
+			string grabspruch = new GrabsteinManager().ErmittleGrabspruch(verstorbener.GetSpielerStatistik());
 
 			// Testament vollstrecken: Ohne Erben scheidet der Spieler aus, mit Erben führt dieser die Dynastie fort
 			var familie = new FamilieManager();
 			var testament = familie.FuehreTestamentAus();
-			await _main.RundenNachrichtenDialog.ShowDialog("Hier das Testament...\n\nEuer Vermächtnis geht an: " + testament.ErbeBezeichnung);
+
+			string erbmeldung;
+			if (testament.SpielVorbei)
+				erbmeldung = "Da niemand als Erbe bestimmt war, endet mit ihm die Dynastie – und dieses Spiel.";
+			else if (testament.ErbeUebernahm)
+				erbmeldung = SW.Dynamisch.GetAktHum().GetName() + " tritt das Erbe an und führt die Dynastie fort.";
+			else
+				erbmeldung = name + " wurde aus dem Spiel entfernt.";
+
+			string titelTeil = string.IsNullOrEmpty(titel) ? "" : ", " + titel;
+			string grabinschrift = "Hier ruht " + name + titelTeil + "\n* " + geburtsjahr + "   † " + todesjahr +
+			                       "\n\n„" + grabspruch + "“\n\n" + erbmeldung;
+
+			await _main.SpielerTodDialog.ShowDialog(todesursache, grabinschrift);
 
 			if (testament.SpielVorbei)
-			{
-				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben.\nDa niemand als Erbe bestimmt war, befinden sich keine weiteren\nMitstreiter in diesem Spiel. Das Spiel wird daher beendet.");
 				return true;
-			}
 
 			if (testament.ErbeUebernahm)
 			{
 				// Der Erbe übernimmt die Identität im selben Slot – der Zug endet und schaltet normal weiter
 				UpdateHud();
-				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben.\n" + SW.Dynamisch.GetAktHum().GetName() +
-				                                " tritt das Erbe an und führt die Dynastie fort.");
 			}
 			else
 			{
-				await _main.RundenNachrichtenDialog.ShowDialog("Der Spieler " + name + " ist verstorben und wurde aus dem Spiel entfernt.");
-
 				// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
 				return false;
 			}
