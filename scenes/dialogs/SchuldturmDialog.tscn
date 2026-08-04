@@ -11,6 +11,9 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_schu")
+LabelTalerPath = NodePath("LabelTaler")
+LabelPlaceDatePath = NodePath("LabelPlaceDate")
+LabelPlayerNameAndOfficePath = NodePath("LabelPlayerNameAndOffice")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -32,4 +35,30 @@ theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 34
 text = "Ihr verbringt dieses Jahr im Schuldturm..."
+horizontal_alignment = 1
+
+[node name="LabelTaler" type="Label" parent="."]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 18.0
+offset_right = 470.0
+offset_bottom = 52.0
+text = "1000 Taler"
+
+[node name="LabelPlaceDate" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1130.0
+offset_top = 18.0
+offset_right = 1560.0
+offset_bottom = 52.0
+text = "Schuldturm A.D. 1600"
+horizontal_alignment = 2
+
+[node name="LabelPlayerNameAndOffice" type="Label" parent="."]
+layout_mode = 0
+offset_left = 350.0
+offset_top = 54.0
+offset_right = 1250.0
+offset_bottom = 92.0
+text = "Spielername"
 horizontal_alignment = 1

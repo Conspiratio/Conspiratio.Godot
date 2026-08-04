@@ -503,6 +503,11 @@ public partial class Kontor : Control
 			return;
 		}
 
+		// Fällige (überfällige) Kredite zwangsweise tilgen – notfalls rutscht das Vermögen dabei ins Minus.
+		// Vor der Abrechnung, damit ein dadurch negatives Vermögen den anschließenden Schuldenprozess auslösen kann.
+		foreach (string kreditMeldung in new SchreibstubeManager().TilgeUeberfaelligeKredite())
+			await _main.RundenNachrichtenDialog.ShowDialog("Fälliger Kredit\n\n" + kreditMeldung);
+
 		// Jahresabrechnung berechnen, verbuchen und anzeigen
 		var abrechnung = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 		UpdateHud();
