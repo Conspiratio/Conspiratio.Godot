@@ -108,6 +108,28 @@ public partial class PrivilegienDialog : DialogBase
 			return;
 		}
 
+		// „Fechtunterricht nehmen" (Issue #17): eigener Kauf-Dialog (wiederholbar).
+		if (privilegId == PrivilegienManager.FechtunterrichtPrivilegId)
+		{
+			SetProcessInput(false);
+			await _main.FechtunterrichtDialog.ShowDialog();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
+		// „Zum Duell fordern" (Issue #17): öffnet die Personen-Karte (Modus 14) zur Auswahl eines
+		// Amtsträgers. Das Privilegienfenster wird geschlossen; die Duell-Abwicklung erledigt die Lib
+		// (KontrahentenManager Modus 14).
+		if (privilegId == PrivilegienManager.DuellPrivilegId)
+		{
+			Close(DialogResultGame.OK);
+			SW.UI.PolitischeWeltkarteDialog.ShowDialogModus(14);
+			return;
+		}
+
 		// Führt das Privileg aus (Infotext oder öffnet den zugehörigen Dialog). Anschließend die Liste
 		// neu aufbauen, da sich die Privilegien ändern können (z. B. Amt niederlegen).
 		_privilegienManager.FuehreAus(privilegId);

@@ -170,11 +170,11 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		// Personen-Ziel-Modi: Privilegien (Prozess = 8, Vergifteter Wein = 12, Henkershand = 13) und
-		// Hinterzimmer (Beziehungen = 0, Sabotage = 1, Anschwärzen = 2, Spionage = 3, Ermordung = 4,
-		// Erpressung = 5). Über die Interface-Methode (Privilegien) wird die Karte im Hintergrund geöffnet
-		// (fire-and-forget).
-		if (mod >= 0 && mod <= 5 || mod == 8 || mod == 12 || mod == 13)
+		// Personen-Ziel-Modi: Privilegien (Prozess = 8, Vergifteter Wein = 12, Henkershand = 13,
+		// Duell = 14) und Hinterzimmer (Beziehungen = 0, Sabotage = 1, Anschwärzen = 2, Spionage = 3,
+		// Ermordung = 4, Erpressung = 5). Über die Interface-Methode (Privilegien) wird die Karte im
+		// Hintergrund geöffnet (fire-and-forget).
+		if (mod >= 0 && mod <= 5 || mod == 8 || mod == 12 || mod == 13 || mod == 14)
 		{
 			_ = OeffnePersonenKarteIntern(mod, flaggenEinblenden);
 			return;
@@ -330,12 +330,12 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 	/// <summary>
 	/// Verhalten nach dem Schließen der Ämter-Ebene: Bei den Privilegien (Prozess = 8, Vergifteter
-	/// Wein = 12, Henkershand = 13) schließt sich – wie im Original – auch die Karte; bei den
+	/// Wein = 12, Henkershand = 13, Duell = 14) schließt sich – wie im Original – auch die Karte; bei den
 	/// Hinterzimmer-Modi bleibt sie offen.
 	/// </summary>
 	private void NachAemterEbene()
 	{
-		if (_personenModusModus == 8 || _personenModusModus == 12 || _personenModusModus == 13)
+		if (_personenModusModus == 8 || _personenModusModus == 12 || _personenModusModus == 13 || _personenModusModus == 14)
 			Schliessen();
 		else if (Visible)
 			SetProcessInput(true);
