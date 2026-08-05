@@ -264,6 +264,27 @@ public partial class Kontor : Control
 			}
 		}
 
+		// KI-Beleidigung (selten, Issue #17): Eine KI beleidigt den Spieler – er wählt Satisfaktion (Duell
+		// im Morgengrauen) oder Verzicht (dann leidet sein Ansehen).
+		if (_geradeGeladen == false)
+		{
+			var fechtDuell = new FechtDuellManager();
+			int beleidiger = fechtDuell.PruefeKiBeleidigtSpieler();
+
+			if (beleidiger != 0)
+			{
+				bool satisfaktion = await SW.UI.YesNoQuestion.ShowDialogText(
+					fechtDuell.GetSatisfaktionsFrage(beleidiger), "Duell im Morgengrauen", "Verzichten") == DialogResultGame.Yes;
+
+				if (satisfaktion)
+					await _main.RundenNachrichtenDialog.ShowDialog("Duell\n\n" + fechtDuell.FuehreDuellDurch(beleidiger).Meldung);
+				else
+					await _main.RundenNachrichtenDialog.ShowDialog("Ehrensache\n\n" + fechtDuell.VerweigereSatisfaktion(SW.Dynamisch.GetAktiverSpieler()));
+
+				UpdateHud();
+			}
+		}
+
 		_geradeGeladen = false;
 
 		// Ankündigung der neu zu besetzenden Ämter zu Zugbeginn (wie im Original), sofern es welche gibt.
