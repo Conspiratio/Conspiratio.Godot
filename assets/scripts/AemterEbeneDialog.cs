@@ -203,8 +203,9 @@ public partial class AemterEbeneDialog : DialogBase
 
 		await _manager.PersonWasMachen(holderId, _modus);
 
-		// Wie im Original: nach dem Prozess (Modus 8) schließt die Ämter-Ebene; sonst bleibt sie offen.
-		if (_modus == 8)
+		// Wie im Original: nach einer einmaligen Aktion (Prozess = 8, Vergifteter Wein = 12) schließt die
+		// Ämter-Ebene; bei den übrigen Modi bleibt sie offen.
+		if (_modus == 8 || _modus == 12)
 		{
 			Close(DialogResultGame.OK);
 			return;
