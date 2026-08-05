@@ -108,11 +108,24 @@ public partial class PrivilegienDialog : DialogBase
 			return;
 		}
 
-		// „Fechtunterricht nehmen" (Issue #17): eigener Kauf-Dialog (wiederholbar).
+		// „Fechtunterricht nehmen" (Issue #17): einfacher Ja/Nein-Dialog, wiederholbar (Muster wie Mätresse).
 		if (privilegId == PrivilegienManager.FechtunterrichtPrivilegId)
 		{
 			SetProcessInput(false);
-			await _main.FechtunterrichtDialog.ShowDialog();
+
+			var fecht = new FechtDuellManager();
+
+			while (fecht.KannFechtstundeBezahlen())
+			{
+				if (await SW.UI.YesNoQuestion.ShowDialogText(fecht.GetAngebotstext(), "Stunde nehmen", "Genug") != DialogResultGame.Yes)
+					break;
+
+				fecht.NimmFechtstunde(out _);
+				SoundManager.Instance.PlayCoins();
+			}
+
+			if (!fecht.KannFechtstundeBezahlen())
+				await SW.UI.ShowText.ShowDialog("Für eine (weitere) Fechtstunde fehlen Euch die Taler.");
 
 			if (Visible)
 				SetProcessInput(true);
