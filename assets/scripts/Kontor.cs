@@ -471,17 +471,6 @@ public partial class Kontor : Control
 		await NaechstenSpielerAnkuendigen();
 	}
 
-	private async void _on_area_nicht_implementiert_pressed()
-	{
-		SetProcessInput(false);
-
-		// TODO: Söldner & Räuber migrieren (AreaKampf)
-		await SW.UI.ShowText.ShowDialog("Wurde noch nicht implementiert");
-
-		if (Visible)
-			SetProcessInput(true);
-	}
-
 	private void UpdateHud()
 	{
 		var spieler = SW.Dynamisch.GetAktHum();
