@@ -19,6 +19,8 @@ CheckBox1PlayerPath = NodePath("CheckBox1Player")
 CheckBoxCheatmodusPath = NodePath("CheckBoxCheatmodus")
 CheckBoxTestmodusPath = NodePath("CheckBoxTestmodus")
 CheckBoxShowDeathsPath = NodePath("CheckBoxShowDeaths")
+OptionButtonDifficultyPath = NodePath("OptionButtonDifficulty")
+OptionButtonMissionPath = NodePath("OptionButtonMission")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1

@@ -203,8 +203,13 @@ public partial class Kontor : Control
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 
 		var spieler = SW.Dynamisch.GetAktHum();
-		await _main.NaechsterSpielerDialog.ShowDialog(spieler.GetTitelGegendert() + " " + spieler.GetName() +
-		                                              ",\n" + spieler.GetAmtNameUndOrt());
+		string ankuendigung = spieler.GetTitelGegendert() + " " + spieler.GetName() + ",\n" + spieler.GetAmtNameUndOrt();
+
+		// Bei aktivem Auftrag den Fortschritt als Erinnerung mit ankündigen.
+		if (AuftragManager.IstAuftragAktiv())
+			ankuendigung += "\n\n" + new AuftragManager().GetFortschrittText(spieler);
+
+		await _main.NaechsterSpielerDialog.ShowDialog(ankuendigung);
 
 		_rundenManager.BeginneZug();
 
@@ -503,6 +508,10 @@ public partial class Kontor : Control
 			return;
 		}
 
+		// Den Spieler merken, dessen Zug hier endet (die Auftragsprüfung folgt nach den Zugnachrichten,
+		// die den aktiven Spieler bereits weiterschalten können).
+		var spielerAmZugende = SW.Dynamisch.GetAktHum();
+
 		// Fällige (überfällige) Kredite zwangsweise tilgen – notfalls rutscht das Vermögen dabei ins Minus.
 		// Vor der Abrechnung, damit ein dadurch negatives Vermögen den anschließenden Schuldenprozess auslösen kann.
 		foreach (string kreditMeldung in new SchreibstubeManager().TilgeUeberfaelligeKredite())
@@ -525,7 +534,36 @@ public partial class Kontor : Control
 			return;
 		}
 
+		// Auftrag (Mission) prüfen: erfüllt der Spieler seinen Auftrag, hat er das Spiel gewonnen.
+		if (await PruefeAuftragErfuellt(spielerAmZugende))
+		{
+			HideAndDisableInput();
+			return;
+		}
+
 		await NaechstenSpielerAnkuendigen();
+	}
+
+	/// <summary>
+	/// Prüft nach dem Zug, ob der Spieler seinen gewählten Auftrag erfüllt hat. Ist das der Fall, wird der
+	/// Siegesbildschirm samt Bestenlisten-Eintrag gezeigt und true zurückgegeben (das Spiel endet dann).
+	/// Ohne aktiven Auftrag oder bei Nichterfüllung passiert nichts (false).
+	/// </summary>
+	private async Task<bool> PruefeAuftragErfuellt(Conspiratio.Lib.Gameplay.Personen.HumSpieler spieler)
+	{
+		if (!AuftragManager.IstAuftragAktiv() || spieler == null)
+			return false;
+
+		if (!new AuftragManager().AktualisiereFortschrittUndPruefe(spieler))
+			return false;
+
+		var auftrag = AuftragManager.GetAktiverAuftrag();
+		int jahr = SW.Dynamisch.GetAktuellesJahr();
+		int jahreGespielt = jahr - SW.Statisch.StartJahr;
+		int mitspieler = SW.Dynamisch.Spielstand.AktiveSpielerAnzahl;
+
+		await _main.AuftragSiegDialog.ShowDialog(auftrag, spieler.GetName(), jahr, jahreGespielt, mitspieler);
+		return true;
 	}
 
 	/// <summary>

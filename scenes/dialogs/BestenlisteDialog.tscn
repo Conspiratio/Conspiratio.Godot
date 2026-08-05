@@ -1,0 +1,67 @@
+[gd_scene load_steps=4 format=3 uid="uid://bestenlistedlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/BestenlisteDialog.cs" id="1_bldg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_bldg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_bldg"]
+
+[node name="BestenlisteDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_bldg")
+script = ExtResource("1_bldg")
+OptionButtonAuftragPath = NodePath("Rahmen/OptionButtonAuftrag")
+LabelEintraegePath = NodePath("Rahmen/LabelEintraege")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -460.0
+offset_top = -320.0
+offset_right = 460.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bldg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 28.0
+offset_right = 880.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 36
+text = "Bestenliste"
+horizontal_alignment = 1
+
+[node name="OptionButtonAuftrag" type="OptionButton" parent="Rahmen"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 96.0
+offset_right = 680.0
+offset_bottom = 140.0
+
+[node name="LabelEintraege" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 160.0
+offset_right = 860.0
+offset_bottom = 600.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 18
+text = "Noch keine Einträge für diesen Auftrag."
+autowrap_mode = 3

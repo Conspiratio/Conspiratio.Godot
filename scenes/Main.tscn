@@ -1,4 +1,4 @@
-[gd_scene load_steps=63 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=65 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -63,6 +63,8 @@
 [ext_resource type="PackedScene" uid="uid://cspielertoddlg1" path="res://scenes/dialogs/SpielerTodDialog.tscn" id="60_tod"]
 [ext_resource type="PackedScene" uid="uid://ckindestoddlg1" path="res://scenes/dialogs/KindestodDialog.tscn" id="61_ktod"]
 [ext_resource type="PackedScene" uid="uid://diagnosedlg01" path="res://scenes/dialogs/DiagnoseDialog.tscn" id="62_diag"]
+[ext_resource type="PackedScene" uid="uid://auftragsiegdlg1" path="res://scenes/dialogs/AuftragSiegDialog.tscn" id="63_asdg"]
+[ext_resource type="PackedScene" uid="uid://bestenlistedlg1" path="res://scenes/dialogs/BestenlisteDialog.tscn" id="64_bldg"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -306,5 +308,13 @@ visible = false
 layout_mode = 1
 
 [node name="DiagnoseDialog" parent="." instance=ExtResource("62_diag")]
+visible = false
+layout_mode = 1
+
+[node name="AuftragSiegDialog" parent="." instance=ExtResource("63_asdg")]
+visible = false
+layout_mode = 1
+
+[node name="BestenlisteDialog" parent="." instance=ExtResource("64_bldg")]
 visible = false
 layout_mode = 1

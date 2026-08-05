@@ -15,6 +15,8 @@ public partial class NewLocalGameMenu : Control
 	private CheckBoxWithSounds _checkBoxCheatmodus;
 	private CheckBoxWithSounds _checkBoxTestmodus;
 	private CheckBoxWithSounds _checkBoxShowDeaths;
+	private OptionButton _optionButtonDifficulty;
+	private OptionButton _optionButtonMission;
 	private NewGameManager _newGameManager;
 	private Main _main;
 
@@ -33,6 +35,12 @@ public partial class NewLocalGameMenu : Control
 	[Export]
 	public NodePath CheckBoxShowDeathsPath { get; set; }
 
+	[Export]
+	public NodePath OptionButtonDifficultyPath { get; set; }
+
+	[Export]
+	public NodePath OptionButtonMissionPath { get; set; }
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -46,6 +54,12 @@ public partial class NewLocalGameMenu : Control
 		_checkBoxCheatmodus = GetNode<CheckBoxWithSounds>(CheckBoxCheatmodusPath);
 		_checkBoxTestmodus = GetNode<CheckBoxWithSounds>(CheckBoxTestmodusPath);
 		_checkBoxShowDeaths = GetNode<CheckBoxWithSounds>(CheckBoxShowDeathsPath);
+
+		_optionButtonDifficulty = GetNode<OptionButton>(OptionButtonDifficultyPath);
+		_optionButtonMission = GetNode<OptionButton>(OptionButtonMissionPath);
+		_optionButtonDifficulty.ItemSelected += _ => AktualisiereAuftragsliste();
+		_optionButtonMission.ItemSelected += _ => AktualisiereAuftragsTooltip();
+		AktualisiereAuftragsliste();
 
 		_main = GetParent<Main>();
 
@@ -104,8 +118,55 @@ public partial class NewLocalGameMenu : Control
 		// Die in den Optionen gewählte KI-Aktivität (Prozent) als Vorgabe für dieses Spiel übernehmen
 		SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent = ClientSettings.KiAktivitaetProzent;
 
+		// Den gewählten Auftrag (Mission) übernehmen – „Kein Auftrag" bedeutet freies/endloses Spiel.
+		SW.Dynamisch.Spielstand.Einstellungen.Auftrag = GetSelectedAuftrag();
+
 		HideAndDisableInput();
 		_main.NewPlayerMenu.StartPlayerSetup();
+	}
+
+	/// <summary>
+	/// Füllt die Auftragsliste passend zur gewählten Schwierigkeit: bei „Keine (freies Spiel)" nur
+	/// „Kein Auftrag" (deaktiviert), sonst die Aufträge der jeweiligen Stufe. Die Auftrags-ID jedes
+	/// Eintrags ist der <see cref="EnumAuftrag"/>-Wert.
+	/// </summary>
+	private void AktualisiereAuftragsliste()
+	{
+		_optionButtonMission.Clear();
+
+		int schwierigkeitId = _optionButtonDifficulty.GetSelectedId(); // 0 = keine, 1/2/3 = leicht/mittel/schwer
+
+		if (schwierigkeitId == 0)
+		{
+			_optionButtonMission.AddItem("Kein Auftrag", (int)EnumAuftrag.KeinAuftrag);
+			_optionButtonMission.Disabled = true;
+		}
+		else
+		{
+			_optionButtonMission.Disabled = false;
+			var schwierigkeit = (EnumAuftragSchwierigkeit)(schwierigkeitId - 1);
+			foreach (var info in AuftragManager.GetAuftraege(schwierigkeit))
+				_optionButtonMission.AddItem(info.Name, (int)info.Auftrag);
+		}
+
+		_optionButtonMission.Selected = 0;
+		AktualisiereAuftragsTooltip();
+	}
+
+	/// <summary>Zeigt das Auftragsziel als Tooltip des Auftrags-Auswahlfelds.</summary>
+	private void AktualisiereAuftragsTooltip()
+	{
+		var info = AuftragManager.GetInfo(GetSelectedAuftrag());
+		_optionButtonMission.TooltipText = info?.Ziel ?? "Freies, endloses Spiel ohne Siegbedingung.";
+	}
+
+	/// <summary>Der aktuell gewählte Auftrag (oder <see cref="EnumAuftrag.KeinAuftrag"/> bei freiem Spiel).</summary>
+	private EnumAuftrag GetSelectedAuftrag()
+	{
+		if (_optionButtonDifficulty.GetSelectedId() == 0)
+			return EnumAuftrag.KeinAuftrag;
+
+		return (EnumAuftrag)_optionButtonMission.GetSelectedId();
 	}
 
 	private void _on_line_edit_game_name_text_submitted(string newText)

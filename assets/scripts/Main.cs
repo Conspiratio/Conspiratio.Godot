@@ -65,6 +65,8 @@ public partial class Main : Control
 	public SpielerTodDialog SpielerTodDialog;
 	public KindestodDialog KindestodDialog;
 	public DiagnoseDialog DiagnoseDialog;
+	public AuftragSiegDialog AuftragSiegDialog;
+	public BestenlisteDialog BestenlisteDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()

@@ -1,0 +1,95 @@
+[gd_scene load_steps=5 format=3 uid="uid://auftragsiegdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/AuftragSiegDialog.cs" id="1_asdg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_asdg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_asdg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="4_asdg"]
+
+[node name="AuftragSiegDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("3_asdg")
+script = ExtResource("1_asdg")
+LabelTitelPath = NodePath("Rahmen/LabelTitel")
+LabelTextPath = NodePath("Rahmen/LabelText")
+LineEditNamePath = NodePath("Rahmen/LineEditName")
+ButtonEintragenPath = NodePath("Rahmen/ButtonEintragen")
+LabelStatusPath = NodePath("Rahmen/LabelStatus")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -300.0
+offset_right = 420.0
+offset_bottom = 300.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_asdg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 30.0
+offset_right = 800.0
+offset_bottom = 92.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 42
+text = "Auftrag erfüllt!"
+horizontal_alignment = 1
+
+[node name="LabelText" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 110.0
+offset_right = 780.0
+offset_bottom = 340.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "Glückwunsch!"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LabelStatus" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 360.0
+offset_right = 780.0
+offset_bottom = 396.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 18
+text = "Tragt Euch in die Bestenliste ein:"
+horizontal_alignment = 1
+
+[node name="LineEditName" type="LineEdit" parent="Rahmen"]
+layout_mode = 0
+offset_left = 220.0
+offset_top = 406.0
+offset_right = 620.0
+offset_bottom = 452.0
+theme_override_font_sizes/font_size = 20
+alignment = 1
+max_length = 30
+
+[node name="ButtonEintragen" parent="Rahmen" instance=ExtResource("4_asdg")]
+custom_minimum_size = Vector2(400, 52)
+layout_mode = 0
+offset_left = 220.0
+offset_top = 470.0
+offset_right = 620.0
+offset_bottom = 522.0
+text = "In Bestenliste eintragen"

@@ -80,6 +80,11 @@ public partial class Mainmenu : Control
 		_main.CreditsDialog.ShowDialog();
 	}
 
+	private void _on_button_bestenliste_pressed()
+	{
+		_main.BestenlisteDialog.ShowDialog();
+	}
+
 	private void _on_button_feedback_pressed()
 	{
 		_main.DiagnoseDialog.ShowDialog();
