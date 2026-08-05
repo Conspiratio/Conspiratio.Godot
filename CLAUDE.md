@@ -85,6 +85,6 @@ Godot dialog scripts implement these interfaces and are registered once in `Main
 
 ### Versioning / changelog
 
-Version lives in `project.godot` (`application/config/version`, e.g. `0.1.0.0-godot`) — not bumped per feature. `CHANGELOG.md` is maintained bilingually (DE and EN sections) — update both when adding user-visible changes. The Lib keeps its own `CHANGELOG.md` (single German+English entry per `<Version>`).
+Version lives in `project.godot` (`application/config/version`, e.g. `0.1.0.0-godot`) — not bumped per feature. `CHANGELOG.md` is maintained bilingually (DE and EN sections) — update both when adding user-visible changes. The Lib keeps its own `CHANGELOG.md`: new changes are appended (bilingual, DE and EN bullets) under a single `## [Unreleased]` heading — **no** per-change version header or date. The Lib `<Version>` in the csproj may still be bumped per change; the `[Unreleased]` block is only cut into a dated `## <Version>` section when a real GitHub release is made.
 
 A feature that touches both repos is committed **Lib first, then Godot**: the two are separate git repos on their own feature branches (Lib on `feature/player-setup-manager`, Godot on `feature/new-game`), and the Godot commit's subject references the Lib version it depends on (e.g. `… (Conspiratio.Lib 3.46.0)`). Commit only when asked.
