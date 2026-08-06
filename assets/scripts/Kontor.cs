@@ -277,7 +277,12 @@ public partial class Kontor : Control
 					fechtDuell.GetSatisfaktionsFrage(beleidiger), "Duell im Morgengrauen", "Verzichten") == DialogResultGame.Yes;
 
 				if (satisfaktion)
-					await _main.RundenNachrichtenDialog.ShowDialog("Duell\n\n" + fechtDuell.FuehreDuellDurch(beleidiger).Meldung);
+				{
+					// Das Duell wird als Vollbild-Szene ausgespielt (Nebel, Sprüche, Erzähler).
+					var ergebnis = fechtDuell.FuehreDuellDurch(beleidiger);
+					await _main.DuellDialog.ShowDuell(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
+						ergebnis.AmtVerloren, ergebnis.AmtName);
+				}
 				else
 					await _main.RundenNachrichtenDialog.ShowDialog("Ehrensache\n\n" + fechtDuell.VerweigereSatisfaktion(SW.Dynamisch.GetAktiverSpieler()));
 

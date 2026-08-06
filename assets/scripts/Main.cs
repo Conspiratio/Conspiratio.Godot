@@ -67,6 +67,7 @@ public partial class Main : Control
 	public DiagnoseDialog DiagnoseDialog;
 	public AuftragSiegDialog AuftragSiegDialog;
 	public BestenlisteDialog BestenlisteDialog;
+	public DuellDialog DuellDialog;
 
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
@@ -79,7 +80,7 @@ public partial class Main : Control
 
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, BeziehungenPflegenDialog, BauwerkStiftenDialog, FestGebenDialog,
-			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, UntergebeneDialog);
+			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, UntergebeneDialog, DuellDialog);
 	}
 
 	/// <summary>
