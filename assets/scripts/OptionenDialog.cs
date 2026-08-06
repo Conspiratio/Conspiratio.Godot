@@ -18,6 +18,7 @@ public partial class OptionenDialog : DialogBase
 	private controls.CheckBoxWithSounds _checkStatistik;
 	private controls.CheckBoxWithSounds _checkStuetzpunkt;
 	private controls.CheckBoxWithSounds _checkMilitaer;
+	private controls.CheckBoxWithSounds _checkDuelle;
 
 	private HSlider _sliderMusik;
 	private HSlider _sliderEffekt;
@@ -38,6 +39,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStatistik = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckStatistik");
 		_checkStuetzpunkt = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckStuetzpunkt");
 		_checkMilitaer = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckMilitaer");
+		_checkDuelle = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckDuelle");
 
 		_sliderMusik = GetNode<HSlider>("Rahmen/VBoxSlider/SliderMusik");
 		_sliderEffekt = GetNode<HSlider>("Rahmen/VBoxSlider/SliderEffekt");
@@ -54,6 +56,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStatistik.Toggled += an => ClientSettings.StatistikAnzeigen = an;
 		_checkStuetzpunkt.Toggled += an => ClientSettings.StuetzpunktereignisseKiAnzeigen = an;
 		_checkMilitaer.Toggled += an => ClientSettings.MilitaerereignisseKiAnzeigen = an;
+		_checkDuelle.Toggled += an => ClientSettings.DuelleInteraktiv = an;
 
 		_sliderMusik.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusMusik, (int)wert);
 		_sliderEffekt.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusEffekt, (int)wert);
@@ -72,6 +75,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStatistik.ButtonPressed = ClientSettings.StatistikAnzeigen;
 		_checkStuetzpunkt.ButtonPressed = ClientSettings.StuetzpunktereignisseKiAnzeigen;
 		_checkMilitaer.ButtonPressed = ClientSettings.MilitaerereignisseKiAnzeigen;
+		_checkDuelle.ButtonPressed = ClientSettings.DuelleInteraktiv;
 
 		_sliderMusik.Value = ClientSettings.MusikLautstaerke;
 		_sliderEffekt.Value = ClientSettings.EffektLautstaerke;

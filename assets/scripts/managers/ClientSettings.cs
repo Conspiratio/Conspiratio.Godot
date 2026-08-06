@@ -39,6 +39,13 @@ public static class ClientSettings
 		set => SetValue("optionen", "tipps_anzeigen", value);
 	}
 
+	/// <summary>Wird ein Duell als Wortgefecht selbst ausgetragen, oder nur als Inszenierung gezeigt?</summary>
+	public static bool DuelleInteraktiv
+	{
+		get => GetBool("optionen", "duelle_interaktiv", true);
+		set => SetValue("optionen", "duelle_interaktiv", value);
+	}
+
 	public static bool StatistikAnzeigen
 	{
 		get => GetBool("optionen", "statistik_anzeigen", true);

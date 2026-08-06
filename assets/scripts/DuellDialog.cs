@@ -70,14 +70,36 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 	[Export]
 	public NodePath LabelErzaehlerPath { get; set; }
 
+	[Export]
+	public NodePath LabelPunktestandPath { get; set; }
+
+	[Export]
+	public NodePath LabelAmZugPath { get; set; }
+
+	[Export]
+	public NodePath AuswahlBoxPath { get; set; }
+
 	private Control _nebel;
 	private Label _labelSpruch;
 	private Label _labelErzaehler;
+	private Label _labelPunktestand;
+	private Label _labelAmZug;
+	private VBoxContainer _auswahlBox;
+	private PackedScene _linkButtonScene;
 
 	/// <summary>Läuft die Inszenierung gerade (dann überspringt ein Rechtsklick, statt zu schließen)?</summary>
 	private bool _laeuft;
 
 	private bool _ueberspringen;
+
+	/// <summary>Wartet gerade eine Auswahl auf einen Klick? Dann darf Rechtsklick nichts auslösen.</summary>
+	private TaskCompletionSource<int> _optionGewaehlt;
+
+	/// <summary>Wird das Duell selbst ausgetragen? Dann gibt es kein Überspringen der Wortwechsel.</summary>
+	private bool _interaktiv;
+
+	/// <summary>Läuft, bis der Spieler die Szene am Ende schließt (zwischen den beiden Aufrufen offen).</summary>
+	private Task<DialogResultGame> _geschlossen;
 
 	private readonly List<Tween> _nebelTweens = new();
 
@@ -89,6 +111,10 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 		_nebel = GetNode<Control>(NebelPath);
 		_labelSpruch = GetNode<Label>(LabelSpruchPath);
 		_labelErzaehler = GetNode<Label>(LabelErzaehlerPath);
+		_labelPunktestand = GetNode<Label>(LabelPunktestandPath);
+		_labelAmZug = GetNode<Label>(LabelAmZugPath);
+		_auswahlBox = GetNode<VBoxContainer>(AuswahlBoxPath);
+		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
 	}
 
 	/// <summary>
@@ -97,11 +123,20 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 	/// </summary>
 	protected override void OnNextOrClose()
 	{
+		// Während einer Auswahl muss ein Knopf gedrückt werden – Rechtsklick tut nichts (wie im Gericht).
+		if (_optionGewaehlt != null)
+		{
+			GetViewport().SetInputAsHandled();
+			return;
+		}
+
 		if (_laeuft)
 		{
 			GetViewport().SetInputAsHandled();
 
-			if (!_ueberspringen)
+			// Ein selbst ausgetragenes Duell lässt sich nicht überspringen – sonst würden die
+			// Wortwechsel durchrauschen. Nur die automatische Inszenierung darf übersprungen werden.
+			if (!_interaktiv && !_ueberspringen)
 			{
 				SoundManager.Instance.PlayRightClick();
 				_ueberspringen = true;
@@ -113,41 +148,82 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 		base.OnNextOrClose();
 	}
 
-	/// <summary>Spielt das Duell als Szene ab und wartet, bis der Spieler den Ausgang weggeklickt hat.</summary>
-	public async Task ShowDuell(bool spielerGewinnt, string gegnerName, bool amtVerloren, string amtName)
+	/// <summary>
+	/// Trägt das Duell aus und liefert, ob der aktive Spieler gewonnen hat. Die Szene bleibt danach
+	/// offen, damit der Aufrufer die Folgen anwenden und sie mit <see cref="ZeigeAusgang"/> zeigen kann.
+	/// </summary>
+	public async Task<bool> SpieleWortgefecht(WortgefechtManager gefecht, string gegnerName)
 	{
 		_laeuft = true;
 		_ueberspringen = false;
 		_labelSpruch.Text = "";
 		_labelSpruch.Modulate = new Color(1, 1, 1, 0);
 		_labelErzaehler.Text = "";
+		_labelAmZug.Text = "";
+		_labelPunktestand.Text = "";
+		_auswahlBox.Visible = false;
 
-		var geschlossen = ShowAndAwait();
+		_interaktiv = ClientSettings.DuelleInteraktiv;
+		_geschlossen = ShowAndAwait();
 
 		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Kampf);
 		StarteNebelDrift();
 
-		await SpieleAblauf(spielerGewinnt, gegnerName, amtVerloren, amtName);
-
-		_laeuft = false;
-		await geschlossen;
-
-		StoppeNebelDrift();
-		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
-	}
-
-	private async Task SpieleAblauf(bool spielerGewinnt, string gegnerName, bool amtVerloren, string amtName)
-	{
 		// Intro: erst die Gegenüberstellung, dann zieht der Nebel auf.
 		await ZeigeErzaehler("Im ersten Licht des Morgengrauens tretet Ihr " + gegnerName + " gegenüber.", 2.4);
 		await ZeigeErzaehler("Und dann zog Nebel auf und verhüllte die Kontrahenten …", 2.2);
+		_labelErzaehler.Text = "";
 
-		// Der Kampf selbst: nur Stimmen aus dem Nebel, abwechselnd Angriff und Erwiderung.
+		if (_interaktiv)
+			await SpieleRunden(gefecht);
+		else
+			await SpieleAutomatisch(gefecht);
+
+		return gefecht.SpielerHatGewonnen;
+	}
+
+	/// <summary>Der Schlagabtausch: Beleidigung wählen, passenden Konter erkennen – bis einer 3 Treffer hat.</summary>
+	private async Task SpieleRunden(WortgefechtManager gefecht)
+	{
+		AktualisierePunktestand(gefecht);
+
+		while (!gefecht.IstBeendet)
+		{
+			// 1. Der Angreifer wählt eine Beleidigung.
+			var angriff = gefecht.NaechsterAngriff();
+
+			int angriffsIndex = angriff.MenschWaehlt
+				? await WaehleOption(angriff.WaehlerIstAktiverSpieler ? "" : angriff.WaehlerName, angriff.Optionen)
+				: gefecht.WaehleKiAngriff();
+
+			var konter = gefecht.WaehleAngriff(angriffsIndex);
+			await ZeigeSpruch(konter.Beleidigung);
+
+			// 2. Der Angegriffene sucht die passende Erwiderung.
+			int konterIndex = konter.MenschWaehlt
+				? await WaehleOption(konter.WaehlerIstAktiverSpieler ? "" : konter.WaehlerName, konter.Optionen)
+				: gefecht.WaehleKiKonter();
+
+			var ergebnis = gefecht.WerteKonterAus(konterIndex);
+			await ZeigeSpruch(ergebnis.Erwiderung);
+
+			_labelErzaehler.Text = ergebnis.Kommentar;
+			AktualisierePunktestand(gefecht);
+			await Warte(1.8);
+			_labelErzaehler.Text = "";
+		}
+	}
+
+	/// <summary>
+	/// Nicht interaktiv (Option „Duelle selbst austragen" aus): der bisherige Ablauf – zufällige Rufe
+	/// aus dem Nebel, während der Ausgang gewürfelt wird.
+	/// </summary>
+	private async Task SpieleAutomatisch(WortgefechtManager gefecht)
+	{
+		gefecht.WuerfleAusgang();
+
 		var angriffe = MischeUndNimm(Angriffe, (AnzahlSprueche + 1) / 2);
 		var antworten = MischeUndNimm(Antworten, AnzahlSprueche / 2);
-
-		// Der Intro-Satz hat ausgedient – jetzt sprechen nur noch die Stimmen aus dem Nebel.
-		_labelErzaehler.Text = "";
 
 		for (int i = 0; i < AnzahlSprueche; i++)
 		{
@@ -157,9 +233,14 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 
 			await ZeigeSpruch(i % 2 == 0 ? angriffe[i / 2] : antworten[i / 2]);
 		}
+	}
 
+	/// <summary>Zeigt den Ausgang und wartet, bis der Spieler die Szene schließt.</summary>
+	public async Task ZeigeAusgang(bool spielerGewinnt, string gegnerName, bool amtVerloren, string amtName)
+	{
 		// Der Nebel lichtet sich und gibt den Ausgang preis.
 		_labelErzaehler.Text = "";
+		_labelAmZug.Text = "";
 		await BlendeNebelAus();
 
 		_labelSpruch.Text = spielerGewinnt ? "Sieg!" : "Niederlage";
@@ -176,9 +257,81 @@ public partial class DuellDialog : DialogBase, IDuellDialog
 		while (Input.IsActionPressed("ui_next_or_close"))
 			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
-		// Ab hier soll ein Rechtsklick schließen, nicht mehr überspringen.
+		// Ab hier schließt ein Rechtsklick, statt zu überspringen.
 		_ueberspringen = false;
+		_laeuft = false;
+
+		await _geschlossen;
+
+		StoppeNebelDrift();
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 	}
+
+	/// <summary>
+	/// Stellt die Auswahl als Knöpfe dar und wartet auf den Klick (Muster wie im Gerichtsdialog).
+	/// Solange eine Auswahl offen ist, schließt Rechtsklick den Dialog nicht.
+	/// </summary>
+	private async Task<int> WaehleOption(string waehlerName, IReadOnlyList<string> texte)
+	{
+		// Der Erzählertext liegt im selben Bereich wie die Knöpfe – während der Auswahl bleibt er leer.
+		_labelErzaehler.Text = "";
+		_labelAmZug.Text = string.IsNullOrEmpty(waehlerName) ? "" : "Am Zug: " + waehlerName;
+
+		LeereAuswahl();
+		_optionGewaehlt = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+		for (int i = 0; i < texte.Count; i++)
+		{
+			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
+			button.Text = texte[i];
+			StyleAuswahlKnopf(button);
+
+			int index = i;
+			button.Pressed += () => _optionGewaehlt?.TrySetResult(index);
+
+			_auswahlBox.AddChild(button);
+		}
+
+		_auswahlBox.Visible = true;
+
+		int gewaehlt = await _optionGewaehlt.Task;
+
+		_optionGewaehlt = null;
+		_auswahlBox.Visible = false;
+		_labelAmZug.Text = "";
+		LeereAuswahl();
+
+		return gewaehlt;
+	}
+
+	/// <summary>
+	/// Die Knöpfe erben sonst die dunkle Pergamentschrift des Standardthemas – vor dem nächtlichen
+	/// Duellplatz wären sie kaum lesbar. Darum hier mittig und in derselben Goldschrift wie die Sprüche.
+	/// </summary>
+	private static void StyleAuswahlKnopf(controls.LinkButtonWithSounds button)
+	{
+		button.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+
+		button.AddThemeColorOverride("font_color", new Color(0.93f, 0.83f, 0.55f));
+		button.AddThemeColorOverride("font_hover_color", new Color(1f, 0.95f, 0.7f));
+		button.AddThemeColorOverride("font_pressed_color", new Color(1f, 1f, 0.85f));
+		button.AddThemeColorOverride("font_focus_color", new Color(0.93f, 0.83f, 0.55f));
+		button.AddThemeColorOverride("font_outline_color", new Color(0.05f, 0.04f, 0.02f));
+		button.AddThemeConstantOverride("outline_size", 6);
+		button.AddThemeFontSizeOverride("font_size", 28);
+	}
+
+	private void LeereAuswahl()
+	{
+		foreach (Node kind in _auswahlBox.GetChildren())
+		{
+			_auswahlBox.RemoveChild(kind);
+			kind.QueueFree();
+		}
+	}
+
+	private void AktualisierePunktestand(WortgefechtManager gefecht) =>
+		_labelPunktestand.Text = "Ihr " + gefecht.SpielerTreffer + " : " + gefecht.GegnerTreffer + " " + gefecht.GegnerName;
 
 	private static string BaueAusgangstext(bool spielerGewinnt, string gegnerName, bool amtVerloren, string amtName)
 	{

@@ -278,9 +278,14 @@ public partial class Kontor : Control
 
 				if (satisfaktion)
 				{
-					// Das Duell wird als Vollbild-Szene ausgespielt (Nebel, Sprüche, Erzähler).
-					var ergebnis = fechtDuell.FuehreDuellDurch(beleidiger);
-					await _main.DuellDialog.ShowDuell(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
+					// Das Duell wird als Vollbild-Szene ausgetragen (Wortgefecht) und erst danach ausgewertet.
+					var gefecht = new WortgefechtManager(beleidiger);
+					string gegnerName = SW.Dynamisch.GetSpWithID(beleidiger).GetKompletterName();
+
+					bool gewonnen = await _main.DuellDialog.SpieleWortgefecht(gefecht, gegnerName);
+					var ergebnis = fechtDuell.WendeDuellAusgangAn(beleidiger, gewonnen);
+
+					await _main.DuellDialog.ZeigeAusgang(ergebnis.SpielerHatGewonnen, ergebnis.GegnerName,
 						ergebnis.AmtVerloren, ergebnis.AmtName);
 				}
 				else

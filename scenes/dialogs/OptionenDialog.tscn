@@ -82,6 +82,11 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Militärereignisse der KI anzeigen"
 
+[node name="CheckDuelle" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Duelle selbst austragen"
+
 [node name="VBoxSlider" type="VBoxContainer" parent="Rahmen"]
 layout_mode = 0
 offset_left = 560.0
