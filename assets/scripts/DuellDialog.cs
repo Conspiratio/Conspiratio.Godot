@@ -20,11 +20,11 @@ namespace Conspiratio.Godot.assets.scripts;
 public partial class DuellDialog : DialogBase, IDuellDialog
 {
 	/// <summary>Wie lange ein Spruch nach dem Einblenden stehen bleibt (plus je 0,35 s Ein-/Ausblenden).</summary>
-	private const double SpruchHaltedauer = 0.8;
+	private const double SpruchHaltedauer = 2.4;
 
 	private const double EinblendDauer = 0.35;
 
-	/// <summary>Anzahl der Sprüche im Nebel – zusammen mit Intro/Outro ergibt das rund 12–15 Sekunden.</summary>
+	/// <summary>Anzahl der Sprüche im Nebel – zusammen mit Intro/Outro ergibt das rund 25 Sekunden.</summary>
 	private const int AnzahlSprueche = 6;
 
 	/// <summary>Kampfrufe und Sticheleien des Spielers.</summary>
