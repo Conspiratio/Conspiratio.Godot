@@ -44,12 +44,31 @@ Since there are no tests and the game needs the editor to play, changes are veri
    (`using Conspiratio.Lib.Allgemein;` for the game-setup managers.)
 2. **Headless smoke test** (above) — catches broken scene loading, missing UIDs, and `_Ready()` NodePath wiring errors after every change.
 3. **Preview render** for a new dialog's layout — instantiate the dialog scene from a temporary `_preview_*.cs`/`.tscn`, set up a game (as in step 1), call its `ShowDialog(...)`, wait a few `ProcessFrame`s, then `GetViewport().GetTexture().GetImage().SavePng("user://preview_*.png")` and read the PNG back. **Run this one windowed (no `--headless`)** — headless has no rendering server and produces a blank/erroring image. Delete the `_preview_*` files afterward.
+   - A windowed run only exits when your script calls `GetTree().Quit()`; if it hangs, **don't pipe its stdout through `head`/`grep`** (that blocks and shows nothing). Read the app's own log instead: `%APPDATA%\Godot\app_userdata\Conspiratio.Godot\logs\conspiratio.log`. Screenshots land next to it in `app_userdata\Conspiratio.Godot\`.
+   - To capture a state that needs input, press buttons programmatically: `button.EmitSignal(BaseButton.SignalName.Pressed)`. For multi-step flows, shoot on a fixed interval and press whatever is on screen, then pick the interesting frames.
+
+**Two testing habits that repeatedly paid off:**
+
+- **Pin randomized inputs, then use large samples.** Much game state is randomized per game (KI `Bosheit`, and thus opponent strength). Comparing runs without pinning it produces swings that look like real regressions. Pin the inputs, and for probabilistic behaviour assert on rates over a few thousand runs, not on single outcomes.
+- **Regression-compare a refactor against the original.** When extracting logic that already exists (e.g. mirroring the office conditions of `PrivilegienAktualisieren` in a new method), have the harness compare old and new over the whole input space — that turns "hopefully equivalent" into a check that also catches later drift.
 
 ### Conspiratio.Lib dependency
 
 The Lib is consumed as the **released NuGet package from nuget.org**. The repo's `nuget.config` pins the source to nuget.org only (`<clear/>` drops any inherited feeds, e.g. a local Lib feed in the user-level `NuGet.Config`), so the build is reproducible for every contributor. To pick up new game logic, bump the `Conspiratio.Lib` `PackageReference` version in `Conspiratio.Godot.csproj` to a version that is published on nuget.org.
 
-To **iterate on the Lib locally before a release**: the Lib builds with `GeneratePackageOnBuild`, dropping a `.nupkg` into `…\Conspiratio.Lib\bin\Debug`. Add that folder as a package source (a local `<add>` in this repo's `nuget.config` or the user-level `NuGet.Config`) while developing, then remove it again — don't commit the local source into the checked-in `nuget.config`.
+To **iterate on the Lib locally before a release**: the Lib builds with `GeneratePackageOnBuild`, dropping a `.nupkg` into `…\Conspiratio.Lib\bin\Debug`. Because this repo's `nuget.config` resolves nuget.org only, the reliable way to let Godot see an unreleased version is to **pre-populate the global NuGet cache** from the console harness, which may use the local feed:
+
+```bash
+# 1. bump <Version> in Conspiratio.Lib.csproj, then build (writes the .nupkg)
+dotnet build
+# 2. purge the cached copy — NuGet will not re-extract a version it already has
+rm -rf ~/.nuget/packages/conspiratio.lib/<version>
+# 3. restore the harness from the local feed; this fills the global cache
+dotnet restore --source "D:/Projekte/C# Projekte/Conspiratio.Lib/Conspiratio.Lib/bin/Debug"
+# 4. now bump the PackageReference in Conspiratio.Godot.csproj and build normally
+```
+
+Step 2 is the one that bites: rebuilding the Lib without purging the cache leaves the old code in place, and the Godot build silently keeps using it. Don't commit a local source into the checked-in `nuget.config`.
 
 Game logic belongs in the Lib, not here. The established pattern: extract logic from the WinForms client into a Lib manager class (e.g. `NewGameManager`), then build a thin Godot view on top.
 
@@ -69,7 +88,21 @@ The Lib exposes static game state via `SW` (`Conspiratio.Lib.Gameplay.Spielwelt`
 - `SW.Dynamisch` — mutable game/session state (players, game name, settings)
 - `SW.UI` — UI abstraction: the Lib calls dialogs only through interfaces (`IYesNoQuestion`, `IShowText`, `IPolitischeWeltkarteDialog`, …)
 
-Godot dialog scripts implement these interfaces and are registered once in `Main.cs` via `SW.UI.Initialisieren(...)`. Most slots are still `null` (TODO) — implementing a missing dialog means: create scene + script implementing the Lib interface, then pass it in `Main.cs`.
+Godot dialog scripts implement these interfaces and are registered once in `Main.cs` via `SW.UI.Initialisieren(...)`. Implementing a further dialog means: create scene + script implementing the Lib interface, then pass it in `Main.cs`.
+
+**Add new `SW.UI` interfaces as optional trailing parameters** of `UIHelper.Initialisieren` (`IDuellDialog duellDialog = null, IErpressungDialog erpressungDialog = null`). The WinForms client calls the same method and must keep compiling; callers in the Lib therefore have to tolerate a `null` slot and fall back to a plain text message (see `KontrahentenManager` case 14). A dialog that has no visuals of its own can be a bare `Node` in `Main.tscn` that adapts the interface onto an existing dialog — `ErpressungDialog` just forwards to `YesNoDialog`.
+
+### Lib domain model — facts that are easy to get wrong
+
+Discovered the hard way; check these before designing around an assumption:
+
+- **Office and territory belong together.** Use `SetAmt(amtId, gebietId)`, never `SetAmtID` alone. An office without its territory makes `GetAmtNameUndOrt()` and `AmtVonXfreigeben()` dereference a null territory. This is also why a test harness must not "just" re-assign a freed office.
+- **Savegame compatibility is a lazy-init convention.** Serialization is field-based and bypasses constructors, so any field added later arrives as `null` (or an array of the old length) from an existing savegame. The pattern is an accessor that creates it on demand — `Spieler.BegingVerbrechenSicher()`, `HumSpieler.GetAhnentafelListe()`, `GetErpressungen()`. Never touch such a field directly.
+- **The law table has fixed capacity 100 and is sparsely populated**: Finanz `0–4`, Straf `20–25`, Kirche `40–44`, with the block boundaries in `GetGesetzgrenzeFinanz/Straf/Kirche`. Adding a law therefore costs nothing and needs no savegame migration — take a free index inside the right block, and court (`SammleVorwuerfe`) and `PrivJurist` pick it up automatically via those boundaries.
+- **Spy evidence is a point total, not a count.** `AktiveSpionagen.GetDelikte()` accumulates the *strength* of each find (1–4, worded by `BeweisStaerkeText`), while the concrete accusations live per law in `Spieler.GetBegingVerbrechenX(i)`. Use the total for thresholds, the per-law delicts for listing charges.
+- **Privileges are gated by office but execute generically.** All office dependence sits in the single `if`-chain of `DynamischeSpieldaten.PrivilegienAktualisieren()`; the 35 `Priv*.cs` act on `SW.Dynamisch.GetAktHum()` and only `PrivEinkommen` reads the office. So granting someone another player's office privileges needs no change to the privileges themselves — see `GetAmtsPrivilegien`.
+- **Synthetic privilege entries** (no Lib privilege behind them, the client intercepts the ID) use IDs ≥ 10000, safely above `GetMaxPriv()`: `10000` Ahnentafel, `10001` Mätresse, `10002` Fechtunterricht, `10003` Duell, `10099` „Eigene Privilegien", `10100 + opferId` per blackmail.
+- **Person-map targeting modes** are routed by `Weltkarte.ShowDialogModus(mod)`: `0–5` back-room actions (`5` = blackmail), `8` trial, `12` poisoned wine, `13` executioner, `14` duel. A new mode touches four places: the `case` in `KontrahentenManager.PersonWasMachen`, the header in `AemterEbeneManager.GetTitel`, and the "close after a single action" lists in `Weltkarte.NachAemterEbene` and `AemterEbeneDialog`.
 
 ### Conventions & patterns
 
@@ -78,6 +111,9 @@ Godot dialog scripts implement these interfaces and are registered once in `Main
 - **Async dialogs**: dialogs return `Task<DialogResultGame>` (or `Task`) via a `TaskCompletionSource` that is resolved when a button closes the dialog (see `YesNoDialog.cs`). Callers `await SW.UI.YesNoQuestion.ShowDialogText(...)` or `await _main.SomeDialog.ShowDialog(...)`.
 - **Parchment dialog pattern**: most content dialogs are a `NinePatchRect` named `Rahmen` using `BackgroundDialog.png` (`uid://cq1th2hp46uxa`) with `patch_margin` 15 on all sides, dark text `Color(0.16, 0.11, 0.05)`, on the shared theme (`uid://bkne0d4c2vxts`). `ShowDialog()` shows the node + `SetProcessInput(true)` + returns a fresh `TaskCompletionSource.Task`; `_Input` closes on `ui_next_or_close`. Copy an existing one (`StatistikDialog`, `StadtInformationenDialog`) rather than starting fresh. For data-driven icon grids, author static labels in the `.tscn` and add the icons in code from the manager's data, scaling the WinForms Designer coordinates by a constant factor into the parchment.
 - **`TextureRect` sizing gotcha**: the default `ExpandMode.KeepSize` forces the texture's native size as the control minimum. To size an icon freely, set `ExpandMode = IgnoreSize` **before** assigning `Size` (object-initializer order matters — the initializer runs before post-construction assignments).
+- **Labels don't clip by default.** Without `autowrap_mode`, a `Label` draws straight past its rect instead of wrapping or truncating — side-by-side columns then overprint each other (this was the „Informationen zur Wahl" bug). For any label holding data of unknown length, set `autowrap_mode` and prefer a `VBoxContainer` over absolutely positioned columns. Conversely `clip_text = true` silently cuts long text off — that was the truncated duel message.
+- **Controls instantiated in code inherit the parchment theme** (dark brown text), which is invisible on a dark full-screen background. Give such buttons explicit theme overrides (`AddThemeColorOverride("font_color", …)`, `font_outline_color`, `outline_size`) and `SizeFlagsHorizontal = SizeFlags.ShrinkCenter` to centre them in a `VBoxContainer`. See `DuellDialog.StyleAuswahlKnopf`.
+- **Choice buttons in a dialog**: reuse the pattern from `GerichtDialog.WaehleOption` — instantiate `LinkButtonWithSounds.tscn` into a `VBoxContainer`, resolve a `TaskCompletionSource<int>` from `Pressed`, then clear the box. While such a choice is open, `ui_next_or_close` must do nothing (a button press is required); guard for it in the dialog's `OnNextOrClose`.
 - **Settings**: `ClientSettings` (`assets/scripts/managers/ClientSettings.cs`) wraps a Godot `ConfigFile` at `user://client.cfg` (audio volumes, feature toggles like `StatistikAnzeigen`/`TippsAnzeigen` that gate optional turn events). Audio runs through buses `Musik`/`Effekt`/`Stimmen` defined in `default_bus_layout.tres`; `AudioEinstellungen` applies the saved volumes.
 - **Show/hide pattern**: dialogs implement `ShowAndEnableInput()` / `HideAndDisableInput()` (visibility + `SetProcessInput`). The input action `ui_next_or_close` (right mouse button or Esc) closes/cancels the active dialog — every dialog handles it in `_Input`.
 - **Sounds**: `SoundManager` is an autoload singleton (`SoundManager.Instance`). UI controls must use the sound-enabled variants in `scenes/controls/` (`ButtonWithSounds`, `CheckBoxWithSounds`, `LinkButtonWithSounds`) instead of plain Godot controls.
@@ -87,4 +123,9 @@ Godot dialog scripts implement these interfaces and are registered once in `Main
 
 Version lives in `project.godot` (`application/config/version`, e.g. `0.1.0.0-godot`) — not bumped per feature. `CHANGELOG.md` is maintained bilingually (DE and EN sections) — update both when adding user-visible changes. The Lib keeps its own `CHANGELOG.md`: new changes are appended (bilingual, DE and EN bullets) under a single `## [Unreleased]` heading — **no** per-change version header or date. The Lib `<Version>` in the csproj may still be bumped per change; the `[Unreleased]` block is only cut into a dated `## <Version>` section when a real GitHub release is made.
 
-A feature that touches both repos is committed **Lib first, then Godot**: the two are separate git repos on their own feature branches (Lib on `feature/player-setup-manager`, Godot on `feature/new-game`), and the Godot commit's subject references the Lib version it depends on (e.g. `… (Conspiratio.Lib 3.46.0)`). Commit only when asked.
+A feature that touches both repos is committed **Lib first, then Godot**: the two are separate git repos, each on its own feature branch, and the Godot commit's subject references the Lib version it depends on (e.g. `… (Conspiratio.Lib 3.46.0)`). Commit only when asked.
+
+Two mechanics that have gone wrong before:
+
+- **Write commit messages with a POSIX heredoc**, `git commit -F - <<'EOF' … EOF`. The Bash tool is Git Bash, not PowerShell: a PowerShell here-string (`@'…'@`) is not parsed and ends up prefixing a stray `@` to the subject line.
+- **Don't reach for `git add -A` blindly.** The Lib working copy carries untracked files that are not part of the current change (e.g. `CONTRIBUTING.md`); stage the paths you touched, or check `git status` before committing and unstage the rest.
