@@ -34,10 +34,16 @@ public partial class PrivilegienDialog : DialogBase
 		_main = GetParentOrNull<Main>();
 	}
 
+	/// <summary>
+	/// ID des Erpressten, dessen Privilegien gerade angezeigt werden (Issue #13); 0 = die eigenen.
+	/// </summary>
+	private int _erpresstesOpfer;
+
 	public async Task ShowDialog(PrivilegienManager privilegienManager)
 	{
 		_privilegienManager = privilegienManager;
 		_privilegienManager.AktualisierePrivilegien();
+		_erpresstesOpfer = 0;
 		Fill();
 
 		await ShowAndAwait();
@@ -51,7 +57,11 @@ public partial class PrivilegienDialog : DialogBase
 			child.QueueFree();
 		}
 
-		var privilegien = _privilegienManager.GetPrivilegien();
+		// Im Fremdmodus (Issue #13) stehen statt der eigenen die Amtsprivilegien des Erpressten in der
+		// Liste – plus der Eintrag, mit dem der Spieler zu seinen eigenen zurückkehrt.
+		var privilegien = _erpresstesOpfer == 0
+			? _privilegienManager.GetPrivilegien()
+			: _privilegienManager.GetErpresstePrivilegien(_erpresstesOpfer);
 
 		_labelKeine.Visible = privilegien.Count == 0;
 		_vBoxPrivilegien.Visible = privilegien.Count > 0;
@@ -70,6 +80,22 @@ public partial class PrivilegienDialog : DialogBase
 
 	private async void OnPrivilegPressed(int privilegId)
 	{
+		// Erpressung (Issue #13): Umschalten auf die Amtsprivilegien eines Erpressten und wieder zurück.
+		if (privilegId == PrivilegienManager.EigenePrivilegienId)
+		{
+			_erpresstesOpfer = 0;
+			Fill();
+			return;
+		}
+
+		int opferId = PrivilegienManager.GetErpressungsOpferId(privilegId);
+		if (opferId != 0)
+		{
+			_erpresstesOpfer = opferId;
+			Fill();
+			return;
+		}
+
 		// Die immer verfügbare Ahnentafel ist kein echtes Lib-Privileg, sondern öffnet den Stammbaum-Dialog.
 		if (privilegId == PrivilegienManager.AhnentafelPrivilegId)
 		{

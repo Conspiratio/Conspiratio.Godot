@@ -78,9 +78,12 @@ public partial class Main : Control
 		var yesNoDialog = GetNode<YesNoDialog>(nameof(YesNoDialog));
 		var textDialog = GetNode<TextDialog>(nameof(TextDialog));
 
+		// Die Erpressungs-Entscheidung (Issue #13) läuft über den Ja/Nein-Dialog und braucht kein Feld.
+		var erpressungDialog = GetNode<ErpressungDialog>(nameof(ErpressungDialog));
+
 		// Alle aktionierbaren Privilegien-Dialoge sind jetzt echte Dialoge (kein Platzhalter mehr).
 		SW.UI.Initialisieren(yesNoDialog, textDialog, BeziehungenPflegenDialog, BauwerkStiftenDialog, FestGebenDialog,
-			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, UntergebeneDialog, DuellDialog);
+			Weltkarte, TestamentDialog, ProzentwertFestlegenDialog, UntergebeneDialog, DuellDialog, erpressungDialog);
 	}
 
 	/// <summary>

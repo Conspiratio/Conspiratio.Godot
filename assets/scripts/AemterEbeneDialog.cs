@@ -205,7 +205,7 @@ public partial class AemterEbeneDialog : DialogBase
 
 		// Wie im Original: nach einer einmaligen Aktion (Prozess = 8, Vergifteter Wein = 12, Duell = 14)
 		// schließt die Ämter-Ebene; bei den übrigen Modi bleibt sie offen.
-		if (_modus == 8 || _modus == 12 || _modus == 14)
+		if (_modus == 5 || _modus == 8 || _modus == 12 || _modus == 14)
 		{
 			Close(DialogResultGame.OK);
 			return;

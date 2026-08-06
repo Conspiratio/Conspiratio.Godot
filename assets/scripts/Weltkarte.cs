@@ -335,7 +335,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 	/// </summary>
 	private void NachAemterEbene()
 	{
-		if (_personenModusModus == 8 || _personenModusModus == 12 || _personenModusModus == 13 || _personenModusModus == 14)
+		if (_personenModusModus == 5 || _personenModusModus == 8 || _personenModusModus == 12 || _personenModusModus == 13 || _personenModusModus == 14)
 			Schliessen();
 		else if (Visible)
 			SetProcessInput(true);
