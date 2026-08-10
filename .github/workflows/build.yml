@@ -1,0 +1,57 @@
+name: Build - Godot-Client
+
+on:
+  push:
+  pull_request:
+
+# Bei mehreren Pushes hintereinander reicht der jeweils letzte Lauf.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Muss zur Godot-Version des Projekts passen (project.godot / Godot.NET.Sdk im csproj).
+  GODOT_VERSION: 4.7.1
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Godot herunterladen
+        run: |
+          NAME="Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64"
+          curl -sSfL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q godot.zip
+          chmod +x "${NAME}/${NAME}"
+          echo "GODOT=${PWD}/${NAME}/${NAME}" >> "$GITHUB_ENV"
+
+      # Legt .godot/ an und registriert die Szenen-UIDs. Muss vor dem Build laufen, weil der
+      # Godot.NET.Sdk sich auf diese Struktur stützt.
+      - name: Ressourcen importieren
+        run: $GODOT --headless --path . --import
+
+      # Scheitert unter anderem dann, wenn Conspiratio.Lib in der referenzierten Version nicht auf
+      # nuget.org veröffentlicht ist – genau die Reproduzierbarkeit, die hier abgesichert werden soll.
+      - name: Build
+        run: dotnet build --configuration Debug
+
+      # Instanziiert Main.tscn und führt alle _Ready()-Verdrahtungen aus. Godot beendet sich auch bei
+      # Skriptfehlern mit Code 0, deshalb wird die Ausgabe zusätzlich auf Fehler geprüft.
+      - name: Headless-Smoke-Test
+        run: |
+          set -o pipefail
+          $GODOT --headless --path . --quit "res://scenes/Main.tscn" 2>&1 | tee smoke.log
+          if grep -qE "SCRIPT ERROR|ERROR:|Failed to load|Cannot open" smoke.log; then
+            echo "::error::Der Headless-Smoke-Test hat Fehler gemeldet (siehe Ausgabe oben)."
+            exit 1
+          fi
