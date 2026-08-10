@@ -25,13 +25,22 @@ Headless smoke test (verifies scene loading and all `_Ready()` wiring; clean out
 & $godot --headless --path . --quit "res://scenes/Main.tscn"   # instantiate scene, run _Ready(), quit
 ```
 
-There are no automated tests in this repo. Playing requires the Godot 4.7 (.NET) editor; scenes (`.tscn`) and `project.godot` are edited there. When editing `.tscn` files textually, be careful: signal connections and NodePath exports live there.
+Playing requires the Godot 4.7 (.NET) editor; scenes (`.tscn`) and `project.godot` are edited there. When editing `.tscn` files textually, be careful: signal connections and NodePath exports live there.
+
+**Where the tests are:** this repo has none — the game rules are covered by xUnit tests in the Lib
+(`Conspiratio.Lib.Tests`, run with `dotnet test`). Since logic belongs in the Lib anyway, **a new feature
+is normally accompanied by tests there**, not here. What stays manual on this side is the presentation:
+scene loading, layout and interaction. `.github/workflows/build.yml` guards the mechanical part on every
+push — it builds and runs the headless smoke test, which also fails when the referenced
+`Conspiratio.Lib` version is not published on nuget.org.
 
 ### Verifying a change (the standard loop)
 
-Since there are no tests and the game needs the editor to play, changes are verified in three complementary ways:
+The game needs the editor to play, so changes are verified in three complementary ways:
 
-1. **Console harness for Lib managers** — before wiring a new Lib manager into a view, verify it in isolation with a throwaway console project that references the same `Conspiratio.Lib` version and exercises the manager against a real game state:
+1. **Rules go into a Lib test** (`Conspiratio.Lib.Tests`) — that is where a new manager's behaviour is
+   pinned down for good. For a quick look before the test exists, a throwaway console project referencing
+   the same `Conspiratio.Lib` version can exercise the manager against a real game state:
    ```csharp
    SW.Statisch.Initialisieren();
    var ngm = new NewGameManager(@"C:\temp");
