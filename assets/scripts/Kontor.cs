@@ -729,10 +729,35 @@ public partial class Kontor : Control
 			await ZeigeKiTodesfaelle();
 			new FamilieManager().VerheirateKis();
 			await ZeigeKampfereignisse();
+			await ZeigeKatastrophe();
 		}
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Katastrophen am Jahresende (Issue #37): Sturm, Flut, Brand, Erdbeben oder Pest suchen selten, dann
+	/// aber heftig eine Stadt, eine Grafschaft oder das ganze Reich heim. Verluste des Spielers werden
+	/// unter der Meldung aufgeführt.
+	/// </summary>
+	private async Task ZeigeKatastrophe()
+	{
+		var ergebnis = new KatastrophenManager().FuehreKatastrophenDurch();
+
+		if (!ergebnis.Eingetreten)
+			return;
+
+		string text = ergebnis.Meldung;
+
+		if (ergebnis.SpielerMeldungen.Count > 0)
+			text += "\n\n" + string.Join("\n", ergebnis.SpielerMeldungen);
+
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Tod);
+		await _main.RundenNachrichtenDialog.ShowDialog("Katastrophe\n\n" + text);
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
+
+		UpdateHud();
 	}
 
 	/// <summary>
