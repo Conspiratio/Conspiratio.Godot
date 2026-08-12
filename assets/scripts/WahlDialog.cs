@@ -31,10 +31,16 @@ public partial class WahlDialog : Control
 
 	private Label _labelTitle;
 	private Label _labelInfo;
+	private Label _labelHinweis;
 	private VBoxContainer _vBoxKandidaten;
 	private VBoxContainer _vBoxStimmen;
 	private controls.LinkButtonWithSounds _linkWeiter;
 	private PackedScene _linkButtonScene;
+
+	/// <summary>Schriftfarbe auf dem dunklen Ratstisch – das Standardthema wäre dort unlesbar.</summary>
+	private static readonly Color Goldschrift = new(0.93f, 0.83f, 0.55f);
+	private static readonly Color GoldschriftHell = new(1f, 0.95f, 0.7f);
+	private static readonly Color Randfarbe = new(0.05f, 0.04f, 0.02f);
 
 	private AemterManager _aemterManager;
 	private readonly List<Label> _kandidatenLabels = new List<Label>();
@@ -47,6 +53,7 @@ public partial class WahlDialog : Control
 	{
 		_labelTitle = GetNode<Label>(LabelTitlePath);
 		_labelInfo = GetNode<Label>(LabelInfoPath);
+		_labelHinweis = GetNode<Label>("LabelHinweis");
 		_vBoxKandidaten = GetNode<VBoxContainer>(VBoxKandidatenPath);
 		_vBoxStimmen = GetNode<VBoxContainer>(VBoxStimmenPath);
 		_linkWeiter = GetNode<controls.LinkButtonWithSounds>(LinkWeiterPath);
@@ -177,6 +184,12 @@ public partial class WahlDialog : Control
 				HorizontalAlignment = HorizontalAlignment.Center
 			};
 
+			// Die Kandidaten stehen auf dem dunklen Ratstisch – ohne Goldschrift wären sie unlesbar.
+			label.AddThemeColorOverride("font_color", Goldschrift);
+			label.AddThemeColorOverride("font_outline_color", Randfarbe);
+			label.AddThemeConstantOverride("outline_size", 6);
+			label.AddThemeFontSizeOverride("font_size", 30);
+
 			_kandidatenLabels.Add(label);
 			_vBoxKandidaten.AddChild(label);
 		}
@@ -198,6 +211,13 @@ public partial class WahlDialog : Control
 		{
 			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
 			button.Text = "Für " + _kandidaten[i].Name + " stimmen";
+
+			button.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+			button.AddThemeColorOverride("font_color", Goldschrift);
+			button.AddThemeColorOverride("font_hover_color", GoldschriftHell);
+			button.AddThemeColorOverride("font_outline_color", Randfarbe);
+			button.AddThemeConstantOverride("outline_size", 6);
+			button.AddThemeFontSizeOverride("font_size", 26);
 
 			int index = i;
 			button.Pressed += () => _stimme?.TrySetResult(index);
@@ -222,6 +242,7 @@ public partial class WahlDialog : Control
 	private async Task WarteWeiter()
 	{
 		_linkWeiter.Visible = true;
+		_labelHinweis.Visible = true;
 		_weiter = new TaskCompletionSource<bool>();
 		await _weiter.Task;
 		_weiter = null;
@@ -229,7 +250,9 @@ public partial class WahlDialog : Control
 
 	private async Task<int> WarteAufStimme()
 	{
+		// Während der Stimmabgabe ist ein Knopf zu drücken – „Weiter" und sein Hinweis wären irreführend.
 		_linkWeiter.Visible = false;
+		_labelHinweis.Visible = false;
 		ZeigeStimmButtons();
 
 		_stimme = new TaskCompletionSource<int>();

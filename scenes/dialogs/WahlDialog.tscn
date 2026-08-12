@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://wahldlg0001"]
 
 [ext_resource type="Script" path="res://assets/scripts/WahlDialog.cs" id="1_wahl"]
-[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_wahl"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintAbstimmung.png" id="2_wahl"]
 [ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_wahl"]
 [ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_wahl"]
 
@@ -15,91 +15,91 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_wahl")
-LabelTitlePath = NodePath("Panel/NinePatchRect/LabelTitle")
-LabelInfoPath = NodePath("Panel/NinePatchRect/LabelInfo")
-VBoxKandidatenPath = NodePath("Panel/NinePatchRect/VBoxKandidaten")
-VBoxStimmenPath = NodePath("Panel/NinePatchRect/VBoxStimmen")
-LinkWeiterPath = NodePath("Panel/NinePatchRect/LinkWeiter")
+LabelTitlePath = NodePath("LabelTitle")
+LabelInfoPath = NodePath("LabelInfo")
+VBoxKandidatenPath = NodePath("VBoxKandidaten")
+VBoxStimmenPath = NodePath("VBoxStimmen")
+LinkWeiterPath = NodePath("LinkWeiter")
 
-[node name="Panel" type="Panel" parent="."]
+[node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -450.0
-offset_top = -320.0
-offset_right = 450.0
-offset_bottom = 320.0
-grow_horizontal = 2
-grow_vertical = 2
 texture = ExtResource("2_wahl")
-patch_margin_left = 15
-patch_margin_top = 15
-patch_margin_right = 15
-patch_margin_bottom = 15
 
-[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+[node name="LabelTitle" type="Label" parent="."]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 30.0
-offset_right = 858.0
-offset_bottom = 70.0
+offset_left = 220.0
+offset_top = 26.0
+offset_right = 1380.0
+offset_bottom = 96.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 38
 text = "Wahl"
 horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="LabelInfo" type="Label" parent="Panel/NinePatchRect"]
+[node name="VBoxKandidaten" type="VBoxContainer" parent="."]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 90.0
-offset_right = 858.0
-offset_bottom = 180.0
+offset_left = 500.0
+offset_top = 250.0
+offset_right = 1100.0
+offset_bottom = 510.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="LabelInfo" type="Label" parent="."]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 545.0
+offset_right = 1300.0
+offset_bottom = 650.0
+theme_override_colors/font_color = Color(0.93, 0.83, 0.55, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
 text = ""
 horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="VBoxKandidaten" type="VBoxContainer" parent="Panel/NinePatchRect"]
+[node name="VBoxStimmen" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 0
-offset_left = 250.0
-offset_top = 200.0
-offset_right = 650.0
-offset_bottom = 400.0
+offset_left = 400.0
+offset_top = 670.0
+offset_right = 1200.0
+offset_bottom = 860.0
+theme = ExtResource("4_wahl")
 theme_override_constants/separation = 10
 alignment = 1
 
-[node name="VBoxStimmen" type="VBoxContainer" parent="Panel/NinePatchRect"]
-visible = false
+[node name="LinkWeiter" parent="." instance=ExtResource("3_wahl")]
 layout_mode = 0
-offset_left = 250.0
-offset_top = 410.0
-offset_right = 650.0
-offset_bottom = 560.0
-theme_override_constants/separation = 8
-alignment = 1
-
-[node name="LinkWeiter" parent="Panel/NinePatchRect" instance=ExtResource("3_wahl")]
-layout_mode = 0
-offset_left = 370.0
-offset_top = 575.0
-offset_right = 550.0
-offset_bottom = 615.0
+offset_left = 710.0
+offset_top = 700.0
+offset_right = 890.0
+offset_bottom = 745.0
 theme = ExtResource("4_wahl")
+theme_override_colors/font_color = Color(0.93, 0.83, 0.55, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.7, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.02, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 28
 text = "Weiter"
 
-[node name="LabelHinweis" type="Label" parent="Panel/NinePatchRect"]
+[node name="LabelHinweis" type="Label" parent="."]
 layout_mode = 0
-offset_left = 42.0
-offset_top = 615.0
-offset_right = 858.0
-offset_bottom = 640.0
+offset_left = 400.0
+offset_top = 760.0
+offset_right = 1200.0
+offset_bottom = 795.0
+theme_override_colors/font_color = Color(0.85, 0.78, 0.6, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.04, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 22
 text = "(Weiter oder Rechtsklick)"
 horizontal_alignment = 1
