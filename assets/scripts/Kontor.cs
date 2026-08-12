@@ -728,8 +728,8 @@ public partial class Kontor : Control
 			new RundenEndeManager().FuehreKiStraftatenDurch();
 			await ZeigeKiTodesfaelle();
 			new FamilieManager().VerheirateKis();
-			await ZeigeKampfereignisse();
 			await ZeigeKatastrophe();
+			await ZeigeKampfereignisse();
 		}
 
 		_rundenManager.SchalteZumNaechstenSpieler();
