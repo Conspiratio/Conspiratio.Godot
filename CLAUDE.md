@@ -83,6 +83,28 @@ The game needs the editor to play, so changes are verified in three complementar
    - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
      with a fixed `--seed`, so a failing run can be replayed exactly. `--seed=0` picks a random one and
      prints it — use that to hunt for new failures, then replay with the printed value.
+   - Sound is muted (master bus, at runtime only — the player's saved volumes are untouched). `--mit-ton`
+     turns it back on.
+
+5. **Visual acceptance** — the same play-through with `--screenshots` (or `--bilder=<dir>`) drops a few
+   states per view as PNGs, giving a visual record of every screen. This is what catches a shifted layout
+   or a clipped label that no assertion notices. **Needs a renderer, so not headless** — the headless
+   driver is a dummy that never draws; the driver says so and skips instead of writing black images.
+   ```bash
+   xvfb-run -a --server-args="-screen 0 1600x900x24" \
+     godot --path . --rendering-method gl_compatibility --rendering-driver opengl3 \
+     "res://scenes/E2eTest.tscn" -- --jahre=4 --spieler=2 --bilder="$PWD/e2e-bilder"
+   ```
+   Locally, drop `xvfb-run` and the driver flags. CI runs this on every push and uploads the images as
+   the `ansichten` artifact (also on failure — that is when they are most useful).
+   - **`gl_compatibility` renders pixel-identical to Vulkan here** (measured: 0 of 160 200 sampled pixels
+     differ, max channel delta 1) because the client is pure 2D. So the CI renderer costs nothing
+     visually, and Vulkan stays the local default.
+   - Not yet established: llvmpipe (software rasterizer) versus a real GPU. Expected identical or ±1 for
+     2D blits, but if you ever add reference images for a regression diff, **generate them in CI**, not
+     locally — otherwise the comparison is between two rasterizers rather than two code states.
+   - `MaxBilderProAnsicht` caps the images per view; without it a news screen with dozens of messages
+     would produce dozens of near-identical PNGs.
 
 **Two testing habits that repeatedly paid off:**
 

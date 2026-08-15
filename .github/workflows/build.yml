@@ -71,3 +71,40 @@ jobs:
             echo "::error::Der End-to-End-Durchlauf hat Fehler gemeldet (siehe Ausgabe oben)."
             exit 1
           fi
+
+      # Derselbe Durchlauf noch einmal, diesmal mit Bild: Von jeder Ansicht werden ein paar Zustände als
+      # PNG abgelegt und als Artefakt hochgeladen – ein visuelles Protokoll jedes Pushes, in dem sich ein
+      # verrutschtes Layout oder ein abgeschnittener Text erkennen lässt, den kein Test bemerkt.
+      #
+      # Warum nicht headless: Godots Headless-Modus hat einen Dummy-Rendertreiber, der nicht zeichnet.
+      # Also läuft der Client hier vor einem virtuellen Bildschirm (Xvfb) und rendert über Mesa in
+      # Software. Der OpenGL-Kompatibilitätsmodus ist dafür der einfachere Weg als Vulkan über lavapipe –
+      # und er ist nachgemessen pixelgleich zum sonst genutzten Vulkan-Pfad, weil der Client reines 2D ist.
+      #
+      # Weniger Jahre als oben: Der eigentliche Ablauf ist im Schritt davor schon geprüft, hier geht es
+      # nur um die Ansichten, und die sind je Ansicht ohnehin gedeckelt.
+      - name: Visuelle Abnahme
+        timeout-minutes: 15
+        run: |
+          set -o pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb libgl1 libglu1-mesa
+          xvfb-run -a --server-args="-screen 0 1600x900x24" \
+            $GODOT --path . --rendering-method gl_compatibility --rendering-driver opengl3 \
+            "res://scenes/E2eTest.tscn" -- \
+            --jahre=4 --spieler=2 --bilder="$PWD/e2e-bilder" 2>&1 | tee bilder.log
+          echo "Abgelegte Bilder: $(ls -1 e2e-bilder/*.png 2>/dev/null | wc -l)"
+          if grep -qE "SCRIPT ERROR|Unhandled exception" bilder.log; then
+            echo "::error::Die visuelle Abnahme hat Fehler gemeldet (siehe Ausgabe oben)."
+            exit 1
+          fi
+
+      # Auch bei einem Fehlschlag hochladen – dann zeigen die Bilder gerade, woran es lag.
+      - name: Screenshots als Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ansichten
+          path: e2e-bilder/
+          if-no-files-found: warn
+          retention-days: 14

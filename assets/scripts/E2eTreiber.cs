@@ -14,13 +14,23 @@ namespace Conspiratio.Godot.assets.scripts;
 /// <summary>
 /// Automatischer Durchlauf des Clients (End-to-End): legt ein Spiel an, spielt eine Reihe von Jahren im
 /// Hot-Seat, besucht dabei die Bereiche des Kontors und prüft am Ende, dass sich der Spielstand
-/// speichern und wieder laden lässt. Läuft absichtlich **headless** – es entstehen keine Bilder, geprüft
-/// werden Ablauf und Spielzustand. Damit ist der Durchlauf CI-tauglich.
+/// speichern und wieder laden lässt. Geprüft werden Ablauf und Spielzustand; das genügt headless und
+/// macht den Durchlauf CI-tauglich.
 ///
 /// <code>godot --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --spieler=2 --verbose</code>
 ///
 /// Weitere Schalter: <c>--ohne-bereiche</c> überspringt den Rundgang durch Stadt, Schreibstube usw.,
-/// <c>--ohne-speichern</c> die Speicher-/Ladeprobe.
+/// <c>--ohne-speichern</c> die Speicher-/Ladeprobe, <c>--mit-ton</c> lässt den sonst stummen Ton an.
+///
+/// Mit <c>--screenshots</c> legt der Durchlauf zusätzlich von jeder Ansicht ein Bild ab und wird damit
+/// zur visuellen Abnahme (Zielordner über <c>--bilder=&lt;pfad&gt;</c>, sonst <c>user://e2e-bilder</c>).
+/// Das setzt einen laufenden Renderer voraus, geht also **nicht** headless – dessen Dummy-Treiber
+/// zeichnet nicht. In der CI läuft dafür ein virtueller Bildschirm:
+///
+/// <code>xvfb-run -a godot --path . --rendering-method gl_compatibility --rendering-driver opengl3 \
+///   "res://scenes/E2eTest.tscn" -- --screenshots</code>
+///
+/// Der Kompatibilitätsmodus ist nachgemessen pixelgleich zu Vulkan – der Client ist reines 2D.
 ///
 /// Der Treiber beendet den Prozess mit Code 1, sobald etwas schiefgeht – so schlägt der CI-Schritt fehl.
 ///
@@ -67,7 +77,18 @@ public partial class E2eTreiber : Node
 		"AreaHandel", "AreaSchreibstube", "AreaKirche", "AreaHinterzimmer", "AreaKampf"
 	};
 
+	/// <summary>
+	/// So viele Bilder werden je Ansicht höchstens abgelegt. Ohne Deckel entstünden aus einem
+	/// Nachrichtenschirm mit dutzenden Meldungen ebenso viele nahezu gleiche Bilder; ein paar Zustände
+	/// je Ansicht sind aussagekräftig, alles darüber ist nur Ballast im Artefakt.
+	/// </summary>
+	private const int MaxBilderProAnsicht = 3;
+
 	private readonly List<string> _fehler = new();
+
+	/// <summary>Zählt je Ansicht die schon abgelegten Bilder (siehe <see cref="MaxBilderProAnsicht"/>).</summary>
+	private readonly Dictionary<string, int> _bilderJeAnsicht = new();
+
 	private Main _main;
 	private string _letzterDialog = "";
 	private int _framesSeitKlick;
@@ -75,10 +96,13 @@ public partial class E2eTreiber : Node
 	private int _knopfKlicks;
 	private int _besuchteBereiche;
 	private int _gespielteZuege;
+	private int _bilder;
 
 	private bool _ausfuehrlich;
 	private bool _mitBereichen = true;
 	private bool _mitSpeicherprobe = true;
+	private bool _mitBildern;
+	private string _bilderOrdner;
 
 	public override async void _Ready()
 	{
@@ -95,6 +119,14 @@ public partial class E2eTreiber : Node
 		_ausfuehrlich = Array.IndexOf(argumente, "--verbose") >= 0;
 		_mitBereichen = Array.IndexOf(argumente, "--ohne-bereiche") < 0;
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
+
+		// Ton aus: Ein Durchlauf im Fenstermodus lärmt sonst minutenlang (Musikwechsel, Klickgeräusche,
+		// Duellstimmen). Stummgeschaltet wird nur der Master-Bus zur Laufzeit – die gespeicherten
+		// Lautstärken des Spielers bleiben unangetastet. Mit --mit-ton bleibt der Ton an.
+		if (Array.IndexOf(argumente, "--mit-ton") < 0)
+			AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), true);
+
+		BereiteBilderVor(argumente);
 
 		GD.Print("=== E2E-Durchlauf: " + jahre + " Jahre, " + spieler + " Spieler, Startwert " + seed + " ===");
 
@@ -201,6 +233,8 @@ public partial class E2eTreiber : Node
 			if (_ausfuehrlich)
 				GD.Print("  Bereich " + name + " → " + bildschirm);
 
+			await Schiesse(bildschirm);
+
 			if (!await KehreZumKontorZurueck(name))
 				return false;
 
@@ -259,7 +293,7 @@ public partial class E2eTreiber : Node
 
 			if (dialog != null)
 			{
-				VersucheZuBedienen(dialog);
+				await VersucheZuBedienen(dialog);
 				ruhig = 0;
 			}
 			else if (_main.Kontor.IsProcessingInput())
@@ -305,7 +339,7 @@ public partial class E2eTreiber : Node
 
 			if (dialog != null)
 			{
-				VersucheZuBedienen(dialog);
+				await VersucheZuBedienen(dialog);
 			}
 			else if (SW.Dynamisch.GetAktuellesJahr() != jahrVorher
 			         || SW.Dynamisch.GetAktiverSpieler() != spielerVorher)
@@ -399,7 +433,7 @@ public partial class E2eTreiber : Node
 
 			if (dialog != null)
 			{
-				VersucheZuBedienen(dialog);
+				await VersucheZuBedienen(dialog);
 				ruhig = 0;
 			}
 			else
@@ -409,7 +443,10 @@ public partial class E2eTreiber : Node
 				ruhig++;
 
 				if (ruhig >= RuheFrames && _main.Kontor.IsProcessingInput())
+				{
+					await Schiesse("Kontor");
 					return true;
+				}
 			}
 
 			await NaechsterFrame();
@@ -439,7 +476,7 @@ public partial class E2eTreiber : Node
 	/// Ein neuer Dialog wird sofort bedient; bei demselben wird gewartet (<see cref="KlickAbstand"/>).
 	/// Liefert, ob geklickt wurde.
 	/// </summary>
-	private bool VersucheZuBedienen(Control dialog)
+	private async Task<bool> VersucheZuBedienen(Control dialog)
 	{
 		_framesSeitKlick++;
 
@@ -451,6 +488,9 @@ public partial class E2eTreiber : Node
 		{
 			return false;
 		}
+
+		// Erst das Bild, dann der Klick – sonst hielte es bereits den Folgezustand fest.
+		await Schiesse(dialog.Name);
 
 		_framesSeitKlick = 0;
 		Bediene(dialog);
@@ -551,6 +591,79 @@ public partial class E2eTreiber : Node
 		}
 	}
 
+	/// <summary>
+	/// Wertet die Bild-Schalter aus und legt den Zielordner an. Ohne Renderer bleibt die Aufnahme aus:
+	/// Der Headless-Treiber zeichnet nicht, ein Bild von ihm wäre leer und die Prüfung damit wertlos –
+	/// besser eine deutliche Meldung als hunderte schwarze PNGs.
+	/// </summary>
+	private void BereiteBilderVor(string[] argumente)
+	{
+		string ordner = LiesText(argumente, "--bilder=");
+		bool gewuenscht = ordner != null || Array.IndexOf(argumente, "--screenshots") >= 0;
+
+		if (!gewuenscht)
+			return;
+
+		if (DisplayServer.GetName() == "headless")
+		{
+			GD.PrintErr("Bilder wurden angefordert, aber Godot läuft headless – dort gibt es keinen "
+			            + "Renderer. Ohne --headless starten (in der CI über xvfb-run).");
+			return;
+		}
+
+		_bilderOrdner = ProjectSettings.GlobalizePath(ordner ?? "user://e2e-bilder");
+
+		try
+		{
+			Directory.CreateDirectory(_bilderOrdner);
+		}
+		catch (Exception ex)
+		{
+			_fehler.Add("Der Bildordner " + _bilderOrdner + " ließ sich nicht anlegen: " + ex.Message);
+			return;
+		}
+
+		_mitBildern = true;
+		GD.Print("Bilder je Ansicht: " + MaxBilderProAnsicht + " → " + _bilderOrdner);
+	}
+
+	/// <summary>
+	/// Legt ein Bild der aktuellen Ansicht ab, solange von ihr noch nicht genug vorliegen. Vor der
+	/// Aufnahme vergehen zwei Frames, damit ein gerade gesetzter Text auch wirklich gezeichnet ist.
+	/// </summary>
+	private async Task Schiesse(string ansicht)
+	{
+		if (!_mitBildern)
+			return;
+
+		_bilderJeAnsicht.TryGetValue(ansicht, out int bisher);
+
+		if (bisher >= MaxBilderProAnsicht)
+			return;
+
+		_bilderJeAnsicht[ansicht] = bisher + 1;
+
+		await NaechsterFrame();
+		await NaechsterFrame();
+
+		string datei = Path.Combine(_bilderOrdner, $"{++_bilder:D3}_{ansicht}_{bisher + 1}.png");
+		var fehler = GetViewport().GetTexture().GetImage().SavePng(datei);
+
+		if (fehler != Error.Ok)
+			_fehler.Add("Das Bild " + datei + " ließ sich nicht schreiben (" + fehler + ").");
+	}
+
+	private static string LiesText(string[] argumente, string praefix)
+	{
+		foreach (string argument in argumente)
+		{
+			if (argument.StartsWith(praefix))
+				return argument.Substring(praefix.Length);
+		}
+
+		return null;
+	}
+
 	private static int LiesZahl(string[] argumente, string praefix, int standard, int minimum = 1)
 	{
 		foreach (string argument in argumente)
@@ -573,6 +686,9 @@ public partial class E2eTreiber : Node
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.
 		GD.Print("Klicks in Dialogen:" + _dialogKlicks + " (davon Knöpfe: " + _knopfKlicks + ")");
 		GD.Print("Besuchte Bereiche: " + _besuchteBereiche);
+
+		if (_mitBildern)
+			GD.Print("Bilder:            " + _bilder + " von " + _bilderJeAnsicht.Count + " Ansichten");
 
 		if (_fehler.Count == 0)
 		{
