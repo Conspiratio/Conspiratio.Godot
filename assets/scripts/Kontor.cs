@@ -697,20 +697,18 @@ public partial class Kontor : Control
 		// Schuldenprozess (nur für einen lebenden Spieler)
 		else if (zugNachrichten.MussSichVorGlaeubigernVerantworten())
 		{
-			await _main.RundenNachrichtenDialog.ShowDialog("Wegen Euren zahlreichen Schulden müsst Ihr Euch nun vor Euren Gläubigern verantworten!");
-
+			// Wie im Original vor dem Ratstisch: die Gläubiger stimmen einzeln ab, jede Stimme wird per
+			// Rechtsklick aufgedeckt (Ort_Abstimmung), und ein Schuldspruch führt anschließend auf den
+			// Kerker-Bildschirm.
 			var prozess = zugNachrichten.FuehreSchuldenProzessDurch();
 
-			string urteile = "Die Abstimmung Eurer Gläubiger\n\n";
+			await _main.SchuldenProzessDialog.ZeigeProzess(prozess);
 
-			for (int i = 0; i < prozess.GeschworenenNamen.Count; i++)
-				urteile += prozess.GeschworenenNamen[i] + ": " + (prozess.Urteile[i] ? "schuldig!" : "nicht schuldig!") + "\n";
-
-			await _main.RundenNachrichtenDialog.ShowDialog(urteile);
-
-			await _main.RundenNachrichtenDialog.ShowDialog(prozess.Schuldig
-				? "Aufgrund Eurer zahlreichen Schulden müsst Ihr nächstes\nJahr im Schuldturm verbringen"
-				: "Ihr seid noch einmal mit dem Schrecken davon gekommen...");
+			if (prozess.Schuldig)
+			{
+				await _main.SchuldturmDialog.ShowDialog(
+					"Aufgrund Eurer zahlreichen Schulden müsst Ihr nächstes\nJahr im Schuldturm verbringen");
+			}
 
 			UpdateHud();
 		}

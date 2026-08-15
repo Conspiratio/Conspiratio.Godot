@@ -67,6 +67,7 @@
 [ext_resource type="PackedScene" uid="uid://bestenlistedlg1" path="res://scenes/dialogs/BestenlisteDialog.tscn" id="64_bldg"]
 [ext_resource type="PackedScene" uid="uid://cduelldialog1" path="res://scenes/dialogs/DuellDialog.tscn" id="65_duel"]
 [ext_resource type="Script" path="res://assets/scripts/ErpressungDialog.cs" id="66_erpr"]
+[ext_resource type="PackedScene" uid="uid://schuldproz001" path="res://scenes/dialogs/SchuldenProzessDialog.tscn" id="67_sprz"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -252,6 +253,10 @@ visible = false
 
 [node name="SchuldturmDialog" parent="." instance=ExtResource("54_schu")]
 visible = false
+
+[node name="SchuldenProzessDialog" parent="." instance=ExtResource("67_sprz")]
+visible = false
+
 
 [node name="JahresbuchDialog" parent="." instance=ExtResource("55_jb")]
 visible = false

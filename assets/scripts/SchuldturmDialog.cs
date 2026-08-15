@@ -22,23 +22,34 @@ public partial class SchuldturmDialog : DialogBase
 	[Export]
 	public NodePath LabelPlayerNameAndOfficePath { get; set; }
 
+	/// <summary>Die Meldung während des Aufenthalts – die Ankündigung nach dem Prozess lautet anders.</summary>
+	private const string TextAufenthalt = "Ihr verbringt dieses Jahr im Schuldturm...";
+
 	private Label _labelTaler;
 	private Label _labelPlaceDate;
 	private Label _labelPlayerNameAndOffice;
+	private Label _labelText;
 
 	protected override void OnReady()
 	{
 		_labelTaler = GetNode<Label>(LabelTalerPath);
 		_labelPlaceDate = GetNode<Label>(LabelPlaceDatePath);
 		_labelPlayerNameAndOffice = GetNode<Label>(LabelPlayerNameAndOfficePath);
+		_labelText = GetNode<Label>("LabelText");
 	}
 
-	public Task ShowDialog()
+	/// <summary>
+	/// Zeigt den Kerker. Ohne Text steht dort die Meldung zum laufenden Aufenthalt; nach einem verlorenen
+	/// Schuldenprozess reicht der Aufrufer stattdessen die Ankündigung herein (wie im Original, das nach
+	/// dem Urteil ebenfalls auf diesen Bildschirm wechselt).
+	/// </summary>
+	public Task ShowDialog(string text = null)
 	{
 		var spieler = SW.Dynamisch.GetAktHum();
 		_labelTaler.Text = spieler.GetTalerFormatiert();
 		_labelPlaceDate.Text = "Schuldturm A.D. " + SW.Dynamisch.GetAktuellesJahr();
 		_labelPlayerNameAndOffice.Text = spieler.GetKompletterName();
+		_labelText.Text = text ?? TextAufenthalt;
 
 		return ShowAndAwait();
 	}

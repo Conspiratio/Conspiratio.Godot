@@ -70,16 +70,16 @@ The game needs the editor to play, so changes are verified in three complementar
    save/load round-trip. `--ohne-bereiche` / `--ohne-speichern` switch those off.
    Five things it taught us, worth knowing before touching it:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()`. The news screen
-     stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
+	 stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
    - Synthetic input must send press **and** release (`InputEventAction`). Dialogs test
-     `Input.IsActionPressed`, so a stuck-pressed action re-fires on every later event.
+	 `Input.IsActionPressed`, so a stuck-pressed action re-fires on every later event.
    - Wait for a quiet phase before pressing "end turn": the turn-begin chain is a series of `async void`
-     steps, and pressing mid-flight interleaves two flows.
+	 steps, and pressing mid-flight interleaves two flows.
    - **Never click the same dialog every frame.** Staged sequences wait for the button to be *released*
-     (`while (Input.IsActionPressed(...))` in `DuellDialog`); a per-frame click keeps them stuck forever.
-     The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
+	 (`while (Input.IsActionPressed(...))` in `DuellDialog`); a per-frame click keeps them stuck forever.
+	 The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
    - Budget generously: an interactive duel takes over a minute of taunts, so a run legitimately varies
-     between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
+	 between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
    - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
      with a fixed `--seed`, so a failing run can be replayed exactly. `--seed=0` picks a random one and
      prints it — use that to hunt for new failures, then replay with the printed value.
