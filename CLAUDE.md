@@ -61,7 +61,10 @@ The game needs the editor to play, so changes are verified in three complementar
    ```bash
    godot --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --spieler=2 --verbose
    ```
-   It creates the game through the same Lib managers the menus use, then drives the client: every
+   It creates the game **through the menus, like a player does** — main menu → "local game" → name the
+   game and pick the player count → per player name, gender, religion and banner (`--ohne-menue` falls
+   back to building it straight through the Lib managers). That is the only way those twelve entry
+   screens get exercised at all. Then it drives the client: every
    overlay dialog is in the group **`Dialogs`**, so the driver finds whatever is open without knowing
    it — pressing the first visible button, or sending `ui_next_or_close`. New dialogs are covered
    automatically. Per turn it also tours the Kontor areas (`AreaHandel`, `AreaSchreibstube`,
@@ -98,6 +101,12 @@ The game needs the editor to play, so changes are verified in three complementar
      prints it — use that to hunt for new failures, then replay with the printed value.
    - Sound is muted (master bus, at runtime only — the player's saved volumes are untouched). `--mit-ton`
      turns it back on.
+   - Menu screens drive themselves through button signals and never enable `_Input`, so waiting on
+     `IsProcessingInput()` there waits forever — `WarteAufSichtbar(..., brauchtEingabe: false)`.
+     Their controls are located by name (`FindChild`), not by node path, so a re-nesting in the scene
+     does not silently break the driver.
+   - "Report a problem" is on the blocked list: it zips a report and opens the system mail client —
+     that tests the environment, not the game, and behaves differently per OS.
 
 5. **Visual acceptance** — the same play-through with `--screenshots` (or `--bilder=<dir>`) drops a few
    states per view as PNGs, giving a visual record of every screen. This is what catches a shifted layout

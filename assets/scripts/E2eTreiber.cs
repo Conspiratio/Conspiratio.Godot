@@ -21,6 +21,7 @@ namespace Conspiratio.Godot.assets.scripts;
 ///
 /// Weitere Schalter: <c>--ohne-bereiche</c> überspringt den Rundgang durch Stadt, Schreibstube usw.,
 /// <c>--ohne-speichern</c> die Speicher-/Ladeprobe, <c>--mit-ton</c> lässt den sonst stummen Ton an.
+/// <c>--ohne-menue</c> legt das Spiel wieder direkt über die Lib-Manager an statt über die Menüs.
 ///
 /// In den Bereichen werden auch deren Knöpfe betätigt (Handel, Bewerbung, Kredit, Spionage …), nicht nur
 /// der Bereich betreten – das erreicht den Großteil der Spiellogik. <c>--ohne-aktionen</c> beschränkt den
@@ -38,8 +39,8 @@ namespace Conspiratio.Godot.assets.scripts;
 ///
 /// Der Treiber beendet den Prozess mit Code 1, sobald etwas schiefgeht – so schlägt der CI-Schritt fehl.
 ///
-/// Wie er den Client bedient: Das Spiel wird über dieselben Lib-Manager angelegt, die auch die Menüs
-/// benutzen, dann übernimmt <see cref="Kontor.StartGame"/>. Alle Overlay-Dialoge liegen in der Gruppe
+/// Wie er den Client bedient: Das Spiel entsteht wie beim Spieler über Hauptmenü, Spielanlage und
+/// Spielererstellung (<see cref="LegeSpielUeberMenueAn"/>). Alle Overlay-Dialoge liegen in der Gruppe
 /// „Dialogs", sodass er jeden offenen Dialog findet, ohne ihn zu kennen: Ist ein Knopf da, drückt er
 /// ihn, sonst schickt er ui_next_or_close. Neue Dialoge werden dadurch automatisch mitbedient.
 /// </summary>
@@ -132,7 +133,13 @@ public partial class E2eTreiber : Node
 	{
 		"AreaFenster",   // „Geld zum Fenster rauswerfen": nimmt den Spieler aus dem Spiel
 		"ButtonBeenden",
-		"ButtonHauptmenue"
+		"ButtonHauptmenue",
+
+		// „Fehler melden" packt ein ZIP und öffnet das Mailprogramm des Systems. Beides hat in einem
+		// automatischen Lauf nichts zu suchen: Es prüft nicht das Spiel, sondern die Umgebung, und
+		// verhält sich je nach Betriebssystem anders.
+		"ButtonFeedback",
+		"ButtonFehlerMelden"
 	};
 
 	private readonly List<string> _fehler = new();
@@ -180,6 +187,10 @@ public partial class E2eTreiber : Node
 	private bool _ausfuehrlich;
 	private bool _mitBereichen = true;
 	private bool _mitAktionen = true;
+	private bool _ueberMenue = true;
+
+	/// <summary>Steht ein Spielzustand bereit? Erst dann darf der Bericht ihn auswerten.</summary>
+	private bool _spielLaeuft;
 	private bool _mitSpeicherprobe = true;
 	private bool _mitBildern;
 	private string _bilderOrdner;
@@ -201,6 +212,7 @@ public partial class E2eTreiber : Node
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
 
 		_mitAktionen = Array.IndexOf(argumente, "--ohne-aktionen") < 0;
+		_ueberMenue = Array.IndexOf(argumente, "--ohne-menue") < 0;
 
 		// Ton aus: Ein Durchlauf im Fenstermodus lärmt sonst minutenlang (Musikwechsel, Klickgeräusche,
 		// Duellstimmen). Stummgeschaltet wird nur der Master-Bus zur Laufzeit – die gespeicherten
@@ -233,8 +245,18 @@ public partial class E2eTreiber : Node
 		AddChild(_main);
 		await NaechsterFrame();
 
-		LegeSpielAn(spieler, seed);
-		_main.Kontor.StartGame();
+		if (_ueberMenue)
+		{
+			if (!await LegeSpielUeberMenueAn(spieler, seed))
+				return;
+		}
+		else
+		{
+			LegeSpielAn(spieler, seed);
+			_main.Kontor.StartGame();
+		}
+
+		_spielLaeuft = true;
 
 		int startJahr = SW.Dynamisch.GetAktuellesJahr();
 		var alterVorJahr = new Dictionary<int, int>();
@@ -444,14 +466,19 @@ public partial class E2eTreiber : Node
 		await NaechsterFrame();
 	}
 
-	/// <summary>Wartet, bis der genannte Bildschirm sichtbar und bedienbar ist.</summary>
-	private async Task<bool> WarteAufSichtbar(string bildschirm, int maxSchritte = MaxSchritte)
+	/// <summary>
+	/// Wartet, bis der genannte Bildschirm sichtbar und bedienbar ist. Die Menüs arbeiten allein über
+	/// Knopfsignale und schalten <c>_Input</c> nie ein – für sie genügt Sichtbarkeit
+	/// (<paramref name="brauchtEingabe"/> = false), sonst wartete der Treiber vergeblich.
+	/// </summary>
+	private async Task<bool> WarteAufSichtbar(string bildschirm, int maxSchritte = MaxSchritte,
+	                                          bool brauchtEingabe = true)
 	{
 		var knoten = _main.GetNodeOrNull<Control>(bildschirm);
 
 		for (int schritt = 0; knoten != null && schritt < maxSchritte; schritt++)
 		{
-			if (knoten.IsVisibleInTree() && knoten.IsProcessingInput())
+			if (knoten.IsVisibleInTree() && (!brauchtEingabe || knoten.IsProcessingInput()))
 				return true;
 
 			await NaechsterFrame();
@@ -674,6 +701,103 @@ public partial class E2eTreiber : Node
 
 		GD.Print("Speichern und Laden geprüft (Jahr " + jahrVorher + ").");
 	}
+
+	/// <summary>
+	/// Legt das Spiel über die Menüs an, wie ein Spieler es tut: Hauptmenü → „Lokales Spiel" → neues
+	/// Spiel benennen und Spielerzahl wählen → je Spieler Name, Geschlecht, Religion und Banner.
+	///
+	/// Der Umweg lohnt, weil der Einstieg sonst gar nicht geprüft wird: <see cref="LegeSpielAn"/> baut
+	/// das Spiel direkt über die Lib-Manager und überspringt damit Hauptmenü, Spielanlage und
+	/// Spielererstellung – ausgerechnet die Bildschirme, die jeder Spieler als erstes sieht.
+	///
+	/// Hier wird gezielt geklickt statt generisch: Die Menüs bestehen aus Eingabefeldern, Ankreuzfeldern
+	/// und Auswahllisten, bei denen „irgendein sichtbarer Knopf" nicht weiterführt.
+	/// </summary>
+	private async Task<bool> LegeSpielUeberMenueAn(int spieler, int seed)
+	{
+		if (!await WarteAufSichtbar(nameof(Mainmenu), brauchtEingabe: false))
+		{
+			_fehler.Add("Das Hauptmenü wurde nicht bedienbereit.");
+			return false;
+		}
+
+		await Schiesse(nameof(Mainmenu));
+		// Das Hauptmenü ist als Kindknoten eingehängt, aber – anders als die Dialoge – kein Feld an Main.
+		Druecke(_main.GetNode<Control>(nameof(Mainmenu)), "ButtonLocalGame");
+
+		// „Lokales Spiel" ist die Stelle, an der der Client die statischen Spieldaten aufbaut – erst
+		// danach lässt sich der Zufallsgenerator festlegen (Initialisieren legt ihn neu an).
+		if (!await WarteAufSichtbar(nameof(LocalGameDialog), brauchtEingabe: false))
+		{
+			_fehler.Add("Der Dialog für das lokale Spiel ging nicht auf.");
+			return false;
+		}
+
+		SW.Statisch.SetRnd(seed);
+
+		await Schiesse(nameof(LocalGameDialog));
+		Druecke(_main.LocalGameDialog, "ButtonStartGame");
+
+		if (!await WarteAufSichtbar(nameof(NewLocalGameMenu), brauchtEingabe: false))
+		{
+			_fehler.Add("Das Menü für ein neues Spiel ging nicht auf.");
+			return false;
+		}
+
+		var neuesSpiel = _main.NewLocalGameMenu;
+		Finde<LineEdit>(neuesSpiel, "LineEditGameName").Text = "E2E";
+		Finde<BaseButton>(neuesSpiel, "CheckBox" + spieler + "Player").ButtonPressed = true;
+
+		await Schiesse(nameof(NewLocalGameMenu));
+		Druecke(neuesSpiel, "ButtonCreateGame");
+
+		// Je Spieler eine Runde Spielererstellung. Heimatstadt und Rohstoffplatz bleiben ungewählt –
+		// das ist der kostenlose Weg, den das Menü mit einer zufälligen Zuteilung beantwortet.
+		for (int i = 1; i <= spieler; i++)
+		{
+			if (!await WarteAufSichtbar(nameof(NewPlayerMenu), brauchtEingabe: false))
+			{
+				_fehler.Add("Die Spielererstellung für Spieler " + i + " ging nicht auf.");
+				return false;
+			}
+
+			var spielerMenue = _main.NewPlayerMenu;
+			Finde<LineEdit>(spielerMenue, "LineEditPlayerName").Text = "Testspieler" + i;
+			Finde<BaseButton>(spielerMenue, i % 2 == 1 ? "CheckBoxMale" : "CheckBoxFemale").ButtonPressed = true;
+			Finde<BaseButton>(spielerMenue, "CheckBoxReligion1").ButtonPressed = true;
+			Finde<BaseButton>(spielerMenue, "CheckBoxBanner" + i).ButtonPressed = true;
+
+			await Schiesse(nameof(NewPlayerMenu));
+			Druecke(spielerMenue, "ButtonCreatePlayer");
+			await NaechsterFrame();
+		}
+
+		if (!await WarteBisKontorBereit())
+		{
+			_fehler.Add("Nach der Spielererstellung wurde der Kontor nicht bedienbereit. " + Zustandsbericht());
+			return false;
+		}
+
+		GD.Print("Spiel über die Menüs angelegt (" + spieler + " Spieler).");
+		return true;
+	}
+
+	/// <summary>
+	/// Sucht ein Bedienelement des Menüs über seinen Namen, egal wie tief es liegt. Feste Knotenpfade
+	/// wären hier die schlechtere Wahl: Sie brechen still, sobald jemand in der Szene eine Ebene einzieht.
+	/// </summary>
+	private T Finde<T>(Node menue, string name) where T : Node
+	{
+		var knoten = menue.FindChild(name, true, false) as T;
+
+		if (knoten == null)
+			_fehler.Add("Im Menü " + menue.Name + " fehlt das Bedienelement " + name + ".");
+
+		return knoten;
+	}
+
+	private void Druecke(Node menue, string name)
+		=> Finde<BaseButton>(menue, name)?.EmitSignal(BaseButton.SignalName.Pressed);
 
 	private static void LegeSpielAn(int spieler, int seed)
 	{
@@ -1040,6 +1164,17 @@ public partial class E2eTreiber : Node
 	private void Bericht(int jahre)
 	{
 		GD.Print("--- Ergebnis ---");
+
+		// Scheitert der Aufbau, gibt es noch keinen Spielzustand. Ohne diese Absicherung wirft der
+		// Bericht dann selbst eine NullReferenceException – und weil sie den Aufruf von Quit() verhindert,
+		// läuft der Prozess endlos weiter, statt mit einer verwertbaren Meldung abzubrechen.
+		if (!_spielLaeuft)
+		{
+			GD.PrintErr("Es kam kein Spiel zustande.");
+			BerichteFehler();
+			return;
+		}
+
 		GD.Print("Gespielte Jahre:   " + (SW.Dynamisch.GetAktuellesJahr() - SW.Statisch.StartJahr) + " von " + jahre + " geplant");
 		GD.Print("Züge:              " + _gespielteZuege);
 		// Rechtsklicks fallen bei inszenierten Sequenzen (Duell) reichlich an, ohne etwas zu bewirken –
@@ -1051,6 +1186,11 @@ public partial class E2eTreiber : Node
 		if (_mitBildern)
 			GD.Print("Bilder:            " + _bilder + " von " + _bilderJeAnsicht.Count + " Ansichten");
 
+		BerichteFehler();
+	}
+
+	private void BerichteFehler()
+	{
 		if (_fehler.Count == 0)
 		{
 			GD.Print("E2E-Durchlauf bestanden.");
