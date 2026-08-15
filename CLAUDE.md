@@ -25,6 +25,15 @@ Headless smoke test (verifies scene loading and all `_Ready()` wiring; clean out
 & $godot --headless --path . --quit "res://scenes/Main.tscn"   # instantiate scene, run _Ready(), quit
 ```
 
+**Long or possibly hanging Godot runs**: use `Start-Process $godot -ArgumentList … -Wait -PassThru
+-RedirectStandardOutput out.log -RedirectStandardError err.log` instead of piping — the pipe form yields no
+exit code, and a run that never quits blocks the tool until its timeout. Failures and stack traces go to
+**stderr**, so read both files. Kill a stuck one with
+`Get-Process -Name "Godot_v4.7.1-stable_mono_win64" | Stop-Process -Force`.
+
+Godot writes UTF-8 and PowerShell renders it as `Ã¶`/`â†’` — filter logs on ASCII-safe fragments
+(`bestanden`, `^  - `), not on umlauts or the `→` arrow.
+
 Playing requires the Godot 4.7 (.NET) editor; scenes (`.tscn`) and `project.godot` are edited there. When editing `.tscn` files textually, be careful: signal connections and NodePath exports live there.
 
 **Where the tests are:** this repo has none — the game rules are covered by xUnit tests in the Lib
@@ -73,60 +82,30 @@ The game needs the editor to play, so changes are verified in three complementar
    applications, credit, espionage and the rest; the home city is opened from the map. After the last
    year it does a `SpeicherManager` save/load round-trip. A 10-year, 2-player run covers 24–26 distinct
    actions in 26–70 s. `--ohne-bereiche` / `--ohne-aktionen` / `--ohne-speichern` switch those off.
-   What it taught us, worth knowing before touching it:
-   - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()`. The news screen
-	 stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
-   - Synthetic input must send press **and** release (`InputEventAction`). Dialogs test
-	 `Input.IsActionPressed`, so a stuck-pressed action re-fires on every later event.
-   - Wait for a quiet phase before pressing "end turn": the turn-begin chain is a series of `async void`
-	 steps, and pressing mid-flight interleaves two flows.
-   - **Never click the same dialog every frame.** Staged sequences wait for the button to be *released*
-	 (`while (Input.IsActionPressed(...))` in `DuellDialog`); a per-frame click keeps them stuck forever.
-	 The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
-   - Budget generously: an interactive duel takes over a minute of taunts, so a run legitimately varies
-	 between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
-	 `MaxSchritte` is 20 000 frames per wait for exactly that reason — headless counts far more frames per
-	 second than the screen does, and 6 000 aborted mid-duel and reported a hang that did not exist.
-   - **Any "it hangs" needs a state report before a fix.** The driver prints open dialogs, visible
-	 screens, the end-turn button and every player's talers when it gives up. Three separate hangs were
-	 decided from that output alone; without it each looked like the same "dialog stayed open?".
-   - Two traps behind those hangs: a driver that answers its own confirmation dialog at random **vetoes
-	 its own intent** (`Kontor.BeendeZug` asks "really end the turn?" first), and an exit counter that
-	 resets on every dialog *change* never fires when two dialogs ping-pong — a purchase that fails for
-	 lack of money plus its "not enough talers" message looped 6 060 times. Hence `MaxKlicksProAktion`,
-	 counting across all dialogs of one action, active only inside an action (`_inAktion`) so it cannot
-	 starve a duel of the button presses it needs.
-   - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
-     with a fixed `--seed`, so a failing run can be replayed exactly (measured: two runs of one seed are
-     identical down to the click count). `--seed=0` picks a random one and prints it — use that to hunt
-     for new failures, then replay with the printed value.
-     **The seed is set twice**: once before the setup and again once the game stands. The second one
-     decouples the play-through from however many random numbers the setup consumed — otherwise any
-     change to the setup path invalidates every noted seed, which is exactly what the switch to
-     menu-driven setup did. What it cannot do is make the two setup paths equal: the starting state (AI
-     malice, home cities, remaining years) comes out of the setup and still differs between them.
-   - Sound is muted (master bus, at runtime only — the player's saved volumes are untouched). `--mit-ton`
-     turns it back on.
-   - Menu screens drive themselves through button signals and never enable `_Input`, so waiting on
-     `IsProcessingInput()` there waits forever — `WarteAufSichtbar(..., brauchtEingabe: false)`.
-     Their controls are located by name (`FindChild`), not by node path, so a re-nesting in the scene
-     does not silently break the driver.
-   - "Report a problem" is on the blocked list: it zips a report and opens the system mail client —
-     that tests the environment, not the game, and behaves differently per OS.
-   - Not every dialog has a button. `GeburtDialog` is only a `LineEdit` submitted with Enter, and its
-     `OnNextOrClose` is deliberately empty so the name cannot be clicked away — for the driver that was
-     a dead end that blocked *every* run reaching a birth (it looked rare only because births are).
-     When no button is found, the driver now fills the first visible `LineEdit` and emits
-     `TextSubmitted`. Worth remembering when adding a dialog that is driven by text entry.
-   - A run can pass **more** years than turns: the debtors' tower skips a player's turn, so one loop
-     iteration produces two year changes (30 planned → 31–33 actual, each jump right after a debt
-     trial). The check is therefore "at least", not "exactly" — too few years is the real warning sign.
-   - **Synthetic mouse events never reach the maps headless.** Both maps (`Weltkarte`,
-     `SoeldnerRaeuberKarte`) are driven by mouse position, not buttons, and `Input.ParseInputEvent` with
-     a mouse event does nothing there without a real window — 20 clicks produced 0 screens. The driver
-     sends the click anyway (it works windowed) and falls back to the same entry point the real click
-     uses: `Stadt.ShowStadt` and `SoeldnerRaeuberKarte.WaehleStuetzpunkt`. Without that fallback the
-     whole city and mercenary subsystems stay untested.
+   Four things to know before touching it — the rest is commented at the point in `E2eTreiber.cs`
+   where it matters:
+   - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()` — except menu
+     screens, which run on button signals and never enable `_Input`
+     (`WarteAufSichtbar(..., brauchtEingabe: false)`). Not every dialog has a button either: where none
+     is found the driver fills the first `LineEdit` and emits `TextSubmitted` (`GeburtDialog`).
+   - Synthetic input needs press **and** release, and never the same dialog every frame — staged
+     sequences wait for the button to be *released*. Synthetic **mouse** events don't reach the maps
+     headless at all; both maps fall back to the entry point the real click uses (`Stadt.ShowStadt`,
+     `SoeldnerRaeuberKarte.WaehleStuetzpunkt`).
+   - Budget generously: `MaxSchritte` is 20 000 frames per wait because a hot-seat duel runs over a
+     minute and headless counts far more frames per second than the screen does.
+   - **Any "it hangs" needs the state report before a fix.** The driver prints open dialogs, visible
+     screens, the end-turn button and every player's talers when it gives up; four separate hangs were
+     decided from that output alone, and every attempt to guess instead failed. Two of them were the
+     driver fighting itself — answering its own "really end the turn?" at random, and an exit counter
+     that reset on each dialog *change* while two dialogs ping-ponged 6 060 times.
+
+   Runs are reproducible: `--seed=N` replays a run exactly (measured: identical down to the click
+   count), `--seed=0` draws one and prints it. The seed is set **twice**, once before setup and once the
+   game stands, so a change to the setup path no longer invalidates noted seeds — it cannot equalise the
+   two setup paths though, since the starting state comes out of the setup itself. Sound is muted at
+   runtime (`--mit-ton` re-enables). "Report a problem" is blocked: it zips a report and opens the system
+   mail client, which tests the environment, not the game.
 
 5. **Visual acceptance** — the same play-through with `--screenshots` (or `--bilder=<dir>`) drops a few
    states per view as PNGs, giving a visual record of every screen. This is what catches a shifted layout
@@ -241,4 +220,7 @@ A feature that touches both repos is committed **Lib first, then Godot**: the tw
 Two mechanics that have gone wrong before:
 
 - **Write commit messages with a POSIX heredoc**, `git commit -F - <<'EOF' … EOF`. The Bash tool is Git Bash, not PowerShell: a PowerShell here-string (`@'…'@`) is not parsed and ends up prefixing a stray `@` to the subject line.
+- **For multi-line or non-ASCII edits use a Python heredoc**, not `sed -i`: `python - <<'PY' … PY` with an
+  `assert old in s` before each replace fails loudly when the anchor moved, while `sed` silently does
+  nothing and its `s|…|` breaks on `|` or umlauts in the replacement. There is no PyYAML here.
 - **Don't reach for `git add -A` blindly.** The Lib working copy carries untracked files that are not part of the current change (e.g. `CONTRIBUTING.md`); stage the paths you touched, or check `git status` before committing and unstage the rest.
