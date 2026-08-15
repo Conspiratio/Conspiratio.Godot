@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="Conspiratio.Godot"
-config/version="0.1.0.0-godot"
+config/version="1.0.0"
 run/main_scene="res://scenes/Title.tscn"
 config/features=PackedStringArray("4.7", "C#")
 config/icon="res://assets/icons/IconC.ico"

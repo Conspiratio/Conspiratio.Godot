@@ -106,6 +106,16 @@ public partial class E2eTreiber : Node
 	/// Bewusst kurz gehalten: Eine Handlung, die nur scheitert oder Geld kostet, ist erwünscht – auch
 	/// der Weg in den Schuldturm ist ein Pfad, der geprüft gehört.
 	/// </summary>
+	/// <summary>Dialoge, die der Treiber über einen bestimmten Knopf verlässt statt frei zu klicken.</summary>
+	private static readonly Dictionary<string, string> Ausstiegsknopf = new()
+	{
+		// Das Ingame-Menü geht auf, sobald ein Rechtsklick den Kontor trifft – also regelmäßig, sobald der
+		// Treiber einen Bildschirm verlässt. Es ist Verwaltung, kein Spielinhalt: „Spiel laden" und
+		// „Spieler hinauswerfen" führen aus dem Durchlauf heraus. Ein Rechtsklick schließt es nicht,
+		// deshalb wird gezielt „Weiter" gedrückt.
+		{ "IngameMenuDialog", "Rahmen/VBox/ButtonWeiter" }
+	};
+
 	private static readonly HashSet<string> Gesperrt = new()
 	{
 		"AreaFenster",   // „Geld zum Fenster rauswerfen": nimmt den Spieler aus dem Spiel
@@ -131,6 +141,13 @@ public partial class E2eTreiber : Node
 	private Main _main;
 	private string _letzterDialog = "";
 	private int _klicksAmSelbenDialog;
+
+	/// <summary>
+	/// Läuft gerade das Zugende? Dann werden Dialoge bestätigt statt zufällig bedient: Der Kontor fragt
+	/// „Wollt Ihr Euren Zug wirklich beenden?", und ein gewürfeltes „Nein" nähme dem Treiber genau die
+	/// Absicht, die er eben gefasst hat – der Zug endete nie und der Durchlauf liefe in den Zeitablauf.
+	/// </summary>
+	private bool _imZugende;
 	private int _framesSeitKlick;
 	private int _dialogKlicks;
 	private int _knopfKlicks;
@@ -562,6 +579,12 @@ public partial class E2eTreiber : Node
 		}
 
 		int spielerVorher = SW.Dynamisch.GetAktiverSpieler();
+		_imZugende = true;
+
+		if (_ausfuehrlich)
+			GD.Print("  Zug beenden (Spieler " + spielerVorher + ", Knopf "
+			         + (zugEnde.Disabled ? "gesperrt" : "frei") + ")");
+
 		zugEnde.EmitSignal(BaseButton.SignalName.Pressed);
 
 		// Der Handler läuft asynchron weiter (async void); es genügt also nicht, gleich danach
@@ -578,13 +601,15 @@ public partial class E2eTreiber : Node
 			else if (SW.Dynamisch.GetAktuellesJahr() != jahrVorher
 			         || SW.Dynamisch.GetAktiverSpieler() != spielerVorher)
 			{
+				_imZugende = false;
 				return true;
 			}
 
 			await NaechsterFrame();
 		}
 
-		_fehler.Add("Der Zug im Jahr " + jahrVorher + " ließ sich nicht beenden (Dialog blieb offen?).");
+		_imZugende = false;
+		_fehler.Add("Der Zug im Jahr " + jahrVorher + " ließ sich nicht beenden. " + Zustandsbericht());
 		return false;
 	}
 
@@ -689,6 +714,50 @@ public partial class E2eTreiber : Node
 		return false;
 	}
 
+	/// <summary>
+	/// Beschreibt beim Steckenbleiben, was gerade auf dem Schirm ist. Ohne das steht im Fehlerfall nur
+	/// „Dialog blieb offen?" – die Vermutung, aber nicht die Beobachtung.
+	/// </summary>
+	private string Zustandsbericht()
+	{
+		var sichtbar = new List<string>();
+
+		foreach (Node knoten in GetTree().GetNodesInGroup("Dialogs"))
+		{
+			if (knoten is Control dialog && dialog.IsVisibleInTree())
+				sichtbar.Add(dialog.Name + (dialog.IsProcessingInput() ? " (nimmt Eingaben)" : " (ohne Eingabe)"));
+		}
+
+		var bildschirme = new List<string>();
+
+		foreach (Node knoten in _main.GetChildren())
+		{
+			if (knoten is Control c && knoten != _main.Kontor && c.IsVisibleInTree() && !c.IsInGroup("Dialogs"))
+				bildschirme.Add(c.Name + (c.IsProcessingInput() ? " (nimmt Eingaben)" : " (ohne Eingabe)"));
+		}
+
+		var spieler = new List<string>();
+
+		for (int i = 1; i <= SW.Dynamisch.GetAktivSpielerAnzahl(); i++)
+		{
+			var sp = SW.Dynamisch.GetHumWithID(i);
+			spieler.Add(sp == null
+				? i + ": fehlt"
+				: i + ": " + sp.GetName() + ", " + sp.GetTaler() + " Taler, Alter " + sp.GetAlter()
+				  + (sp.GetSitztImKerker() ? ", im Schuldturm" : ""));
+		}
+
+		var zugEnde = _main.Kontor.GetNodeOrNull<BaseButton>("ButtonEndTurn");
+
+		return "Zug-beenden-Knopf: " + (zugEnde == null ? "fehlt" : zugEnde.Disabled ? "gesperrt" : "frei")
+		       + " | Spieler: " + string.Join(" / ", spieler)
+		       + " | Sichtbare Dialoge: " + (sichtbar.Count == 0 ? "keine" : string.Join(", ", sichtbar))
+		       + " | Sichtbare Bildschirme: " + (bildschirme.Count == 0 ? "keine" : string.Join(", ", bildschirme))
+		       + " | Kontor: " + (_main.Kontor.IsVisibleInTree() ? "sichtbar" : "verborgen")
+		       + (_main.Kontor.IsProcessingInput() ? ", nimmt Eingaben" : ", ohne Eingabe")
+		       + " | aktiver Spieler: " + SW.Dynamisch.GetAktiverSpieler();
+	}
+
 	private Control FindeOffenenDialog()
 	{
 		Control offen = null;
@@ -740,7 +809,9 @@ public partial class E2eTreiber : Node
 		// ausgestiegen: Dialoge mit Reitern (die Gesetzestafel) haben keinen Knopf, der hinausführt.
 		BaseButton knopf;
 
-		if (_mitAktionen)
+		if (Ausstiegsknopf.TryGetValue(dialog.Name.ToString(), out string ausstieg))
+			knopf = dialog.GetNodeOrNull<BaseButton>(ausstieg) ?? FindeSichtbarenKnopf(dialog);
+		else if (_mitAktionen && !_imZugende)
 			knopf = ++_klicksAmSelbenDialog <= MaxKlicksProDialog ? WaehleKnopf(dialog) : null;
 		else
 			knopf = FindeSichtbarenKnopf(dialog);
