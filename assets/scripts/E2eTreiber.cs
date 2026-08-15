@@ -22,6 +22,10 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Weitere Schalter: <c>--ohne-bereiche</c> überspringt den Rundgang durch Stadt, Schreibstube usw.,
 /// <c>--ohne-speichern</c> die Speicher-/Ladeprobe, <c>--mit-ton</c> lässt den sonst stummen Ton an.
 ///
+/// <c>--aktionen</c> betätigt in den Bereichen auch deren Knöpfe (Handel, Bewerbung, Kredit, Spionage …)
+/// statt sie nur zu betreten – das erreicht deutlich mehr Code, hängt aber noch gelegentlich beim
+/// Zugende und ist deshalb vorerst nicht der Standard.
+///
 /// Mit <c>--screenshots</c> legt der Durchlauf zusätzlich von jeder Ansicht ein Bild ab und wird damit
 /// zur visuellen Abnahme (Zielordner über <c>--bilder=&lt;pfad&gt;</c>, sonst <c>user://e2e-bilder</c>).
 /// Das setzt einen laufenden Renderer voraus, geht also **nicht** headless – dessen Dummy-Treiber
@@ -84,22 +88,60 @@ public partial class E2eTreiber : Node
 	/// </summary>
 	private const int MaxBilderProAnsicht = 3;
 
+	/// <summary>
+	/// So viele Knöpfe werden je Bereichsbesuch betätigt. Alle bei jedem Besuch zu drücken bläht einen
+	/// einzelnen Zug auf; über die Züge eines Durchlaufs kommt so trotzdem jeder an die Reihe.
+	/// </summary>
+	private const int MaxAktionenProBereich = 2;
+
+	/// <summary>
+	/// So oft wird in einem Dialog ein Knopf gedrückt, bevor der Treiber ihn per Rechtsklick verlässt.
+	/// Ohne diese Grenze bliebe er in Dialogen mit Reitern hängen: Dort führt kein Knopf hinaus, und der
+	/// immer gleiche erste Knopf (der erste Reiter) bringt den Ablauf nicht weiter.
+	/// </summary>
+	private const int MaxKlicksProDialog = 3;
+
+	/// <summary>
+	/// Knöpfe, die der Treiber nicht drückt, weil sie den Durchlauf beenden statt ihn zu prüfen.
+	/// Bewusst kurz gehalten: Eine Handlung, die nur scheitert oder Geld kostet, ist erwünscht – auch
+	/// der Weg in den Schuldturm ist ein Pfad, der geprüft gehört.
+	/// </summary>
+	private static readonly HashSet<string> Gesperrt = new()
+	{
+		"AreaFenster",   // „Geld zum Fenster rauswerfen": nimmt den Spieler aus dem Spiel
+		"ButtonBeenden",
+		"ButtonHauptmenue"
+	};
+
 	private readonly List<string> _fehler = new();
+
+	/// <summary>Welche Knöpfe im Lauf betätigt wurden – die Abdeckung, die der Bericht ausweist.</summary>
+	private readonly HashSet<string> _bedienteKnoepfe = new();
+
+	/// <summary>
+	/// Eigener Zufall für die Auswahl der Handlungen. Bewusst getrennt vom Spielzufall: Sonst würde
+	/// schon die Wahl eines Knopfes den weiteren Spielverlauf verschieben und zwei Läufe mit gleichem
+	/// Startwert liefen auseinander, sobald sich an der Auswahl etwas ändert.
+	/// </summary>
+	private Random _auswahl;
 
 	/// <summary>Zählt je Ansicht die schon abgelegten Bilder (siehe <see cref="MaxBilderProAnsicht"/>).</summary>
 	private readonly Dictionary<string, int> _bilderJeAnsicht = new();
 
 	private Main _main;
 	private string _letzterDialog = "";
+	private int _klicksAmSelbenDialog;
 	private int _framesSeitKlick;
 	private int _dialogKlicks;
 	private int _knopfKlicks;
 	private int _besuchteBereiche;
+	private int _besuchteStaedte;
 	private int _gespielteZuege;
 	private int _bilder;
 
 	private bool _ausfuehrlich;
 	private bool _mitBereichen = true;
+	private bool _mitAktionen;
 	private bool _mitSpeicherprobe = true;
 	private bool _mitBildern;
 	private string _bilderOrdner;
@@ -120,11 +162,18 @@ public partial class E2eTreiber : Node
 		_mitBereichen = Array.IndexOf(argumente, "--ohne-bereiche") < 0;
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
 
+		// Noch nicht der Standard: Die Handlungen in den Bereichen erreichen viel mehr Code, aber ein
+		// Zugende bleibt dabei gelegentlich haengen (Ursache noch offen). Bis das geklaert ist, laeuft
+		// die CI ohne sie, damit ein echter Fehlschlag nicht in einem bekannten Problem untergeht.
+		_mitAktionen = Array.IndexOf(argumente, "--aktionen") >= 0;
+
 		// Ton aus: Ein Durchlauf im Fenstermodus lärmt sonst minutenlang (Musikwechsel, Klickgeräusche,
 		// Duellstimmen). Stummgeschaltet wird nur der Master-Bus zur Laufzeit – die gespeicherten
 		// Lautstärken des Spielers bleiben unangetastet. Mit --mit-ton bleibt der Ton an.
 		if (Array.IndexOf(argumente, "--mit-ton") < 0)
 			AudioServer.SetBusMute(AudioServer.GetBusIndex("Master"), true);
+
+		_auswahl = new Random(seed);
 
 		BereiteBilderVor(argumente);
 
@@ -235,6 +284,9 @@ public partial class E2eTreiber : Node
 
 			await Schiesse(bildschirm);
 
+			if (_mitAktionen)
+				await BedieneBildschirm(bildschirm);
+
 			if (!await KehreZumKontorZurueck(name))
 				return false;
 
@@ -242,6 +294,188 @@ public partial class E2eTreiber : Node
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// Betätigt im gerade offenen Bereichsbildschirm ein paar seiner Knöpfe – das ist der Teil, der die
+	/// eigentlichen Spielhandlungen erreicht: Handel, Bewerbung, Kredit, Beichte, Spionage. Vorher wurde
+	/// jeder Bereich nur betreten und sofort wieder verlassen, sodass alles dahinter ungeprüft blieb.
+	///
+	/// Nicht alle Knöpfe je Besuch, sondern <see cref="MaxAktionenProBereich"/> zufällig gewählte: Über
+	/// die Züge eines Durchlaufs kommt trotzdem alles an die Reihe, ohne dass ein einzelner Zug ausufert.
+	/// Der Zufall stammt aus einem eigenen Generator, damit die Auswahl den Spielzufall nicht verschiebt.
+	///
+	/// Eine abgelehnte Handlung ist ausdrücklich kein Fehler: „Ihr habt nicht genug Taler" ist richtiges
+	/// Verhalten. Gemeldet werden nur Abstürze, Hänger und unplausibler Zustand.
+	/// </summary>
+	private async Task BedieneBildschirm(string bildschirm)
+	{
+		// Die Karten kennen keine Knöpfe – sie werden über die Mausposition bedient.
+		if (bildschirm == nameof(Weltkarte))
+		{
+			await BesucheHeimatstadt();
+			return;
+		}
+
+		var knoten = _main.GetNodeOrNull<Control>(bildschirm);
+
+		if (knoten == null)
+			return;
+
+		var knoepfe = new List<BaseButton>();
+		SammleKnoepfe(knoten, knoepfe);
+		knoepfe.RemoveAll(k => Gesperrt.Contains(k.Name.ToString()));
+
+		for (int i = 0; i < MaxAktionenProBereich && knoepfe.Count > 0; i++)
+		{
+			var knopf = knoepfe[_auswahl.Next(knoepfe.Count)];
+			knoepfe.Remove(knopf);
+
+			string bezeichnung = bildschirm + "." + knopf.Name;
+			_bedienteKnoepfe.Add(bezeichnung);
+
+			if (_ausfuehrlich)
+				GD.Print("    Aktion: " + bezeichnung);
+
+			knopf.EmitSignal(BaseButton.SignalName.Pressed);
+
+			if (!await WarteBisBildschirmZurueck(bildschirm, bezeichnung))
+				return;
+		}
+	}
+
+	/// <summary>
+	/// Klickt auf der Handelskarte die Heimatstadt an und bedient die Stadtansicht. Ohne diesen Umweg
+	/// erreicht der Durchlauf die Stadt nie – und damit weder Handel noch Werkstätten noch Anwesen.
+	/// Die Karte wertet echte Mausereignisse aus, also werden Bewegung und Klick auch so geschickt.
+	/// </summary>
+	private async Task BesucheHeimatstadt()
+	{
+		// Die Stadt mit dem eigenen Wohnsitz: Dort stehen die eigenen Werkstätten, der Besuch führt also
+		// in die aussagekräftigste Stadtansicht. Ohne Wohnsitz (nach einem Erbfall möglich) irgendeine.
+		int stadtId = SW.Dynamisch.GetAktHum().GetFirstStadtIDMitWohnsitz();
+
+		if (stadtId <= 0)
+			stadtId = SW.Statisch.GetMinStadtID();
+
+		var mitte = _main.Weltkarte.GetStadtMitte(stadtId);
+
+		if (mitte == Vector2.Zero)
+		{
+			_fehler.Add("Die Heimatstadt " + stadtId + " hat auf der Karte keine Position.");
+			return;
+		}
+
+		// Erst bewegen (die Karte merkt sich die überfahrene Stadt), dann klicken.
+		Input.ParseInputEvent(new InputEventMouseMotion { Position = mitte, GlobalPosition = mitte });
+		await NaechsterFrame();
+		Input.ParseInputEvent(new InputEventMouseButton
+		{
+			Position = mitte, GlobalPosition = mitte, ButtonIndex = MouseButton.Left, Pressed = true
+		});
+		Input.ParseInputEvent(new InputEventMouseButton
+		{
+			Position = mitte, GlobalPosition = mitte, ButtonIndex = MouseButton.Left, Pressed = false
+		});
+
+		if (!await WarteAufSichtbar(nameof(Stadt), 60))
+		{
+			// Headless gibt es kein Fenster und kein Mausgerät, synthetische Mausereignisse erreichen die
+			// Karte dort nicht. Damit die Stadtansicht trotzdem geprüft wird, öffnet der Treiber sie dann
+			// direkt – denselben Aufruf macht die Karte beim echten Klick auch (Weltkarte.StadtAngeklickt).
+			_main.Weltkarte.Hide();
+			_main.Weltkarte.SetProcessInput(false);
+			_main.Stadt.ShowStadt(stadtId);
+
+			if (!await WarteAufSichtbar(nameof(Stadt), 60))
+			{
+				_fehler.Add("Die Stadtansicht für Stadt " + stadtId + " ließ sich nicht öffnen.");
+				return;
+			}
+		}
+
+		_besuchteStaedte++;
+		await Schiesse(nameof(Stadt));
+		await BedieneBildschirm(nameof(Stadt));
+
+		// Zurück auf die Karte, damit der Aufrufer von dort aus zum Kontor findet.
+		SchickeAbbruch();
+		await NaechsterFrame();
+	}
+
+	/// <summary>Wartet, bis der genannte Bildschirm sichtbar und bedienbar ist.</summary>
+	private async Task<bool> WarteAufSichtbar(string bildschirm, int maxSchritte = MaxSchritte)
+	{
+		var knoten = _main.GetNodeOrNull<Control>(bildschirm);
+
+		for (int schritt = 0; knoten != null && schritt < maxSchritte; schritt++)
+		{
+			if (knoten.IsVisibleInTree() && knoten.IsProcessingInput())
+				return true;
+
+			await NaechsterFrame();
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Wartet nach einer Handlung, bis der Bereichsbildschirm wieder bedienbar ist – dazwischen werden
+	/// alle Dialoge bedient, die die Handlung ausgelöst hat (Bestätigungen, Meldungen, Auswahlkarten).
+	/// </summary>
+	private async Task<bool> WarteBisBildschirmZurueck(string bildschirm, string bezeichnung)
+	{
+		var knoten = _main.GetNodeOrNull<Control>(bildschirm);
+		int ruhig = 0;
+
+		for (int schritt = 0; schritt < MaxSchritte; schritt++)
+		{
+			var dialog = FindeOffenenDialog();
+
+			if (dialog != null)
+			{
+				await VersucheZuBedienen(dialog);
+				ruhig = 0;
+			}
+			else if (knoten != null && knoten.IsVisibleInTree() && knoten.IsProcessingInput())
+			{
+				if (++ruhig >= 3)
+					return true;
+			}
+			else if (_main.Kontor.IsProcessingInput())
+			{
+				// Manche Handlungen enden im Kontor statt im Bereich (das Testament etwa schließt die
+				// Kirche). Das ist kein Fehler – der Rundgang macht dort einfach weiter.
+				if (_ausfuehrlich)
+					GD.Print("      (" + bezeichnung + " endete im Kontor)");
+
+				return false;
+			}
+			else
+			{
+				ruhig = 0;
+
+				// Die Handlung führte auf einen anderen Bildschirm (etwa eine Auswahlkarte) – zurück.
+				if (schritt % 8 == 0)
+					SchickeAbbruch();
+			}
+
+			await NaechsterFrame();
+		}
+
+		_fehler.Add("Nach der Aktion " + bezeichnung + " kehrte der Ablauf nicht zu " + bildschirm + " zurück.");
+		return false;
+	}
+
+	private static void SammleKnoepfe(Node knoten, List<BaseButton> ziel)
+	{
+		foreach (Node kind in knoten.GetChildren())
+		{
+			if (kind is BaseButton knopf && knopf.IsVisibleInTree() && !knopf.Disabled)
+				ziel.Add(knopf);
+
+			SammleKnoepfe(kind, ziel);
+		}
 	}
 
 	/// <summary>
@@ -483,6 +717,7 @@ public partial class E2eTreiber : Node
 		if (dialog.Name != _letzterDialog)
 		{
 			_letzterDialog = dialog.Name;
+			_klicksAmSelbenDialog = 0;
 		}
 		else if (_framesSeitKlick < KlickAbstand)
 		{
@@ -500,7 +735,15 @@ public partial class E2eTreiber : Node
 
 	private void Bediene(Control dialog)
 	{
-		var knopf = FindeSichtbarenKnopf(dialog);
+		// Im Standardpfad wird immer der erste sichtbare Knopf gedrückt – schlicht, aber über viele Läufe
+		// als stabil belegt. Nur mit --aktionen wird gewürfelt und nach ein paar Klicks per Rechtsklick
+		// ausgestiegen: Dialoge mit Reitern (die Gesetzestafel) haben keinen Knopf, der hinausführt.
+		BaseButton knopf;
+
+		if (_mitAktionen)
+			knopf = ++_klicksAmSelbenDialog <= MaxKlicksProDialog ? WaehleKnopf(dialog) : null;
+		else
+			knopf = FindeSichtbarenKnopf(dialog);
 
 		if (knopf != null)
 		{
@@ -516,6 +759,10 @@ public partial class E2eTreiber : Node
 			GD.Print("  [" + _dialogKlicks + "] " + dialog.Name + " → ui_next_or_close");
 
 		SchickeAbbruch();
+
+		// Nach dem Ausstiegsversuch wieder Knöpfe zulassen: Ein Dialog, der sich nur über einen Knopf
+		// weiterschalten lässt (die Abrechnung etwa), käme sonst nach drei Klicks nie mehr voran.
+		_klicksAmSelbenDialog = 0;
 	}
 
 	/// <summary>
@@ -537,6 +784,19 @@ public partial class E2eTreiber : Node
 			LinkButton l => l.Text,
 			_ => knopf.Name
 		};
+	}
+
+	/// <summary>
+	/// Waehlt einen der sichtbaren Knoepfe des Dialogs. Zufaellig statt immer den ersten: Sonst wuerde in
+	/// jedem Dialog nur der erste Knopf je erreicht – bei Reitern also immer derselbe Reiter.
+	/// </summary>
+	private BaseButton WaehleKnopf(Control dialog)
+	{
+		var knoepfe = new List<BaseButton>();
+		SammleKnoepfe(dialog, knoepfe);
+		knoepfe.RemoveAll(k => Gesperrt.Contains(k.Name.ToString()));
+
+		return knoepfe.Count == 0 ? null : knoepfe[_auswahl.Next(knoepfe.Count)];
 	}
 
 	private static BaseButton FindeSichtbarenKnopf(Node knoten)
@@ -585,9 +845,9 @@ public partial class E2eTreiber : Node
 			if (string.IsNullOrWhiteSpace(spieler.GetName()))
 				_fehler.Add("Jahr " + jahr + ": Spieler " + i + " hat keinen Namen mehr.");
 
-			// Das Alter steigt jedes Jahr – außer beim Erbfall, dann übernimmt ein jüngerer Erbe.
-			if (alterVorJahr.TryGetValue(i, out int vorher) && spieler.GetAlter() == vorher)
-				_fehler.Add("Jahr " + jahr + ": Spieler " + i + " ist nicht gealtert (" + vorher + ").");
+			// Bewusst keine Prüfung auf steigendes Alter: Es gibt zu viele richtige Ausnahmen – der
+			// Erbfall setzt einen jüngeren Erben ein, und im Schuldturm wird der Zug übersprungen, ohne
+			// dass der Spieler altert. Die Prüfung schlug dadurch bei völlig korrekten Läufen an.
 		}
 	}
 
@@ -685,7 +945,8 @@ public partial class E2eTreiber : Node
 		// Rechtsklicks fallen bei inszenierten Sequenzen (Duell) reichlich an, ohne etwas zu bewirken –
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.
 		GD.Print("Klicks in Dialogen:" + _dialogKlicks + " (davon Knöpfe: " + _knopfKlicks + ")");
-		GD.Print("Besuchte Bereiche: " + _besuchteBereiche);
+		GD.Print("Besuchte Bereiche: " + _besuchteBereiche + ", davon Staedte: " + _besuchteStaedte);
+		GD.Print("Bediente Knoepfe:  " + _bedienteKnoepfe.Count + " verschiedene");
 
 		if (_mitBildern)
 			GD.Print("Bilder:            " + _bilder + " von " + _bilderJeAnsicht.Count + " Ansichten");

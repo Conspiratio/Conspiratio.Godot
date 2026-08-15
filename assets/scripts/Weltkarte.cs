@@ -413,6 +413,19 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 
 	#region Hover
 
+	/// <summary>
+	/// Der Mittelpunkt einer Stadt auf der Karte. Die Karte wird über Mausposition bedient, nicht über
+	/// Knöpfe – der automatische Spieldurchlauf braucht diesen Punkt, um eine Stadt anzuklicken.
+	/// Liefert <see cref="Vector2.Zero"/>, solange die Rechtecke noch nicht berechnet sind.
+	/// </summary>
+	public Vector2 GetStadtMitte(int stadtId)
+	{
+		if (_stadtRechtecke == null || stadtId < 0 || stadtId >= _stadtRechtecke.Length)
+			return Vector2.Zero;
+
+		return _stadtRechtecke[stadtId].GetCenter();
+	}
+
 	private void HoverAktualisieren(Vector2 position)
 	{
 		int neueStadt = 0;

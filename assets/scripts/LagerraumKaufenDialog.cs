@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
@@ -25,6 +26,12 @@ public partial class LagerraumKaufenDialog : DialogBase
 	private PackedScene _buttonScene;
 
 	private LagerraumManager _manager;
+
+	/// <summary>
+	/// Die Zeile je Angebot. Gemerkt statt über den Kindindex angesprochen: Ein gekauftes Angebot wird
+	/// entfernt, danach passt der Index eines späteren Angebots nicht mehr zu seiner Position in der Box.
+	/// </summary>
+	private readonly List<HBoxContainer> _reihen = new();
 
 	protected override void OnReady()
 	{
@@ -57,6 +64,8 @@ public partial class LagerraumKaufenDialog : DialogBase
 			child.QueueFree();
 		}
 
+		_reihen.Clear();
+
 		for (int i = 0; i < LagerraumManager.AnzahlAngebote; i++)
 		{
 			int angebot = i;
@@ -74,6 +83,7 @@ public partial class LagerraumKaufenDialog : DialogBase
 			labelPreis.AddThemeColorOverride("font_color", new Color(0.16f, 0.11f, 0.05f));
 			reihe.AddChild(labelPreis);
 
+			_reihen.Add(reihe);
 			_vBoxAngebote.AddChild(reihe);
 		}
 	}
@@ -87,8 +97,11 @@ public partial class LagerraumKaufenDialog : DialogBase
 			SoundManager.Instance.PlayCoins();
 			AktualisiereAktuell();
 
-			// Das gekaufte Angebot ausblenden (wie im Original).
-			_vBoxAngebote.GetChild(angebot).QueueFree();
+			// Das gekaufte Angebot ausblenden (wie im Original) – über die gemerkte Zeile, nicht über den
+			// Kindindex: Nach dem ersten Kauf ist die Box kürzer, und ein späterer Index zeigt dann
+			// entweder auf das falsche Angebot oder ins Leere (Absturz beim zweiten Kauf).
+			if (angebot < _reihen.Count && IsInstanceValid(_reihen[angebot]))
+				_reihen[angebot].QueueFree();
 		}
 		else
 		{
