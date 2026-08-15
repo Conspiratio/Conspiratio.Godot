@@ -290,8 +290,12 @@ public partial class E2eTreiber : Node
 
 		int gespielt = SW.Dynamisch.GetAktuellesJahr() - startJahr;
 
-		if (gespielt != jahre)
-			_fehler.Add("Es sollten " + jahre + " Jahre vergehen, tatsächlich waren es " + gespielt + ".");
+		// Mindestens, nicht genau: Sitzt ein Spieler im Schuldturm, überspringt der Client seinen Zug –
+		// dann laufen in einem Schleifendurchlauf zwei Jahreswechsel. Über 30 Jahre kamen so 33 heraus,
+		// jedes Mal unmittelbar nach einem Schuldenprozess. Das ist richtiges Spielverhalten; zu wenige
+		// Jahre wären dagegen ein Zeichen, dass der Durchlauf irgendwo stecken geblieben ist.
+		if (gespielt < jahre)
+			_fehler.Add("Es sollten mindestens " + jahre + " Jahre vergehen, tatsächlich waren es " + gespielt + ".");
 
 		if (_mitSpeicherprobe)
 			PruefeSpeichernUndLaden();

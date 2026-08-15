@@ -107,6 +107,9 @@ The game needs the editor to play, so changes are verified in three complementar
      does not silently break the driver.
    - "Report a problem" is on the blocked list: it zips a report and opens the system mail client —
      that tests the environment, not the game, and behaves differently per OS.
+   - A run can pass **more** years than turns: the debtors' tower skips a player's turn, so one loop
+     iteration produces two year changes (30 planned → 31–33 actual, each jump right after a debt
+     trial). The check is therefore "at least", not "exactly" — too few years is the real warning sign.
    - **Synthetic mouse events never reach the maps headless.** Both maps (`Weltkarte`,
      `SoeldnerRaeuberKarte`) are driven by mouse position, not buttons, and `Input.ParseInputEvent` with
      a mouse event does nothing there without a real window — 20 clicks produced 0 screens. The driver
