@@ -115,8 +115,12 @@ The game needs the editor to play, so changes are verified in three complementar
    yield drops proportionally; above it the yield is capped while wages keep rising linearly — an
    overstaffed run measurably loses money. With the ratio right, 15 years of trade alone move 2 261 goods
    and end at +2 353 / +3 948 talers; with a fixed 25 workers the same run ended at −8 583.
-   Selling in the city that produces the goods still fetches poor prices — exporting to another city is
-   the profitable path and is not yet driven.
+   Both ways of selling are driven, alternating by year so they don't collide (the export only ships at
+   turn end, while selling on the spot clears the stock immediately). Note the export as built is **not**
+   yet profitable: measured over the same 15 years it moved 785 goods but left the players at +2 086 /
+   −163 instead of +2 353 / +3 948. The caravan costs a base fee plus a rate per started 100 units
+   (`BerechneProdKosten`), and the target city is picked arbitrarily rather than by price — choosing it by
+   what the goods actually fetch there is the open lever.
    Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
    emits it explicitly, otherwise the city never learns of the change.
 

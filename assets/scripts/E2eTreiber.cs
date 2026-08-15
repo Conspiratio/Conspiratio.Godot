@@ -186,6 +186,7 @@ public partial class E2eTreiber : Node
 	private int _besuchteBereiche;
 	private int _besuchteStaedte;
 	private int _verkaufteWaren;
+	private int _exportierteWaren;
 	private int _gespielteZuege;
 	private int _bilder;
 
@@ -554,19 +555,68 @@ public partial class E2eTreiber : Node
 		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", arbeiter);
 		await NaechsterFrame();
 
-		// Verkaufen: Ein Klick auf das Rohstoffsymbol veräußert den kompletten Bestand dieser Ware.
-		// Erst ab dem zweiten Jahr liegt etwas im Lager – vorher passiert hier schlicht nichts.
+		// Absetzen der Ware. Beide Wege werden gespielt, im Wechsel je Jahr, damit sie sich nicht in die
+		// Quere kommen: Der Export zieht erst zum Rundenende, waehrend der Verkauf vor Ort sofort raeumt.
 		int bestand = handel.GetLagerbestand(stadtId, rohstoffId);
 
-		if (bestand > 0)
-		{
-			stadt.GetNodeOrNull<BaseButton>("ButtonRoh" + werkstattNr)?
-			     .EmitSignal(BaseButton.SignalName.Pressed);
-			await NaechsterFrame();
-			_verkaufteWaren += bestand;
-		}
+		if (SW.Dynamisch.GetAktuellesJahr() % 2 == 0)
+			await StelleExportEin(handel, stadt, stadtId, rohstoffId, bestand);
+		else if (bestand > 0)
+			VerkaufeVorOrt(stadt, werkstattNr, bestand);
 
 		_bedienteKnoepfe.Add("Stadt.Handelsrunde");
+	}
+
+	/// <summary>
+	/// Verkauft den Lagerbestand in der Stadt selbst – ein Klick auf das Rohstoffsymbol genuegt.
+	/// Bequem, aber schlecht bezahlt: Wo die Ware herkommt, ist sie wenig wert.
+	/// </summary>
+	private void VerkaufeVorOrt(Node stadt, int werkstattNr, int bestand)
+	{
+		stadt.GetNodeOrNull<BaseButton>("ButtonRoh" + werkstattNr)?.EmitSignal(BaseButton.SignalName.Pressed);
+		_verkaufteWaren += bestand;
+	}
+
+	/// <summary>
+	/// Stellt den Export in eine andere Stadt ein – der Weg, mit dem im Spiel tatsaechlich verdient wird.
+	/// Im Verkaufsmodus deutet der Bildschirm dieselben Zahlenknoepfe um: Aus der Staettenzahl wird die
+	/// Zielstadt, aus der Menge die Verkaufsmenge.
+	///
+	/// Die Karawane kostet einen Grundpreis plus einen Betrag je angefangene 100 Stueck
+	/// (<c>BerechneProdKosten</c>). Kleine Restbestaende lohnen den Weg daher nicht; unterhalb einer
+	/// vollen Fuhre bleibt die Ware liegen und wird im naechsten Jahr vor Ort verkauft.
+	/// </summary>
+	private async Task StelleExportEin(HandelsManager handel, Node stadt, int stadtId, int rohstoffId, int bestand)
+	{
+		if (bestand < 100)
+			return;
+
+		var taetigkeitsKnopf = stadt.GetNodeOrNull<BaseButton>("ButtonTaetigkeit1");
+
+		for (int versuch = 0; versuch < 4; versuch++)
+		{
+			if ((EnumProduktionsslotAktionsart)handel.GetProduktionsslot(stadtId, 1).GetTaetigkeit()
+			    == EnumProduktionsslotAktionsart.Verkaufen)
+				break;
+
+			taetigkeitsKnopf?.EmitSignal(BaseButton.SignalName.Pressed);
+			await NaechsterFrame();
+		}
+
+		// Irgendeine andere Stadt als die eigene - dort ist die Ware knapp und entsprechend mehr wert.
+		int zielStadt = stadtId % (SW.Statisch.GetMaxStadtID() - 1) + 1;
+
+		if (zielStadt == stadtId)
+			zielStadt = zielStadt % (SW.Statisch.GetMaxStadtID() - 1) + 1;
+
+		handel.SetzeVerkaufsRohstoff(stadtId, 1, rohstoffId);
+		handel.SetzeVerkaufsStadt(stadtId, 1, zielStadt);
+
+		SetzeZahl(stadt, "HBoxDetail1/NumericStaette", zielStadt);
+		SetzeZahl(stadt, "HBoxDetail1/NumericMenge", bestand);
+		await NaechsterFrame();
+
+		_exportierteWaren += bestand;
 	}
 
 	/// <summary>
@@ -1380,7 +1430,7 @@ public partial class E2eTreiber : Node
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.
 		GD.Print("Klicks in Dialogen:" + _dialogKlicks + " (davon Knöpfe: " + _knopfKlicks + ")");
 		GD.Print("Besuchte Bereiche: " + _besuchteBereiche + ", davon Staedte: " + _besuchteStaedte);
-		GD.Print("Verkaufte Waren:   " + _verkaufteWaren);
+		GD.Print("Verkaufte Waren:   " + _verkaufteWaren + " vor Ort, " + _exportierteWaren + " exportiert");
 
 		// Das Vermoegen am Ende zeigt, ob der Kern des Spiels ueberhaupt getragen hat: Ohne Produktion
 		// und Verkauf bleibt es beim Startgeld, und alles was daran haengt (Steuern, Kredite, Auftrag)
