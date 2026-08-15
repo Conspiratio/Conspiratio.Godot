@@ -117,10 +117,12 @@ The game needs the editor to play, so changes are verified in three complementar
    and end at +2 353 / +3 948 talers; with a fixed 25 workers the same run ended at −8 583.
    Both ways of selling are driven, alternating by year so they don't collide (the export only ships at
    turn end, while selling on the spot clears the stock immediately). Note the export as built is **not**
-   yet profitable: measured over the same 15 years it moved 785 goods but left the players at +2 086 /
-   −163 instead of +2 353 / +3 948. The caravan costs a base fee plus a rate per started 100 units
-   (`BerechneProdKosten`), and the target city is picked arbitrarily rather than by price — choosing it by
-   what the goods actually fetch there is the open lever.
+   yet profitable: measured over the same 15 years it moved ~790 goods but left the players at
+   +2 064 / +149 instead of +2 353 / +3 948 without it. The target city *is* chosen by demand — the
+   highest price for that good, exactly what the city information screen shows (`Stadt.GetBedarf` ranks
+   by the markup over the standard price) — and that only helped marginally. So the caravan fee itself
+   (a base charge plus a rate per started 100 units, see `BerechneProdKosten`) is the likelier reason it
+   does not pay at these volumes: measure that before optimising further.
    Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
    emits it explicitly, otherwise the city never learns of the change.
 
