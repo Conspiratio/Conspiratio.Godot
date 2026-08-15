@@ -113,6 +113,11 @@ The game needs the editor to play, so changes are verified in three complementar
      does not silently break the driver.
    - "Report a problem" is on the blocked list: it zips a report and opens the system mail client —
      that tests the environment, not the game, and behaves differently per OS.
+   - Not every dialog has a button. `GeburtDialog` is only a `LineEdit` submitted with Enter, and its
+     `OnNextOrClose` is deliberately empty so the name cannot be clicked away — for the driver that was
+     a dead end that blocked *every* run reaching a birth (it looked rare only because births are).
+     When no button is found, the driver now fills the first visible `LineEdit` and emits
+     `TextSubmitted`. Worth remembering when adding a dialog that is driven by text entry.
    - A run can pass **more** years than turns: the debtors' tower skips a player's turn, so one loop
      iteration produces two year changes (30 planned → 31–33 actual, each jump right after a debt
      trial). The check is therefore "at least", not "exactly" — too few years is the real warning sign.

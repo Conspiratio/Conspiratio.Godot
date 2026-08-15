@@ -1055,6 +1055,20 @@ public partial class E2eTreiber : Node
 			return;
 		}
 
+		// Manche Dialoge haben gar keinen Knopf, sondern nur ein Eingabefeld, das mit der Eingabetaste
+		// bestätigt wird – der Geburtsdialog etwa verlangt einen Namen und ignoriert den Rechtsklick
+		// bewusst. Für den Treiber war ein solcher Dialog eine Sackgasse: nichts zu drücken, und der
+		// Rechtsklick läuft ins Leere. Deshalb wird hier ein Name eingetragen und abgeschickt.
+		if (dialog.FindChild("*LineEdit*", true, false) is LineEdit feld && feld.IsVisibleInTree())
+		{
+			if (_ausfuehrlich)
+				GD.Print("  [" + _dialogKlicks + "] " + dialog.Name + " → Eingabe \"Testkind\"");
+
+			feld.Text = "Testkind";
+			feld.EmitSignal(LineEdit.SignalName.TextSubmitted, feld.Text);
+			return;
+		}
+
 		if (_ausfuehrlich)
 			GD.Print("  [" + _dialogKlicks + "] " + dialog.Name + " → ui_next_or_close");
 
