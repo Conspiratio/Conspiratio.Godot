@@ -56,9 +56,18 @@ jobs:
             exit 1
           fi
 
-      # Spielt ein komplettes Spiel über mehrere Jahre: Zugbeginn, Zugende, Abrechnung, Wahlen,
-      # Jahresende-Ereignisse. Der Treiber beendet sich mit Code 1, wenn der Ablauf hängt oder der
+      # Spielt ein komplettes Spiel im Hot-Seat über mehrere Jahre: Zugbeginn, Rundgang durch die
+      # Bereiche des Kontors, Zugende, Abrechnung, Wahlen, Jahresende-Ereignisse und zum Schluss eine
+      # Speichern-/Laden-Probe. Der Treiber beendet sich mit Code 1, wenn der Ablauf hängt oder der
       # Spielzustand unplausibel wird – ein hängender Dialog fällt hier auf, nicht erst beim Spielen.
+      # Zusätzlich wird die Ausgabe auf Skriptfehler geprüft, die Godot sonst mit Code 0 durchwinkt.
       - name: End-to-End-Durchlauf
-        timeout-minutes: 10
-        run: $GODOT --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --verbose
+        timeout-minutes: 15
+        run: |
+          set -o pipefail
+          $GODOT --headless --path . "res://scenes/E2eTest.tscn" -- \
+            --jahre=10 --spieler=2 --verbose 2>&1 | tee e2e.log
+          if grep -qE "SCRIPT ERROR|Unhandled exception|Fehler beim" e2e.log; then
+            echo "::error::Der End-to-End-Durchlauf hat Fehler gemeldet (siehe Ausgabe oben)."
+            exit 1
+          fi

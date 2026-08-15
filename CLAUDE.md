@@ -59,18 +59,29 @@ The game needs the editor to play, so changes are verified in three complementar
 4. **Automated play-through** (`scenes/E2eTest.tscn`) — plays a whole game headless and fails with exit
    code 1 if the flow stalls or the state goes implausible. Runs in CI on every push:
    ```bash
-   godot --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --verbose
+   godot --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --spieler=2 --verbose
    ```
    It creates the game through the same Lib managers the menus use, then drives the client: every
    overlay dialog is in the group **`Dialogs`**, so the driver finds whatever is open without knowing
    it — pressing the first visible button, or sending `ui_next_or_close`. New dialogs are covered
-   automatically. Three things it taught us, worth knowing before touching it:
+   automatically. Per turn it also tours the Kontor areas (`AreaHandel`, `AreaSchreibstube`,
+   `AreaKirche`, `AreaHinterzimmer`, `AreaKampf` — *not* `AreaFenster`, which ends the turn), asserting
+   that each one actually opens a screen, and after the last year it does a `SpeicherManager`
+   save/load round-trip. `--ohne-bereiche` / `--ohne-speichern` switch those off.
+   Five things it taught us, worth knowing before touching it:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()`. The news screen
      stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
    - Synthetic input must send press **and** release (`InputEventAction`). Dialogs test
      `Input.IsActionPressed`, so a stuck-pressed action re-fires on every later event.
    - Wait for a quiet phase before pressing "end turn": the turn-begin chain is a series of `async void`
      steps, and pressing mid-flight interleaves two flows.
+   - **Never click the same dialog every frame.** Staged sequences wait for the button to be *released*
+     (`while (Input.IsActionPressed(...))` in `DuellDialog`); a per-frame click keeps them stuck forever.
+     The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
+   - Budget generously: an interactive duel takes over a minute of taunts, so a run legitimately varies
+     between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
+   - Not seedable: `SW.Statisch.Rnd` has a private setter, so runs cannot be made reproducible without a
+     Lib change. Home cities and banners are fixed in the driver to at least narrow the variance.
 
 **Two testing habits that repeatedly paid off:**
 
