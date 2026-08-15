@@ -148,7 +148,7 @@ The game needs the editor to play, so changes are verified in three complementar
    - `MaxBilderProAnsicht` caps the images per view; without it a news screen with dozens of messages
      would produce dozens of near-identical PNGs.
 
-6. **Nightly long runs** (`.github/workflows/nightly.yml`) — six 40-year games per night, three on fixed
+6. **Weekly long runs** (`.github/workflows/weekly.yml`) — six 40-year games every Sunday, three on fixed
    seeds (regression) and three on random ones (`--seed=0`, which prints the value it drew so a striking
    run can be replayed). Length alone reaches what a 10-year push run never does: measured in one
    40-year game — `SpielerTodDialog` 2×, `KindestodDialog` 3×, `GeburtDialog` 4×, `Kirchgang` 20×,
@@ -157,7 +157,8 @@ The game needs the editor to play, so changes are verified in three complementar
    (an indictment, a running candidacy, an owned base), not more years.
    Runs `--verbose` on purpose: when something fails only after an hour, the log is the only trace and
    a second attempt costs another hour. Logs are uploaded either way, so you can read off which events
-   a run actually hit.
+   a run actually hit. Weekly rather than nightly for cost: six runs are roughly 40 CI minutes, so daily
+   would eat over 1 200 of the 2 000 free minutes a month; weekly leaves room for the push runs.
 
 **Two testing habits that repeatedly paid off:**
 

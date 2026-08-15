@@ -1,9 +1,14 @@
-name: Nachtlauf - lange Spieldurchlaeufe
+name: Wochenlauf - lange Spieldurchlaeufe
 
 # Der Push-Lauf spielt 10 Jahre mit einem festen Startwert – das haelt ihn schnell, deckt aber nur einen
 # einzigen Spielverlauf ab. Vieles zeigt sich erst spaeter oder nur in bestimmten Verlaeufen: Erbfolge,
-# Tod des Spielers, Kindestod, ein gewonnener Auftrag. Dieser Lauf nimmt sich deshalb nachts die Zeit
-# fuer lange Partien und streut ueber mehrere Startwerte.
+# Tod des Spielers, Kindestod, ein gewonnener Auftrag. Dieser Lauf nimmt sich deshalb einmal die Woche
+# die Zeit fuer lange Partien und streut ueber mehrere Startwerte.
+#
+# Woechentlich, nicht taeglich, und zwar aus Kostengruenden: Sechs Durchlaeufe kosten je rund sieben
+# Minuten (Godot laden, importieren, bauen, 40 Jahre spielen), zusammen also etwa 40 Minuten. Taeglich
+# waeren das ueber 1200 Minuten im Monat und damit der Grossteil des kostenlosen Kontingents von 2000;
+# woechentlich sind es rund 180 und es bleibt Luft fuer die Push-Laeufe.
 #
 # Drei feste Startwerte dienen der Regression (derselbe Verlauf wie gestern, also vergleichbar), drei
 # zufaellige der Streuung. Ein zufaelliger Startwert wird zu Beginn des Laufs ausgegeben – damit laesst
@@ -12,8 +17,8 @@ name: Nachtlauf - lange Spieldurchlaeufe
 
 on:
   schedule:
-    # 03:20 UTC. Nicht zur vollen Stunde: Dann sind die GitHub-Runner am staerksten belegt.
-    - cron: '20 3 * * *'
+    # Sonntags 03:20 UTC. Nicht zur vollen Stunde: Dann sind die GitHub-Runner am staerksten belegt.
+    - cron: '20 3 * * 0'
   workflow_dispatch:
     inputs:
       jahre:
@@ -84,8 +89,8 @@ jobs:
           $GODOT --headless --path . "res://scenes/E2eTest.tscn" -- \
             --jahre=${{ github.event.inputs.jahre || 40 }} \
             --spieler=${{ github.event.inputs.spieler || 2 }} \
-            --seed=${{ matrix.seed }} --verbose 2>&1 | tee nachtlauf.log
-          if grep -qE "SCRIPT ERROR|Unhandled exception" nachtlauf.log; then
+            --seed=${{ matrix.seed }} --verbose 2>&1 | tee wochenlauf.log
+          if grep -qE "SCRIPT ERROR|Unhandled exception" wochenlauf.log; then
             echo "::error::Der Durchlauf ${{ matrix.name }} hat Fehler gemeldet (siehe Protokoll)."
             exit 1
           fi
@@ -96,7 +101,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nachtlauf-${{ matrix.name }}
-          path: nachtlauf.log
+          name: wochenlauf-${{ matrix.name }}
+          path: wochenlauf.log
           if-no-files-found: warn
           retention-days: 30
