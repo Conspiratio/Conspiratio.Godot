@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ce2etest0001"]
+
+[ext_resource type="Script" path="res://assets/scripts/E2eTreiber.cs" id="1_e2e"]
+
+[node name="E2eTest" type="Node"]
+script = ExtResource("1_e2e")

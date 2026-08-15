@@ -55,3 +55,10 @@ jobs:
             echo "::error::Der Headless-Smoke-Test hat Fehler gemeldet (siehe Ausgabe oben)."
             exit 1
           fi
+
+      # Spielt ein komplettes Spiel über mehrere Jahre: Zugbeginn, Zugende, Abrechnung, Wahlen,
+      # Jahresende-Ereignisse. Der Treiber beendet sich mit Code 1, wenn der Ablauf hängt oder der
+      # Spielzustand unplausibel wird – ein hängender Dialog fällt hier auf, nicht erst beim Spielen.
+      - name: End-to-End-Durchlauf
+        timeout-minutes: 10
+        run: $GODOT --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --verbose

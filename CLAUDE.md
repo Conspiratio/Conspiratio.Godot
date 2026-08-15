@@ -56,6 +56,22 @@ The game needs the editor to play, so changes are verified in three complementar
    - A windowed run only exits when your script calls `GetTree().Quit()`; if it hangs, **don't pipe its stdout through `head`/`grep`** (that blocks and shows nothing). Read the app's own log instead: `%APPDATA%\Godot\app_userdata\Conspiratio.Godot\logs\conspiratio.log`. Screenshots land next to it in `app_userdata\Conspiratio.Godot\`.
    - To capture a state that needs input, press buttons programmatically: `button.EmitSignal(BaseButton.SignalName.Pressed)`. For multi-step flows, shoot on a fixed interval and press whatever is on screen, then pick the interesting frames.
 
+4. **Automated play-through** (`scenes/E2eTest.tscn`) — plays a whole game headless and fails with exit
+   code 1 if the flow stalls or the state goes implausible. Runs in CI on every push:
+   ```bash
+   godot --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=10 --verbose
+   ```
+   It creates the game through the same Lib managers the menus use, then drives the client: every
+   overlay dialog is in the group **`Dialogs`**, so the driver finds whatever is open without knowing
+   it — pressing the first visible button, or sending `ui_next_or_close`. New dialogs are covered
+   automatically. Three things it taught us, worth knowing before touching it:
+   - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()`. The news screen
+     stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
+   - Synthetic input must send press **and** release (`InputEventAction`). Dialogs test
+     `Input.IsActionPressed`, so a stuck-pressed action re-fires on every later event.
+   - Wait for a quiet phase before pressing "end turn": the turn-begin chain is a series of `async void`
+     steps, and pressing mid-flight interleaves two flows.
+
 **Two testing habits that repeatedly paid off:**
 
 - **Pin randomized inputs, then use large samples.** Much game state is randomized per game (KI `Bosheit`, and thus opponent strength). Comparing runs without pinning it produces swings that look like real regressions. Pin the inputs, and for probabilistic behaviour assert on rates over a few thousand runs, not on single outcomes.

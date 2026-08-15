@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
@@ -32,8 +32,16 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 	private Label _labelTitel;
 	private RichTextLabel _labelText;
 
-	/// <summary>Ist gesetzt, solange die Kampfereignisse Meldung für Meldung durchgeblättert werden.</summary>
+	/// <summary>Ist gesetzt, solange auf den Klick zur nächsten Meldung gewartet wird.</summary>
 	private TaskCompletionSource<bool> _weiterKlick;
+
+	/// <summary>
+	/// Läuft gerade das Durchblättern der Kampfereignisse? Zwischen zwei Meldungen ist
+	/// <see cref="_weiterKlick"/> kurz null; ohne dieses Kennzeichen würde ein Klick in genau dieses
+	/// Fenster den Dialog schließen und die Eingabe abschalten – die Schleife wartete dann ewig auf
+	/// einen Klick, der nicht mehr ankommen kann (das Spiel fror bei schnellem Klicken ein).
+	/// </summary>
+	private bool _blaettertGerade;
 
 	// Der Nachrichtenschirm bleibt beim Weiterblättern sichtbar (kein Durchblitzen des Bildschirms dahinter).
 	protected override bool BleibtSichtbarBeimSchliessen => true;
@@ -57,6 +65,15 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 			var klick = _weiterKlick;
 			_weiterKlick = null;
 			klick.TrySetResult(true);
+			return;
+		}
+
+		// Beim Durchblättern zwischen zwei Meldungen: Der Klick läuft ins Leere, statt den Dialog zu
+		// schließen. Sonst wäre die Eingabe abgeschaltet, bevor die Schleife die nächste Meldung
+		// scharfmacht – und das Blättern käme nie wieder in Gang.
+		if (_blaettertGerade)
+		{
+			GetViewport().SetInputAsHandled();
 			return;
 		}
 
@@ -109,6 +126,7 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 		var sb = new StringBuilder();
 
 		OffenerNachrichtenschirm = this;
+		_blaettertGerade = true;
 		Show();
 		MoveToFront();
 		SetProcessInput(true);
@@ -128,6 +146,7 @@ public partial class RundenNachrichtenDialog : DialogBase, IShowText
 			await AufNaechstenKlickWarten();
 		}
 
+		_blaettertGerade = false;
 		OffenerNachrichtenschirm = null;
 		HideAndDisableInput();
 	}
