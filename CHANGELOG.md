@@ -1,6 +1,6 @@
 # Changelog Conspiratio Godot
 
-## 1.0.0
+## 1.0.0-godot
 
 _Unreleased_
 
