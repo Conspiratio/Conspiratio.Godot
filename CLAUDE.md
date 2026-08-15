@@ -65,10 +65,12 @@ The game needs the editor to play, so changes are verified in three complementar
    overlay dialog is in the group **`Dialogs`**, so the driver finds whatever is open without knowing
    it — pressing the first visible button, or sending `ui_next_or_close`. New dialogs are covered
    automatically. Per turn it also tours the Kontor areas (`AreaHandel`, `AreaSchreibstube`,
-   `AreaKirche`, `AreaHinterzimmer`, `AreaKampf` — *not* `AreaFenster`, which ends the turn), asserting
-   that each one actually opens a screen, and after the last year it does a `SpeicherManager`
-   save/load round-trip. `--ohne-bereiche` / `--ohne-speichern` switch those off.
-   Five things it taught us, worth knowing before touching it:
+   `AreaKirche`, `AreaHinterzimmer`, `AreaKampf` — *not* `AreaFenster`, which ends the turn), asserts
+   that each one actually opens a screen, and presses two of that area's buttons — reaching trade,
+   applications, credit, espionage and the rest; the home city is opened from the map. After the last
+   year it does a `SpeicherManager` save/load round-trip. A 10-year, 2-player run covers 24–26 distinct
+   actions in 26–70 s. `--ohne-bereiche` / `--ohne-aktionen` / `--ohne-speichern` switch those off.
+   What it taught us, worth knowing before touching it:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()`. The news screen
 	 stays visible after closing (`BleibtSichtbarBeimSchliessen`) and merely drops input.
    - Synthetic input must send press **and** release (`InputEventAction`). Dialogs test
@@ -80,6 +82,17 @@ The game needs the editor to play, so changes are verified in three complementar
 	 The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
    - Budget generously: an interactive duel takes over a minute of taunts, so a run legitimately varies
 	 between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
+	 `MaxSchritte` is 20 000 frames per wait for exactly that reason — headless counts far more frames per
+	 second than the screen does, and 6 000 aborted mid-duel and reported a hang that did not exist.
+   - **Any "it hangs" needs a state report before a fix.** The driver prints open dialogs, visible
+	 screens, the end-turn button and every player's talers when it gives up. Three separate hangs were
+	 decided from that output alone; without it each looked like the same "dialog stayed open?".
+   - Two traps behind those hangs: a driver that answers its own confirmation dialog at random **vetoes
+	 its own intent** (`Kontor.BeendeZug` asks "really end the turn?" first), and an exit counter that
+	 resets on every dialog *change* never fires when two dialogs ping-pong — a purchase that fails for
+	 lack of money plus its "not enough talers" message looped 6 060 times. Hence `MaxKlicksProAktion`,
+	 counting across all dialogs of one action, active only inside an action (`_inAktion`) so it cannot
+	 starve a duel of the button presses it needs.
    - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
      with a fixed `--seed`, so a failing run can be replayed exactly. `--seed=0` picks a random one and
      prints it — use that to hunt for new failures, then replay with the printed value.
