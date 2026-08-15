@@ -694,6 +694,36 @@ public partial class E2eTreiber : Node
 	}
 
 	/// <summary>
+	/// Sucht die Stadt, in der die Ware am meisten einbringt. Genau das zeigen die Stadtinformationen als
+	/// „Nachfrage" an: Sie ergibt sich aus dem Aufschlag des dortigen Preises auf den Standardpreis
+	/// (<c>Stadt.GetBedarf</c> sortiert danach). Vorher wurde die Zielstadt beliebig gewählt, und der
+	/// Export lohnte sich deshalb messbar nicht – landete die Ware in einer Stadt, die sie selbst
+	/// herstellt, war der Erlös so mager wie zu Hause.
+	/// </summary>
+	private static int FindeBesteAbsatzstadt(int eigeneStadtId, int rohstoffId)
+	{
+		int beste = 0;
+		int besterPreis = SW.Dynamisch.GetStadtwithID(eigeneStadtId).GetRohstoffPreisVonIDX(rohstoffId);
+
+		for (int id = SW.Statisch.GetMinStadtID(); id < SW.Statisch.GetMaxStadtID(); id++)
+		{
+			if (id == eigeneStadtId)
+				continue;
+
+			int preis = SW.Dynamisch.GetStadtwithID(id).GetRohstoffPreisVonIDX(rohstoffId);
+
+			if (preis > besterPreis)
+			{
+				besterPreis = preis;
+				beste = id;
+			}
+		}
+
+		// Bringt keine andere Stadt mehr als die eigene, lohnt der Weg nicht – dann bleibt die Ware da.
+		return beste;
+	}
+
+	/// <summary>
 	/// Wartet, bis der genannte Bildschirm sichtbar und bedienbar ist. Die Menüs arbeiten allein über
 	/// Knopfsignale und schalten <c>_Input</c> nie ein – für sie genügt Sichtbarkeit
 	/// (<paramref name="brauchtEingabe"/> = false), sonst wartete der Treiber vergeblich.
