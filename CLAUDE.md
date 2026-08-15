@@ -105,6 +105,17 @@ The game needs the editor to play, so changes are verified in three complementar
      driver fighting itself — answering its own "really end the turn?" at random, and an exit counter
      that reset on each dialog *change* while two dialogs ping-ponged 6 060 times.
 
+   Per turn the driver also plays a **trade round** in the home city — set the slot to "produce", pick the
+   workshop's resource, staff it with `ArbeiterProRunde` workers on one site, and sell the stock by
+   clicking the resource symbol. That is the core loop; without it the run earns nothing and everything
+   hanging off wealth (settlement, taxes, credit, debtors' tower, mission goals) runs on unrealistic
+   numbers. It runs even with `--ohne-aktionen`, because it is the game's core, not a random action.
+   Measured over 15 years, trade only: 8 workers move 2 088 goods and end near break-even, while 25
+   workers *lose* money — wages outgrow the proceeds, and selling in the producing city fetches poor
+   prices. Exporting to another city is the profitable path and is not yet driven.
+   Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
+   emits it explicitly, otherwise the city never learns of the change.
+
    Runs are reproducible: `--seed=N` replays a run exactly (measured: identical down to the click
    count), `--seed=0` draws one and prints it. The seed is set **twice**, once before setup and once the
    game stands, so a change to the setup path no longer invalidates noted seeds — it cannot equalise the

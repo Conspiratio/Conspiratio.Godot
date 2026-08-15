@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Niederlassung;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using Godot;
@@ -99,6 +100,13 @@ public partial class E2eTreiber : Node
 	private const int MaxAktionenProBereich = 2;
 
 	/// <summary>
+	/// Arbeiter, mit denen der Durchlauf je Runde produzieren lässt. Klein gehalten: Löhne fallen
+	/// jährlich an, und ein Spieler, den der Test in den Schuldturm wirtschaftet, prüft am Ende die
+	/// Schuldenlogik statt des Handels.
+	/// </summary>
+	private const int ArbeiterProRunde = 8;
+
+	/// <summary>
 	/// So oft wird in einem Dialog ein Knopf gedrückt, bevor der Treiber ihn per Rechtsklick verlässt.
 	/// Ohne diese Grenze bliebe er in Dialogen mit Reitern hängen: Dort führt kein Knopf hinaus, und der
 	/// immer gleiche erste Knopf (der erste Reiter) bringt den Ablauf nicht weiter.
@@ -181,6 +189,7 @@ public partial class E2eTreiber : Node
 	private int _knopfKlicks;
 	private int _besuchteBereiche;
 	private int _besuchteStaedte;
+	private int _verkaufteWaren;
 	private int _gespielteZuege;
 	private int _bilder;
 
@@ -356,7 +365,9 @@ public partial class E2eTreiber : Node
 
 			await Schiesse(bildschirm);
 
-			if (_mitAktionen)
+			// Die Heimatstadt wird immer angesteuert: Produktion und Verkauf sind der Kern des Spiels,
+			// keine der zufaelligen Handlungen, die --ohne-aktionen abschaltet.
+			if (_mitAktionen || bildschirm == nameof(Weltkarte))
 				await BedieneBildschirm(bildschirm);
 
 			if (!await KehreZumKontorZurueck(name))
@@ -479,11 +490,97 @@ public partial class E2eTreiber : Node
 
 		_besuchteStaedte++;
 		await Schiesse(nameof(Stadt));
-		await BedieneBildschirm(nameof(Stadt));
+		await FuehreHandelsrundeDurch(stadtId);
+
+		if (_mitAktionen)
+			await BedieneBildschirm(nameof(Stadt));
 
 		// Zurück auf die Karte, damit der Aufrufer von dort aus zum Kontor findet.
 		SchickeAbbruch();
 		await NaechsterFrame();
+	}
+
+	/// <summary>
+	/// Spielt in der offenen Stadt eine Handelsrunde: produzieren lassen und den vorhandenen Bestand
+	/// verkaufen. Das ist der eigentliche Kern des Spiels – ohne ihn erwirtschaftet der Durchlauf nichts,
+	/// und alles, was am Vermögen hängt (Abrechnung, Steuern, Kredite, Schuldturm, Auftragsziele), läuft
+	/// mit unrealistischen Zahlen oder gar nicht.
+	///
+	/// Bewusst gezielt statt zufällig: Produktion braucht Tätigkeit, Ware, Arbeiter und Stätten in
+	/// sinnvoller Kombination – erwürfelt kommt dabei nichts heraus. Die Werte sind klein gehalten
+	/// (<see cref="ArbeiterProRunde"/>, eine Stätte), damit die Löhne den Spieler nicht ins Minus ziehen.
+	///
+	/// Bedient wird über die Steuerelemente des Bildschirms, damit der Client-Pfad läuft.
+	/// </summary>
+	private async Task FuehreHandelsrundeDurch(int stadtId)
+	{
+		var handel = new HandelsManager();
+		var stadt = _main.Stadt;
+
+		// Ohne eigene Werkstätte gibt es nichts zu produzieren. Die Plätze sind 1-basiert (ButtonWs1…6).
+		int werkstattNr = -1;
+
+		for (int nr = 1; nr <= 6 && werkstattNr < 0; nr++)
+		{
+			if (handel.HatWerkstatt(stadtId, nr))
+				werkstattNr = nr;
+		}
+
+		if (werkstattNr < 0)
+			return;
+
+		// Slot 0 auf „Produzieren" schalten. Der Knopf rotiert durch die vier Tätigkeiten, es wird also
+		// so oft gedrückt, bis die gewünschte erreicht ist.
+		var taetigkeitsKnopf = stadt.GetNodeOrNull<BaseButton>("ButtonTaetigkeit0");
+
+		for (int versuch = 0; versuch < 4; versuch++)
+		{
+			if ((EnumProduktionsslotAktionsart)handel.GetProduktionsslot(stadtId, 0).GetTaetigkeit()
+			    == EnumProduktionsslotAktionsart.Produzieren)
+				break;
+
+			taetigkeitsKnopf?.EmitSignal(BaseButton.SignalName.Pressed);
+			await NaechsterFrame();
+		}
+
+		handel.SetzeProduktionsRohstoff(stadtId, 0, handel.RohstoffIdAnPlatz(stadtId, werkstattNr));
+
+		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", 1);
+		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", ArbeiterProRunde);
+		await NaechsterFrame();
+
+		// Verkaufen: Ein Klick auf das Rohstoffsymbol veräußert den kompletten Bestand dieser Ware.
+		// Erst ab dem zweiten Jahr liegt etwas im Lager – vorher passiert hier schlicht nichts.
+		int rohstoffId = handel.RohstoffIdAnPlatz(stadtId, werkstattNr);
+		int bestand = handel.GetLagerbestand(stadtId, rohstoffId);
+
+		if (bestand > 0)
+		{
+			stadt.GetNodeOrNull<BaseButton>("ButtonRoh" + werkstattNr)?
+			     .EmitSignal(BaseButton.SignalName.Pressed);
+			await NaechsterFrame();
+			_verkaufteWaren += bestand;
+		}
+
+		_bedienteKnoepfe.Add("Stadt.Handelsrunde");
+	}
+
+	/// <summary>
+	/// Setzt einen Zahlenknopf und meldet die Änderung. Das Setzen von <c>Wert</c> allein löst das Signal
+	/// nicht aus – nur die Ziffern-Eingabe tut das –, und ohne Signal erfährt die Stadt nichts davon.
+	/// </summary>
+	private void SetzeZahl(Node bildschirm, string pfad, int wert)
+	{
+		var knopf = bildschirm.GetNodeOrNull<controls.NumericButtonWithSounds>(pfad);
+
+		if (knopf == null)
+		{
+			_fehler.Add("Der Zahlenknopf " + pfad + " wurde in der Stadt nicht gefunden.");
+			return;
+		}
+
+		knopf.Wert = wert;
+		knopf.EmitSignal(controls.NumericButtonWithSounds.SignalName.WertChanged, knopf.Wert);
 	}
 
 	/// <summary>
@@ -1279,6 +1376,18 @@ public partial class E2eTreiber : Node
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.
 		GD.Print("Klicks in Dialogen:" + _dialogKlicks + " (davon Knöpfe: " + _knopfKlicks + ")");
 		GD.Print("Besuchte Bereiche: " + _besuchteBereiche + ", davon Staedte: " + _besuchteStaedte);
+		GD.Print("Verkaufte Waren:   " + _verkaufteWaren);
+
+		// Das Vermoegen am Ende zeigt, ob der Kern des Spiels ueberhaupt getragen hat: Ohne Produktion
+		// und Verkauf bleibt es beim Startgeld, und alles was daran haengt (Steuern, Kredite, Auftrag)
+		// laeuft mit unrealistischen Zahlen.
+		for (int i = 1; i <= SW.Dynamisch.GetAktivSpielerAnzahl(); i++)
+		{
+			var sp = SW.Dynamisch.GetHumWithID(i);
+
+			if (sp != null)
+				GD.Print("Spieler " + i + ":         " + sp.GetTaler() + " Taler");
+		}
 		GD.Print("Bediente Knoepfe:  " + _bedienteKnoepfe.Count + " verschiedene");
 
 		if (_mitBildern)
