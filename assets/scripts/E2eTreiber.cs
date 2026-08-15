@@ -99,12 +99,8 @@ public partial class E2eTreiber : Node
 	/// </summary>
 	private const int MaxAktionenProBereich = 2;
 
-	/// <summary>
-	/// Arbeiter, mit denen der Durchlauf je Runde produzieren lässt. Klein gehalten: Löhne fallen
-	/// jährlich an, und ein Spieler, den der Test in den Schuldturm wirtschaftet, prüft am Ende die
-	/// Schuldenlogik statt des Handels.
-	/// </summary>
-	private const int ArbeiterProRunde = 8;
+	/// <summary>Produktionsstätten, die der Durchlauf je Runde besetzt.</summary>
+	private const int StaettenProRunde = 1;
 
 	/// <summary>
 	/// So oft wird in einem Dialog ein Knopf gedrückt, bevor der Treiber ihn per Rechtsklick verlässt.
@@ -543,15 +539,23 @@ public partial class E2eTreiber : Node
 			await NaechsterFrame();
 		}
 
-		handel.SetzeProduktionsRohstoff(stadtId, 0, handel.RohstoffIdAnPlatz(stadtId, werkstattNr));
+		int rohstoffId = handel.RohstoffIdAnPlatz(stadtId, werkstattNr);
+		handel.SetzeProduktionsRohstoff(stadtId, 0, rohstoffId);
 
-		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", 1);
-		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", ArbeiterProRunde);
+		// Genau so viele Arbeiter wie die Ware verlangt: Produktionsslot.GetProduktion rechnet mit
+		// benArbeiter = Staetten * (Arbeiter / Werkstaetten) je Rohstoff. Darunter sinkt der Ertrag
+		// anteilig, darueber steigt er nicht mehr – nur die Loehne. Ein fester Wert ist deshalb entweder
+		// zu knapp oder verbrennt Geld; gemessen war eine Ueberbesetzung klar defizitaer.
+		var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+		int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 1;
+		int arbeiter = Math.Max(1, StaettenProRunde * proStaette);
+
+		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", StaettenProRunde);
+		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", arbeiter);
 		await NaechsterFrame();
 
 		// Verkaufen: Ein Klick auf das Rohstoffsymbol veräußert den kompletten Bestand dieser Ware.
 		// Erst ab dem zweiten Jahr liegt etwas im Lager – vorher passiert hier schlicht nichts.
-		int rohstoffId = handel.RohstoffIdAnPlatz(stadtId, werkstattNr);
 		int bestand = handel.GetLagerbestand(stadtId, rohstoffId);
 
 		if (bestand > 0)

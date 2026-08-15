@@ -110,9 +110,13 @@ The game needs the editor to play, so changes are verified in three complementar
    clicking the resource symbol. That is the core loop; without it the run earns nothing and everything
    hanging off wealth (settlement, taxes, credit, debtors' tower, mission goals) runs on unrealistic
    numbers. It runs even with `--ohne-aktionen`, because it is the game's core, not a random action.
-   Measured over 15 years, trade only: 8 workers move 2 088 goods and end near break-even, while 25
-   workers *lose* money — wages outgrow the proceeds, and selling in the producing city fetches poor
-   prices. Exporting to another city is the profitable path and is not yet driven.
+   **Staff it at the ratio the goods demand**, never at a fixed number: `Produktionsslot.GetProduktion`
+   computes `benArbeiter = sites × (Rohstoff.GetArbeiter() / Rohstoff.GetWerkstaetten())`. Below that the
+   yield drops proportionally; above it the yield is capped while wages keep rising linearly — an
+   overstaffed run measurably loses money. With the ratio right, 15 years of trade alone move 2 261 goods
+   and end at +2 353 / +3 948 talers; with a fixed 25 workers the same run ended at −8 583.
+   Selling in the city that produces the goods still fetches poor prices — exporting to another city is
+   the profitable path and is not yet driven.
    Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
    emits it explicitly, otherwise the city never learns of the change.
 
