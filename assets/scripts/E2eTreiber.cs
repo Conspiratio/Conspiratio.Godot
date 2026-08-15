@@ -22,9 +22,9 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Weitere Schalter: <c>--ohne-bereiche</c> überspringt den Rundgang durch Stadt, Schreibstube usw.,
 /// <c>--ohne-speichern</c> die Speicher-/Ladeprobe, <c>--mit-ton</c> lässt den sonst stummen Ton an.
 ///
-/// <c>--aktionen</c> betätigt in den Bereichen auch deren Knöpfe (Handel, Bewerbung, Kredit, Spionage …)
-/// statt sie nur zu betreten – das erreicht deutlich mehr Code, hängt aber noch gelegentlich beim
-/// Zugende und ist deshalb vorerst nicht der Standard.
+/// In den Bereichen werden auch deren Knöpfe betätigt (Handel, Bewerbung, Kredit, Spionage …), nicht nur
+/// der Bereich betreten – das erreicht den Großteil der Spiellogik. <c>--ohne-aktionen</c> beschränkt den
+/// Rundgang wieder aufs Betreten und Verlassen.
 ///
 /// Mit <c>--screenshots</c> legt der Durchlauf zusätzlich von jeder Ansicht ein Bild ab und wird damit
 /// zur visuellen Abnahme (Zielordner über <c>--bilder=&lt;pfad&gt;</c>, sonst <c>user://e2e-bilder</c>).
@@ -56,11 +56,14 @@ public partial class E2eTreiber : Node
 	private const int StandardSeed = 20250815;
 
 	/// <summary>
-	/// Obergrenze an Frames je Warteschritt – schützt vor einem Ablauf, der nie weiterläuft. Großzügig
-	/// bemessen, weil inszenierte Sequenzen (allen voran das Duell mit seinen Sprüchen) über eine Minute
-	/// laufen können; ein echter Hänger fällt trotzdem auf, spätestens am Zeitlimit des CI-Schritts.
+	/// Obergrenze an Frames je Warteschritt – schützt vor einem Ablauf, der nie weiterläuft.
+	///
+	/// Sehr großzügig bemessen, und das mit Grund: Ein Duell unter zwei menschlichen Spielern läuft über
+	/// eine Minute, und headless zählt die Engine deutlich mehr Frames pro Sekunde als auf dem Bildschirm.
+	/// Mit 6000 Frames brach der Treiber mitten im Wortgefecht ab und meldete einen Hänger, den es nicht
+	/// gab. Ein echter Hänger fällt trotzdem auf – spätestens am Zeitlimit des CI-Schritts.
 	/// </summary>
-	private const int MaxSchritte = 6000;
+	private const int MaxSchritte = 20000;
 
 	/// <summary>
 	/// Mindestabstand in Frames zwischen zwei Klicks auf denselben Dialog. Ohne diese Bremse würde der
@@ -102,6 +105,15 @@ public partial class E2eTreiber : Node
 	private const int MaxKlicksProDialog = 3;
 
 	/// <summary>
+	/// Obergrenze an Klicks, die eine einzelne Handlung nach sich ziehen darf, bevor der Treiber
+	/// abbricht und schließt. Notwendig, weil <see cref="MaxKlicksProDialog"/> bei jedem Dialogwechsel
+	/// neu beginnt: Pendeln zwei Dialoge gegeneinander – ein Kaufversuch ohne Geld und die Meldung
+	/// „Ihr habt nicht genügend Taler" – erreicht jener Zähler sein Limit nie, und der Treiber klickt
+	/// bis zum Zeitablauf im Kreis. Diese Grenze zählt über alle Dialoge einer Handlung hinweg.
+	/// </summary>
+	private const int MaxKlicksProAktion = 15;
+
+	/// <summary>
 	/// Knöpfe, die der Treiber nicht drückt, weil sie den Durchlauf beenden statt ihn zu prüfen.
 	/// Bewusst kurz gehalten: Eine Handlung, die nur scheitert oder Geld kostet, ist erwünscht – auch
 	/// der Weg in den Schuldturm ist ein Pfad, der geprüft gehört.
@@ -141,6 +153,15 @@ public partial class E2eTreiber : Node
 	private Main _main;
 	private string _letzterDialog = "";
 	private int _klicksAmSelbenDialog;
+	private int _klicksSeitAktion;
+
+	/// <summary>
+	/// Läuft gerade eine Handlung aus einem Bereich? Nur dann wird gewürfelt und gedeckelt. Außerhalb –
+	/// beim Zugbeginn oder in einem Duell – gilt die schlichte Bedienung des Standardpfads: Ein Duell
+	/// verlangt eine Auswahl, und ein Treiber, der dort nur noch Rechtsklicks schickt, bringt es nie
+	/// zu Ende.
+	/// </summary>
+	private bool _inAktion;
 
 	/// <summary>
 	/// Läuft gerade das Zugende? Dann werden Dialoge bestätigt statt zufällig bedient: Der Kontor fragt
@@ -158,7 +179,7 @@ public partial class E2eTreiber : Node
 
 	private bool _ausfuehrlich;
 	private bool _mitBereichen = true;
-	private bool _mitAktionen;
+	private bool _mitAktionen = true;
 	private bool _mitSpeicherprobe = true;
 	private bool _mitBildern;
 	private string _bilderOrdner;
@@ -179,10 +200,7 @@ public partial class E2eTreiber : Node
 		_mitBereichen = Array.IndexOf(argumente, "--ohne-bereiche") < 0;
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
 
-		// Noch nicht der Standard: Die Handlungen in den Bereichen erreichen viel mehr Code, aber ein
-		// Zugende bleibt dabei gelegentlich haengen (Ursache noch offen). Bis das geklaert ist, laeuft
-		// die CI ohne sie, damit ein echter Fehlschlag nicht in einem bekannten Problem untergeht.
-		_mitAktionen = Array.IndexOf(argumente, "--aktionen") >= 0;
+		_mitAktionen = Array.IndexOf(argumente, "--ohne-aktionen") < 0;
 
 		// Ton aus: Ein Durchlauf im Fenstermodus lärmt sonst minutenlang (Musikwechsel, Klickgeräusche,
 		// Duellstimmen). Stummgeschaltet wird nur der Master-Bus zur Laufzeit – die gespeicherten
@@ -262,7 +280,8 @@ public partial class E2eTreiber : Node
 	{
 		if (!await WarteBisKontorBereit())
 		{
-			_fehler.Add("Der Kontor wurde im Jahr " + SW.Dynamisch.GetAktuellesJahr() + " nicht bedienbereit.");
+			_fehler.Add("Der Kontor wurde im Jahr " + SW.Dynamisch.GetAktuellesJahr()
+			            + " nicht bedienbereit. " + Zustandsbericht());
 			return false;
 		}
 
@@ -354,9 +373,14 @@ public partial class E2eTreiber : Node
 			if (_ausfuehrlich)
 				GD.Print("    Aktion: " + bezeichnung);
 
+			_klicksSeitAktion = 0;
+			_inAktion = true;
 			knopf.EmitSignal(BaseButton.SignalName.Pressed);
 
-			if (!await WarteBisBildschirmZurueck(bildschirm, bezeichnung))
+			bool zurueck = await WarteBisBildschirmZurueck(bildschirm, bezeichnung);
+			_inAktion = false;
+
+			if (!zurueck)
 				return;
 		}
 	}
@@ -480,7 +504,8 @@ public partial class E2eTreiber : Node
 			await NaechsterFrame();
 		}
 
-		_fehler.Add("Nach der Aktion " + bezeichnung + " kehrte der Ablauf nicht zu " + bildschirm + " zurück.");
+		_fehler.Add("Nach der Aktion " + bezeichnung + " kehrte der Ablauf nicht zu " + bildschirm
+		            + " zurück. " + Zustandsbericht());
 		return false;
 	}
 
@@ -809,10 +834,14 @@ public partial class E2eTreiber : Node
 		// ausgestiegen: Dialoge mit Reitern (die Gesetzestafel) haben keinen Knopf, der hinausführt.
 		BaseButton knopf;
 
+		_klicksSeitAktion++;
+
 		if (Ausstiegsknopf.TryGetValue(dialog.Name.ToString(), out string ausstieg))
 			knopf = dialog.GetNodeOrNull<BaseButton>(ausstieg) ?? FindeSichtbarenKnopf(dialog);
-		else if (_mitAktionen && !_imZugende)
-			knopf = ++_klicksAmSelbenDialog <= MaxKlicksProDialog ? WaehleKnopf(dialog) : null;
+		else if (_mitAktionen && _inAktion && !_imZugende)
+			knopf = ++_klicksAmSelbenDialog <= MaxKlicksProDialog && _klicksSeitAktion <= MaxKlicksProAktion
+				? WaehleKnopf(dialog)
+				: null;
 		else
 			knopf = FindeSichtbarenKnopf(dialog);
 
