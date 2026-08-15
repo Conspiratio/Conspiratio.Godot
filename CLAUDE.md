@@ -88,6 +88,11 @@ The game needs the editor to play, so changes are verified in three complementar
      screens, which run on button signals and never enable `_Input`
      (`WarteAufSichtbar(..., brauchtEingabe: false)`). Not every dialog has a button either: where none
      is found the driver fills the first `LineEdit` and emits `TextSubmitted` (`GeburtDialog`).
+   - **The CI runner has no `user://client.cfg`**, so every `ClientSettings` default applies there and
+     nowhere else — the tips dialog is shown on a fresh machine but was off locally, which is why it only
+     ever broke in CI. To reproduce such a case, move the file aside (and put it back: it is the user's
+     settings). Out of that dialog leads no button at all, only a right-click, so the driver alternates
+     `MaxKlicksProDialog` button presses with one `ui_next_or_close` — always, not just inside an action.
    - Synthetic input needs press **and** release, and never the same dialog every frame — staged
      sequences wait for the button to be *released*. Synthetic **mouse** events don't reach the maps
      headless at all; both maps fall back to the entry point the real click uses (`Stadt.ShowStadt`,

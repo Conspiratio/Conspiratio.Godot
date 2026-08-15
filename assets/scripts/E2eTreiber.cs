@@ -1036,12 +1036,20 @@ public partial class E2eTreiber : Node
 
 		_klicksSeitAktion++;
 
+		// Der Wechsel „ein paar Knopfdruecke, dann ein Rechtsklick" gilt immer: Aus manchen Dialogen
+		// fuehrt ueberhaupt kein Knopf heraus, ihre Knoepfe bleiben aber dauerhaft verfuegbar. Der
+		// Tipps-Dialog etwa hat nur „Zurueck" und „Weiter" und schliesst allein per Rechtsklick – wer
+		// stets den ersten sichtbaren Knopf drueckt, blaettert dort bis zum Zeitablauf.
+		// Ausgehungert wird dadurch nichts: Nach dem Rechtsklick setzt Bediene den Zaehler zurueck, es
+		// gibt also gleich wieder Knopfdruecke (wichtig fuers Duell, das genau die braucht).
+		bool nurNochSchliessen = ++_klicksAmSelbenDialog > MaxKlicksProDialog && !_imZugende;
+
 		if (Ausstiegsknopf.TryGetValue(dialog.Name.ToString(), out string ausstieg))
 			knopf = dialog.GetNodeOrNull<BaseButton>(ausstieg) ?? FindeSichtbarenKnopf(dialog);
-		else if (_mitAktionen && _inAktion && !_imZugende)
-			knopf = ++_klicksAmSelbenDialog <= MaxKlicksProDialog && _klicksSeitAktion <= MaxKlicksProAktion
-				? WaehleKnopf(dialog)
-				: null;
+		else if (nurNochSchliessen)
+			knopf = null;
+		else if (_mitAktionen && _inAktion)
+			knopf = _klicksSeitAktion <= MaxKlicksProAktion ? WaehleKnopf(dialog) : null;
 		else
 			knopf = FindeSichtbarenKnopf(dialog);
 
