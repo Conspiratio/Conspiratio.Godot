@@ -32,8 +32,18 @@ jobs:
           curl -sSfL -o godot.zip \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
           unzip -q godot.zip
-          chmod +x "${NAME}/${NAME}"
-          echo "GODOT=${PWD}/${NAME}/${NAME}" >> "$GITHUB_ENV"
+          # Die Binary wird gesucht, nicht aus dem Archivnamen zusammengesetzt: Der Ordner heisst
+          # "..._linux_x86_64", die Datei darin schreibt Godot aber anders. Ein zusammengesetzter Name
+          # ging ins Leere ("chmod: cannot access"). Suchen ueberlebt auch kuenftige Umbenennungen.
+          GODOT_BIN="$(find . -maxdepth 3 -type f -name 'Godot_v*_mono_linux*' ! -name '*.zip' | head -1)"
+          if [ -z "$GODOT_BIN" ]; then
+            echo "::error::Im Archiv wurde keine Godot-Binary gefunden. Inhalt:"
+            unzip -l godot.zip
+            exit 1
+          fi
+          chmod +x "$GODOT_BIN"
+          echo "GODOT=$(realpath "$GODOT_BIN")" >> "$GITHUB_ENV"
+          echo "Godot-Binary: $GODOT_BIN"
 
       # Legt .godot/ an und registriert die Szenen-UIDs. Muss vor dem Build laufen, weil der
       # Godot.NET.Sdk sich auf diese Struktur stützt.

@@ -71,8 +71,16 @@ jobs:
           curl -sSfL -o godot.zip \
             "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
           unzip -q godot.zip
-          chmod +x "${NAME}/${NAME}"
-          echo "GODOT=${PWD}/${NAME}/${NAME}" >> "$GITHUB_ENV"
+          # Siehe build.yml: Die Binary heisst anders als der Ordner, deshalb wird sie gesucht.
+          GODOT_BIN="$(find . -maxdepth 3 -type f -name 'Godot_v*_mono_linux*' ! -name '*.zip' | head -1)"
+          if [ -z "$GODOT_BIN" ]; then
+            echo "::error::Im Archiv wurde keine Godot-Binary gefunden. Inhalt:"
+            unzip -l godot.zip
+            exit 1
+          fi
+          chmod +x "$GODOT_BIN"
+          echo "GODOT=$(realpath "$GODOT_BIN")" >> "$GITHUB_ENV"
+          echo "Godot-Binary: $GODOT_BIN"
 
       - name: Ressourcen importieren
         run: $GODOT --headless --path . --import
