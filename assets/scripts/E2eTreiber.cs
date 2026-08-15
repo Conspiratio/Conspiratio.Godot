@@ -375,6 +375,12 @@ public partial class E2eTreiber : Node
 			return;
 		}
 
+		if (bildschirm == nameof(SoeldnerRaeuberKarte))
+		{
+			await BesucheStuetzpunkt();
+			return;
+		}
+
 		var knoten = _main.GetNodeOrNull<Control>(bildschirm);
 
 		if (knoten == null)
@@ -464,6 +470,62 @@ public partial class E2eTreiber : Node
 		// Zurück auf die Karte, damit der Aufrufer von dort aus zum Kontor findet.
 		SchickeAbbruch();
 		await NaechsterFrame();
+	}
+
+	/// <summary>
+	/// Klickt auf der Militärkarte einen Stützpunkt an. Ohne diesen Umweg bleibt das gesamte
+	/// Räuber-/Söldner-System ungeprüft: Kauf und Verwaltung eines Stützpunkts hängen an einem Klick auf
+	/// die Karte, und die kennt – wie die Weltkarte – keine Knöpfe, sondern nur Mauspositionen.
+	/// </summary>
+	private async Task BesucheStuetzpunkt()
+	{
+		var karte = _main.SoeldnerRaeuberKarte;
+		int anzahl = karte.AnzahlStuetzpunkte;
+
+		if (anzahl <= 0)
+			return;
+
+		// Reihum ein anderer Stützpunkt: eigene und fremde führen zu verschiedenen Bildschirmen
+		// (Verwaltung beim eigenen, Kaufangebot beim fremden).
+		int id = 1 + _auswahl.Next(anzahl);
+		var mitte = karte.GetStuetzpunktMitte(id);
+
+		if (mitte == Vector2.Zero)
+			return;
+
+		KlickeAufPosition(mitte);
+		await NaechsterFrame();
+
+		// Headless kommen synthetische Mausereignisse bei den Karten nicht an (dieselbe Beobachtung wie
+		// bei der Weltkarte). Bleibt die Karte danach stehen, wird der Stützpunkt direkt gewählt – über
+		// denselben Weg, den auch der echte Klick nimmt.
+		if (karte.IsProcessingInput())
+			karte.WaehleStuetzpunkt(id);
+
+		if (_ausfuehrlich)
+			GD.Print("    Stuetzpunkt " + id + " angeklickt");
+
+		// Was aufgeht, haengt vom Besitzer ab – deshalb wird hier nichts Bestimmtes erwartet, sondern
+		// bedient, was erscheint, und anschliessend zur Karte zurueckgekehrt.
+		_bedienteKnoepfe.Add("SoeldnerRaeuberKarte.Stuetzpunkt");
+		_klicksSeitAktion = 0;
+		_inAktion = true;
+		await WarteBisBildschirmZurueck(nameof(SoeldnerRaeuberKarte), "Stuetzpunkt " + id);
+		_inAktion = false;
+	}
+
+	/// <summary>Schickt Mausbewegung und Klick an eine Bildschirmposition (fuer die Karten).</summary>
+	private static void KlickeAufPosition(Vector2 punkt)
+	{
+		Input.ParseInputEvent(new InputEventMouseMotion { Position = punkt, GlobalPosition = punkt });
+		Input.ParseInputEvent(new InputEventMouseButton
+		{
+			Position = punkt, GlobalPosition = punkt, ButtonIndex = MouseButton.Left, Pressed = true
+		});
+		Input.ParseInputEvent(new InputEventMouseButton
+		{
+			Position = punkt, GlobalPosition = punkt, ButtonIndex = MouseButton.Left, Pressed = false
+		});
 	}
 
 	/// <summary>

@@ -96,6 +96,13 @@ public partial class SoeldnerRaeuberKarte : Control
 		_main.Kontor.ReturnFromStadt();
 	}
 
+	/// <summary>
+	/// Wählt einen Stützpunkt so aus, als hätte der Spieler ihn angeklickt. Die Karte wertet sonst nur
+	/// echte Mausereignisse aus – die erreichen sie headless nicht, weshalb der automatische
+	/// Spieldurchlauf diesen Einstieg braucht, um Kauf und Verwaltung überhaupt zu erreichen.
+	/// </summary>
+	public void WaehleStuetzpunkt(int stuetzpunktId) => StuetzpunktAngeklickt(stuetzpunktId);
+
 	private async void StuetzpunktAngeklickt(int stuetzpunktId)
 	{
 		SoundManager.Instance.PlayLeftClick();
@@ -204,6 +211,21 @@ public partial class SoeldnerRaeuberKarte : Control
 				_flaggen[id].Size = new Vector2(25, 35);
 			}
 		}
+	}
+
+	/// <summary>
+	/// Der Mittelpunkt eines Stützpunkts auf der Karte, und wie viele es gibt. Die Karte wird über die
+	/// Mausposition bedient, nicht über Knöpfe – der automatische Spieldurchlauf braucht diesen Punkt,
+	/// um einen Stützpunkt anzuklicken. Liefert <see cref="Vector2.Zero"/>, solange nichts berechnet ist.
+	/// </summary>
+	public int AnzahlStuetzpunkte => _manager?.Anzahl ?? 0;
+
+	public Vector2 GetStuetzpunktMitte(int stuetzpunktId)
+	{
+		if (_rechtecke == null || stuetzpunktId < 0 || stuetzpunktId >= _rechtecke.Length)
+			return Vector2.Zero;
+
+		return _rechtecke[stuetzpunktId].GetCenter();
 	}
 
 	private void HoverAktualisieren(Vector2 position)

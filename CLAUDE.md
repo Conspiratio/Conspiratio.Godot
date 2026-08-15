@@ -107,6 +107,12 @@ The game needs the editor to play, so changes are verified in three complementar
      does not silently break the driver.
    - "Report a problem" is on the blocked list: it zips a report and opens the system mail client —
      that tests the environment, not the game, and behaves differently per OS.
+   - **Synthetic mouse events never reach the maps headless.** Both maps (`Weltkarte`,
+     `SoeldnerRaeuberKarte`) are driven by mouse position, not buttons, and `Input.ParseInputEvent` with
+     a mouse event does nothing there without a real window — 20 clicks produced 0 screens. The driver
+     sends the click anyway (it works windowed) and falls back to the same entry point the real click
+     uses: `Stadt.ShowStadt` and `SoeldnerRaeuberKarte.WaehleStuetzpunkt`. Without that fallback the
+     whole city and mercenary subsystems stay untested.
 
 5. **Visual acceptance** — the same play-through with `--screenshots` (or `--bilder=<dir>`) drops a few
    states per view as PNGs, giving a visual record of every screen. This is what catches a shifted layout
