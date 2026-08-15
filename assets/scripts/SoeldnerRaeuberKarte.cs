@@ -18,9 +18,15 @@ public partial class SoeldnerRaeuberKarte : Control
 	private const float ScaleY = 900f / 1440f;
 
 	// Räuberlager-Platzhalter-Icons (wie im Original) an den Stützpunkten, die im Kartenbild kein
-	// eigenes Symbol tragen. Offsets und Größe stammen aus dem 1366×768-Formraum des Originals und
-	// werden auf die 1600×900-Auflösung hochskaliert.
-	private const float PlatzhalterFaktor = 1600f / 1366f;
+	// eigenes Symbol tragen.
+	//
+	// Offsets und Größe liegen im selben Koordinatenraum wie die Rechtecke und werden deshalb mit
+	// ScaleX/ScaleY umgerechnet: Das Original addiert sie auf die bereits normierten Rechteckkanten
+	// (`stuetzpunkt_platzhalter1.Left = s3_left + 45`), sie sind also keine eigene Größe. Zuvor stand
+	// hier 1600/1366 – das Icon rutschte dadurch gegenüber seinem Klickrechteck nach rechts unten, und
+	// wer das Symbol anklickte, traf daneben.
+	private const float PlatzhalterFaktorX = ScaleX;
+	private const float PlatzhalterFaktorY = ScaleY;
 
 	private static readonly (int Id, float OffsetX, float OffsetY)[] PlatzhalterDaten =
 	{
@@ -161,7 +167,7 @@ public partial class SoeldnerRaeuberKarte : Control
 					ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
 					StretchMode = TextureRect.StretchModeEnum.Scale,
 					MouseFilter = MouseFilterEnum.Ignore,
-					Size = new Vector2(40 * PlatzhalterFaktor, 44 * PlatzhalterFaktor)
+					Size = new Vector2(40 * PlatzhalterFaktorX, 44 * PlatzhalterFaktorY)
 				};
 
 				_platzhalter[i] = platzhalter;
@@ -174,7 +180,7 @@ public partial class SoeldnerRaeuberKarte : Control
 			var daten = PlatzhalterDaten[i];
 			var rechteck = _rechtecke[daten.Id];
 			_platzhalter[i].Position = rechteck.Position
-				+ new Vector2(daten.OffsetX * PlatzhalterFaktor, daten.OffsetY * PlatzhalterFaktor);
+				+ new Vector2(daten.OffsetX * PlatzhalterFaktorX, daten.OffsetY * PlatzhalterFaktorY);
 		}
 	}
 
