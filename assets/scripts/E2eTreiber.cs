@@ -258,6 +258,16 @@ public partial class E2eTreiber : Node
 
 		_spielLaeuft = true;
 
+		// Den Startwert ein zweites Mal setzen, jetzt wo das Spiel steht. Damit haengt der Verlauf ab dem
+		// ersten Zug nur noch am Startwert, nicht mehr daran, wie viele Zufallszahlen die Spielanlage
+		// unterwegs verbraucht hat. Ohne das entwertet jede Aenderung am Anlageweg saemtliche notierten
+		// Startwerte - genau das ist beim Umbau auf die Menuefuehrung passiert.
+		//
+		// Was es nicht leistet: Der Ausgangszustand (Bosheit der KI, Heimatstaedte, Lebensjahre) stammt
+		// aus der Anlage und bleibt zwischen den beiden Wegen verschieden. Gleich wird der Zufallsstrom,
+		// nicht die Ausgangslage.
+		SW.Statisch.SetRnd(seed);
+
 		int startJahr = SW.Dynamisch.GetAktuellesJahr();
 		var alterVorJahr = new Dictionary<int, int>();
 

@@ -97,8 +97,14 @@ The game needs the editor to play, so changes are verified in three complementar
 	 counting across all dialogs of one action, active only inside an action (`_inAktion`) so it cannot
 	 starve a duel of the button presses it needs.
    - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
-     with a fixed `--seed`, so a failing run can be replayed exactly. `--seed=0` picks a random one and
-     prints it — use that to hunt for new failures, then replay with the printed value.
+     with a fixed `--seed`, so a failing run can be replayed exactly (measured: two runs of one seed are
+     identical down to the click count). `--seed=0` picks a random one and prints it — use that to hunt
+     for new failures, then replay with the printed value.
+     **The seed is set twice**: once before the setup and again once the game stands. The second one
+     decouples the play-through from however many random numbers the setup consumed — otherwise any
+     change to the setup path invalidates every noted seed, which is exactly what the switch to
+     menu-driven setup did. What it cannot do is make the two setup paths equal: the starting state (AI
+     malice, home cities, remaining years) comes out of the setup and still differs between them.
    - Sound is muted (master bus, at runtime only — the player's saved volumes are untouched). `--mit-ton`
      turns it back on.
    - Menu screens drive themselves through button signals and never enable `_Input`, so waiting on
