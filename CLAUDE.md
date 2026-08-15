@@ -80,8 +80,9 @@ The game needs the editor to play, so changes are verified in three complementar
      The driver leaves `KlickAbstand` frames between two clicks on the same dialog.
    - Budget generously: an interactive duel takes over a minute of taunts, so a run legitimately varies
      between 15 s and 90 s. A "not responding" limit tight enough to catch it would produce false alarms.
-   - Not seedable: `SW.Statisch.Rnd` has a private setter, so runs cannot be made reproducible without a
-     Lib change. Home cities and banners are fixed in the driver to at least narrow the variance.
+   - Runs are reproducible: the driver seeds the Lib's generator (`SW.Statisch.SetRnd`, added in 3.97.0)
+     with a fixed `--seed`, so a failing run can be replayed exactly. `--seed=0` picks a random one and
+     prints it — use that to hunt for new failures, then replay with the printed value.
 
 **Two testing habits that repeatedly paid off:**
 

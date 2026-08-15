@@ -35,6 +35,13 @@ public partial class E2eTreiber : Node
 	private const int StandardSpieler = 2;
 
 	/// <summary>
+	/// Startwert des Zufallsgenerators. Fest, damit ein Durchlauf reproduzierbar ist – ohne ihn ließe
+	/// sich ein fehlgeschlagener CI-Lauf nicht nachstellen. Mit <c>--seed=0</c> läuft es wieder zufällig
+	/// (die Uhrzeit als Startwert), was für gelegentliche Streuungsläufe nützlich ist.
+	/// </summary>
+	private const int StandardSeed = 20250815;
+
+	/// <summary>
 	/// Obergrenze an Frames je Warteschritt – schützt vor einem Ablauf, der nie weiterläuft. Großzügig
 	/// bemessen, weil inszenierte Sequenzen (allen voran das Duell mit seinen Sprüchen) über eine Minute
 	/// laufen können; ein echter Hänger fällt trotzdem auf, spätestens am Zeitlimit des CI-Schritts.
@@ -78,16 +85,22 @@ public partial class E2eTreiber : Node
 		var argumente = OS.GetCmdlineUserArgs();
 		int jahre = LiesZahl(argumente, "--jahre=", StandardJahre);
 		int spieler = LiesZahl(argumente, "--spieler=", StandardSpieler);
+		int seed = LiesZahl(argumente, "--seed=", StandardSeed, 0);
+
+		// --seed=0 heißt „streuen": ein zufälliger Startwert, der aber ausgegeben wird – damit lässt
+		// sich ein auffällig gewordener Durchlauf anschließend gezielt wiederholen.
+		if (seed == 0)
+			seed = System.Environment.TickCount & int.MaxValue;
 
 		_ausfuehrlich = Array.IndexOf(argumente, "--verbose") >= 0;
 		_mitBereichen = Array.IndexOf(argumente, "--ohne-bereiche") < 0;
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
 
-		GD.Print("=== E2E-Durchlauf: " + jahre + " Jahre, " + spieler + " Spieler ===");
+		GD.Print("=== E2E-Durchlauf: " + jahre + " Jahre, " + spieler + " Spieler, Startwert " + seed + " ===");
 
 		try
 		{
-			await Spiele(jahre, spieler);
+			await Spiele(jahre, spieler, seed);
 		}
 		catch (Exception ex)
 		{
@@ -98,13 +111,13 @@ public partial class E2eTreiber : Node
 		GetTree().Quit(_fehler.Count == 0 ? 0 : 1);
 	}
 
-	private async Task Spiele(int jahre, int spieler)
+	private async Task Spiele(int jahre, int spieler, int seed)
 	{
 		_main = GD.Load<PackedScene>("res://scenes/Main.tscn").Instantiate<Main>();
 		AddChild(_main);
 		await NaechsterFrame();
 
-		LegeSpielAn(spieler);
+		LegeSpielAn(spieler, seed);
 		_main.Kontor.StartGame();
 
 		int startJahr = SW.Dynamisch.GetAktuellesJahr();
@@ -344,10 +357,13 @@ public partial class E2eTreiber : Node
 		GD.Print("Speichern und Laden geprüft (Jahr " + jahrVorher + ").");
 	}
 
-	private static void LegeSpielAn(int spieler)
+	private static void LegeSpielAn(int spieler, int seed)
 	{
 		// Die statischen Spieldaten legt der Client sonst beim Klick auf „Lokales Spiel" an (Mainmenu).
 		SW.Statisch.Initialisieren();
+
+		// Erst nach Initialisieren, denn dieses legt den Zufallsgenerator neu an.
+		SW.Statisch.SetRnd(seed);
 
 		string pfad = Path.Combine(Path.GetTempPath(), "conspiratio-e2e");
 		Directory.CreateDirectory(pfad);
@@ -535,11 +551,11 @@ public partial class E2eTreiber : Node
 		}
 	}
 
-	private static int LiesZahl(string[] argumente, string praefix, int standard)
+	private static int LiesZahl(string[] argumente, string praefix, int standard, int minimum = 1)
 	{
 		foreach (string argument in argumente)
 		{
-			if (argument.StartsWith(praefix) && int.TryParse(argument.Substring(praefix.Length), out int wert) && wert > 0)
+			if (argument.StartsWith(praefix) && int.TryParse(argument.Substring(praefix.Length), out int wert) && wert >= minimum)
 				return wert;
 		}
 
