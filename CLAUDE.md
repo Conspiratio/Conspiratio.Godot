@@ -90,20 +90,20 @@ The game needs the editor to play, so changes are verified in three complementar
      is found the driver fills the first `LineEdit` and emits `TextSubmitted` (`GeburtDialog`).
    - **The CI runner has no `user://client.cfg`**, so every `ClientSettings` default applies there and
      nowhere else — the tips dialog is shown on a fresh machine but was off locally, which is why it only
-     ever broke in CI. To reproduce such a case, move the file aside (and put it back: it is the user's
-     settings). Out of that dialog leads no button at all, only a right-click, so the driver alternates
-     `MaxKlicksProDialog` button presses with one `ui_next_or_close` — always, not just inside an action.
+	 ever broke in CI. To reproduce such a case, move the file aside (and put it back: it is the user's
+	 settings). Out of that dialog leads no button at all, only a right-click, so the driver alternates
+	 `MaxKlicksProDialog` button presses with one `ui_next_or_close` — always, not just inside an action.
    - Synthetic input needs press **and** release, and never the same dialog every frame — staged
-     sequences wait for the button to be *released*. Synthetic **mouse** events don't reach the maps
+	 sequences wait for the button to be *released*. Synthetic **mouse** events don't reach the maps
      headless at all; both maps fall back to the entry point the real click uses (`Stadt.ShowStadt`,
      `SoeldnerRaeuberKarte.WaehleStuetzpunkt`).
    - Budget generously: `MaxSchritte` is 20 000 frames per wait because a hot-seat duel runs over a
      minute and headless counts far more frames per second than the screen does.
    - **Any "it hangs" needs the state report before a fix.** The driver prints open dialogs, visible
-     screens, the end-turn button and every player's talers when it gives up; four separate hangs were
-     decided from that output alone, and every attempt to guess instead failed. Two of them were the
-     driver fighting itself — answering its own "really end the turn?" at random, and an exit counter
-     that reset on each dialog *change* while two dialogs ping-ponged 6 060 times.
+	 screens, the end-turn button and every player's talers when it gives up; four separate hangs were
+	 decided from that output alone, and every attempt to guess instead failed. Two of them were the
+	 driver fighting itself — answering its own "really end the turn?" at random, and an exit counter
+	 that reset on each dialog *change* while two dialogs ping-ponged 6 060 times.
 
    Per turn the driver also plays a **trade round** in the home city — set the slot to "produce", pick the
    workshop's resource, staff it with `ArbeiterProRunde` workers on one site, and sell the stock by
