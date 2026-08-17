@@ -19,6 +19,7 @@ public partial class OptionenDialog : DialogBase
 	private controls.CheckBoxWithSounds _checkStuetzpunkt;
 	private controls.CheckBoxWithSounds _checkMilitaer;
 	private controls.CheckBoxWithSounds _checkDuelle;
+	private controls.CheckBoxWithSounds _checkVollbild;
 
 	private HSlider _sliderMusik;
 	private HSlider _sliderEffekt;
@@ -40,6 +41,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStuetzpunkt = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckStuetzpunkt");
 		_checkMilitaer = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckMilitaer");
 		_checkDuelle = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckDuelle");
+		_checkVollbild = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckVollbild");
 
 		_sliderMusik = GetNode<HSlider>("Rahmen/VBoxSlider/SliderMusik");
 		_sliderEffekt = GetNode<HSlider>("Rahmen/VBoxSlider/SliderEffekt");
@@ -57,6 +59,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStuetzpunkt.Toggled += an => ClientSettings.StuetzpunktereignisseKiAnzeigen = an;
 		_checkMilitaer.Toggled += an => ClientSettings.MilitaerereignisseKiAnzeigen = an;
 		_checkDuelle.Toggled += an => ClientSettings.DuelleInteraktiv = an;
+		_checkVollbild.Toggled += OnVollbildGeaendert;
 
 		_sliderMusik.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusMusik, (int)wert);
 		_sliderEffekt.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusEffekt, (int)wert);
@@ -76,6 +79,7 @@ public partial class OptionenDialog : DialogBase
 		_checkStuetzpunkt.ButtonPressed = ClientSettings.StuetzpunktereignisseKiAnzeigen;
 		_checkMilitaer.ButtonPressed = ClientSettings.MilitaerereignisseKiAnzeigen;
 		_checkDuelle.ButtonPressed = ClientSettings.DuelleInteraktiv;
+		_checkVollbild.ButtonPressed = ClientSettings.Vollbild;
 
 		_sliderMusik.Value = ClientSettings.MusikLautstaerke;
 		_sliderEffekt.Value = ClientSettings.EffektLautstaerke;
@@ -99,6 +103,15 @@ public partial class OptionenDialog : DialogBase
 
 		ClientSettings.MusikAusschalten = ausgeschaltet;
 		AudioEinstellungen.AlleAnwenden();
+	}
+
+	private void OnVollbildGeaendert(bool vollbild)
+	{
+		if (_laedt)
+			return;
+
+		ClientSettings.Vollbild = vollbild;
+		FensterEinstellungen.AlleAnwenden();
 	}
 
 	private void OnLautstaerke(string bus, int prozent)

@@ -46,6 +46,12 @@ public static class ClientSettings
 		set => SetValue("optionen", "duelle_interaktiv", value);
 	}
 
+	public static bool Vollbild
+	{
+		get => GetBool("optionen", "vollbild", true);
+		set => SetValue("optionen", "vollbild", value);
+	}
+
 	public static bool StatistikAnzeigen
 	{
 		get => GetBool("optionen", "statistik_anzeigen", true);
