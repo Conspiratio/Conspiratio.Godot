@@ -187,6 +187,7 @@ public partial class E2eTreiber : Node
 	private int _besuchteStaedte;
 	private int _verkaufteWaren;
 	private int _exportierteWaren;
+	private int _exportAbgelehnt;
 	private int _gespielteZuege;
 	private int _bilder;
 
@@ -591,6 +592,31 @@ public partial class E2eTreiber : Node
 		if (bestand < 100)
 			return;
 
+		int zielStadt = FindeBesteAbsatzstadt(stadtId, rohstoffId);
+
+		if (zielStadt == 0)
+			return;
+
+		// Rechnet sich die Fuhre überhaupt? Die Karawane kostet einen Sockel plus einen Betrag je
+		// angefangene 100 Stück – bei der billigsten 100 Taler Sockel und effektiv 1 Taler je Stück.
+		// Dem steht nur der Preisunterschied zur eigenen Stadt gegenüber. Ohne diese Prüfung exportierte
+		// der Durchlauf auch dann, wenn die Gebühr den Mehrerlös übersteigt, und die Spieler blieben
+		// gemessen ärmer als ganz ohne Export.
+		var karawane = handel.GetKarawane(stadtId);
+		int fuhren = (bestand + 99) / 100;
+		int kosten = karawane.Fixpreis + karawane.PreisProStueck * fuhren;
+		int mehrerloes = (SW.Dynamisch.GetStadtwithID(zielStadt).GetRohstoffPreisVonIDX(rohstoffId)
+		                  - SW.Dynamisch.GetStadtwithID(stadtId).GetRohstoffPreisVonIDX(rohstoffId)) * bestand;
+
+		if (mehrerloes <= kosten)
+		{
+			if (_ausfuehrlich)
+				GD.Print("    Export unterbleibt: " + mehrerloes + " Mehrerlös gegen " + kosten + " Karawane");
+
+			_exportAbgelehnt++;
+			return;
+		}
+
 		var taetigkeitsKnopf = stadt.GetNodeOrNull<BaseButton>("ButtonTaetigkeit1");
 
 		for (int versuch = 0; versuch < 4; versuch++)
@@ -603,11 +629,6 @@ public partial class E2eTreiber : Node
 			await NaechsterFrame();
 		}
 
-		// Irgendeine andere Stadt als die eigene - dort ist die Ware knapp und entsprechend mehr wert.
-		int zielStadt = stadtId % (SW.Statisch.GetMaxStadtID() - 1) + 1;
-
-		if (zielStadt == stadtId)
-			zielStadt = zielStadt % (SW.Statisch.GetMaxStadtID() - 1) + 1;
 
 		handel.SetzeVerkaufsRohstoff(stadtId, 1, rohstoffId);
 		handel.SetzeVerkaufsStadt(stadtId, 1, zielStadt);
@@ -1460,7 +1481,7 @@ public partial class E2eTreiber : Node
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.
 		GD.Print("Klicks in Dialogen:" + _dialogKlicks + " (davon Knöpfe: " + _knopfKlicks + ")");
 		GD.Print("Besuchte Bereiche: " + _besuchteBereiche + ", davon Staedte: " + _besuchteStaedte);
-		GD.Print("Verkaufte Waren:   " + _verkaufteWaren + " vor Ort, " + _exportierteWaren + " exportiert");
+		GD.Print("Verkaufte Waren:   " + _verkaufteWaren + " vor Ort, " + _exportierteWaren + " exportiert, " + _exportAbgelehnt + "x unrentabel");
 
 		// Das Vermoegen am Ende zeigt, ob der Kern des Spiels ueberhaupt getragen hat: Ohne Produktion
 		// und Verkauf bleibt es beim Startgeld, und alles was daran haengt (Steuern, Kredite, Auftrag)
