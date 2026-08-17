@@ -59,8 +59,10 @@ jobs:
         run: $GODOT --headless --path . --import
 
       # Fail-fast vor dem Export: ein Compile-Fehler soll hier auffallen, nicht erst tief im Exporter.
+      # Godot-C#-Projekte kennen kein "Release" - die generierte .sln definiert nur Debug, ExportDebug
+      # und ExportRelease (das ist die Konfiguration, die der Exporter selbst fuer --export-release nutzt).
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration ExportRelease
 
       - name: Export Linux
         run: |
