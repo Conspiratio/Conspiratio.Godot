@@ -1,0 +1,87 @@
+name: Release - Godot-Client
+
+# Stufe 1: roher Export fuer Linux und Windows, ausgeloest durch ein Versions-Tag.
+# Erzeugt (noch) kein GitHub Release, nur Workflow-Artefakte - das ist eine spaetere Stufe.
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  # Muss zur Godot-Version des Projekts passen (project.godot / Godot.NET.Sdk im csproj).
+  GODOT_VERSION: 4.7.1
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Godot herunterladen
+        run: |
+          NAME="Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64"
+          curl -sSfL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q godot.zip
+          # Wie in build.yml: die Binary wird gesucht statt aus dem Archivnamen zusammengesetzt.
+          GODOT_BIN="$(find . -maxdepth 3 -type f -name 'Godot_v*_mono_linux*' ! -name '*.zip' | head -1)"
+          if [ -z "$GODOT_BIN" ]; then
+            echo "::error::Im Archiv wurde keine Godot-Binary gefunden. Inhalt:"
+            unzip -l godot.zip
+            exit 1
+          fi
+          chmod +x "$GODOT_BIN"
+          echo "GODOT=$(realpath "$GODOT_BIN")" >> "$GITHUB_ENV"
+          echo "Godot-Binary: $GODOT_BIN"
+
+      # Export-Templates sind ein eigener Download, getrennt vom Editor. Godot erwartet sie an einem
+      # festen, versions- und varianten-codierten Pfad - das ".mono"-Suffix ist Pflicht, weil wir die
+      # .NET-Variante exportieren. Das Archiv enthaelt die Payloads fuer alle Zielplattformen, ein
+      # Linux-Runner kann damit also sowohl Linux- als auch Windows-Builds erzeugen.
+      - name: Export-Templates herunterladen
+        run: |
+          TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable.mono"
+          mkdir -p "$TEMPLATE_DIR"
+          curl -sSfL -o templates.tpz \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_mono_export_templates.tpz"
+          unzip -q templates.tpz -d templates_extracted
+          mv templates_extracted/templates/* "$TEMPLATE_DIR/"
+
+      # Legt .godot/ an und registriert die Szenen-UIDs, wie in build.yml.
+      - name: Ressourcen importieren
+        run: $GODOT --headless --path . --import
+
+      # Fail-fast vor dem Export: ein Compile-Fehler soll hier auffallen, nicht erst tief im Exporter.
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Export Linux
+        run: |
+          mkdir -p bin/linux
+          $GODOT --headless --path . --export-release "Linux" bin/linux/Conspiratio.x86_64
+
+      - name: Export Windows
+        run: |
+          mkdir -p bin/windows
+          $GODOT --headless --path . --export-release "Windows Desktop" bin/windows/Conspiratio.exe
+
+      - name: Linux-Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: conspiratio-linux
+          path: bin/linux/
+          if-no-files-found: error
+
+      - name: Windows-Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: conspiratio-windows
+          path: bin/windows/
+          if-no-files-found: error
