@@ -104,6 +104,10 @@ beiden neuen Verhalten (Sabotage- und Anschwärzen-Initiierung), analog zu `Fech
   einfach keine zweite auslösen (anders als beim bestehenden Mechanismus gibt es hier
   keine Rückpfeif-Interaktion, da die KI nicht mit dem Menschen verhandelt — sie läuft
   bis zum Ablauf der Dauer einfach weiter).
+- **Keine Meldung bei der Initiierung.** Sabotage ist covert — der Mensch erfährt erst
+  etwas, wenn eine Wirkung tatsächlich zuschlägt (siehe unten). Löst in einem 5-Jahres-
+  Fenster kein einziger Jahreswurf aus, bemerkt er die Sabotage nie — spiegelt die
+  Unsicherheit des Originals, bei dem der Erfolg pro Jahr ebenfalls nur eine Chance ist.
 
 **Laufende Wirkung** `ZugNachrichtenManager.ErmittleGegnerischeSabotageNachrichten()`,
 aufgerufen in `ZeigeVerdeckteEreignisse` neben der bestehenden Sabotage-Meldung:
@@ -117,19 +121,22 @@ aufgerufen in `ZeigeVerdeckteEreignisse` neben der bestehenden Sabotage-Meldung:
 
 ## 5. Anschwärzen (Entkopplung + Beweisgewichtung + KI-Initiierung)
 
-**Entkopplung.** Die Kernlogik wandert in eine parameterlose UI-freie Methode:
+**Entkopplung.** Die Kernlogik wandert in eine UI-freie Methode, die ihre Meldung als
+Rückgabewert statt über `BelTextAnzeigen` liefert (damit sowohl der bestehende
+Mensch-Flow als auch der neue KI-Flow sie weiterverwenden können):
 
 ```csharp
 // DynamischeSpieldaten.cs
-public void AnschwaerzenAusfuehren(int taeterId, int x, int y)
+public string AnschwaerzenAusfuehren(int taeterId, int x, int y)
 ```
 
 Sie enthält exakt die heutige Logik aus `Anschwaerzen(int id)` ab dem zweiten Schritt
-(Selbst-Check, Gesetzesverstoß, Glaubwürdigkeits-Check, Beziehungsänderungen,
-`BelTextAnzeigen`), aber mit `taeterId` als Parameter statt `GetAktiverSpieler()`.
-Die bestehende `Anschwaerzen(int id)` wird zum dünnen Wrapper: hält weiterhin
-`_anschwaerzID` für den zweistufigen UI-Fluss und ruft im zweiten Schritt
-`AnschwaerzenAusfuehren(GetAktiverSpieler(), _anschwaerzID, id)`.
+(Gesetzesverstoß, Glaubwürdigkeits-Check, Beziehungsänderungen), aber mit `taeterId` als
+Parameter statt `GetAktiverSpieler()`, und gibt den Meldungstext zurück statt ihn über
+`BelTextAnzeigen` auszugeben. Die bestehende `Anschwaerzen(int id)` wird zum dünnen
+Wrapper: hält weiterhin `_anschwaerzID` und den Selbst-Check/Human-Adressat-Check (die
+UI-Validierung, die nichts mit dem Täter zu tun hat) und ruft im zweiten Schritt
+`BelTextAnzeigen(AnschwaerzenAusfuehren(GetAktiverSpieler(), _anschwaerzID, id))`.
 
 **Beweisgewichtung.** Die Glaubwürdigkeits-Schwelle (bisher fix 80) wird:
 
@@ -163,26 +170,44 @@ Spionage vorliegt.
   der Sabotage-Initiierung (alle KIs, kein Amt nötig).
 - Adressat Y: die KI mit der besten Beziehung zum Ankläger, ausgenommen Ankläger und X
   selbst. Gibt es außer dem Ankläger keine weitere KI (Minimalspiel), entfällt die Aktion.
-- Ruft `SW.Dynamisch.AnschwaerzenAusfuehren(anklaegerId, x, y)`.
+- Ruft `SW.Dynamisch.AnschwaerzenAusfuehren(anklaegerId, x, y)` und behält den
+  zurückgegebenen Meldungstext.
 
-**Meldung.** Neuer Block „Intrigen" in `ZeigeVerdeckteEreignisse`, der dem Menschen erzählt,
-ob und mit welchem Ausgang er angeschwärzt wurde — folgt dem etablierten Muster, dass
-verdeckte Gegneraktionen (Kerkerklatsch, Spionage) dem Spieler erzählt werden, auch wenn
-er es in der Spielfiktion nicht direkt mitbekommen könnte. `AnschwaerzenAusfuehren` müsste
-dafür das Ergebnis (glaubt Y? wer verliert wie viel Beziehung?) als Rückgabewert statt nur
-über `BelTextAnzeigen` liefern, wenn `taeterId` eine KI ist — die UI-Variante (Mensch als
-Täter) behält die direkte `BelTextAnzeigen`-Anzeige.
+**Meldung — sofort, nicht verzögert.** Anders als Sabotage ist Anschwärzen ein
+Einmal-Ereignis mit sofortigem Ergebnis (glaubt Y oder nicht), es gibt keinen späteren
+Moment, in dem sich das noch entscheiden würde. Die Meldung erscheint deshalb **im selben
+Zugbeginn-Block wie die Initiierung** (Abschnitt 7), nicht in `ZeigeVerdeckteEreignisse` —
+dort landet nur der Sabotage-Wirkungs-Block.
 
 ## 6. Exklusivität: gemeinsamer Feindseligkeits-Dispatcher
 
 `PruefeKiBeleidigtSpieler` bleibt unverändert (eigene, bereits gemessene Balance,
-beschränkt auf Amtsträger). Eine neue Methode `AggressionManager.PruefeKiAggression(int beleidigerId)`
-(bekommt die ID der KI, die diese Runde ggf. schon beleidigt hat, oder 0):
+beschränkt auf Amtsträger). Eine neue Methode mit folgender Signatur ersetzt den in
+Abschnitt 7 zuvor skizzierten Einzel-Int-Rückgabewert, weil hier — anders als bei der
+Beleidigung — mehrere KIs unabhängig voneinander im selben Zug feuern können:
 
-- Für jede KI außer `beleidigerId`: einmal würfeln (gleiche Feindseligkeits-Formel).
+```csharp
+public enum AggressionsAktion { Sabotage, Anschwaerzen }
+
+public class AggressionsErgebnis
+{
+    public int TaeterId { get; init; }
+    public AggressionsAktion Aktion { get; init; }
+    /// <summary>Nur bei Aktion == Anschwaerzen befüllt; das Ergebnis von AnschwaerzenAusfuehren.</summary>
+    public string Meldung { get; init; }
+}
+
+// AggressionManager.cs
+public List<AggressionsErgebnis> PruefeKiAggression(int beleidigerId)
+```
+
+- Für jede KI außer `beleidigerId`: einmal würfeln (gleiche Feindseligkeits-Formel wie
+  `PruefeKiBeleidigtSpieler`).
 - Bei Erfolg: Wahl zwischen Sabotage und Anschwärzen — 50/50, außer die KI hat gegen
   diesen Menschen bereits eine laufende Sabotage (dann Anschwärzen bevorzugt, um nicht
-  wirkungslos eine zweite Sabotage gegen dasselbe Ziel zu prüfen).
+  wirkungslos eine zweite Sabotage gegen dasselbe Ziel zu prüfen). Bei Sabotage wird
+  `Meldung` nicht gesetzt (covert, siehe Abschnitt 4); bei Anschwärzen enthält es den
+  Rückgabewert von `AnschwaerzenAusfuehren`.
 - Jede KI führt höchstens eine Aktion pro Zug gegen denselben Menschen aus; verschiedene
   KIs können im selben Zug unabhängig voneinander verschiedene Aktionen gegen denselben
   Menschen auslösen (keine globale Ein-Aktion-pro-Zug-Grenze).
@@ -194,8 +219,16 @@ KI-Beleidigungs-Block (`Kontor.cs:267–295`):
 
 ```csharp
 var aggression = new AggressionManager();
-int sabotiert = aggression.PruefeKiAggression(beleidiger); // 0 = keine, sonst KI-ID
-// je nach gewählter Aktion: Sabotage-Meldung ODER AnschwaerzenAusfuehren-Ergebnis anzeigen
+
+foreach (var ergebnis in aggression.PruefeKiAggression(beleidiger))
+{
+    if (ergebnis.Aktion == AggressionsAktion.Anschwaerzen)
+    {
+        UpdateHud();
+        await _main.RundenNachrichtenDialog.ShowDialog("Intrigen\n\n" + ergebnis.Meldung);
+    }
+    // Aktion == Sabotage: bewusst keine Meldung, siehe Abschnitt 4 (covert)
+}
 ```
 
 `ZeigeVerdeckteEreignisse` (`Kontor.cs:767`): zwei neue Meldungsblöcke „Sabotage gegen Euch"
