@@ -91,9 +91,15 @@ beiden neuen Verhalten (Sabotage- und Anschwärzen-Initiierung), analog zu `Fech
 - Gleiche Feindseligkeits-/Chance-Formel wie `PruefeKiBeleidigtSpieler` (Konstanten dorthin
   extrahieren oder duplizieren — Entscheidung bei der Implementierung, siehe Abschnitt 6
   zur Exklusivität, die beide Prüfungen verzahnt).
-- Bei Erfolg: Kosten/Dauer exakt wie die bestehende Mensch→KI-Sabotage
-  (`max(1000, 4% × Menschenvermögen)`, 5 Jahre), abgebucht vom Taler-Vermögen der
-  initiierenden KI. Setzt `mensch.GetGegnerischeSabotage(kiId)`.
+- Bei Erfolg: Dauer exakt wie die bestehende Mensch→KI-Sabotage (5 Jahre). Setzt
+  `mensch.GetGegnerischeSabotage(kiId)`.
+- **Abweichung von der Spiegelung:** Der Kosten-Wert (`4% × Zielvermögen`) ist bei der
+  bestehenden Sabotage eine **jährlich wiederkehrende** Belastung, die `AbrechnungsManager`
+  ausschließlich für den gerade aktiven Menschen abrechnet (`AbrechnungsManager.cs:95`).
+  Eine gleichwertige Buchhaltung für KI-Finanzen existiert nicht und für einen Effekt, den
+  der Mensch nie zu Gesicht bekommt, lohnt sich eine parallele Pipeline nicht (YAGNI). Die
+  KI zahlt daher **keine** laufenden Kosten; `AktiveSabotagen.SetKosten` bleibt bei der
+  gegnerischen Sabotage auf 0, nur `SetDauer` wird gesetzt.
 - Bereits eine laufende gegnerische Sabotage derselben KI gegen denselben Menschen? Dann
   einfach keine zweite auslösen (anders als beim bestehenden Mechanismus gibt es hier
   keine Rückpfeif-Interaktion, da die KI nicht mit dem Menschen verhandelt — sie läuft
