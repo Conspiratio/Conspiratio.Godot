@@ -710,22 +710,6 @@ namespace Conspiratio.Lib.Tests
         }
 
         [Fact]
-        public void Laeuft_bereits_eine_Sabotage_derselben_KI_wird_keine_zweite_ausgeloest_aber_angeschwaerzt()
-        {
-            TestSpielwelt.Starte();
-            int menschId = SW.Dynamisch.GetAktiverSpieler();
-            int kiId = TestSpielwelt.SetzeKiGegner(0, 0, bosheit: 0);
-            TestSpielwelt.SetzeKiGegner(1, 0, bosheit: 0); // moeglicher Adressat
-            SW.Dynamisch.GetKIwithID(kiId).SetBeziehungZuX(menschId, -1000);
-            SW.Dynamisch.GetAktHum().GetGegnerischeSabotage(kiId).SetDauer(3);
-
-            var ergebnisse = new AggressionManager().PruefeKiAggression(0);
-
-            Assert.Single(ergebnisse);
-            Assert.Equal(AggressionsAktion.Anschwaerzen, ergebnisse[0].Aktion);
-        }
-
-        [Fact]
         public void Sabotage_setzt_die_Dauer_ohne_laufende_Kosten()
         {
             TestSpielwelt.Starte(seed: 1);
@@ -758,7 +742,7 @@ namespace Conspiratio.Lib.Tests
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `dotnet test "D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib.sln" --filter "FullyQualifiedName~AggressionManagerTests"`
-Expected: Build-Fehler (Klasse `AggressionManager` existiert nicht). Die letzten beiden Tests (Anschwärzen-Bevorzugung, Anschwärzen-Zweig überhaupt) bleiben bis Task 6 rot — in diesem Task genügt es, dass die ersten vier Tests grün werden; Task 6 macht die verbleibenden grün.
+Expected: Build-Fehler (Klasse `AggressionManager` existiert nicht).
 
 - [ ] **Step 3: Implement `AggressionManager` (Sabotage-Zweig)**
 
@@ -841,10 +825,10 @@ namespace Conspiratio.Lib.Allgemein
 }
 ```
 
-- [ ] **Step 4: Run the first four tests to verify they pass**
+- [ ] **Step 4: Run all `AggressionManagerTests` to verify they pass**
 
-Run: `dotnet test "D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib.sln" --filter "FullyQualifiedName~Extrem_schlechte_Beziehung|FullyQualifiedName~Neutrale_Beziehung|FullyQualifiedName~ausgenommene_KI|FullyQualifiedName~Mehrere_feindselige|FullyQualifiedName~Sabotage_setzt_die_Dauer"`
-Expected: PASS (5/5). `Laeuft_bereits_eine_Sabotage...` bleibt erwartungsgemäß rot (`Assert.Single` schlägt fehl, da der Zweig aktuell `continue` statt Anschwärzen macht) — das wird in Task 6 behoben.
+Run: `dotnet test "D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib.sln" --filter "FullyQualifiedName~AggressionManagerTests"`
+Expected: PASS (5/5) — die gesamte Testklasse ist an dieser Stelle grün. Der `laeuftSchonSabotage`-Zweig bleibt vorerst ein ungetesteter No-Op (`continue`); Task 6 füllt ihn und bringt den dafür nötigen Test mit.
 
 - [ ] **Step 5: Commit**
 
@@ -855,8 +839,8 @@ git commit -m "AggressionManager: Sabotage-Initiierung mit Exklusivitaet
 
 Jede KI (nicht nur Amtstraeger) prueft unabhaengig ihre Feindseligkeit zum
 aktiven Menschen; bei Erfolg startet sie eine Sabotage. Anschwaerzen-Zweig
-folgt im naechsten Commit - Laeuft_bereits_eine_Sabotage-Test bleibt bis
-dahin bewusst rot."
+(auch fuer bereits sabotierende KIs) folgt im naechsten Commit; der
+laeuftSchonSabotage-Zweig ist bis dahin ein ungetesteter No-Op."
 ```
 
 ---
@@ -870,11 +854,27 @@ dahin bewusst rot."
 **Interfaces:**
 - Consumes: `DynamischeSpieldaten.AnschwaerzenAusfuehren` (Task 4).
 
-- [ ] **Step 1: Write the failing test**
+- [ ] **Step 1: Write the failing tests**
 
 In `AggressionManagerTests.cs` ergänzen:
 
 ```csharp
+        [Fact]
+        public void Laeuft_bereits_eine_Sabotage_derselben_KI_wird_keine_zweite_ausgeloest_aber_angeschwaerzt()
+        {
+            TestSpielwelt.Starte();
+            int menschId = SW.Dynamisch.GetAktiverSpieler();
+            int kiId = TestSpielwelt.SetzeKiGegner(0, 0, bosheit: 0);
+            TestSpielwelt.SetzeKiGegner(1, 0, bosheit: 0); // moeglicher Adressat
+            SW.Dynamisch.GetKIwithID(kiId).SetBeziehungZuX(menschId, -1000);
+            SW.Dynamisch.GetAktHum().GetGegnerischeSabotage(kiId).SetDauer(3);
+
+            var ergebnisse = new AggressionManager().PruefeKiAggression(0);
+
+            Assert.Single(ergebnisse);
+            Assert.Equal(AggressionsAktion.Anschwaerzen, ergebnisse[0].Aktion);
+        }
+
         [Fact]
         public void Anschwaerzen_waehlt_die_KI_mit_der_besten_Beziehung_zum_Anklaeger_als_Adressat()
         {
@@ -896,10 +896,10 @@ In `AggressionManagerTests.cs` ergänzen:
         }
 ```
 
-- [ ] **Step 2: Run tests to verify the new one and `Laeuft_bereits_eine_Sabotage...` fail**
+- [ ] **Step 2: Run tests to verify the two new ones fail**
 
 Run: `dotnet test "D:\Projekte\C# Projekte\Conspiratio.Lib\Conspiratio.Lib.sln" --filter "FullyQualifiedName~AggressionManagerTests"`
-Expected: `Anschwaerzen_waehlt_die_KI...` und `Laeuft_bereits_eine_Sabotage...` FAIL, Rest PASS.
+Expected: `Laeuft_bereits_eine_Sabotage...` und `Anschwaerzen_waehlt_die_KI...` FAIL, Rest PASS.
 
 - [ ] **Step 3: Complete the dispatcher**
 
