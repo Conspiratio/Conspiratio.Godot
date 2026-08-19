@@ -813,6 +813,11 @@ public partial class Kontor : Control
 		if (sabotage != null)
 			await _main.RundenNachrichtenDialog.ShowDialog("Sabotage\n\n" + sabotage);
 
+		string gegnerischeSabotage = zugNachrichten.ErmittleGegnerischeSabotageNachrichten();
+
+		if (gegnerischeSabotage != null)
+			await _main.RundenNachrichtenDialog.ShowDialog("Sabotage gegen Euch\n\n" + gegnerischeSabotage);
+
 		string ermordung = zugNachrichten.FuehreErmordungDurch();
 
 		if (ermordung != null)
