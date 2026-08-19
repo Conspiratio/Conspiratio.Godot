@@ -23,3 +23,6 @@ mono_crash.*.json
 
 # Godot Exports
 bin
+
+# Subagent-driven-development scratch workspace (per-plan ledgers, briefs, review packages)
+.superpowers/
