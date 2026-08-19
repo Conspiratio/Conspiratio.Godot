@@ -293,6 +293,20 @@ public partial class Kontor : Control
 
 				UpdateHud();
 			}
+
+			// Aggressive KI (Sabotage + Anschwärzen): jede KI außer der oben ggf. beleidigenden prüft
+			// unabhängig ihre Feindseligkeit; Sabotage bleibt covert (Meldung erst bei tatsächlichem
+			// Schaden, siehe ZeigeVerdeckteEreignisse), Anschwärzen hat ein sofortiges Ergebnis.
+			var aggression = new AggressionManager();
+
+			foreach (var ergebnis in aggression.PruefeKiAggression(beleidiger))
+			{
+				if (ergebnis.Aktion == AggressionsAktion.Anschwaerzen)
+				{
+					UpdateHud();
+					await _main.RundenNachrichtenDialog.ShowDialog("Intrigen\n\n" + ergebnis.Meldung);
+				}
+			}
 		}
 
 		_geradeGeladen = false;
