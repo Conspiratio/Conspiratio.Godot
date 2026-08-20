@@ -89,8 +89,16 @@ public partial class OptionenDialog : DialogBase
 		AktualisiereLautstaerkeLabel(_labelEffekt, "Effekt", ClientSettings.EffektLautstaerke);
 		AktualisiereLautstaerkeLabel(_labelStimmen, "Stimmen", ClientSettings.StimmenLautstaerke);
 
-		_sliderKiAggressivitaet.Value = ClientSettings.KiAggressivitaetProzent;
-		AktualisiereKiAggressivitaetLabel(ClientSettings.KiAggressivitaetProzent);
+		// Bei laufendem Spiel gilt der Spielstand-Wert (der ist es, was tatsächlich wirkt) statt der
+		// ClientSettings-Vorgabe, die nur für neue Spiele greift – sonst könnte der Regler nach dem
+		// Laden eines Spielstands mit abweichendem Wert einen Prozentsatz anzeigen, der nicht der ist,
+		// mit dem die KI gerade rechnet.
+		int aggressivitaet = SW.Dynamisch.Spielstand != null
+			? SW.Dynamisch.GetKiAggressivitaetProzent()
+			: ClientSettings.KiAggressivitaetProzent;
+
+		_sliderKiAggressivitaet.Value = aggressivitaet;
+		AktualisiereKiAggressivitaetLabel(aggressivitaet);
 
 		_laedt = false;
 

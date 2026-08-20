@@ -11,7 +11,7 @@ Heute ist die Lage zersplittert und teilweise tot:
 
 | Was | Wo | Zustand heute |
 |---|---|---|
-| `Spieleinstellungen.AggressivitaetKISpieler` (`EnumSchwierigkeitsgrad`: Niedrig/Mittel/Hoch) | Lib | **Tot**: kein UI-Element setzt es je, läuft immer auf `Mittel`. Beeinflusst nur Gerichtsurteile, Amtsenthebungs-Schwelle, Anklage-Häufigkeit. |
+| `Spieleinstellungen.AggressivitaetKISpieler` (`EnumSchwierigkeitsgrad`: Niedrig/Mittel/Hoch) | Lib | **Im Godot-Client tot**: kein dortiges UI-Element setzt es je, läuft im Godot-Client immer auf `Mittel`. Der eingefrorene Legacy-WinForms-Client setzt und liest es dagegen weiterhin (`frmEinstellungen.cs:125,133,141`, `Main.cs:6067`) — die Löschung dieses Felds (Abschnitt 2) lässt jenen Client folglich nicht mehr gegen diese Lib-Version kompilieren; hingenommen, da er laut Projektkonvention nur noch Referenzimplementierung ist. Beeinflusst nur Gerichtsurteile, Amtsenthebungs-Schwelle, Anklage-Häufigkeit. |
 | `Spieleinstellungen.KiAktivitaetProzent` (1–100) | Lib | Lebt, per Options-Regler gesetzt — beeinflusst aber **nur** Räuberlager-/Zollburg-Aktivität. |
 | `KISpieler.Bosheit` (`_boese`, 0–100) | Lib | Rein zufällig je KI (`Rnd.Next(0, 101)`), **von keiner Einstellung beeinflussbar**. Treibt 8 Mechaniken (siehe Abschnitt 3). |
 
@@ -64,9 +64,14 @@ public int KiAggressivitaetProzent { get; set; } = 50;
 ```
 
 `AggressivitaetKISpieler` **entfällt ersatzlos**, ebenso die dann nirgends mehr
-referenzierte Datei `EnumSchwierigkeitsgrad.cs`. Es gibt nichts zu migrieren: Da nie ein
-UI-Element das Feld gesetzt hat, steht es in *jedem* existierenden Spielstand auf `Mittel`
-— und `Mittel` ist genau der Punkt, den die neue 50-%-Vorgabe reproduziert.
+referenzierte Datei `EnumSchwierigkeitsgrad.cs`. Für den Godot-Client gibt es nichts zu
+migrieren: Da dort nie ein UI-Element das Feld gesetzt hat, steht es in *jedem* mit diesem
+Client erzeugten Spielstand auf `Mittel` — und `Mittel` ist genau der Punkt, den die neue
+50-%-Vorgabe reproduziert. Für Spielstände aus dem Legacy-WinForms-Client gilt das nicht:
+Dessen `frmEinstellungen` setzt das Feld tatsächlich auf `Niedrig`/`Mittel`/`Hoch`, sodass
+ein von dort mitgebrachter Spielstand nach der Löschung dieses Felds seine individuelle
+Einstellung verliert und wie `Mittel` (= 50 %) behandelt wird. Hingenommen, da WinForms-
+Savegame-Kompatibilität für den Godot-Client ohnehin keine Priorität ist.
 
 **Serialisierung / alte Spielstände.** Die Umbenennung von `KiAktivitaetProzent` ist ein
 Feldwechsel im field-basierten JSON: Ein alter Spielstand bringt `KiAktivitaetProzent` mit,
