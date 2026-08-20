@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -28,7 +29,7 @@ public partial class OptionenDialog : DialogBase
 	private Label _labelEffekt;
 	private Label _labelStimmen;
 
-	private HSlider _sliderKiAktivitaet;
+	private HSlider _sliderKiAggressivitaet;
 	private Label _labelAgg;
 
 	private bool _laedt;
@@ -50,7 +51,7 @@ public partial class OptionenDialog : DialogBase
 		_labelEffekt = GetNode<Label>("Rahmen/VBoxSlider/LabelEffekt");
 		_labelStimmen = GetNode<Label>("Rahmen/VBoxSlider/LabelStimmen");
 
-		_sliderKiAktivitaet = GetNode<HSlider>("Rahmen/SliderKiAktivitaet");
+		_sliderKiAggressivitaet = GetNode<HSlider>("Rahmen/SliderKiAggressivitaet");
 		_labelAgg = GetNode<Label>("Rahmen/LabelAgg");
 
 		_checkMusikAus.Toggled += OnMusikAusgeschaltet;
@@ -65,7 +66,7 @@ public partial class OptionenDialog : DialogBase
 		_sliderEffekt.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusEffekt, (int)wert);
 		_sliderStimmen.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusStimmen, (int)wert);
 
-		_sliderKiAktivitaet.ValueChanged += OnKiAktivitaetGeaendert;
+		_sliderKiAggressivitaet.ValueChanged += OnKiAggressivitaetGeaendert;
 	}
 
 	/// <summary>Öffnet das Einstellungsfenster und lädt die aktuellen Werte in die Steuerelemente.</summary>
@@ -88,8 +89,8 @@ public partial class OptionenDialog : DialogBase
 		AktualisiereLautstaerkeLabel(_labelEffekt, "Effekt", ClientSettings.EffektLautstaerke);
 		AktualisiereLautstaerkeLabel(_labelStimmen, "Stimmen", ClientSettings.StimmenLautstaerke);
 
-		_sliderKiAktivitaet.Value = ClientSettings.KiAktivitaetProzent;
-		AktualisiereKiAktivitaetLabel(ClientSettings.KiAktivitaetProzent);
+		_sliderKiAggressivitaet.Value = ClientSettings.KiAggressivitaetProzent;
+		AktualisiereKiAggressivitaetLabel(ClientSettings.KiAggressivitaetProzent);
 
 		_laedt = false;
 
@@ -142,20 +143,26 @@ public partial class OptionenDialog : DialogBase
 			AudioEinstellungen.AlleAnwenden();
 	}
 
-	private void OnKiAktivitaetGeaendert(double wert)
+	private void OnKiAggressivitaetGeaendert(double wert)
 	{
 		int prozent = (int)wert;
-		AktualisiereKiAktivitaetLabel(prozent);
+		AktualisiereKiAggressivitaetLabel(prozent);
 
 		if (_laedt)
 			return;
 
-		ClientSettings.KiAktivitaetProzent = prozent;
+		ClientSettings.KiAggressivitaetProzent = prozent;
+
+		// Zusätzlich in den laufenden Spielstand schreiben, damit der Regler sofort wirkt und nicht
+		// erst im nächsten neuen Spiel. Ohne laufendes Spiel ist der Spielstand ein Platzhalter, der
+		// beim Anlegen ohnehin aus den ClientSettings überschrieben wird – eine Fallunterscheidung
+		// braucht es daher nicht.
+		SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = prozent;
 	}
 
-	private void AktualisiereKiAktivitaetLabel(int prozent)
+	private void AktualisiereKiAggressivitaetLabel(int prozent)
 	{
-		_labelAgg.Text = "Aktivität der KI-Spieler: " + prozent + " %";
+		_labelAgg.Text = "Aggressivität der KI-Spieler: " + prozent + " %";
 	}
 
 	private static void AktualisiereLautstaerkeLabel(Label label, string typ, int prozent)

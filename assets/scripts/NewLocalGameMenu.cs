@@ -115,8 +115,8 @@ public partial class NewLocalGameMenu : Control
 			return;
 		}
 
-		// Die in den Optionen gewählte KI-Aktivität (Prozent) als Vorgabe für dieses Spiel übernehmen
-		SW.Dynamisch.Spielstand.Einstellungen.KiAktivitaetProzent = ClientSettings.KiAktivitaetProzent;
+		// Die in den Optionen gewählte KI-Aggressivität (Prozent) als Vorgabe für dieses Spiel übernehmen
+		SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = ClientSettings.KiAggressivitaetProzent;
 
 		// Den gewählten Auftrag (Mission) übernehmen – „Kein Auftrag" bedeutet freies/endloses Spiel.
 		SW.Dynamisch.Spielstand.Einstellungen.Auftrag = GetSelectedAuftrag();

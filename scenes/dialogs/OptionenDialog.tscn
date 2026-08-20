@@ -142,9 +142,9 @@ offset_top = 531.0
 offset_right = 700.0
 offset_bottom = 563.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
-text = "Aktivität der KI-Spieler: 50 %"
+text = "Aggressivität der KI-Spieler: 50 %"
 
-[node name="SliderKiAktivitaet" type="HSlider" parent="Rahmen"]
+[node name="SliderKiAggressivitaet" type="HSlider" parent="Rahmen"]
 layout_mode = 0
 offset_left = 70.0
 offset_top = 575.0
