@@ -154,10 +154,13 @@ public partial class OptionenDialog : DialogBase
 		ClientSettings.KiAggressivitaetProzent = prozent;
 
 		// Zusätzlich in den laufenden Spielstand schreiben, damit der Regler sofort wirkt und nicht
-		// erst im nächsten neuen Spiel. Ohne laufendes Spiel ist der Spielstand ein Platzhalter, der
-		// beim Anlegen ohnehin aus den ClientSettings überschrieben wird – eine Fallunterscheidung
-		// braucht es daher nicht.
-		SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = prozent;
+		// erst im nächsten neuen Spiel. Der Dialog ist auch direkt aus dem Hauptmenü erreichbar,
+		// wo noch kein Spielstand existiert (er entsteht erst in NeuInitialisieren, aufgerufen beim
+		// Anlegen oder Laden eines Spiels) – ohne laufendes Spiel gibt es nichts, worauf die
+		// Einstellung sofort wirken könnte, und ClientSettings liefert den Wert bei der
+		// Spielerstellung ohnehin.
+		if (SW.Dynamisch.Spielstand != null)
+			SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = prozent;
 	}
 
 	private void AktualisiereKiAggressivitaetLabel(int prozent)
