@@ -206,11 +206,17 @@ Feldname und die Herkunft des Fallbacks.
   Stützpunkt-Aktivität (Abschnitt 5) ab dem nächsten Auswerten — ohne Neustart, ohne neues
   Spiel. Der Wert wandert über die normale Spielstand-Serialisierung mit in den Speicherstand.
 
-  Eine Fallunterscheidung „läuft gerade ein Spiel?" ist nicht nötig: `Spielstand` ist nie
-  `null` (`DynamischeSpieldaten.cs:43-44` legt es bei Bedarf an), und ohne laufendes Spiel
-  wird der Platzhalter beim nächsten Spielstart ohnehin aus `ClientSettings` überschrieben.
-  `ClientSettings` bleibt die Vorgabe für neue Spiele, der Spielstand-Wert das, was das
-  laufende Spiel tatsächlich verwendet.
+  **Eine Fallunterscheidung „läuft gerade ein Spiel?" ist nötig.** `Spielstand` ist entgegen
+  der ersten Annahme dieses Konzepts sehr wohl `null`, solange kein Spiel läuft: Die
+  Zuweisung in `DynamischeSpieldaten.cs:43-44` steht innerhalb von `NeuInitialisieren()`,
+  nicht im Property-Getter, und der Aufruf im Konstruktor ist auskommentiert
+  (`DynamischeSpieldaten.cs:32-35`). `NeuInitialisieren()` läuft nur über
+  `NewGameManager.CreateNewGame` oder beim Laden eines Spielstands — auf dem Weg
+  Hauptmenü → Optionen also nie. Der Schreibzugriff wird deshalb mit
+  `if (SW.Dynamisch.Spielstand != null)` abgesichert; ohne laufendes Spiel gibt es nichts,
+  worauf die Einstellung sofort wirken könnte, und `ClientSettings` liefert den Wert bei der
+  Spielerstellung ohnehin. `ClientSettings` bleibt die Vorgabe für neue Spiele, der
+  Spielstand-Wert das, was das laufende Spiel tatsächlich verwendet.
 
 Kein neuer Regler, kein zweites Bedienelement: der bestehende Slider wird umgewidmet.
 
