@@ -115,23 +115,39 @@ The game needs the editor to play, so changes are verified in three complementar
 	 that reset on each dialog *change* while two dialogs ping-ponged 6 060 times.
 
    Per turn the driver also plays a **trade round** in the home city — set the slot to "produce", pick the
-   workshop's resource, staff it with `ArbeiterProRunde` workers on one site, and sell the stock by
-   clicking the resource symbol. That is the core loop; without it the run earns nothing and everything
-   hanging off wealth (settlement, taxes, credit, debtors' tower, mission goals) runs on unrealistic
-   numbers. It runs even with `--ohne-aktionen`, because it is the game's core, not a random action.
-   **Staff it at the ratio the goods demand**, never at a fixed number: `Produktionsslot.GetProduktion`
-   computes `benArbeiter = sites × (Rohstoff.GetArbeiter() / Rohstoff.GetWerkstaetten())`. Below that the
-   yield drops proportionally; above it the yield is capped while wages keep rising linearly — an
-   overstaffed run measurably loses money. With the ratio right, 15 years of trade alone move 2 261 goods
-   and end at +2 353 / +3 948 talers; with a fixed 25 workers the same run ended at −8 583.
+   workshop's resource, staff it, and sell the stock by clicking the resource symbol or exporting. That is
+   the core loop; without it the run earns nothing and everything hanging off wealth (settlement, taxes,
+   credit, debtors' tower, mission goals) runs on unrealistic numbers. It runs even with `--ohne-aktionen`,
+   because it is the game's core, not a random action.
+
+   **Site count is derived from whichever of two hard caps binds** (`ErmittleSinnvolleStaetten`), not from
+   a fixed constant — the first version used one fixed site and left both ceilings far below capacity:
+   - **Storage**: `HumSpieler.ErmittleLagerplatzInStadt` × `Rohstoff.GetLagermengeProQMeter` is the most the
+     workshop can hold; production beyond it is still paid for and then lost (`BuchManager`: "was nicht
+     eingelagert werden konnte, geht verloren").
+   - **Workers**: `HandelsManager.SetzeProduktionsArbeiter` silently clamps at `StatischeSpieldaten.
+     GetMaxArbeiterAnzahl()` (99 per slot) — sites beyond what 99 workers can staff lose yield
+     proportionally (`Produktionsslot.GetProduktion`'s `benArbeiter` ratio) while costs keep climbing.
+   Workers are always set to `sites × (Rohstoff.GetArbeiter() / Rohstoff.GetWerkstaetten())` — the exact
+   ratio the goods demand; a fixed worker count is either understaffed or measurably loses money once
+   overstaffed. **Storage is expanded from surplus** (`LagerraumManager`, largest offer that leaves
+   `RuecklageFuerAusbau` = 1 500 standing) but **only while storage is the binding cap** — once the worker
+   cap binds instead, extra storage is dead capital: an earlier version that kept buying regardless turned
+   a positive 15-year result negative.
+   Measured against the Lib directly (single player, 15 years, fixed seed): the old fixed-one-site,
+   fixed-worker-count strategy ended at +4 979; the current derived-site/derived-worker/bounded-storage
+   strategy ended at **+33 311** — using up to 14 sites instead of 1, the true ceiling given a 99-worker
+   cap and this resource's 7-workers-per-site ratio. Run through the actual client screens with the
+   random Kontor actions switched off (`--ohne-aktionen`, `--spieler=1`), it reached +64 175 to +80 088.
+   **A full E2E run (default settings, random actions and AI-aggression sabotage included) can still end
+   negative** even with this strategy — that is not a trading regression: per-seed swings from those
+   intentionally-random systems reach tens of thousands of talers and dominate the outcome (see the
+   `--aggressivitaet` measurements above). Isolating that from trading requires `--ohne-aktionen`, since
+   `--ohne-bereiche` also skips the home-city visit and reports zero trade.
    Both ways of selling are driven, alternating by year so they don't collide (the export only ships at
-   turn end, while selling on the spot clears the stock immediately). Note the export as built is **not**
-   yet profitable: measured over the same 15 years it moved ~790 goods but left the players at
-   +2 064 / +149 instead of +2 353 / +3 948 without it. The target city *is* chosen by demand — the
-   highest price for that good, exactly what the city information screen shows (`Stadt.GetBedarf` ranks
-   by the markup over the standard price) — and that only helped marginally. So the caravan fee itself
-   (a base charge plus a rate per started 100 units, see `BerechneProdKosten`) is the likelier reason it
-   does not pay at these volumes: measure that before optimising further.
+   turn end, while selling on the spot clears the stock immediately). The export's own caravan fee (a base
+   charge plus a rate per started 100 units, `BerechneProdKosten`) still eats into its margin at these
+   volumes relative to selling on the spot — not re-measured against the new strategy.
    Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
    emits it explicitly, otherwise the city never learns of the change.
 

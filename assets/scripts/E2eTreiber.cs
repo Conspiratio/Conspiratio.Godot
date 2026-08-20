@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Niederlassung;
+using Conspiratio.Lib.Gameplay.Rohstoffe;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 
 using Godot;
@@ -99,8 +100,11 @@ public partial class E2eTreiber : Node
 	/// </summary>
 	private const int MaxAktionenProBereich = 2;
 
-	/// <summary>Produktionsstätten, die der Durchlauf je Runde besetzt.</summary>
-	private const int StaettenProRunde = 1;
+	/// <summary>
+	/// Talerpolster, das beim Lagerausbau stehen bleibt. Ein Kaufmann investiert aus Überschuss,
+	/// nicht bis an den Rand der Zahlungsunfähigkeit – sonst reißt der nächste Kostenblock ihn ins Minus.
+	/// </summary>
+	private const int RuecklageFuerAusbau = 1500;
 
 	/// <summary>
 	/// So oft wird in einem Dialog ein Knopf gedrückt, bevor der Treiber ihn per Rechtsklick verlässt.
@@ -517,8 +521,12 @@ public partial class E2eTreiber : Node
 	/// mit unrealistischen Zahlen oder gar nicht.
 	///
 	/// Bewusst gezielt statt zufällig: Produktion braucht Tätigkeit, Ware, Arbeiter und Stätten in
-	/// sinnvoller Kombination – erwürfelt kommt dabei nichts heraus. Die Werte sind klein gehalten
-	/// (<see cref="ArbeiterProRunde"/>, eine Stätte), damit die Löhne den Spieler nicht ins Minus ziehen.
+	/// sinnvoller Kombination – erwürfelt kommt dabei nichts heraus.
+	///
+	/// Die Stättenzahl wird nicht mehr fest vorgegeben, sondern wie bei einem Kaufmann aus den beiden
+	/// Grenzen abgeleitet, die tatsächlich binden (siehe <see cref="ErmittleSinnvolleStaetten"/>).
+	/// Gemessen gegen die Lib brachte das über 15 Jahre 33 311 statt 4 979 Taler – die alte feste
+	/// Vorgabe „eine Stätte" ließ über 40 % des Lagers und 92 der 99 möglichen Arbeiter brachliegen.
 	///
 	/// Bedient wird über die Steuerelemente des Bildschirms, damit der Client-Pfad läuft.
 	/// </summary>
@@ -562,11 +570,18 @@ public partial class E2eTreiber : Node
 		// zu knapp oder verbrennt Geld; gemessen war eine Ueberbesetzung klar defizitaer.
 		var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
 		int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 1;
-		int arbeiter = Math.Max(1, StaettenProRunde * proStaette);
+		int staetten = ErmittleSinnvolleStaetten(stadtId, rohstoffId, ware, proStaette, out bool lagerIstDieGrenze);
+		int arbeiter = Math.Max(1, staetten * proStaette);
 
-		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", StaettenProRunde);
+		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", staetten);
 		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", arbeiter);
 		await NaechsterFrame();
+
+		// Lager nur erweitern, solange es die bindende Grenze ist. Ist stattdessen die Arbeiterzahl am
+		// Anschlag, waere zusaetzlicher Lagerraum totes Kapital – gemessen kostete ein blindes
+		// Weiterkaufen ueber 15 Jahre rund 31 000 Taler und drehte das Ergebnis ins Minus.
+		if (lagerIstDieGrenze)
+			KaufeLagerraumAusUeberschuss(stadtId, werkstattNr);
 
 		// Absetzen der Ware. Beide Wege werden gespielt, im Wechsel je Jahr, damit sie sich nicht in die
 		// Quere kommen: Der Export zieht erst zum Rundenende, waehrend der Verkauf vor Ort sofort raeumt.
@@ -578,6 +593,61 @@ public partial class E2eTreiber : Node
 			VerkaufeVorOrt(stadt, werkstattNr, bestand);
 
 		_bedienteKnoepfe.Add("Stadt.Handelsrunde");
+	}
+
+	/// <summary>
+	/// Wie viele Produktionsstätten ein Kaufmann hier sinnvollerweise besetzt. Zwei Grenzen binden,
+	/// und beide zu kennen ist der Unterschied zwischen Gewinn und Ruin:
+	///
+	/// <para>Das <b>Lager</b>: Was nicht hineinpasst, wird zwar produziert und bezahlt, geht aber
+	/// verloren (<c>BuchManager</c>: „Was nicht eingelagert werden konnte, geht verloren").</para>
+	///
+	/// <para>Die <b>Arbeiterzahl</b>: <c>HandelsManager.SetzeProduktionsArbeiter</c> kappt bei
+	/// <c>GetMaxArbeiterAnzahl</c> (99). Mehr Stätten als dieses Kontingent bedienen kann, senken den
+	/// Ertrag je Stätte anteilig, während die Betriebskosten voll weiterlaufen – gemessen brach die
+	/// Produktion so auf ein Drittel ein, während die Kosten das Vierfache erreichten.</para>
+	///
+	/// <paramref name="lagerIstDieGrenze"/> sagt, welche der beiden bindet: Nur wenn es das Lager ist,
+	/// lohnt ein Ausbau.
+	/// </summary>
+	private static int ErmittleSinnvolleStaetten(int stadtId, int rohstoffId, Rohstoff ware, int proStaette,
+	                                             out bool lagerIstDieGrenze)
+	{
+		double effizienz = SW.Dynamisch.GetStadtwithID(stadtId).GetEffizienzVonRohstoffMitIDX(rohstoffId);
+		int ertragJeStaette = Math.Max(1, (int)(ware.GetWSProdProWS() * 0.9 * effizienz));
+
+		int lagerplatzStueck = SW.Dynamisch.GetAktHum().ErmittleLagerplatzInStadt(stadtId, rohstoffId)
+		                       * ware.GetLagermengeProQMeter();
+
+		int nachLager = Math.Max(1, lagerplatzStueck / ertragJeStaette);
+		int nachArbeitern = Math.Max(1, SW.Statisch.GetMaxArbeiterAnzahl() / proStaette);
+
+		lagerIstDieGrenze = nachLager < nachArbeitern;
+
+		return Math.Min(nachLager, nachArbeitern);
+	}
+
+	/// <summary>
+	/// Kauft Lagerraum, aber nur aus dem Überschuss: Es bleibt <see cref="RuecklageFuerAusbau"/> stehen,
+	/// und es wird das größte Angebot genommen, das dieses Polster nicht antastet. Gekauft wird über den
+	/// <c>LagerraumManager</c> der Lib, nicht über den Bildschirm – der Lagerraum-Dialog gehört nicht zur
+	/// Handelsrunde, und ihn hier aufzuziehen würde die Zugsteuerung durcheinanderbringen.
+	/// </summary>
+	private void KaufeLagerraumAusUeberschuss(int stadtId, int werkstattNr)
+	{
+		var lager = new LagerraumManager(stadtId, werkstattNr);
+		int taler = SW.Dynamisch.GetAktHum().GetTaler();
+
+		for (int angebot = LagerraumManager.AnzahlAngebote - 1; angebot >= 0; angebot--)
+		{
+			int preis = lager.GetPreis(angebot);
+
+			if (preis > 0 && taler - preis >= RuecklageFuerAusbau && lager.Kaufe(angebot))
+			{
+				_bedienteKnoepfe.Add("Stadt.Lagerausbau");
+				return;
+			}
+		}
 	}
 
 	/// <summary>
