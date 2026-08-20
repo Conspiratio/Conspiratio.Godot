@@ -201,6 +201,7 @@ public partial class E2eTreiber : Node
 	private bool _mitSpeicherprobe = true;
 	private bool _mitBildern;
 	private string _bilderOrdner;
+	private int _aggressivitaet;
 
 	public override async void _Ready()
 	{
@@ -214,6 +215,7 @@ public partial class E2eTreiber : Node
 		if (seed == 0)
 			seed = System.Environment.TickCount & int.MaxValue;
 
+		_aggressivitaet = LiesZahl(argumente, "--aggressivitaet=", 0, 0);
 		_ausfuehrlich = Array.IndexOf(argumente, "--verbose") >= 0;
 		_mitBereichen = Array.IndexOf(argumente, "--ohne-bereiche") < 0;
 		_mitSpeicherprobe = Array.IndexOf(argumente, "--ohne-speichern") < 0;
@@ -274,6 +276,16 @@ public partial class E2eTreiber : Node
 		// aus der Anlage und bleibt zwischen den beiden Wegen verschieden. Gleich wird der Zufallsstrom,
 		// nicht die Ausgangslage.
 		SW.Statisch.SetRnd(seed);
+
+		// KI-Aggressivität (1–100). Ohne Angabe bleibt es beim Standard 50, also dem Verhalten, das
+		// dieser Treiber seit jeher misst. Mit --aggressivitaet=N lässt sich prüfen, ob das Spiel bei
+		// hohen Werten noch spielbar bleibt – die Einstellung wirkt sofort, weil die Bosheit beim Lesen
+		// moduliert wird.
+		if (_aggressivitaet > 0)
+		{
+			SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = _aggressivitaet;
+			GD.Print("KI-Aggressivitaet: " + _aggressivitaet + " %");
+		}
 
 		int startJahr = SW.Dynamisch.GetAktuellesJahr();
 		var alterVorJahr = new Dictionary<int, int>();

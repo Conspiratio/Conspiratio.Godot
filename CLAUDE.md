@@ -82,6 +82,15 @@ The game needs the editor to play, so changes are verified in three complementar
    applications, credit, espionage and the rest; the home city is opened from the map. After the last
    year it does a `SpeicherManager` save/load round-trip. A 10-year, 2-player run covers 24–26 distinct
    actions in 26–70 s. `--ohne-bereiche` / `--ohne-aktionen` / `--ohne-speichern` switch those off.
+   `--aggressivitaet=N` (1–100) overrides the AI-aggressiveness setting for the run; without it the
+   game's default of 50 applies, which is the behaviour every other measurement here assumes.
+   Measured over 3 seeds × 15 years × 2 players: every setting from 1 to 100 completes all years with
+   exit 0 — what rises with the setting is the **dialog burden** (mean clicks 1 743 → 1 965 → 2 564
+   for 1 / 50 / 100 %), while the final wealth is dominated by per-seed noise (spread within one
+   setting reached +7 379 to −62 073, far exceeding the gap between settings). Note also that at
+   100 % the run stops being seed-reproducible: at 50 % two runs of the same seed gave identical
+   talers (only the click counter drifted by ±2), at 100 % whole outcomes diverged — more
+   interactive events give the driver's frame-timing jitter more to grip.
    Four things to know before touching it — the rest is commented at the point in `E2eTreiber.cs`
    where it matters:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()` — except menu
