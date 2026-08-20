@@ -414,7 +414,7 @@ Expected: PASS.
             int faktor = InterpoliereNachAggressivitaet(2, 5, 12);
 ```
 
-Anschließend in allen drei Dateien prüfen, ob das `using ...Einstellungen;` (bzw. `using Conspiratio.Lib.Gameplay.Einstellungen;`) jetzt ungenutzt ist, und es dann entfernen — der Compiler warnt nicht darüber, aber ein ungenutztes `using` auf einen gelöschten Namespace wäre ein Build-Fehler.
+**Die `using`-Zeilen bleiben unangetastet.** Der Namespace `Conspiratio.Lib.Gameplay.Einstellungen` verschwindet *nicht* — `Spieleinstellungen.cs` und `EnumAuftrag.cs` liegen weiterhin darin; gelöscht wird in Step 6 nur die eine Datei `EnumSchwierigkeitsgrad.cs`. `using Conspiratio.Lib.Gameplay.Einstellungen;` in `DynamischeSpieldaten.cs:7` und `GerichtsverhandlungManager.cs:5` bleibt also gültig (in `DynamischeSpieldaten` wird es ohnehin für `EnumAuftrag` gebraucht). Nichts entfernen — falls eine dieser Zeilen danach ungenutzt sein sollte, ist das eine harmlose, warnungsfreie Kleinigkeit, kein Fehler.
 
 - [ ] **Step 6: Enum und totes Feld entfernen**
 
