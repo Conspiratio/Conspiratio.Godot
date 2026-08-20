@@ -28,15 +28,22 @@ Commit.
 | # | Frage | Entscheidung |
 |---|-------|--------------|
 | 1 | Wie viele Einstellungen am Ende? | **Genau eine**, 0–100 %, für sämtliche KI-Aggressivität |
-| 2 | Streuung zwischen einzelnen KIs | **Erhalten**: die Einstellung verschiebt den Mittelwert der Bosheit-Verteilung, jede KI würfelt weiterhin individuell darum herum |
+| 2 | Streuung zwischen einzelnen KIs | **Erhalten**: die Einstellung verschiebt alle Bosheitswerte gemeinsam, der individuelle Charakterwurf jeder KI bleibt erhalten — es gibt also weiterhin mildere und bösartigere KIs |
 | 3 | Wirkung auf die bisher enum-gesteuerten Mechaniken | **Stufenlos interpolieren** zwischen den bisherigen Niedrig-/Mittel-/Hoch-Werten, statt intern wieder in Stufen einzuteilen |
 | 4 | Verhalten bei 50 % | **Bit-identisch zum heutigen Normalfall** an jeder einzelnen Stelle — 50 % ist der Regressionsanker des ganzen Vorhabens |
 | 5 | Bestehender Regler | **Umgewidmet**, kein zweiter Regler daneben (Anforderung „nur eine einzige Einstellung") |
+| 6 | Wirkzeitpunkt | **Sofort, auch im laufenden Spiel** — inklusive bereits existierender KI-Spieler und geladener alter Spielstände |
 
 **Nicht in diesem Vorhaben:** ein Schwierigkeitsgrad, der auch nicht-aggressive Aspekte
 betrifft (KI-Wirtschaftskraft, Startvermögen, Preisverhalten); eine Aggressivität pro
-KI-Spieler statt global; ein nachträgliches Ändern im laufenden Spiel (der Wert wird wie
-heute bei der Spielerstellung in den Spielstand übernommen).
+KI-Spieler statt global.
+
+Entscheidung 6 ist der Grund für den Zuschnitt von Abschnitt 3. Heute wirkt der Regler
+**gar nicht** auf ein laufendes Spiel: Er schreibt nur nach `ClientSettings`, und in den
+Spielstand — den die Spiellogik liest — wird der Wert ausschließlich beim Anlegen eines
+neuen Spiels kopiert (`NewLocalGameMenu.cs:119`). Ein Spieler, der ihn mitten im Spiel
+verstellt, sieht also keinerlei Wirkung, obwohl der Regler bedienbar aussieht. Dieses
+Konzept behebt das mit.
 
 ## 2. Datenmodell
 
@@ -86,33 +93,45 @@ Abschnitt 6) für neue Spiele erhalten bleibt.
 | 8 | Jährliche Deliktpunkte-Drift | `DynamischeSpieldaten.cs:2244` |
 
 Statt an acht Stellen einzeln zu skalieren — acht Gelegenheiten für Balance-Fehler und
-Inkonsistenzen — greift die Einstellung **einmal** dort an, wo Bosheit entsteht: bei der
-Erzeugung eines KI-Spielers. Alle acht Verbraucher ändern sich dadurch automatisch mit,
-ohne dass ihr Code angefasst wird.
-
-Zwei Erzeugungsstellen, beide `Rnd.Next(0, 101)` als vierter Konstruktorparameter:
-
-- `DynamischeSpieldaten.cs:175` — Aufbau der Spielwelt
-- `DynamischeSpieldaten.cs:427` — Ersatz-KI, wenn eine KI stirbt oder ausscheidet
-
-Beide rufen künftig einen gemeinsamen Helfer:
+Inkonsistenzen — greift die Einstellung **einmal** an, und zwar dort, wo Bosheit *gelesen*
+wird: im Getter selbst. Alle acht Verbraucher ändern sich dadurch automatisch mit, ohne
+dass ihr Code angefasst wird, und ein künftiger neunter Verbraucher bekommt die Skalierung
+ebenfalls automatisch — er kann sie gar nicht vergessen.
 
 ```csharp
+// KISpieler.cs
 /// <summary>
-/// Würfelt die Bosheit einer neuen KI aus und verschiebt sie um die eingestellte
-/// KI-Aggressivität: Bei 50 % (Standard) bleibt die Verteilung unverändert bei 0–100,
-/// bei 100 % liegt sie bei 50–100, bei 0 % bei 0–50. Die Streuung zwischen einzelnen
-/// KIs bleibt dabei erhalten – die Einstellung verschiebt den Mittelwert, sie
-/// vereinheitlicht die Charaktere nicht.
+/// Die wirksame Bosheit dieser KI: ihr ausgewürfelter Charakterwert, verschoben um die
+/// eingestellte KI-Aggressivität. Bei 50 % (Standard) ist das exakt der Charakterwert,
+/// bei 100 % um 50 Punkte höher, bei 0 % um 50 niedriger – jeweils auf 0–100 begrenzt.
+/// Die Streuung zwischen den KIs bleibt erhalten: Die Einstellung verschiebt alle
+/// Charaktere gemeinsam, sie gleicht sie nicht an.
 /// </summary>
-public int WuerfleBosheit()
+public int GetBosheit()
 {
-    int aggressivitaet = GetKiAggressivitaetProzent();  // mit <= 0 -> 50 Fallback
-    return Math.Max(0, Math.Min(100, SW.Statisch.Rnd.Next(0, 101) + (aggressivitaet - 50)));
+    int aggressivitaet = SW.Dynamisch.GetKiAggressivitaetProzent();  // mit <= 0 -> 50 Fallback
+    return Math.Max(0, Math.Min(100, _boese + (aggressivitaet - 50)));
 }
 ```
 
-Bei 50 % ist der Summand exakt 0 — die Bosheit wird bit-identisch wie heute gewürfelt.
+Der gespeicherte Charakterwert `_boese` bleibt unangetastet — er wird weiterhin bei der
+Erzeugung gewürfelt (`Rnd.Next(0, 101)`, `DynamischeSpieldaten.cs:175` und `:427`),
+unverändert serialisiert und beim Laden unverändert wiederhergestellt. Die Einstellung
+moduliert nur, wie stark sich dieser Charakter auswirkt.
+
+**Warum im Getter und nicht bei der Erzeugung** (der naheliegendere erste Entwurf): Nur so
+wirkt die Einstellung *sofort und rückwirkend* — auf bereits existierende KI-Spieler, im
+laufenden Spiel und in geladenen alten Spielständen (Entscheidung 6). Würde die
+Verschiebung beim Auswürfeln einbacken, wäre die Bosheit jeder KI ab ihrer Erschaffung
+eingefroren, und der Regler bliebe für alles Laufende wirkungslos.
+
+Bei 50 % ist der Summand exakt 0 — `GetBosheit()` liefert den Rohwert, also bit-identisches
+Verhalten zu heute an allen acht Verbrauchern.
+
+**Kein Rohwert-Bedarf anderswo:** Die Bosheit wird dem Spieler nirgends angezeigt (im
+gesamten Godot-Client kommt sie nur in einem Kommentar in `E2eTreiber.cs:273` vor). Die
+Serialisierung ist feldbasiert und greift auf `_boese` zu, nicht auf den Getter. Es gibt
+also keine Stelle, an der ein modulierter Getter den Rohwert verdecken würde.
 
 **Bewusste Nebenwirkung:** Über Verbraucher 3 und 4 beeinflusst die Einstellung nicht nur,
 *wie oft* die KI angreift, sondern auch, *wie stark* sie im Duell ist. Das ist gewollt:
@@ -152,10 +171,12 @@ public int InterpoliereNachAggressivitaet(int beiNull, int beiFuenfzig, int beiH
 
 Bei 50 % liefert der Helfer exakt `beiFuenfzig`, also den heutigen `Mittel`-Wert.
 
-**Wo die Helfer wohnen.** Beide (`WuerfleBosheit`, `InterpoliereNachAggressivitaet`) plus
-der private `GetKiAggressivitaetProzent()` mit dem `<= 0`-Fallback gehören zu
-`DynamischeSpieldaten` — dort liegen die Spieleinstellungen, dort sitzen drei der fünf
-Aufrufer, und ein eigener Manager für drei kurze Methoden wäre Überbau (YAGNI).
+**Wo die Helfer wohnen.** `InterpoliereNachAggressivitaet` und das öffentliche
+`GetKiAggressivitaetProzent()` (mit dem `<= 0`-Fallback) gehören zu `DynamischeSpieldaten` —
+dort liegen die Spieleinstellungen, dort sitzen die meisten Aufrufer, und ein eigener
+Manager für zwei kurze Methoden wäre Überbau (YAGNI). `GetKiAggressivitaetProzent()` muss
+öffentlich sein, weil `KISpieler.GetBosheit()` (Abschnitt 3), `Raeuberlager` und `Zollburg`
+(Abschnitt 5) es von außen aufrufen.
 
 ## 5. Militärstützpunkte (Räuberlager, Zollburg)
 
@@ -178,6 +199,18 @@ Feldname und die Herkunft des Fallbacks.
   mit umbenannt, samt der `GetNode`-Pfade — sonst driften Szene und Skript auseinander.
 - `NewLocalGameMenu.cs:119` übernimmt den Wert wie bisher in den Spielstand, nur unter dem
   neuen Namen.
+- **Neu — der Regler wirkt sofort:** `OnKiAktivitaetGeaendert` (künftig
+  `OnKiAggressivitaetGeaendert`, `OptionenDialog.cs:145-154`) schreibt den Wert zusätzlich
+  nach `SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent`. Damit greifen
+  Bosheit (Abschnitt 3), die drei interpolierten Mechaniken (Abschnitt 4) und die
+  Stützpunkt-Aktivität (Abschnitt 5) ab dem nächsten Auswerten — ohne Neustart, ohne neues
+  Spiel. Der Wert wandert über die normale Spielstand-Serialisierung mit in den Speicherstand.
+
+  Eine Fallunterscheidung „läuft gerade ein Spiel?" ist nicht nötig: `Spielstand` ist nie
+  `null` (`DynamischeSpieldaten.cs:43-44` legt es bei Bedarf an), und ohne laufendes Spiel
+  wird der Platzhalter beim nächsten Spielstart ohnehin aus `ClientSettings` überschrieben.
+  `ClientSettings` bleibt die Vorgabe für neue Spiele, der Spielstand-Wert das, was das
+  laufende Spiel tatsächlich verwendet.
 
 Kein neuer Regler, kein zweites Bedienelement: der bestehende Slider wird umgewidmet.
 
@@ -185,10 +218,14 @@ Kein neuer Regler, kein zweites Bedienelement: der bestehende Slider wird umgewi
 
 Der Regressionsanker ist überall derselbe: **bei 50 % muss sich nichts ändern.**
 
-- `WuerfleBosheit`: bei 50 % identische Verteilung wie `Rnd.Next(0, 101)` bei gleichem Seed;
-  bei 0 % und 100 % Mittelwert-Verschiebung über Großstichprobe (einige Tausend Würfe),
-  Grenzen sauber bei 0 bzw. 100 gekappt; Streuung bleibt erhalten (Standardabweichung bzw.
-  Spannweite bei 100 % deutlich > 0, nicht alle KIs identisch).
+- `KISpieler.GetBosheit`: bei 50 % exakt der Rohwert `_boese`; bei 0 % und 100 % um 50
+  verschoben, an den Grenzen sauber bei 0 bzw. 100 gekappt; über eine Großstichprobe (einige
+  Tausend KIs) verschiebt sich der Mittelwert wie erwartet, während die Streuung erhalten
+  bleibt (Spannweite bei 100 % deutlich > 0, nicht alle KIs identisch).
+- **Sofortwirkung** (Kern von Entscheidung 6): derselben KI zweimal `GetBosheit()` entlocken,
+  dazwischen nur die Einstellung ändern — der zweite Wert muss höher sein. Analog für eine
+  der interpolierten Mechaniken. Das ist der Test, der die ursprünglich angedachte
+  Erzeugungszeit-Variante hätte auffallen lassen.
 - `InterpoliereNachAggressivitaet`: exakte Stützpunkte bei 0/50/100 %, Monotonie und
   plausible Zwischenwerte bei 25 % und 75 %, für alle drei realen Wertetripel.
 - Je einen Test für die drei umgestellten Mechaniken, der bei 50 % den heutigen Wert
@@ -208,9 +245,19 @@ csproj bumpen. Godot-Commit danach mit Versionsreferenz im Subject, dazu `CHANGE
 - Die Bosheit-Verschiebung ist bewusst linear (`+ (prozent - 50)`). Ob sich 100 % im Spiel
   tatsächlich „doppelt so aggressiv" anfühlt oder eher überzogen, lässt sich erst am
   laufenden Spiel beurteilen — über einen E2E-Langlauf messbar und über die eine Formel
-  leicht nachjustierbar.
+  leicht nachjustierbar. Der zuletzt umgesetzte Aggressions-Mechanismus (Sabotage/
+  Anschwärzen) hat gezeigt, wie weit gefühlte und gemessene Ereignisrate auseinanderliegen
+  können: Dort messen, nicht schätzen.
 - Die Umbenennung `KiAktivitaetProzent` → `KiAggressivitaetProzent` kostet laufende
   Spielstände die individuelle Einstellung (Rückfall auf 50 %). Alternativ ließe sich das
   alte Feld als veralteter Alias mitlesen; angesichts des Vorabversions-Status des Clients
   ist der einfache Schnitt vorzuziehen — falls das anders gesehen wird, ist es der eine
-  Punkt, an dem dieses Konzept nachzuschärfen wäre.
+  Punkt, an dem dieses Konzept nachzuschärfen wäre. Praktisch gemildert wird es dadurch,
+  dass der Regler jetzt jederzeit im laufenden Spiel nachgezogen werden kann
+  (Entscheidung 6): Ein Spieler stellt seinen Wert einmal neu ein, statt ein Spiel damit
+  verloren zu geben.
+- `GetBosheit()` liefert künftig einen abgeleiteten statt eines gespeicherten Werts. Das ist
+  in diesem Codebestand ungewöhnlich (die meisten Getter geben ihr Feld direkt zurück) und
+  wird nur durch den XML-Kommentar kenntlich gemacht. Sollte später doch einmal der reine
+  Charakterwert gebraucht werden — etwa für eine Anzeige im Savegame-Editor —, wäre ein
+  zusätzliches `GetBosheitRoh()` der saubere Weg, nicht ein Zurückdrehen der Modulation.
