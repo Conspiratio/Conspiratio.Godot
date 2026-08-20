@@ -175,7 +175,7 @@ public partial class StuetzpunktVerwalten : Control
 			UpgradeButton("SymbJustiz", "Zollsatz festlegen",
 				() => SW.UI.ProzentwertFestlegenDialog.ShowDialog(ProzentwertArt.ZollsatzZollburg, _manager.StuetzpunktId));
 
-		var manoever = UpgradeButtonNode("Roh17", "Manöver durchführen");
+		var manoever = UpgradeButtonNode("Roh17", "Manöver durchführen", "rohstoffe");
 		manoever.Pressed += OnManoeverPressed;
 
 		// Zum Verkauf anbieten: KI-Spieler unterbreiten dann gelegentlich Kaufangebote.
@@ -231,11 +231,11 @@ public partial class StuetzpunktVerwalten : Control
 		button.Pressed += () => aktion();
 	}
 
-	private controls.ButtonWithSounds UpgradeButtonNode(string icon, string tooltip)
+	private controls.ButtonWithSounds UpgradeButtonNode(string icon, string tooltip, string ordner = "symbole")
 	{
 		var button = _buttonScene.Instantiate<controls.ButtonWithSounds>();
 		button.CustomMinimumSize = new Vector2(84, 84);
-		button.Icon = GD.Load<Texture2D>("res://assets/images/symbole/" + icon + ".png");
+		button.Icon = GD.Load<Texture2D>("res://assets/images/" + ordner + "/" + icon + ".png");
 		button.ExpandIcon = true;
 		button.Flat = true;
 		button.TooltipText = tooltip;
