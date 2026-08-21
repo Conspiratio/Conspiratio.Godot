@@ -134,11 +134,47 @@ The game needs the editor to play, so changes are verified in three complementar
    `RuecklageFuerAusbau` = 1 500 standing) but **only while storage is the binding cap** — once the worker
    cap binds instead, extra storage is dead capital: an earlier version that kept buying regardless turned
    a positive 15-year result negative.
-   Measured against the Lib directly (single player, 15 years, fixed seed): the old fixed-one-site,
-   fixed-worker-count strategy ended at +4 979; the current derived-site/derived-worker/bounded-storage
-   strategy ended at **+33 311** — using up to 14 sites instead of 1, the true ceiling given a 99-worker
-   cap and this resource's 7-workers-per-site ratio. Run through the actual client screens with the
-   random Kontor actions switched off (`--ohne-aktionen`, `--spieler=1`), it reached +64 175 to +80 088.
+   Run through the actual client screens with the random Kontor actions switched off
+   (`--ohne-aktionen`, `--spieler=1`) — using up to 14 sites instead of 1, the true ceiling given a
+   99-worker cap and this resource's 7-workers-per-site ratio — single-player 15-year runs reached
+   **+64 175 to +80 088** before the saturation price and the round-end economy calls below existed.
+   **Those numbers, and an earlier +4 979-vs-+33 311 site-count comparison run directly against the
+   Lib, are now obsolete for the same reason**: none of them ran with the goods cycle actually
+   turning (see below), and the site-count comparison cannot be honestly recomputed from that era's
+   data. Measured afterward across four seeds, same flags: **+38 204 to +58 519** — clearly below the
+   old range, comfortably positive. Treat this as an order-of-magnitude comparison, not a precise
+   delta: two repeats of the same seed (4711) landed at +41 777 and +45 638, a **3 861**-taler
+   run-to-run spread on identical input, so the true effect size is somewhere in a band, not a point.
+
+   **Selling into one city no longer scales.** `Stadt.GetRohstoffPreisVonIDX` discounts the price by how
+   many years of local demand (`Einwohner / 10`) sit unsold in that city's stock, capped at
+   `Stadt.MaxAbschlagProzent`. Sustainable volume is therefore bounded by the population you actually
+   supply, and the discount now reaches **below** `preisMin` — that floor only bounds the base price in
+   the setters. Workshops also get progressively more expensive
+   (`HandelsManager.SteigerungProzent` per workshop already owned, capped at `MaxSteigerungsstufen`,
+   which is overflow protection rather than balancing).
+
+   **The round-end economy calls were missing entirely** until this change: `RohBedarfAktRundenEnde`
+   (sales into city stock, population consumption), `RohPreiseRandomSchwanken` (prices moved not at all)
+   and `RundenBestechungenAbwickeln` were in the Lib but called from no Godot script — the WinForms
+   original runs them in `RundenEndnachrichtenAnzeigen`. They now run in `Kontor.cs`, together with the
+   new `EinwohnerWachstumAktRundenEnde`. **Any measurement taken before this is not comparable**: the
+   goods cycle simply did not turn.
+
+   **Cities develop now.** `_einwohner` and `_reichtum` previously only ever fell
+   (`KatastrophenManager`), which would have made the saturation discount harsher every year while the
+   consumption that drains stock shrank with it. Population growth is driven by `Reichtum` and
+   `Kriminalitaet` plus noise, bounded by `MindestEinwohner`/`MaxEinwohner` — the lower bound is
+   load-bearing, since multiplicative growth can never lift a city off zero. Wealth rises on a
+   trade-volume-driven yearly dice roll (`ReichtumWachstumAktRundenEnde`), which **must run before**
+   `RohBedarfAktRundenEnde` — that one consumes and zeroes the per-city sales figures it reads.
+
+   That closes a loop worth knowing about: heavy trade enriches a city, which both makes storage
+   expansion there dearer (`LagerraumManager` scales with `Reichtum`) and speeds its population growth,
+   which raises the annual demand the saturation discount divides by. Developing one market over years
+   is therefore a real alternative to moving on — bounded on both ends by `GetMaxReichtum()` and
+   `MaxEinwohner`.
+
    **A full E2E run (default settings, random actions and AI-aggression sabotage included) can still end
    negative** even with this strategy — that is not a trading regression: per-seed swings from those
    intentionally-random systems reach tens of thousands of talers and dominate the outcome (see the
