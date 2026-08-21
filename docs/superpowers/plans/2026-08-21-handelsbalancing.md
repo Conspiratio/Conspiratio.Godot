@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Den unbegrenzten Skalierungsvorteil mehrerer Kontore bremsen — über einen sättigungsabhängigen Warenpreis und einen nach Besitzstand gestaffelten Werkstatt-Kaufpreis.
+**Goal:** Den unbegrenzten Skalierungsvorteil mehrerer Kontore bremsen — über einen sättigungsabhängigen Warenpreis und einen nach Besitzstand gestaffelten Werkstatt-Kaufpreis — und den dafür nötigen Warenkreislauf überhaupt erst zum Laufen bringen.
 
-**Architecture:** Zwei unabhängige Formeländerungen in bestehenden Lib-Methoden, beide reine Funktionen über bereits vorhandenem Zustand. `Stadt.GetRohstoffPreisVonIDX` misst den Mengenabschlag künftig in Jahren lokalen Bedarfs statt in fixen Talern; `HandelsManager.GetWerkstattKaufpreis` staffelt nach reichsweit besessenen Betrieben. Es kommt kein serialisiertes Feld hinzu, also keine Savegame-Migration.
+**Architecture:** Drei Lib-Änderungen und eine Verdrahtung im Client. `Stadt.GetRohstoffPreisVonIDX` misst den Mengenabschlag künftig in Jahren lokalen Bedarfs statt in fixen Talern; `HandelsManager.GetWerkstattKaufpreis` staffelt nach reichsweit besessenen Betrieben; `EinwohnerWachstumAktRundenEnde` gibt den Städten erstmals Wachstum, ohne das der Nenner des Abschlags über die Spieldauer verfiele. Zuletzt zieht der Godot-Client drei Rundenende-Aufrufe nach, die er nie vom Referenzclient übernommen hat — **ohne sie bliebe der Sättigungspreis vollständig folgenlos.** Es kommt kein serialisiertes Feld hinzu, also keine Savegame-Migration.
 
 **Tech Stack:** C# / netstandard2.0 (`Conspiratio.Lib`), xUnit (`Conspiratio.Lib.Tests`), Godot 4.7 / .NET 8 für die E2E-Messung.
 
@@ -13,15 +13,16 @@
 ## Global Constraints
 
 - **netstandard2.0** in der Lib — keine modernen BCL-APIs.
-- **Ganzzahlarithmetik** in beiden Formeln, damit E2E-Läufe seed-reproduzierbar bleiben. Kein `Math.Pow`, kein `double` in den neuen Pfaden.
-- **Kein neues serialisiertes Feld.** Die Serialisierung ist feldbasiert; jedes neue Feld käme aus Altständen als `null`/`0`. Beide Änderungen lesen ausschließlich vorhandenen Zustand.
+- **Ganzzahlarithmetik** in allen neuen Formeln, damit E2E-Läufe seed-reproduzierbar bleiben. Kein `Math.Pow`, kein `double` in den neuen Pfaden; das Wachstum rechnet in Promille.
+- **Kein neues serialisiertes Feld.** Die Serialisierung ist feldbasiert; jedes neue Feld käme aus Altständen als `null`/`0`. Alle Änderungen lesen und schreiben ausschließlich vorhandene Felder.
 - **Deutsche Domänenbenennung** für Konstanten, Methoden und Kommentare.
 - **Balancing-Konstanten als `public const int`** auf der jeweiligen Klasse — etabliertes Muster der Lib (`ErpressungManager.BeziehungsverlustBeiMisserfolg`, `KatastrophenManager.PreisanstiegMin`).
 - **Lib-CHANGELOG:** bilinguale Stichpunkte (DE und EN) unter dem einen `## [Unreleased]`-Block, **kein** Versionsheader und **kein** Datum pro Change.
 - **Commit-Reihenfolge:** erst Lib, dann Godot. Der Godot-Commit nennt die Lib-Version im Betreff.
 - **Commit-Nachrichten per POSIX-Heredoc** (`git commit -F - <<'EOF' … EOF`) — die Bash-Tool-Shell ist Git Bash, ein PowerShell-Here-String hängt ein `@` an die Betreffzeile.
 - **Beide Repos stehen auf Branch `feature/ki-aggression-sabotage-anschwaerzen`.** Nicht mergen, nicht pushen.
-- **Startwerte sind keine Endwerte.** Die vier Balancing-Zahlen werden in Task 4 gegen echte Läufe kalibriert.
+- **Startwerte sind keine Endwerte.** Die Balancing-Zahlen aus Task 1–3 werden in Task 6 gegen echte Läufe kalibriert.
+- **Reihenfolge ist bindend:** Erst die gesamte Lib-Arbeit (Task 1–4), dann die Godot-Verdrahtung (Task 5), dann die Messung (Task 6). Task 5 braucht die Lib-Version aus Task 4, und Task 6 braucht die Verdrahtung aus Task 5 — vorher ist nichts messbar.
 
 **Repo-Pfade:**
 - Lib: `D:\Projekte\C# Projekte\Conspiratio.Lib`
@@ -34,11 +35,238 @@
 - Stadt 1 („Frozen Castle") hat **5 000** Einwohner, Stadt 2 („Icepike") **2 500**. Der Jahresbedarf ist `Einwohner / 10`.
 - Stadt 1, Werkstattplatz 1 produziert Rohstoff **5 (Holz, Stufe 1)** → Basispreis 2 000.
 - Korn (Rohstoff 1): `preisMin` 7, `preisStd` 8, `preisMax` 20. `SetRohstoffPreisVonIDXToY` klemmt auf `[preisMin, preisMax]`.
-- Die Tests laufen **nacheinander** (`AssemblyInfo.cs`), weil der Spielzustand global in `SW` liegt. Jeder Test beginnt mit eigenem `TestSpielwelt.Starte()`.
+- Die Tests laufen **nacheinander** (`AssemblyInfo.cs`), weil der Spielzustand global in `SW` liegt. Jeder Test beginnt mit eigenem `TestSpielwelt.Starte()`; die Signatur ist `Starte(int menschen = 1, IErpressungDialog erpressungDialog = null, int? seed = null)`.
+- **Uneinheitliche Setter-Benennung** auf `Stadt`: `SetReichtumToX` gegen `SetKriminalitaetAufX` gegen `SetEinwohnerAufX` — eine häufige Fehlerquelle.
+- `KatastrophenManager` senkt Einwohner **und** Reichtum, hebt beide nie an (`JahresChance` 22 %). Das Wachstum aus Task 1 ist das Gegengewicht.
 
 ---
 
-### Task 1: Sättigungsabhängiger Warenpreis
+### Task 1: Bevölkerungswachstum
+
+**Files:**
+- Modify: `Conspiratio.Lib/Gameplay/Spielwelt/DynamischeSpieldaten.cs` (neue Methode neben `RohBedarfAktRundenEnde`, Zeile 634–651)
+- Test: `Conspiratio.Lib.Tests/BevoelkerungTests.cs` (neu)
+
+**Interfaces:**
+- Consumes: nichts.
+- Produces: `public void DynamischeSpieldaten.EinwohnerWachstumAktRundenEnde()` — wird in Task 5 vom Godot-Client aufgerufen. Konstanten auf `DynamischeSpieldaten`: `GrundwachstumPromille` (10), `ReichtumBonusPromille` (2), `KriminalitaetMalusPromille` (2), `ZufallPromille` (5), `MindestEinwohner` (250), `MaxEinwohner` (12000).
+
+**Kontext:** `_einwohner` wird heute nur an zwei Stellen geschrieben — im Konstruktor und von `KatastrophenManager`, der ihn ausschließlich **senkt** (8–20 % je Ereignis, bei Pest verdoppelt, bis auf 0). Es gibt kein Wachstum. Über 40 Jahre bedeutet das rund 30 % Bevölkerungsverlust ohne Erholung.
+
+**Warum das eine Voraussetzung ist:** Task 2 nutzt `Einwohner / 10` als Nenner. Sinkt die Einwohnerzahl dauerhaft, wird der Mengenabschlag immer steiler *und* der Verbrauch, der den Vorrat abbaut, immer kleiner — der Handel würde über die Spieldauer unrentabel. Historisch ist Wachstum um 1600 ohnehin geboten.
+
+- [ ] **Step 1: Die fehlschlagenden Tests anlegen**
+
+Neue Datei `Conspiratio.Lib.Tests/BevoelkerungTests.cs`:
+
+```csharp
+using Conspiratio.Lib.Gameplay.Spielwelt;
+
+using Xunit;
+
+namespace Conspiratio.Lib.Tests
+{
+    /// <summary>
+    /// Bevölkerungswachstum: Bisher konnte die Einwohnerzahl nur durch Katastrophen sinken. Ohne
+    /// Gegengewicht schrumpfen alle Städte über die Spieldauer, was den Warenabsatz dauerhaft
+    /// unrentabel machen würde – der Jahresbedarf (<c>Einwohner / 10</c>) ist die Bezugsgröße des
+    /// Mengenabschlags.
+    /// </summary>
+    public class BevoelkerungTests
+    {
+        private const int GrosseStadt = 1;
+        private const int KleineStadt = 2;
+
+        [Fact]
+        public void Eine_Stadt_waechst_ueber_die_Runden()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            int vorher = stadt.GetEinwohner();
+
+            for (int runde = 0; runde < 10; runde++)
+                SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+
+            Assert.True(stadt.GetEinwohner() > vorher,
+                        "Nach zehn Runden muss die Stadt gewachsen sein, sonst fehlt das Gegengewicht zu den Katastrophen.");
+        }
+
+        [Fact]
+        public void Reichtum_beschleunigt_und_Kriminalitaet_bremst_das_Wachstum()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var reich = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            var arm = SW.Dynamisch.GetStadtwithID(KleineStadt);
+
+            // Gleiche Ausgangsgröße, damit nur die Standortfaktoren den Unterschied machen.
+            reich.SetEinwohnerAufX(4000);
+            arm.SetEinwohnerAufX(4000);
+            reich.SetReichtumToX(7);
+            reich.SetKriminalitaetAufX(1);
+            arm.SetReichtumToX(1);
+            arm.SetKriminalitaetAufX(5);
+
+            for (int runde = 0; runde < 25; runde++)
+                SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+
+            Assert.True(reich.GetEinwohner() > arm.GetEinwohner(),
+                        "Reichtum zieht Menschen an, Kriminalität vertreibt sie – über 25 Runden muss sich das zeigen.");
+        }
+
+        [Fact]
+        public void Das_Wachstum_ueberschreitet_die_Obergrenze_nie()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetEinwohnerAufX(DynamischeSpieldaten.MaxEinwohner);
+
+            for (int runde = 0; runde < 50; runde++)
+                SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+
+            Assert.Equal(DynamischeSpieldaten.MaxEinwohner, stadt.GetEinwohner());
+        }
+
+        /// <summary>
+        /// Multiplikatives Wachstum käme aus der Null nie heraus (0 × irgendetwas = 0). Die Untergrenze
+        /// macht eine von Katastrophen verwüstete Stadt wieder erholbar.
+        /// </summary>
+        [Fact]
+        public void Eine_entvoelkerte_Stadt_erholt_sich()
+        {
+            TestSpielwelt.Starte(seed: 1);
+
+            var stadt = SW.Dynamisch.GetStadtwithID(GrosseStadt);
+            stadt.SetEinwohnerAufX(0);
+
+            SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+
+            Assert.Equal(DynamischeSpieldaten.MindestEinwohner, stadt.GetEinwohner());
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Tests laufen lassen und Fehlschlag bestätigen**
+
+```bash
+dotnet test --filter "FullyQualifiedName~BevoelkerungTests"
+```
+
+Erwartet: Kompilierfehler `CS1061`/`CS0117` — `EinwohnerWachstumAktRundenEnde`, `MaxEinwohner` und `MindestEinwohner` gibt es noch nicht.
+
+Die benötigten Setter gibt es bereits: `Stadt.SetReichtumToX` (`Stadt.cs:169`) und
+`Stadt.SetKriminalitaetAufX` (`Stadt.cs:179`) — auf die **uneinheitliche Benennung** achten
+(`…ToX` gegen `…AufX`), sie ist eine häufige Fehlerquelle.
+
+- [ ] **Step 3: Konstanten und Methode ergänzen**
+
+In `Conspiratio.Lib/Gameplay/Spielwelt/DynamischeSpieldaten.cs` die Konstanten zu den übrigen Feldern der Klasse ergänzen:
+
+```csharp
+        /// <summary>Grundwachstum der Einwohnerzahl je Runde in Promille.</summary>
+        public const int GrundwachstumPromille = 10;
+
+        /// <summary>Zusätzliches Wachstum je Punkt Reichtum – Wohlstand zieht Menschen an.</summary>
+        public const int ReichtumBonusPromille = 2;
+
+        /// <summary>Wachstumsverlust je Punkt Kriminalität – Unsicherheit vertreibt Menschen.</summary>
+        public const int KriminalitaetMalusPromille = 2;
+
+        /// <summary>Zufällige Schwankung des Wachstums je Runde, plus/minus in Promille.</summary>
+        public const int ZufallPromille = 5;
+
+        /// <summary>
+        /// Untergrenze der Einwohnerzahl. Zwingend, weil multiplikatives Wachstum aus der Null nie
+        /// herauskäme – erst dadurch ist eine von Katastrophen verwüstete Stadt wieder erholbar.
+        /// </summary>
+        public const int MindestEinwohner = 250;
+
+        /// <summary>
+        /// Obergrenze der Einwohnerzahl. Bewusst eine globale Konstante statt einer Schranke relativ zum
+        /// Startwert der Stadt: Dieser wird nirgends gespeichert, und ein Feld dafür wäre ein neues
+        /// serialisiertes Feld mit Savegame-Folgen.
+        /// </summary>
+        public const int MaxEinwohner = 12000;
+```
+
+Und die Methode direkt nach `RohBedarfAktRundenEnde` (endet Zeile 651) einfügen:
+
+```csharp
+        /// <summary>
+        /// Lässt die Städte wachsen. Ohne dies kennt die Einwohnerzahl nur eine Richtung: Der
+        /// <c>KatastrophenManager</c> senkt sie, niemand hebt sie je an – über eine lange Partie
+        /// schrumpfen damit alle Märkte, und mit ihnen der Warenabsatz.
+        ///
+        /// Gerechnet wird in Promille, damit kein Gleitkomma in den Kern der Ökonomie gerät und
+        /// E2E-Läufe seed-reproduzierbar bleiben.
+        /// </summary>
+        public void EinwohnerWachstumAktRundenEnde()
+        {
+            for (int i = 1; i < SW.Statisch.GetMaxStadtID(); i++)
+            {
+                Stadt stadt = GetStadtwithID(i);
+
+                int wachstumPromille = GrundwachstumPromille
+                                     + stadt.GetReichtum() * ReichtumBonusPromille
+                                     - stadt.GetKriminalitaet() * KriminalitaetMalusPromille
+                                     + SW.Statisch.Rnd.Next(-ZufallPromille, ZufallPromille + 1);
+
+                int neu = stadt.GetEinwohner() + (stadt.GetEinwohner() * wachstumPromille) / 1000;
+
+                if (neu < MindestEinwohner)
+                    neu = MindestEinwohner;
+
+                if (neu > MaxEinwohner)
+                    neu = MaxEinwohner;
+
+                stadt.SetEinwohnerAufX(neu);
+            }
+        }
+```
+
+Prüfen, dass der Namensraum von `Stadt` (`Conspiratio.Lib.Gameplay.Gebiete`) in der Datei bereits eingebunden ist — `GetStadtwithID` wird dort schon verwendet, also sehr wahrscheinlich ja.
+
+- [ ] **Step 4: Tests laufen lassen und Erfolg bestätigen**
+
+```bash
+dotnet test --filter "FullyQualifiedName~BevoelkerungTests"
+```
+
+Erwartet: 4 Tests grün.
+
+- [ ] **Step 5: Vollständige Testsuite laufen lassen**
+
+```bash
+dotnet test
+```
+
+Erwartet: alles grün. Kippt ein Katastrophentest, ist das ein **echter** Befund (die Untergrenze schwächt schwere Katastrophen ab) — melden statt den Test stumm anzupassen.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add Conspiratio.Lib/Gameplay/Spielwelt/DynamischeSpieldaten.cs Conspiratio.Lib.Tests/BevoelkerungTests.cs
+git commit -F - <<'EOF'
+Staedte wachsen wieder
+
+Die Einwohnerzahl kannte bisher nur eine Richtung: Der KatastrophenManager
+senkte sie um 8-20 % je Ereignis (Pest doppelt), angehoben hat sie nie jemand.
+Ueber 40 Jahre sind das rund 30 % Verlust ohne Erholung - unrealistisch fuer
+die Zeit um 1600 und die Grundlage dafuer, dass der Warenabsatz spaeter
+unrentabel wird.
+
+Das Wachstum bemisst sich an Reichtum und Kriminalitaet der Stadt plus einem
+Zufallsanteil, gerechnet in Promille. Die Untergrenze ist zwingend: Aus der
+Null kaeme multiplikatives Wachstum nie heraus.
+EOF
+```
+
+---
+
+### Task 2: Sättigungsabhängiger Warenpreis
 
 **Files:**
 - Modify: `Conspiratio.Lib/Gameplay/Gebiete/Stadt.cs` (Methode `GetRohstoffPreisVonIDX`, Zeile 108–117)
@@ -46,7 +274,7 @@
 
 **Interfaces:**
 - Consumes: nichts aus früheren Tasks.
-- Produces: `public const int Stadt.AbschlagJeBedarfsjahrProzent` (Wert 10), `public const int Stadt.MaxAbschlagProzent` (Wert 50). Task 4 justiert diese beiden Werte.
+- Produces: `public const int Stadt.AbschlagJeBedarfsjahrProzent` (Wert 10), `public const int Stadt.MaxAbschlagProzent` (Wert 50). Task 6 justiert diese beiden Werte.
 
 **Kontext:** Heute lautet die Formel `preis − vorrat/1000`, hart geklemmt bei `preisMin`. Für Korn sind das maximal 1 Taler Abschlag (8 → 7), erreicht nach ~1 000 Stück Vorrat — das produziert ein einzelner Betrieb im ersten Jahr. Danach ist beliebiges Abladen kostenlos.
 
@@ -247,7 +475,7 @@ EOF
 
 ---
 
-### Task 2: Progressiver Werkstatt-Kaufpreis
+### Task 3: Progressiver Werkstatt-Kaufpreis
 
 **Files:**
 - Modify: `Conspiratio.Lib/Gameplay/Personen/HumSpieler.cs` (neue Methode `ZaehleWerkstaetten`, einzufügen bei den übrigen Werkstatt-Zugriffen um Zeile 280–295)
@@ -255,8 +483,8 @@ EOF
 - Test: `Conspiratio.Lib.Tests/HandelsbalancingTests.cs` (erweitern)
 
 **Interfaces:**
-- Consumes: fachlich nichts aus Task 1 (die beiden Formeln sind unabhängig). **Aber:** Die Tests erweitern die in Task 1 angelegte Datei `HandelsbalancingTests.cs` und nutzen deren bereits vorhandene private Konstanten `GrosseStadt` (= 1) und `KleineStadt` (= 2) mit. Diese Datei zuerst lesen.
-- Produces: `public int HumSpieler.ZaehleWerkstaetten()`, `public const int HandelsManager.SteigerungProzent` (Wert 125), `public const int HandelsManager.MaxSteigerungsstufen` (Wert 20). Task 4 justiert `SteigerungProzent`.
+- Consumes: fachlich nichts aus Task 2 (die beiden Formeln sind unabhängig). **Aber:** Die Tests erweitern die in Task 2 angelegte Datei `HandelsbalancingTests.cs` und nutzen deren bereits vorhandene private Konstanten `GrosseStadt` (= 1) und `KleineStadt` (= 2) mit. Diese Datei zuerst lesen.
+- Produces: `public int HumSpieler.ZaehleWerkstaetten()`, `public const int HandelsManager.SteigerungProzent` (Wert 125), `public const int HandelsManager.MaxSteigerungsstufen` (Wert 20). Task 6 justiert `SteigerungProzent`.
 
 **Kontext:** `GetWerkstattKaufpreis` gibt heute schlicht `Rohstoff.GetWSKaufpreis()` zurück, unabhängig vom Besitzstand. Bei 84 möglichen Betrieben zu je 2 000 Talern und ~3 700 Talern Jahresgewinn liegt die Amortisation unter einem Jahr.
 
@@ -460,7 +688,7 @@ Prüfen, dass `using System;` in der Datei vorhanden ist (für `Math`); sonst er
 dotnet test --filter "FullyQualifiedName~HandelsbalancingTests"
 ```
 
-Erwartet: alle Tests grün — 5 aus Task 1 und 9 aus Task 2 (die `Theory` zählt als vier Fälle).
+Erwartet: alle Tests grün — 5 aus Task 2 und 9 aus Task 3 (die `Theory` zählt als vier Fälle).
 
 - [ ] **Step 6: Vollständige Testsuite laufen lassen**
 
@@ -490,7 +718,7 @@ EOF
 
 ---
 
-### Task 3: Lib-Version, CHANGELOG und lokale Paketbereitstellung
+### Task 4: Lib-Version, CHANGELOG und lokale Paketbereitstellung
 
 **Files:**
 - Modify: `Conspiratio.Lib/Conspiratio.Lib.csproj` (Zeile 42, `<Version>`)
@@ -498,8 +726,8 @@ EOF
 - Modify: `Conspiratio.Godot.csproj` (Zeile 15, `PackageReference`)
 
 **Interfaces:**
-- Consumes: die fertigen Formeln aus Task 1 und 2.
-- Produces: eine im lokalen NuGet-Cache verfügbare Lib-Version `4.1.0`, gegen die Task 4 messen kann.
+- Consumes: die fertigen Formeln aus Task 1, 2 und 3.
+- Produces: eine im lokalen NuGet-Cache verfügbare Lib-Version `4.1.0`, gegen die Task 5 und 6 messen können.
 
 **Kontext:** Der Godot-Client konsumiert die Lib als NuGet-Paket. Für Task 4 muss die unveröffentlichte Version im globalen Cache liegen. **Schritt 2 ist der, der erfahrungsgemäß übersehen wird:** NuGet extrahiert eine Version nicht neu, die es schon kennt — ohne Löschen baut Godot still gegen den alten Code weiter.
 
@@ -595,17 +823,113 @@ EOF
 
 ---
 
-### Task 4: Kalibrierung gegen E2E-Läufe und Dokumentation
+### Task 5: Fehlende Rundenende-Aufrufe im Godot-Client nachziehen
 
 **Files:**
-- Modify (nur falls die Messung es verlangt): `Conspiratio.Lib/Gameplay/Gebiete/Stadt.cs`, `Conspiratio.Lib/Allgemein/HandelsManager.cs` (die vier Balancing-Konstanten)
+- Modify: `assets/scripts/Kontor.cs` (im Godot-Repo, `IstLetzterSpielerImJahr()`-Block, Zeile 737–747)
+
+**Interfaces:**
+- Consumes: `SW.Dynamisch.EinwohnerWachstumAktRundenEnde()` aus Task 1; die Lib-Version 4.1.0 aus Task 4.
+- Produces: eine vollständige Rundenende-Sequenz — erst dadurch werden die Formeln aus Task 1–3 im Spiel überhaupt wirksam und in Task 6 messbar.
+
+**Kontext — der wichtigste Task des Plans:** Der Godot-Client hat drei Aufrufe der Rundenende-Sequenz des WinForms-Referenzclients (`Conspiratio/Main.cs:6345–6350`) nie übernommen. Jeder existiert in der Lib und wird von **keinem** Godot-Skript aufgerufen:
+
+| Fehlender Aufruf | Folge im heutigen Godot-Spiel |
+|---|---|
+| `RohBedarfAktRundenEnde()` | Verkäufe landen nie im Stadtvorrat, die Bevölkerung verbraucht nichts — der Vorrat bleibt für immer unverändert |
+| `RohPreiseRandomSchwanken()` | Warenpreise stehen dauerhaft still, es gibt keinerlei Marktbewegung |
+| `RundenBestechungenAbwickeln()` | Rundenbestechungen werden nie abgewickelt |
+
+**Ohne den ersten wäre Task 2 vollständig folgenlos** — `_rohstoffVorrat` bliebe konstant, und ein vorratsabhängiger Preis hätte nichts, worauf er reagieren könnte.
+
+(`DeliktpunkteBerechnen()` fehlt dort ebenfalls, ist aber unkritisch: `KircheManager` und `Kirchgang` rufen es auf. Es wird hier **nicht** ergänzt, sonst liefe es doppelt.)
+
+- [ ] **Step 1: Den heutigen Zustand belegen**
+
+```bash
+for m in RohBedarfAktRundenEnde RohPreiseRandomSchwanken RundenBestechungenAbwickeln; do echo "$m: $(grep -rn "$m" --include=*.cs assets/ | wc -l) Treffer"; done
+```
+
+Erwartet: alle drei mit `0 Treffer`. Ist einer bereits vorhanden, ihn **nicht** ein zweites Mal ergänzen.
+
+- [ ] **Step 2: Die vier Aufrufe einfügen**
+
+In `assets/scripts/Kontor.cs` im Block `if (_rundenManager.IstLetzterSpielerImJahr())` **vor** `await HalteWahlenAb();` einfügen:
+
+```csharp
+			// Wirtschaftliches Rundenende – im WinForms-Original der Auftakt der Rundenereignisse
+			// (Main.cs, RundenEndnachrichtenAnzeigen). Diese Aufrufe fehlten bisher vollständig, weshalb
+			// Warenpreise stillstanden, Verkäufe nie im Stadtvorrat landeten und Bestechungen nie
+			// abgewickelt wurden.
+			SW.Dynamisch.RohPreiseRandomSchwanken();
+			SW.Dynamisch.RohBedarfAktRundenEnde();
+			SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+			SW.Dynamisch.RundenBestechungenAbwickeln();
+```
+
+Das Wachstum läuft bewusst **vor** dem weiter unten folgenden `await ZeigeKatastrophe();`: Erst wächst die Stadt um ihre Jahresrate, dann schlägt gegebenenfalls die Katastrophe zu. So ist das Wachstum die langsame Grundlinie und die Katastrophe der Schock.
+
+Die Datei nutzt Tabs zur Einrückung — die vorhandene Einrückung des Blocks übernehmen.
+
+- [ ] **Step 3: Bauen**
+
+```bash
+dotnet build
+```
+
+Erwartet: 0 Fehler. Fehlt `SW`, ist `using Conspiratio.Lib.Gameplay.Spielwelt;` bereits in der Datei — `SW.Dynamisch` wird dort schon verwendet.
+
+- [ ] **Step 4: Smoke-Test**
+
+```bash
+"/c/Program Files (x86)/Godot_v4.7.1-stable_mono_win64/Godot_v4.7.1-stable_mono_win64.exe" --headless --path . --quit "res://scenes/Main.tscn"
+```
+
+Erwartet: sauberer Durchlauf ohne Stacktrace. Fehler gehen auf **stderr**.
+
+- [ ] **Step 5: Nachweisen, dass der Vorrat jetzt tatsächlich wächst**
+
+Genau das war der blinde Fleck — deshalb hier ein Beleg statt eines Vertrauensvorschusses:
+
+```bash
+"/c/Program Files (x86)/Godot_v4.7.1-stable_mono_win64/Godot_v4.7.1-stable_mono_win64.exe" --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=15 --spieler=1 --seed=4711 --ohne-aktionen > /tmp/verdrahtet.txt 2>&1; echo "exit=$?"; grep -E "Gespielte Jahre|Verkaufte Waren|Spieler 1:|E2E-Durchlauf" /tmp/verdrahtet.txt
+```
+
+Erwartet: exit 0 und ein Endvermögen, das **deutlich unter** dem Vorwert von +80 088 (Seed 4711) liegt. Bleibt es unverändert, greift die Sättigung nicht — dann zuerst prüfen, ob `RohBedarfAktRundenEnde` wirklich läuft, bevor an den Konstanten gedreht wird.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add assets/scripts/Kontor.cs
+git commit -F - <<'EOF'
+Fehlende Rundenende-Aufrufe nachgezogen (Conspiratio.Lib 4.1.0)
+
+Der Client hat drei Aufrufe der Rundenende-Sequenz des WinForms-Originals nie
+uebernommen: RohBedarfAktRundenEnde (Verkaeufe landeten nie im Stadtvorrat,
+die Bevoelkerung verbrauchte nichts), RohPreiseRandomSchwanken (die Preise
+standen dauerhaft still) und RundenBestechungenAbwickeln. Dazu kommt das neue
+EinwohnerWachstumAktRundenEnde.
+
+Damit wird der Warenkreislauf ueberhaupt erst wirksam - ohne die Vorratsbuchung
+haette der neue saettigungsabhaengige Preis nichts, worauf er reagieren kann.
+EOF
+```
+
+---
+
+### Task 6: Kalibrierung gegen E2E-Läufe und Dokumentation
+
+**Files:**
+- Modify (nur falls die Messung es verlangt): `Conspiratio.Lib/Gameplay/Gebiete/Stadt.cs`, `Conspiratio.Lib/Allgemein/HandelsManager.cs` (die Balancing-Konstanten)
 - Modify: `CLAUDE.md` (im Godot-Repo, Abschnitt zur Handelsrunde)
 
 **Interfaces:**
-- Consumes: die lauffähige Godot-Version aus Task 3.
+- Consumes: die verdrahtete Rundenende-Sequenz aus Task 5.
 - Produces: festgeschriebene Balancing-Werte und aktualisierte Referenzzahlen in `CLAUDE.md`.
 
-**Kontext:** Die vier Zahlen sind begründete Startwerte, keine Endwerte. Der Zielkorridor lautet: spürbar unter den heute gemessenen **+64 175 bis +80 088**, aber **deutlich positiv** — Expansion soll sich weiter lohnen, nur mit sinkendem Grenznutzen.
+**Kontext:** Alle Balancing-Zahlen aus Task 1–3 sind begründete Startwerte, keine Endwerte. Der Zielkorridor lautet: spürbar unter den vor dieser Änderung gemessenen **+64 175 bis +80 088**, aber **deutlich positiv** — Expansion soll sich weiter lohnen, nur mit sinkendem Grenznutzen.
+
+**Zwei Wirkungen überlagern sich hier**, und sie müssen getrennt beurteilt werden: die Verdrahtung aus Task 5 (der Warenkreislauf läuft erstmals überhaupt) und die neuen Formeln aus Task 1–3. Der in Task 5, Schritt 5 gemessene Wert ist die Bezugsgröße für die Formeln — nicht der alte Wert von +80 088, der aus einem Spiel ohne funktionierenden Vorrat stammt.
 
 **Messmethodik:** `--ohne-aktionen --spieler=1` isoliert den Handel von den zufälligen Kontor-Aktionen, deren Streuung mehrere Zehntausend Taler beträgt und den Effekt sonst überdeckt. **Nicht** `--ohne-bereiche` verwenden — das überspringt den Heimatstadtbesuch und meldet null Handel.
 
@@ -617,18 +941,21 @@ Aus `C:\Projekte\Godot\Conspiratio.Godot`:
 for seed in 4711 1234 999; do "/c/Program Files (x86)/Godot_v4.7.1-stable_mono_win64/Godot_v4.7.1-stable_mono_win64.exe" --headless --path . "res://scenes/E2eTest.tscn" -- --jahre=15 --spieler=1 --seed=$seed --ohne-aktionen > /tmp/kalib_$seed.txt 2>&1; echo "--- seed $seed (exit $?) ---"; grep -E "Gespielte Jahre|Verkaufte Waren|Spieler 1:|E2E-Durchlauf" /tmp/kalib_$seed.txt; done
 ```
 
-Vergleichswerte **vor** dieser Änderung: Seed 4711 = +80 088, Seed 1234 = +64 175.
+Vergleichswerte:
+- **Vor dem gesamten Vorhaben** (kein Vorratskreislauf, feste Preise): Seed 4711 = +80 088, Seed 1234 = +64 175.
+- **Nach Task 5** (Kreislauf läuft, Formeln aktiv): der in Task 5, Schritt 5 für Seed 4711 notierte Wert.
 
 - [ ] **Step 2: Ergebnis bewerten und Parameter entscheiden**
 
-Bewertungsregel:
-- Endvermögen **negativ oder nahe null** → zu hart. `MaxAbschlagProzent` auf 40 senken, erneut messen.
-- Endvermögen **weiterhin über ~50 000** → zu lasch. `AbschlagJeBedarfsjahrProzent` auf 15 anheben, erneut messen.
+Bewertungsregel, in dieser Reihenfolge:
+- Endvermögen **negativ oder nahe null** → zu hart. Zuerst `Stadt.MaxAbschlagProzent` auf 40 senken; reicht das nicht, `HandelsManager.SteigerungProzent` auf 115 senken.
+- Endvermögen **weiterhin über ~50 000** → zu lasch. `Stadt.AbschlagJeBedarfsjahrProzent` auf 15 anheben.
 - Endvermögen **spürbar niedriger, aber klar positiv** → Werte bleiben.
+- Sinkt die Einwohnerzahl über 15 Jahre im Mittel trotzdem → `DynamischeSpieldaten.GrundwachstumPromille` auf 13 anheben. Das Wachstum soll die Katastrophen ausgleichen, nicht überkompensieren.
 
-Bei Änderung: Konstante anpassen, Task-3-Schritte 3–5 (bauen, Cache löschen, restore) wiederholen, dann erneut messen. `MaxSteigerungsstufen` dabei **nicht** anheben (Überlaufschutz).
+`MaxSteigerungsstufen` dabei **nicht** anheben — Überlaufschutz, kein Regler.
 
-Werden Konstanten geändert, müssen die Erwartungswerte in `HandelsbalancingTests.cs` mitgezogen werden — `dotnet test` im Lib-Repo laufen lassen.
+Bei jeder Änderung: Konstante anpassen, Task-4-Schritte 3–5 (bauen, Cache löschen, restore) wiederholen, dann erneut messen. Werden Konstanten geändert, ziehen die Erwartungswerte in `HandelsbalancingTests.cs` und `BevoelkerungTests.cs` mit — `dotnet test` im Lib-Repo laufen lassen.
 
 - [ ] **Step 3: Vollen E2E-Lauf zur Regressionssicherung**
 
@@ -640,7 +967,7 @@ Erwartet: exit 0, „E2E-Durchlauf bestanden", 15 von 15 Jahren. Ein negatives E
 
 - [ ] **Step 4: `CLAUDE.md` aktualisieren**
 
-Im Abschnitt zur Handelsrunde (Punkt 4, „Automated play-through") sind die Zahlen **+33 311**, **+64 175 bis +80 088** und **+4 979** durch diese Änderung überholt. Zu ergänzen ist außerdem die neue Mechanik, weil sie das Verhalten des Treibers erklärt:
+Im Abschnitt zur Handelsrunde (Punkt 4, „Automated play-through") sind die Zahlen **+33 311**, **+64 175 bis +80 088** und **+4 979** durch diese Änderung überholt — sie stammen aus einem Spiel, in dem der Warenkreislauf gar nicht lief. Zu ergänzen ist außerdem die neue Mechanik, weil sie das Verhalten des Treibers erklärt:
 
 ```markdown
    **Selling into one city no longer scales.** `Stadt.GetRohstoffPreisVonIDX` discounts the price by how
@@ -650,6 +977,19 @@ Im Abschnitt zur Handelsrunde (Punkt 4, „Automated play-through") sind die Zah
    the setters. Workshops also get progressively more expensive
    (`HandelsManager.SteigerungProzent` per workshop already owned, capped at `MaxSteigerungsstufen`,
    which is overflow protection rather than balancing).
+
+   **The round-end economy calls were missing entirely** until this change: `RohBedarfAktRundenEnde`
+   (sales into city stock, population consumption), `RohPreiseRandomSchwanken` (prices moved not at all)
+   and `RundenBestechungenAbwickeln` were in the Lib but called from no Godot script — the WinForms
+   original runs them in `RundenEndnachrichtenAnzeigen`. They now run in `Kontor.cs`, together with the
+   new `EinwohnerWachstumAktRundenEnde`. **Any measurement taken before this is not comparable**: the
+   goods cycle simply did not turn.
+
+   **Cities grow now.** `_einwohner` previously only ever fell (`KatastrophenManager`, 8–20 % per event,
+   doubled for plague), which would have made the saturation discount harsher every year while the
+   consumption that drains stock shrank with it. Growth is driven by `Reichtum` and `Kriminalitaet` plus
+   noise, bounded by `MindestEinwohner`/`MaxEinwohner` — the lower bound is load-bearing, since
+   multiplicative growth can never lift a city off zero.
 ```
 
 Die konkreten gemessenen Endvermögen aus Schritt 1 an die Stelle der alten Zahlen setzen.
@@ -659,7 +999,7 @@ Die konkreten gemessenen Endvermögen aus Schritt 1 an die Stelle der alten Zahl
 Falls Konstanten geändert wurden, zuerst im Lib-Repo:
 
 ```bash
-git add Conspiratio.Lib/Gameplay/Gebiete/Stadt.cs Conspiratio.Lib/Allgemein/HandelsManager.cs Conspiratio.Lib.Tests/HandelsbalancingTests.cs
+git add Conspiratio.Lib/Gameplay/Gebiete/Stadt.cs Conspiratio.Lib/Allgemein/HandelsManager.cs Conspiratio.Lib/Gameplay/Spielwelt/DynamischeSpieldaten.cs Conspiratio.Lib.Tests/
 git commit -F - <<'EOF'
 Handelsbalancing gegen E2E-Laeufe kalibriert
 EOF

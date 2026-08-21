@@ -1,15 +1,17 @@
 # Handelsbalancing: Sättigungspreis und progressiver Werkstatt-Kaufpreis
 
 **Datum:** 2026-08-21
-**Betrifft:** `Conspiratio.Lib` (Spiellogik), nachgelagert `Conspiratio.Godot` (E2E-Messung, CHANGELOG)
-**Ziel:** Den unbegrenzten Skalierungsvorteil mehrerer Kontore bremsen, ohne Aufbaufreude zu nehmen.
+**Betrifft:** `Conspiratio.Lib` (Spiellogik) und `Conspiratio.Godot` (fehlende Rundenende-Aufrufe, E2E-Messung)
+**Ziel:** Den unbegrenzten Skalierungsvorteil mehrerer Kontore bremsen, ohne Aufbaufreude zu nehmen — und
+die dafür nötige Wirtschaftsmechanik überhaupt erst zum Laufen bringen.
 
 ---
 
 ## 1. Problem
 
 Erfahrene Spieler verdienen mit mehreren Kontoren beliebig viel Geld. Die Messungen der aktuellen
-E2E-Läufe und ein Blick in die Lib zeigen zwei unabhängige Ursachen.
+E2E-Läufe und ein Blick in die Lib zeigen dafür zwei Ursachen (1.1, 1.2) — und bei deren Prüfung kamen
+zwei weitere Befunde ans Licht, ohne die eine Gegenmaßnahme wirkungslos bliebe (1.4, 1.5).
 
 ### 1.1 Der Werkstatt-Kaufpreis ist besitzunabhängig
 
@@ -50,6 +52,41 @@ Boden klebt.
 `KISpieler` (178 Zeilen) besitzt weder Werkstätten noch Produktion noch Lager — nur einen abstrakten
 `Taler`-Wert. Die Warenwirtschaft ist ein reines Solo-Optimierungsproblem gegen konstante Preise. Beide
 Änderungen wirken daher ausschließlich auf menschliche Spieler; eine KI-Nachjustierung entfällt.
+
+### 1.4 Drei Rundenende-Aufrufe fehlen im Godot-Client
+
+Bei der Prüfung des Nenners `Einwohner / 10` kam heraus, dass der Godot-Client Teile der
+Rundenende-Sequenz des WinForms-Referenzclients (`Conspiratio/Main.cs:6345–6350`) nie übernommen hat.
+Jeder dieser Aufrufe existiert in der Lib, wird aber von **keinem** Godot-Skript aufgerufen:
+
+| Fehlender Aufruf | Folge im heutigen Godot-Spiel |
+|---|---|
+| `DynamischeSpieldaten.RohBedarfAktRundenEnde()` | Spielerverkäufe landen nie im Stadtvorrat, die Bevölkerung verbraucht nichts — der Vorrat bleibt für immer unverändert |
+| `DynamischeSpieldaten.RohPreiseRandomSchwanken()` | Die Warenpreise stehen dauerhaft still; es gibt keinerlei Marktbewegung |
+| `DynamischeSpieldaten.RundenBestechungenAbwickeln()` | Rundenbestechungen werden nie abgewickelt |
+
+`DeliktpunkteBerechnen()` fehlt in dieser Sequenz ebenfalls, ist aber unkritisch: `KircheManager` und
+`Kirchgang` rufen es auf.
+
+**Der erste dieser drei ist eine harte Voraussetzung für Entwurf A.** Ohne ihn bleibt `_rohstoffVorrat`
+konstant, und ein vorratsabhängiger Preis wäre wirkungslos — die Änderung wäre nicht messbar, sondern
+schlicht folgenlos.
+
+### 1.5 Die Einwohnerzahl kann nur sinken
+
+`_einwohner` wird an genau zwei Stellen geschrieben: im Konstruktor und in `KatastrophenManager`
+(Zeile 230–231), der sie ausschließlich **senkt** — 8–20 % je Ereignis, bei Pest über
+`PestEinwohnerFaktor` verdoppelt auf 16–40 %, und über `neueEinwohner < 0 ? 0` bis auf null. Ein
+Wachstum gibt es nirgends. Dasselbe gilt für `_reichtum`.
+
+Bei 22 % Jahreschance (`KatastrophenManager.JahresChance`) und den Umfangsanteilen (15 % Reich,
+35 % Grafschaft, sonst eine Stadt) trifft es eine Stadt über 40 Jahre im Mittel rund 2,6-mal, was etwa
+30 % Bevölkerungsverlust ohne jede Erholung bedeutet.
+
+Für Entwurf A wirkt das **doppelt**: Der Jahresbedarf im Nenner sinkt (der Abschlag wird steiler) *und*
+der Verbrauch, der den Vorrat abbaut, sinkt mit. Die Marktsättigung würde sich über die Spieldauer also
+selbst verschärfen, bis der Handel dauerhaft unrentabel wäre. Ein Bevölkerungswachstum ist damit keine
+Ergänzung, sondern Voraussetzung — und historisch ohnehin geboten: Um 1600 wuchs die Bevölkerung.
 
 ---
 
@@ -204,7 +241,83 @@ Rückkauf-Arbitrage entsteht nicht, weil ¾ < 1 ist.
 
 ---
 
-## 4. Randbedingungen
+## 4. Entwurf C: Bevölkerungswachstum
+
+### 4.1 Formel
+
+Neue Methode `DynamischeSpieldaten.EinwohnerWachstumAktRundenEnde()`, am Rundenende neben den übrigen
+Wirtschaftsaufrufen. Gerechnet wird in **Promille**, damit kein Gleitkomma in den Kern der Ökonomie
+gerät:
+
+```csharp
+foreach (Stadt in allen Städten)
+{
+    int wachstumPromille = GrundwachstumPromille
+                         + stadt.GetReichtum() * ReichtumBonusPromille
+                         - stadt.GetKriminalitaet() * KriminalitaetMalusPromille
+                         + SW.Statisch.Rnd.Next(-ZufallPromille, ZufallPromille + 1);
+
+    int neu = stadt.GetEinwohner() + (stadt.GetEinwohner() * wachstumPromille) / 1000;
+
+    stadt.SetEinwohnerAufX(Math.Min(MaxEinwohner, Math.Max(MindestEinwohner, neu)));
+}
+```
+
+**Startwerte:** `GrundwachstumPromille = 10`, `ReichtumBonusPromille = 2`,
+`KriminalitaetMalusPromille = 2`, `ZufallPromille = 5`, `MindestEinwohner = 250`,
+`MaxEinwohner = 12000`.
+
+### 4.2 Begründung der Werte
+
+Die Stadtdaten führen `Reichtum` 1–7 (Skala bis `GetMaxReichtum()` = 14) und `Kriminalität` 1–5, im
+Mittel etwa 3,6 bzw. 2,8. Daraus folgt ein mittleres Wachstum von
+`10 + 3,6·2 − 2,8·2 ≈ 11,6 ‰`, also ~1,2 % pro Jahr gegen ~0,9 % Katastrophenverlust — netto ein
+langsames Wachstum, das Rückschläge ausgleicht, ohne sie bedeutungslos zu machen. Die Spanne über alle
+Städte reicht von etwa −0,3 % bis +2,7 % jährlich, sodass sich Städte spürbar unterschiedlich
+entwickeln.
+
+### 4.3 Die beiden Grenzen sind bewusst gesetzt
+
+- **`MindestEinwohner`**: Multiplikatives Wachstum kann eine auf null gefallene Stadt nie wiederbeleben
+  (`0 × irgendwas = 0`). Die Untergrenze macht Katastrophen erholbar statt endgültig. Sie hebt eine
+  verwüstete Stadt aktiv wieder an — das schwächt schwere Katastrophen bewusst ab und ist der Preis
+  dafür, dass keine Stadt dauerhaft aus dem Spiel fällt.
+- **`MaxEinwohner`**: Verhindert unbegrenztes Wachstum. Bewusst eine **globale Konstante** statt einer
+  Obergrenze relativ zum Startwert der Stadt: Deren Startwert wird nirgends gespeichert, und ein neues
+  Feld dafür wäre ein serialisiertes Feld mit Savegame-Folgen (siehe Randbedingungen).
+
+### 4.4 Zusammenspiel mit Entwurf A
+
+Die Untergrenze von 250 Einwohnern setzt zugleich einen Boden unter den Jahresbedarf
+(`Math.Max(1, Einwohner / 10)` ≥ 25). Ohne sie könnte der Nenner gegen 1 laufen und der Mengenabschlag
+selbst bei geringem Vorrat sofort den Deckel erreichen.
+
+---
+
+## 5. Fehlende Rundenende-Aufrufe nachziehen
+
+Die drei in 1.4 genannten Aufrufe werden im Godot-Client ergänzt, in der Reihenfolge des
+Referenzclients, zusammen mit dem neuen Wachstum aus Entwurf C. Einstiegspunkt ist der
+`IstLetzterSpielerImJahr()`-Block in `assets/scripts/Kontor.cs` (Zeile 737–747), **vor** den bereits
+vorhandenen Aufrufen:
+
+```csharp
+SW.Dynamisch.RohPreiseRandomSchwanken();
+SW.Dynamisch.RohBedarfAktRundenEnde();
+SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+SW.Dynamisch.RundenBestechungenAbwickeln();
+```
+
+Das Wachstum läuft **vor** `ZeigeKatastrophe()`, das im selben Block später folgt: Erst wächst die Stadt
+um ihre Jahresrate, dann schlägt gegebenenfalls die Katastrophe zu. So ist das Wachstum die langsame
+Grundlinie und die Katastrophe der Schock — nicht umgekehrt.
+
+`RundenBestechungenAbwickeln` gehört fachlich nicht zum Handel, wird aber mit aufgenommen, weil es
+dieselbe fehlende Sequenz betrifft und sonst weiter unbemerkt ausfiele.
+
+---
+
+## 6. Randbedingungen
 
 - **Keine Savegame-Migration.** Beide Änderungen sind reine Formeln über bereits vorhandenem Zustand
   (`_rohstoffVorrat`, Werkstatt-Flags). Es kommt **kein serialisiertes Feld hinzu** — die Serialisierung
@@ -217,9 +330,9 @@ Rückkauf-Arbitrage entsteht nicht, weil ¾ < 1 ist.
 
 ---
 
-## 5. Test- und Messstrategie
+## 7. Test- und Messstrategie
 
-### 5.1 Unit-Tests (`Conspiratio.Lib.Tests`, xUnit)
+### 7.1 Unit-Tests (`Conspiratio.Lib.Tests`, xUnit)
 
 Beide Formeln sind reine Funktionen; bislang deckt sie **kein** Test ab.
 
@@ -237,7 +350,18 @@ Progressiver Kaufpreis:
   Betrieben; ohne Deckel überliefe `int` ab dem 62.).
 - `ZaehleWerkstaetten` zählt über Stadtgrenzen hinweg und ignoriert deaktivierte Plätze.
 
-### 5.2 Kalibrierung gegen E2E
+Bevölkerungswachstum:
+- Eine Stadt wächst über mehrere Runden messbar (Zufallsanteil durch festen Seed gebunden).
+- Eine reiche Stadt wächst schneller als eine gleich große mit hoher Kriminalität.
+- `MaxEinwohner` wird nie überschritten, auch nicht nach vielen Runden.
+- Eine auf 0 gesetzte Stadt erholt sich auf `MindestEinwohner` — die Probe darauf, dass multiplikatives
+  Wachstum nicht bei null hängen bleibt.
+
+Zur Katastrophen-Wechselwirkung genügt die Zusicherung, dass Wachstum und `KatastrophenManager`
+denselben Wert über `SetEinwohnerAufX` schreiben; ein kombinierter Test wäre wegen der 22-%-Jahreschance
+zufallsabhängig und damit unzuverlässig.
+
+### 7.2 Kalibrierung gegen E2E
 
 Die vier Zahlen (`AbschlagJeBedarfsjahrProzent`, `MaxAbschlagProzent`, `SteigerungProzent`,
 `MaxSteigerungsstufen`) sind **begründete Startwerte, keine Endwerte**. Nach der Implementierung:
@@ -250,16 +374,18 @@ Die vier Zahlen (`AbschlagJeBedarfsjahrProzent`, `MaxAbschlagProzent`, `Steigeru
 3. Erst danach die Werte festschreiben und `CLAUDE.md` mit den neuen Referenzzahlen aktualisieren, da die
    dort dokumentierten Messwerte durch diese Änderung ungültig werden.
 
-### 5.3 Was sich in bestehenden Messungen zwangsläufig ändert
+### 7.3 Was sich in bestehenden Messungen zwangsläufig ändert
 
 `CLAUDE.md` dokumentiert Handelsergebnisse (+33 311 im Harness, +64 175 bis +80 088 im Client-Pfad). Diese
 Werte werden durch die Änderung ungültig und sind Teil der Umsetzung, nicht ein separates Aufräumen.
 
 ---
 
-## 6. Ausdrücklich nicht im Umfang
+## 8. Ausdrücklich nicht im Umfang
 
 - Verwaltungs-/Aufmerksamkeitskosten pro Kontor (der dritte, verworfene Vorschlag).
+- Ein Wachstum für `_reichtum`, der demselben Einbahn-Verfall unterliegt wie die Einwohnerzahl. Als
+  Befund festgehalten, aber bewusst nicht mitbehandelt — er beeinflusst den Handel nur mittelbar.
 - Eine Wirtschaftssimulation für KI-Spieler.
 - Neubalancierung des Karawanenzolls beim Export — erst messen, ob Entwurf A den Export von allein
   attraktiv macht.
