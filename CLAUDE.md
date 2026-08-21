@@ -34,6 +34,20 @@ exit code, and a run that never quits blocks the tool until its timeout. Failure
 Godot writes UTF-8 and PowerShell renders it as `Ã¶`/`â†’` — filter logs on ASCII-safe fragments
 (`bestanden`, `^  - `), not on umlauts or the `→` arrow.
 
+**`--import` rewrites this file's indentation.** Measured: every `godot --headless --path . --import`
+converts leading spaces to tabs on ~29 lines of `CLAUDE.md` — reproducibly, the same lines each time,
+and only this file (other `.md` files, including far more deeply indented ones, are untouched).
+`dotnet build` and the smoke test do not do it, and the `.editorconfig` does not prevent it. The change
+is **always whitespace-only**, so discard it rather than committing it:
+
+```bash
+git diff -w --stat CLAUDE.md   # empty output = content unchanged, safe to discard
+git checkout -- CLAUDE.md
+```
+
+This matters beyond cosmetics: a leading tab on the continuation line of a list item can be parsed as a
+code block and breaks the list. Eight such lines were committed unnoticed before this was traced.
+
 Playing requires the Godot 4.7 (.NET) editor; scenes (`.tscn`) and `project.godot` are edited there. When editing `.tscn` files textually, be careful: signal connections and NodePath exports live there.
 
 **Where the tests are:** this repo has none — the game rules are covered by xUnit tests in the Lib

@@ -1,12 +1,13 @@
-# Einrueckungskonventionen dieses Repos, damit Editoren sie nicht stillschweigend umschreiben.
-#
-# Anlass: In CLAUDE.md hatte ein Editor mehrfach fuehrende Leerzeichen in Tabs verwandelt. In Markdown
-# ist das nicht bloss kosmetisch — ein fuehrender Tab in der Fortsetzungszeile eines Listenpunkts kann
-# als Codeblock gedeutet werden und zerreisst die Liste.
+# Einrueckungskonventionen dieses Repos, damit Werkzeuge sie nicht stillschweigend umschreiben.
 #
 # Die Werte sind am Bestand gemessen, nicht gesetzt: .cs steht auf Tabs (ueber 10 000 eingerueckte
 # Zeilen, keine einzige mit Leerzeichen — so schreibt der Godot-Editor generierte Skripte), Markdown
 # auf Leerzeichen (rund 1 600 gegen 65).
+#
+# ACHTUNG, diese Datei loest das CLAUDE.md-Problem NICHT: `godot --headless --import` schreibt in
+# CLAUDE.md reproduzierbar fuehrende Leerzeichen in Tabs um und beachtet dabei keine .editorconfig
+# (gemessen: zwei Laeufe, identisches Ergebnis; `dotnet build` und der Smoke-Test tun es nicht, andere
+# .md-Dateien sind nicht betroffen). Siehe den Hinweis dazu in CLAUDE.md unter "Build & Run".
 #
 # Bewusst knapp gehalten: nur Einrueckung. Regeln wie trim_trailing_whitespace oder end_of_line wuerden
 # beim naechsten Speichern ganze Dateien umschreiben — also genau die Art von unbeabsichtigter Aenderung,
