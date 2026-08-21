@@ -736,6 +736,17 @@ public partial class Kontor : Control
 
 		if (_rundenManager.IstLetzterSpielerImJahr())
 		{
+			// Wirtschaftliches Rundenende – im WinForms-Original der Auftakt der Rundenereignisse
+			// (Main.cs, RundenEndnachrichtenAnzeigen). Diese Aufrufe fehlten bisher vollständig, weshalb
+			// Warenpreise stillstanden, Verkäufe nie im Stadtvorrat landeten und Bestechungen nie
+			// abgewickelt wurden.
+			// Reihenfolge beachten: Das Reichtumswachstum liest die Verkaufsmengen, die
+			// RohBedarfAktRundenEnde anschließend verbraucht und nullt.
+			SW.Dynamisch.RohPreiseRandomSchwanken();
+			SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+			SW.Dynamisch.RohBedarfAktRundenEnde();
+			SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+			SW.Dynamisch.RundenBestechungenAbwickeln();
 			await HalteWahlenAb();
 			// KI-Spieler begehen zufällig Straftaten (Issue #18); sie werden per Spione als Beweise
 			// erkennbar und bei einer Anklage im nächsten Jahr vor Gericht herangezogen.
