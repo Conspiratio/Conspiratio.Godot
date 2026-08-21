@@ -77,7 +77,8 @@ schlicht folgenlos.
 `_einwohner` wird an genau zwei Stellen geschrieben: im Konstruktor und in `KatastrophenManager`
 (Zeile 230–231), der sie ausschließlich **senkt** — 8–20 % je Ereignis, bei Pest über
 `PestEinwohnerFaktor` verdoppelt auf 16–40 %, und über `neueEinwohner < 0 ? 0` bis auf null. Ein
-Wachstum gibt es nirgends. Dasselbe gilt für `_reichtum`.
+Wachstum gibt es nirgends. Dasselbe gilt für `_reichtum`, den derselbe Manager um 1–2 Punkte je
+Ereignis senkt — Entwurf D gibt ihm ein Gegengewicht.
 
 Bei 22 % Jahreschance (`KatastrophenManager.JahresChance`) und den Umfangsanteilen (15 % Reich,
 35 % Grafschaft, sonst eine Stadt) trifft es eine Stadt über 40 Jahre im Mittel rund 2,6-mal, was etwa
@@ -294,7 +295,71 @@ selbst bei geringem Vorrat sofort den Deckel erreichen.
 
 ---
 
-## 5. Fehlende Rundenende-Aufrufe nachziehen
+## 5. Entwurf D: Reichtumswachstum
+
+### 5.1 Formel
+
+Neue Methode `DynamischeSpieldaten.ReichtumWachstumAktRundenEnde()`. `Reichtum` ist ein kleiner
+Ganzzahlwert (Stadtdaten 1–7, Obergrenze `GetMaxReichtum()` = 14), lässt sich also nicht in kleinen
+Schritten erhöhen. Statt eines Bruchteil-Zählers — der ein **neues serialisiertes Feld** wäre — entscheidet
+je Jahr ein Würfelwurf, dessen Chance vom Handelsvolumen abhängt:
+
+```csharp
+// Handelsvolumen der Stadt: was die Menschen dieses Jahr hier netto abgesetzt haben.
+int volumen = Summe über alle Menschen und Rohstoffe von
+              GetEinVerkaeufeInStadtXVonRohstoffIDY(stadtId, rohId);
+
+if (volumen < 0)
+    volumen = 0;          // Einkäufe stehen negativ in derselben Zahl
+
+int chance = volumen / HandelsvolumenJeReichtumsChance
+           - stadt.GetKriminalitaet() * KriminalitaetReichtumsMalus;
+
+if (chance > MaxReichtumsChance)
+    chance = MaxReichtumsChance;
+
+if (chance > 0 && SW.Statisch.Rnd.Next(0, 100) < chance)
+    stadt.SetReichtumToX(stadt.GetReichtum() + 1);   // nie über GetMaxReichtum()
+```
+
+**Startwerte:** `HandelsvolumenJeReichtumsChance = 100` (100 Stück Absatz = 1 Prozentpunkt Chance),
+`KriminalitaetReichtumsMalus = 3`, `MaxReichtumsChance = 40`.
+
+Ein Markt mit 2 400 Stück Jahresabsatz und Kriminalität 3 kommt damit auf `24 − 9 = 15 %` Chance pro
+Jahr, also grob einen Punkt alle sieben Jahre. `SetReichtumToX` klemmt **nicht** von sich aus — die
+Obergrenze `GetMaxReichtum()` muss die Methode selbst ziehen.
+
+### 5.2 Die Reihenfolge ist bindend
+
+`RohBedarfAktRundenEnde` **nullt** die Verkaufsmengen, nachdem es sie in den Stadtvorrat gebucht hat
+(`SetEinVerkaeufeInStadtXVonRohstoffIDYAufZ(..., 0)`). `ReichtumWachstumAktRundenEnde` muss deshalb
+**davor** laufen, sonst misst es dauerhaft ein Handelsvolumen von null und wirkt nie.
+
+Aus demselben Grund scheidet `GetUmsatzInStadtX` als Bezugsgröße aus, obwohl Taler-Umsatz für „Reichtum"
+näherliegend wäre: `AbrechnungsManager` setzt ihn bei der Jahresabrechnung des Spielers zurück
+(Zeile 208), die vor dem Rundenende liegt. Die Stückzahl ist die einzige Größe, die zum Rundenende noch
+unversehrt vorliegt.
+
+### 5.3 Was Reichtum bewirkt — und die Rückkopplung, die daraus entsteht
+
+`Reichtum` wird heute nur an zwei Stellen gelesen: `LagerraumManager` (Preiszuschlag beim Lagerausbau,
+`GetReichtum() / GetMaxReichtum()`) und die Stadtinformationen. Zusammen mit Entwurf C entsteht ein
+geschlossener Kreis:
+
+**Viel Handel → Stadt wird reicher → (a) Lagerausbau dort wird teurer, (b) die Stadt wächst schneller
+(Entwurf C nutzt `Reichtum` als Wachstumsfaktor) → mehr Einwohner heben den Jahresbedarf → der
+Sättigungsabschlag aus Entwurf A fällt milder aus.**
+
+Das ist ausdrücklich erwünscht: Es gibt dem Spieler die Möglichkeit, einen Markt über Jahre zu
+*entwickeln*, statt nach der Sättigung nur weiterzuziehen. Der Kreis ist durch `GetMaxReichtum()` (14)
+und `MaxEinwohner` (12 000) beidseitig beschränkt und kann daher nicht davonlaufen.
+
+Kriminalität wirkt als Gegengewicht, und `KatastrophenManager` senkt den Reichtum weiterhin um 1–2
+Punkte je Ereignis.
+
+---
+
+## 6. Fehlende Rundenende-Aufrufe nachziehen
 
 Die drei in 1.4 genannten Aufrufe werden im Godot-Client ergänzt, in der Reihenfolge des
 Referenzclients, zusammen mit dem neuen Wachstum aus Entwurf C. Einstiegspunkt ist der
@@ -303,10 +368,16 @@ vorhandenen Aufrufen:
 
 ```csharp
 SW.Dynamisch.RohPreiseRandomSchwanken();
-SW.Dynamisch.RohBedarfAktRundenEnde();
+SW.Dynamisch.ReichtumWachstumAktRundenEnde();   // MUSS vor RohBedarfAktRundenEnde stehen
+SW.Dynamisch.RohBedarfAktRundenEnde();          // bucht die Verkaeufe und nullt sie danach
 SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
 SW.Dynamisch.RundenBestechungenAbwickeln();
 ```
+
+**Die Reihenfolge der ersten drei ist bindend, nicht kosmetisch:** `RohBedarfAktRundenEnde` nullt die
+Verkaufsmengen. Stünde das Reichtumswachstum danach, läse es dauerhaft ein Handelsvolumen von null.
+Das Einwohnerwachstum steht bewusst *nach* dem Reichtumswachstum, damit es den frisch aktualisierten
+Reichtum als Faktor verwendet.
 
 Das Wachstum läuft **vor** `ZeigeKatastrophe()`, das im selben Block später folgt: Erst wächst die Stadt
 um ihre Jahresrate, dann schlägt gegebenenfalls die Katastrophe zu. So ist das Wachstum die langsame
@@ -317,7 +388,7 @@ dieselbe fehlende Sequenz betrifft und sonst weiter unbemerkt ausfiele.
 
 ---
 
-## 6. Randbedingungen
+## 7. Randbedingungen
 
 - **Keine Savegame-Migration.** Beide Änderungen sind reine Formeln über bereits vorhandenem Zustand
   (`_rohstoffVorrat`, Werkstatt-Flags). Es kommt **kein serialisiertes Feld hinzu** — die Serialisierung
@@ -330,9 +401,9 @@ dieselbe fehlende Sequenz betrifft und sonst weiter unbemerkt ausfiele.
 
 ---
 
-## 7. Test- und Messstrategie
+## 8. Test- und Messstrategie
 
-### 7.1 Unit-Tests (`Conspiratio.Lib.Tests`, xUnit)
+### 8.1 Unit-Tests (`Conspiratio.Lib.Tests`, xUnit)
 
 Beide Formeln sind reine Funktionen; bislang deckt sie **kein** Test ab.
 
@@ -357,11 +428,21 @@ Bevölkerungswachstum:
 - Eine auf 0 gesetzte Stadt erholt sich auf `MindestEinwohner` — die Probe darauf, dass multiplikatives
   Wachstum nicht bei null hängen bleibt.
 
-Zur Katastrophen-Wechselwirkung genügt die Zusicherung, dass Wachstum und `KatastrophenManager`
-denselben Wert über `SetEinwohnerAufX` schreiben; ein kombinierter Test wäre wegen der 22-%-Jahreschance
-zufallsabhängig und damit unzuverlässig.
+Reichtumswachstum:
+- Ohne Handel in der Stadt steigt der Reichtum nicht.
+- Nach einem Jahr mit hohem Absatz steigt er (Zufall über festen Seed gebunden; notfalls über mehrere
+  Runden prüfen, da der Wurf probabilistisch ist).
+- `GetMaxReichtum()` wird nie überschritten — wichtig, weil `SetReichtumToX` selbst **nicht** klemmt.
+- Hohe Kriminalität senkt die Chance messbar gegenüber einer sonst gleichen Stadt.
+- **Die Reihenfolge-Probe:** Läuft `RohBedarfAktRundenEnde` zuerst, misst das Reichtumswachstum ein
+  Volumen von null und der Reichtum steigt nicht. Dieser Test hält die bindende Aufrufreihenfolge aus
+  6. fest, damit eine spätere Umstellung nicht unbemerkt die Mechanik abschaltet.
 
-### 7.2 Kalibrierung gegen E2E
+Zur Katastrophen-Wechselwirkung genügt die Zusicherung, dass Wachstum und `KatastrophenManager`
+denselben Wert über `SetEinwohnerAufX` bzw. `SetReichtumToX` schreiben; ein kombinierter Test wäre wegen
+der 22-%-Jahreschance zufallsabhängig und damit unzuverlässig.
+
+### 8.2 Kalibrierung gegen E2E
 
 Die vier Zahlen (`AbschlagJeBedarfsjahrProzent`, `MaxAbschlagProzent`, `SteigerungProzent`,
 `MaxSteigerungsstufen`) sind **begründete Startwerte, keine Endwerte**. Nach der Implementierung:
@@ -374,18 +455,16 @@ Die vier Zahlen (`AbschlagJeBedarfsjahrProzent`, `MaxAbschlagProzent`, `Steigeru
 3. Erst danach die Werte festschreiben und `CLAUDE.md` mit den neuen Referenzzahlen aktualisieren, da die
    dort dokumentierten Messwerte durch diese Änderung ungültig werden.
 
-### 7.3 Was sich in bestehenden Messungen zwangsläufig ändert
+### 8.3 Was sich in bestehenden Messungen zwangsläufig ändert
 
 `CLAUDE.md` dokumentiert Handelsergebnisse (+33 311 im Harness, +64 175 bis +80 088 im Client-Pfad). Diese
 Werte werden durch die Änderung ungültig und sind Teil der Umsetzung, nicht ein separates Aufräumen.
 
 ---
 
-## 8. Ausdrücklich nicht im Umfang
+## 9. Ausdrücklich nicht im Umfang
 
 - Verwaltungs-/Aufmerksamkeitskosten pro Kontor (der dritte, verworfene Vorschlag).
-- Ein Wachstum für `_reichtum`, der demselben Einbahn-Verfall unterliegt wie die Einwohnerzahl. Als
-  Befund festgehalten, aber bewusst nicht mitbehandelt — er beeinflusst den Handel nur mittelbar.
 - Eine Wirtschaftssimulation für KI-Spieler.
 - Neubalancierung des Karawanenzolls beim Export — erst messen, ob Entwurf A den Export von allein
   attraktiv macht.
