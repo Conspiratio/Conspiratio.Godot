@@ -141,10 +141,34 @@ The game needs the editor to play, so changes are verified in three complementar
    **Those numbers, and an earlier +4 979-vs-+33 311 site-count comparison run directly against the
    Lib, are now obsolete for the same reason**: none of them ran with the goods cycle actually
    turning (see below), and the site-count comparison cannot be honestly recomputed from that era's
-   data. Measured afterward across four seeds, same flags: **+38 204 to +58 519** — clearly below the
-   old range, comfortably positive. Treat this as an order-of-magnitude comparison, not a precise
-   delta: two repeats of the same seed (4711) landed at +41 777 and +45 638, a **3 861**-taler
-   run-to-run spread on identical input, so the true effect size is somewhere in a band, not a point.
+   data. Re-measured after the two follow-up fixes below, four seeds, same flags: **+19 882 / +26 292 /
+   +39 633 / +90 822** (1234 / 42 / 2023 / 4711) — a band of roughly **+20 000 to +90 000**, mean
+   ~44 000 against a pre-project mean of ~72 000. **Read the band, never a single number**: the seed
+   dominates everything else. The 4711 outlier is mostly game time rather than yield — debtor's-tower
+   years stretch it to 19 played years against 16 for 1234, and wealth compounds; per played year the
+   four runs sit at 1 243 / 1 643 / 2 331 / 4 780. An intermediate measurement of the same seeds landed
+   at +38 204 to +58 519, with two repeats of 4711 differing by 3 861 talers on identical input;
+   same-seed runs reproduce exactly again now (4711 twice: 90 822 talers, 877 clicks), so treat
+   cross-seed differences below ~10 000 talers as nothing. The balancing constants were deliberately
+   left untouched on the strength of these numbers.
+
+   Three traps this re-measurement closed, worth not falling into again:
+   - **`GetWerkstattVerkaufspreis` must not inherit the purchase-price scaling.** The factor
+     `SteigerungProzent` per owned workshop multiplies the *goods'* base price (tier 1 = 2 000,
+     tier 2 = 10 000, tier 3 = 40 000) while the counter spans the whole realm, so a scaled resale
+     price depended on how many *other* workshops were owned. Selling cheap tier-1 sites, buying a
+     tier-3 site at the low counter, buying the cheap ones back and reselling the tier-3 site netted
+     **+758 314 per cycle**, repeatable — more than a whole 15-year game earns. Single-tier tests never
+     catch it (a same-tier cycle correctly loses 6.25 %); a regression test has to mix tiers.
+   - **The export path must book the sold quantity into the destination city.** The WinForms original
+     books it into the city of origin, which was harmless only while the Godot client never called
+     `RohBedarfAktRundenEnde`. With that call in place, the destination never saturated while export
+     volume pushed the price down in the player's own city — where the driver also sells on the spot.
+   - **The round-end economy has to run on every path that advances the year**, not just the regular
+     end-of-turn block: a debtor's-tower turn and a heirless death both leave `ZeigeZugnachrichten`
+     early while the Lib still bumps the year. `Kontor.FuehreWirtschaftlichesRundenendeDurch` is the
+     one shared method all four call sites use — in a single-player game one skipped call froze the
+     whole economy for that year.
 
    **Selling into one city no longer scales.** `Stadt.GetRohstoffPreisVonIDX` discounts the price by how
    many years of local demand (`Einwohner / 10`) sit unsold in that city's stock, capped at

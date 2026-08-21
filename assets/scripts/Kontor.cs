@@ -222,7 +222,13 @@ public partial class Kontor : Control
 			await _main.SchuldturmDialog.ShowDialog();
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 
-			// Im Schuldturm wird der Zug übersprungen (der Spieler altert dabei nicht)
+			// Im Schuldturm wird der Zug übersprungen (der Spieler altert dabei nicht). War es der letzte
+			// Spieler des Jahres, schaltet SchalteZumNaechstenSpieler gleichwohl das Jahr weiter – das
+			// wirtschaftliche Rundenende muss deshalb auch hier laufen, sonst überspringt ein Kerkerjahr
+			// die gesamte Wirtschaft.
+			if (_rundenManager.IstLetzterSpielerImJahr())
+				FuehreWirtschaftlichesRundenendeDurch();
+
 			_rundenManager.SchalteZumNaechstenSpieler();
 			await NaechstenSpielerAnkuendigen();
 			return;
@@ -677,6 +683,11 @@ public partial class Kontor : Control
 			string todesursache = zugNachrichten.GetZufaelligeTodesursache();
 			string grabspruch = new GrabsteinManager().ErmittleGrabspruch(verstorbener.GetSpielerStatistik());
 
+			// Ob dieser Zug das Jahr beendet, muss VOR dem Testament feststehen: Scheidet der Spieler ohne
+			// Erben aus, erhöht EntferneAktivenSpielerAusDemSpiel selbst das Jahr und ordnet die
+			// Spielerliste neu - danach ist die Frage nicht mehr zuverlässig zu beantworten.
+			bool warLetzterSpielerImJahr = _rundenManager.IstLetzterSpielerImJahr();
+
 			// Testament vollstrecken: Ohne Erben scheidet der Spieler aus, mit Erben führt dieser die Dynastie fort
 			var familie = new FamilieManager();
 			var testament = familie.FuehreTestamentAus();
@@ -696,16 +707,29 @@ public partial class Kontor : Control
 			await _main.SpielerTodDialog.ShowDialog(todesursache, grabinschrift);
 
 			if (testament.SpielVorbei)
+			{
+				// Auch dieser Zweig holt das Rundenende nach - gleiche Behandlung wie unten, damit eine
+				// spätere Änderung die Lücke nicht an einer Stelle wieder aufreißt.
+				if (warLetzterSpielerImJahr)
+					FuehreWirtschaftlichesRundenendeDurch();
+
 				return true;
+			}
 
 			if (testament.ErbeUebernahm)
 			{
 				// Der Erbe übernimmt die Identität im selben Slot – der Zug endet und schaltet normal weiter
+				// (der reguläre Rundenende-Block unten greift dann wie sonst auch).
 				UpdateHud();
 			}
 			else
 			{
-				// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet werden
+				// Der nächste Spieler ist durch die Entfernung bereits aktiv, es darf nicht weitergeschaltet
+				// werden. War der Verstorbene der letzte Spieler des Jahres, hat die Lib das Jahr bereits
+				// erhöht - das wirtschaftliche Rundenende muss deshalb hier nachgeholt werden.
+				if (warLetzterSpielerImJahr)
+					FuehreWirtschaftlichesRundenendeDurch();
+
 				return false;
 			}
 		}
@@ -736,17 +760,7 @@ public partial class Kontor : Control
 
 		if (_rundenManager.IstLetzterSpielerImJahr())
 		{
-			// Wirtschaftliches Rundenende – im WinForms-Original der Auftakt der Rundenereignisse
-			// (Main.cs, RundenEndnachrichtenAnzeigen). Diese Aufrufe fehlten bisher vollständig, weshalb
-			// Warenpreise stillstanden, Verkäufe nie im Stadtvorrat landeten und Bestechungen nie
-			// abgewickelt wurden.
-			// Reihenfolge beachten: Das Reichtumswachstum liest die Verkaufsmengen, die
-			// RohBedarfAktRundenEnde anschließend verbraucht und nullt.
-			SW.Dynamisch.RohPreiseRandomSchwanken();
-			SW.Dynamisch.ReichtumWachstumAktRundenEnde();
-			SW.Dynamisch.RohBedarfAktRundenEnde();
-			SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
-			SW.Dynamisch.RundenBestechungenAbwickeln();
+			FuehreWirtschaftlichesRundenendeDurch();
 			await HalteWahlenAb();
 			// KI-Spieler begehen zufällig Straftaten (Issue #18); sie werden per Spione als Beweise
 			// erkennbar und bei einer Anklage im nächsten Jahr vor Gericht herangezogen.
@@ -759,6 +773,32 @@ public partial class Kontor : Control
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Wirtschaftliches Rundenende – im WinForms-Original der Auftakt der Rundenereignisse
+	/// (Main.cs, RundenEndnachrichtenAnzeigen). Diese Aufrufe fehlten im Godot-Client lange vollständig,
+	/// weshalb Warenpreise stillstanden, Verkäufe nie im Stadtvorrat landeten und Bestechungen nie
+	/// abgewickelt wurden.
+	///
+	/// <b>Muss auf jedem Weg laufen, der das Jahr weiterschaltet</b>, nicht nur im regulären
+	/// Rundenende-Block: Ein Spieler im Schuldturm überspringt seinen Zug, und ein gestorbener Spieler
+	/// ohne Erben verlässt den Zug vorzeitig – in beiden Fällen erhöht die Lib das Jahr trotzdem. Ohne
+	/// diesen Aufruf gäbe es in einem solchen Jahr keine Preisbewegung, keine Vorratsbuchung, keinen
+	/// Verbrauch, kein Wachstum und keine Bestechungsabwicklung – im Einspieler-Spiel würde ein einziges
+	/// Kerkerjahr die ganze Wirtschaft einfrieren. Deshalb eine gemeinsame Methode statt drei Kopien.
+	///
+	/// Die Reihenfolge der ersten drei Aufrufe ist bindend: Das Reichtumswachstum liest die
+	/// Verkaufsmengen, die RohBedarfAktRundenEnde anschließend verbraucht und nullt. Das
+	/// Einwohnerwachstum folgt dem Reichtumswachstum, damit es den frisch aktualisierten Reichtum nutzt.
+	/// </summary>
+	private static void FuehreWirtschaftlichesRundenendeDurch()
+	{
+		SW.Dynamisch.RohPreiseRandomSchwanken();
+		SW.Dynamisch.ReichtumWachstumAktRundenEnde();
+		SW.Dynamisch.RohBedarfAktRundenEnde();
+		SW.Dynamisch.EinwohnerWachstumAktRundenEnde();
+		SW.Dynamisch.RundenBestechungenAbwickeln();
 	}
 
 	/// <summary>
