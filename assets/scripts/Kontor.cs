@@ -101,6 +101,12 @@ public partial class Kontor : Control
 
 		SetProcessInput(false);
 
+		// Jahr vor dem Dialog merken: Entfernt der Dialog den letzten Spieler des Jahres, schaltet die
+		// Lib das Jahr innerhalb von ShowDialog weiter (DynamischeSpieldaten.EntferneAktivenSpielerAusDemSpiel).
+		// Der Zustand danach lässt sich nicht mehr zuverlässig nachbauen (welcher Spieler war der letzte?) -
+		// der Jahresvergleich ist direkter Beleg statt Nachbau.
+		int jahrVorMenue = SW.Dynamisch.GetAktuellesJahr();
+
 		// Esc öffnet das Ingame-Menü (Optionen, Spieler hinauswerfen, Hauptmenü).
 		var ergebnis = await _main.IngameMenuDialog.ShowDialog();
 
@@ -117,7 +123,18 @@ public partial class Kontor : Control
 				break;
 
 			case IngameMenuDialog.Ergebnis.SpielerEntferntWeiter:
-				// Der aktive Slot wird jetzt vom nächsten Spieler eingenommen: dessen Zug ankündigen.
+				// Der aktive Slot wird jetzt vom nächsten Spieler eingenommen. War der entfernte Spieler
+				// der letzte des Jahres, hat die Lib das Jahr bereits weitergeschaltet - das
+				// wirtschaftliche Rundenende muss dann hier nachgeholt werden, sonst bleibt dieses Jahr
+				// ohne Preisbewegung, Vorratsbuchung, Verbrauch, Wachstum und Bestechungsabwicklung
+				// (dasselbe Loch wie beim Schuldturm- und Erbenlos-Pfad). Der Vergleich gehört nur in
+				// diesen einen Zweig: der Zweig "Geladen" ändert das Jahr ebenfalls (ein geladener
+				// Spielstand bringt sein eigenes Jahr mit), dort darf das Rundenende aber keinesfalls
+				// laufen - ein Jahresvergleich außerhalb des switch, der alle Zweige einschließt, wäre
+				// deshalb falsch.
+				if (SW.Dynamisch.GetAktuellesJahr() != jahrVorMenue)
+					FuehreWirtschaftlichesRundenendeDurch();
+
 				await NaechstenSpielerAnkuendigen();
 				break;
 
@@ -781,12 +798,15 @@ public partial class Kontor : Control
 	/// weshalb Warenpreise stillstanden, Verkäufe nie im Stadtvorrat landeten und Bestechungen nie
 	/// abgewickelt wurden.
 	///
-	/// <b>Muss auf jedem Weg laufen, der das Jahr weiterschaltet</b>, nicht nur im regulären
-	/// Rundenende-Block: Ein Spieler im Schuldturm überspringt seinen Zug, und ein gestorbener Spieler
-	/// ohne Erben verlässt den Zug vorzeitig – in beiden Fällen erhöht die Lib das Jahr trotzdem. Ohne
-	/// diesen Aufruf gäbe es in einem solchen Jahr keine Preisbewegung, keine Vorratsbuchung, keinen
-	/// Verbrauch, kein Wachstum und keine Bestechungsabwicklung – im Einspieler-Spiel würde ein einziges
-	/// Kerkerjahr die ganze Wirtschaft einfrieren. Deshalb eine gemeinsame Methode statt drei Kopien.
+	/// <b>Muss auf jedem Weg laufen, auf dem die Lib das Jahr weiterschaltet</b>, nicht nur im regulären
+	/// Rundenende-Block: Ein Spieler im Schuldturm überspringt seinen Zug, ein gestorbener Spieler ohne
+	/// Erben verlässt den Zug vorzeitig, und wer sich über das Ingame-Menü als letzter Spieler des Jahres
+	/// aus der Partie nimmt, lässt die Lib das Jahr ebenfalls weiterschalten
+	/// (DynamischeSpieldaten.EntferneAktivenSpielerAusDemSpiel) – in allen Fällen ohne den üblichen
+	/// Rundenende-Block. Ohne diesen Aufruf gäbe es in einem solchen Jahr keine Preisbewegung, keine
+	/// Vorratsbuchung, keinen Verbrauch, kein Wachstum und keine Bestechungsabwicklung – im
+	/// Einspieler-Spiel würde ein einziges solches Jahr die ganze Wirtschaft einfrieren. Deshalb eine
+	/// gemeinsame Methode statt einer Kopie pro Weg.
 	///
 	/// Die Reihenfolge der ersten drei Aufrufe ist bindend: Das Reichtumswachstum liest die
 	/// Verkaufsmengen, die RohBedarfAktRundenEnde anschließend verbraucht und nullt. Das

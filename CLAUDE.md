@@ -178,11 +178,15 @@ The game needs the editor to play, so changes are verified in three complementar
      books it into the city of origin, which was harmless only while the Godot client never called
      `RohBedarfAktRundenEnde`. With that call in place, the destination never saturated while export
      volume pushed the price down in the player's own city — where the driver also sells on the spot.
-   - **The round-end economy has to run on every path that advances the year**, not just the regular
-     end-of-turn block: a debtor's-tower turn and a heirless death both leave `ZeigeZugnachrichten`
-     early while the Lib still bumps the year. `Kontor.FuehreWirtschaftlichesRundenendeDurch` is the
-     one shared method all four call sites use — in a single-player game one skipped call froze the
-     whole economy for that year.
+   - **The round-end economy has to run on every path where the Lib advances the year**, not just the
+     regular end-of-turn block — a count would go stale the moment another such path turns up, and one
+     already has: a debtor's-tower turn and a heirless death both leave `ZeigeZugnachrichten` early
+     while the Lib still bumps the year, and leaving the game as the last player of the year through the
+     ingame menu (`SpielerEntferntWeiter`) does the same inside `IngameMenuDialog.ShowDialog` — the
+     client only finds out afterwards, by comparing the year before and after the dialog, since the
+     removal happens inside the Lib call and cannot be reconstructed from client state. All of them
+     call `Kontor.FuehreWirtschaftlichesRundenendeDurch` — in a single-player game one skipped call
+     froze the whole economy for that year.
 
    **Selling into one city no longer scales.** `Stadt.GetRohstoffPreisVonIDX` discounts the price by how
    many years of local demand (`Einwohner / 10`) sit unsold in that city's stock, capped at
