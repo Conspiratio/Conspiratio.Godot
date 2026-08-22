@@ -276,10 +276,11 @@ The game needs the editor to play, so changes are verified in three complementar
    a run actually hit. Weekly rather than nightly for cost: six runs are roughly 40 CI minutes, so daily
    would eat over 1 200 of the 2 000 free minutes a month; weekly leaves room for the push runs.
 
-**Two testing habits that repeatedly paid off:**
+**Three testing habits that repeatedly paid off:**
 
 - **Pin randomized inputs, then use large samples.** Much game state is randomized per game (KI `Bosheit`, and thus opponent strength). Comparing runs without pinning it produces swings that look like real regressions. Pin the inputs, and for probabilistic behaviour assert on rates over a few thousand runs, not on single outcomes.
 - **Regression-compare a refactor against the original.** When extracting logic that already exists (e.g. mirroring the office conditions of `PrivilegienAktualisieren` in a new method), have the harness compare old and new over the whole input space — that turns "hopefully equivalent" into a check that also catches later drift.
+- **A change that consumes randomness invalidates same-seed before/after comparisons.** The round-end calls draw from the shared `SW.Statisch.Rnd`, so adding them shifts every later draw and the seed no longer replays the same events — the swing that was read as the change's effect was the same order of magnitude as the known noise. Prove such a change on a deterministic path instead (a console harness with no `Rnd` in it), then use direction-consistency across several seeds for the size. Note also that `Gespielte Jahre` can exceed `--jahre` (a jail year costs a turn without playing one) while the turn count stays at `--jahre` — so never normalise wealth per game year.
 
 ### Conspiratio.Lib dependency
 
