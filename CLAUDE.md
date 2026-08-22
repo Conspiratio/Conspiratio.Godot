@@ -97,14 +97,10 @@ The game needs the editor to play, so changes are verified in three complementar
    year it does a `SpeicherManager` save/load round-trip. A 10-year, 2-player run covers 24–26 distinct
    actions in 26–70 s. `--ohne-bereiche` / `--ohne-aktionen` / `--ohne-speichern` switch those off.
    `--aggressivitaet=N` (1–100) overrides the AI-aggressiveness setting for the run; without it the
-   game's default of 50 applies, which is the behaviour every other measurement here assumes.
-   Measured over 3 seeds × 15 years × 2 players: every setting from 1 to 100 completes all years with
-   exit 0 — what rises with the setting is the **dialog burden** (mean clicks 1 743 → 1 965 → 2 564
-   for 1 / 50 / 100 %), while the final wealth is dominated by per-seed noise (spread within one
-   setting reached +7 379 to −62 073, far exceeding the gap between settings). Note also that at
-   100 % the run stops being seed-reproducible: at 50 % two runs of the same seed gave identical
-   talers (only the click counter drifted by ±2), at 100 % whole outcomes diverged — more
-   interactive events give the driver's frame-timing jitter more to grip.
+   game's default of 50 applies, which is the behaviour every other measurement here assumes. Every
+   setting from 1 to 100 completes all years with exit 0 — what rises with the setting is the **dialog
+   burden**, not the difficulty of the outcome: final wealth is dominated by per-seed noise. Figures in
+   [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md) (measured **before** the trade balancing).
    Four things to know before touching it — the rest is commented at the point in `E2eTreiber.cs`
    where it matters:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()` — except menu
@@ -148,33 +144,21 @@ The game needs the editor to play, so changes are verified in three complementar
    `RuecklageFuerAusbau` = 1 500 standing) but **only while storage is the binding cap** — once the worker
    cap binds instead, extra storage is dead capital: an earlier version that kept buying regardless turned
    a positive 15-year result negative.
-   Run through the actual client screens with the random Kontor actions switched off
-   (`--ohne-aktionen`, `--spieler=1`) — using up to 14 sites instead of 1, the true ceiling given a
-   99-worker cap and this resource's 7-workers-per-site ratio — single-player 15-year runs reached
-   **+64 175 to +80 088** before the saturation price and the round-end economy calls below existed.
-   **Those numbers, and an earlier +4 979-vs-+33 311 site-count comparison run directly against the
-   Lib, are now obsolete for the same reason**: none of them ran with the goods cycle actually
-   turning (see below), and the site-count comparison cannot be honestly recomputed from that era's
-   data. Re-measured after the two follow-up fixes below, four seeds, same flags: **+19 882 / +26 292 /
-   +39 633 / +90 822** (1234 / 42 / 2023 / 4711) — a band of roughly **+20 000 to +90 000**, mean
-   ~44 000 against a pre-project mean of ~72 000. **Read the band, never a single number**: the seed
-   dominates everything else. The 4711 outlier is mostly game time rather than yield — debtor's-tower
-   years stretch it to 19 played years against 16 for 1234, and wealth compounds; per played year the
-   four runs sit at 1 243 / 1 643 / 2 331 / 4 780. An intermediate measurement of the same seeds landed
-   at +38 204 to +58 519, with two repeats of 4711 differing by 3 861 talers on identical input;
-   same-seed runs reproduce exactly again now (4711 twice: 90 822 talers, 877 clicks), so treat
-   cross-seed differences below ~10 000 talers as nothing. The balancing constants were deliberately
-   left untouched on the strength of these numbers.
 
-   **Every number above is superseded again by the restored AI year-change** (`KIAktionenDurchfuehren`
-   in `Kontor.cs`, missing until then). It adds ~300 000 random draws per year (390 AIs x 390
-   relationships), which reshapes the random stream from the first turn on, so no seed keeps its old
-   outcome. Measured after: seed 1234, 15 years, `--ohne-aktionen --spieler=1` gives **+68 392** where
-   the same invocation gave +19 882 before. Do not compare across that change; re-measure instead. Its
-   own baseline is deliberately not written down yet - it should be established over several seeds
-   first, the way the band above was.
+   **The measurement history lives in [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md)**, not here — it
+   is a chain in which each layer invalidates the one before, and keeping it in this file made the
+   current state hard to find. What carries over as method:
+   - **Read a band, never a single number.** The seed dominates everything else; cross-seed differences
+     below ~10 000 talers mean nothing. The last band measured was roughly +20 000 to +90 000 over four
+     seeds, mean ~44 000 against a pre-project mean of ~72 000.
+   - **Never compare across a change that reshapes the random stream** — re-measure instead. The
+     restored AI year-change (`KIAktionenDurchfuehren`) alone adds ~300 000 draws per year (390 AIs ×
+     390 relationships), so no seed keeps its old outcome. Its own baseline is deliberately not written
+     down yet; it should be established over several seeds first.
+   - A run's wealth is **not** comparable per game year: the driver always plays `--jahre` turns, but
+     `Gespielte Jahre` can exceed that because a debtor's-tower year costs a turn without playing one.
 
-   Three traps this re-measurement closed, worth not falling into again:
+   Three traps a re-measurement closed, worth not falling into again:
    - **`GetWerkstattVerkaufspreis` must not inherit the purchase-price scaling.** The factor
      `SteigerungProzent` per owned workshop multiplies the *goods'* base price (tier 1 = 2 000,
      tier 2 = 10 000, tier 3 = 40 000) while the counter spans the whole realm, so a scaled resale
