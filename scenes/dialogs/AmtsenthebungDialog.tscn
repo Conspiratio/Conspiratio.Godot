@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://amtsenthebung01"]
+[gd_scene format=3 uid="uid://cniwxaalqe6nw"]
 
 [ext_resource type="Script" path="res://assets/scripts/AmtsenthebungDialog.cs" id="1_amte"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/HintAbstimmung.png" id="2_amte"]

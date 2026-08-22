@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://hochzeitdlg001"]
+[gd_scene format=3 uid="uid://3yf1t2yvb4rc"]
 
 [ext_resource type="Script" path="res://assets/scripts/HochzeitDialog.cs" id="1_hoch"]
 [ext_resource type="Texture2D" path="res://assets/backgrounds/HintTrauung.png" id="2_hoch"]
