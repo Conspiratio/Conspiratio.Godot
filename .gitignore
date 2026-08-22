@@ -26,3 +26,7 @@ bin
 
 # Subagent-driven-development scratch workspace (per-plan ledgers, briefs, review packages)
 .superpowers/
+
+# Visuelle Abnahme: die Bilder des E2E-Durchlaufs (--screenshots / --bilder). Reproduzierbare
+# Ausgabe, die CI ohnehin als Artefakt "ansichten" hochlaedt - lokal schnell dreistellige MB.
+docs/ansichten/
