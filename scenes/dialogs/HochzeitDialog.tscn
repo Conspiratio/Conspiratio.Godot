@@ -1,0 +1,53 @@
+[gd_scene load_steps=4 format=3 uid="uid://hochzeitdlg001"]
+
+[ext_resource type="Script" path="res://assets/scripts/HochzeitDialog.cs" id="1_hoch"]
+[ext_resource type="Texture2D" path="res://assets/backgrounds/HintTrauung.png" id="2_hoch"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_hoch"]
+
+[node name="HochzeitDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_hoch")
+script = ExtResource("1_hoch")
+LabelTitelPath = NodePath("LabelTitel")
+LabelTextPath = NodePath("LabelText")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_hoch")
+
+[node name="LabelTitel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 300.0
+offset_top = 20.0
+offset_right = 1300.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 44
+text = "Hochzeit"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LabelText" type="Label" parent="."]
+layout_mode = 0
+offset_left = 140.0
+offset_top = 720.0
+offset_right = 1460.0
+offset_bottom = 870.0
+theme_override_colors/font_color = Color(0.97, 0.88, 0.62, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.02, 0.02, 1)
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 34
+text = "Meldung"
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

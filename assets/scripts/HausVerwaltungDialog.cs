@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
@@ -33,6 +33,9 @@ public partial class HausVerwaltungDialog : DialogBase
 	public NodePath LinkVerkaufenPath { get; set; }
 
 	[Export]
+	public NodePath LinkBestechenPath { get; set; }
+
+	[Export]
 	public NodePath LabelZustandPath { get; set; }
 
 	private Label _labelText;
@@ -41,6 +44,7 @@ public partial class HausVerwaltungDialog : DialogBase
 	private controls.LinkButtonWithSounds _linkRenovieren;
 	private controls.LinkButtonWithSounds _linkErweitern;
 	private controls.LinkButtonWithSounds _linkVerkaufen;
+	private controls.LinkButtonWithSounds _linkBestechen;
 	private Label _labelZustand;
 
 	private Texture2D _bildNichtVorhanden;
@@ -59,6 +63,7 @@ public partial class HausVerwaltungDialog : DialogBase
 		_linkRenovieren = GetNode<controls.LinkButtonWithSounds>(LinkRenovierenPath);
 		_linkErweitern = GetNode<controls.LinkButtonWithSounds>(LinkErweiternPath);
 		_linkVerkaufen = GetNode<controls.LinkButtonWithSounds>(LinkVerkaufenPath);
+		_linkBestechen = GetNode<controls.LinkButtonWithSounds>(LinkBestechenPath);
 		_labelZustand = GetNode<Label>(LabelZustandPath);
 
 		_bildNichtVorhanden = GD.Load<Texture2D>("res://assets/images/anwesen/AnwNV.png");
@@ -69,6 +74,7 @@ public partial class HausVerwaltungDialog : DialogBase
 		_linkRenovieren.Pressed += OnRenovierenPressed;
 		_linkErweitern.Pressed += OnErweiternPressed;
 		_linkVerkaufen.Pressed += OnVerkaufenPressed;
+		_linkBestechen.Pressed += OnBestechenPressed;
 
 		_main = GetParent<Main>();
 	}
@@ -99,6 +105,21 @@ public partial class HausVerwaltungDialog : DialogBase
 		_linkVerkaufen.Visible = istFertig;
 		_labelZustand.Visible = istFertig;
 
+		// Umgekehrt: Den Baumeister bestechen kann man nur, solange gebaut wird und dabei mehr als ein
+		// Jahr zu gewinnen ist. Der Knopf teilt sich den Platz mit "Renovieren", das dann ausgeblendet ist.
+		_linkBestechen.Visible = hatHaus && !istFertig && _anwesenManager.KannBauBeschleunigen(_stadtId);
+
+		// Der Preis passt nicht mehr in die Knopfbeschriftung (er liefe in das Haus-Bild hinein) und steht
+		// deshalb in der Zustandszeile, die waehrend des Baus ohnehin leer bleibt.
+		if (_linkBestechen.Visible)
+		{
+			int gesparteJahre = _anwesenManager.GetRestlicheBauzeit(_stadtId) - 1;
+
+			_labelZustand.Visible = true;
+			_labelZustand.Text = "Bestechung: " + _anwesenManager.GetBaubeschleunigungsPreis(_stadtId).ToStringGeld() +
+			                     "\n(spart " + gesparteJahre + (gesparteJahre == 1 ? " Jahr)" : " Jahre)");
+		}
+
 		if (!hatHaus)
 		{
 			_labelText.Text = "Ihr besitzt hier keinen Wohnsitz";
@@ -112,7 +133,10 @@ public partial class HausVerwaltungDialog : DialogBase
 		}
 		else
 		{
-			_labelText.Text = _anwesenManager.GetNameInklPronomen(_stadtId, false) + " wird erst errichtet";
+			// Ohne das Fertigstellungsjahr stand nirgends, wie lange der Bau noch dauert - eine Villa
+			// braucht sechs Jahre.
+			_labelText.Text = _anwesenManager.GetNameInklPronomen(_stadtId, false) + " wird erst errichtet\n" +
+			                  "Fertig im Jahr " + _anwesenManager.GetFertigstellungsjahr(_stadtId);
 			_hausBild.Texture = _bildImBau;
 		}
 	}
@@ -131,6 +155,36 @@ public partial class HausVerwaltungDialog : DialogBase
 			// modus 0 = neu bauen, 1 = umbauen (falls schon ein fertiger Wohnsitz existiert)
 			int modus = _anwesenManager.HatHaus(_stadtId) ? 1 : 0;
 			await _main.HausWaehlenDialog.ShowDialog(_anwesenManager, _stadtId, modus);
+			Refresh();
+		}
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	/// <summary>
+	/// Kauft dem Baumeister gegen Bestechungsgeld alle Baujahre bis auf das letzte ab. Der Wohnsitz ist
+	/// damit nicht sofort fertig, sondern im nächsten Jahr – wie ein regulärer letzter Bauabschnitt.
+	/// </summary>
+	private async void OnBestechenPressed()
+	{
+		SetProcessInput(false);
+
+		int preis = _anwesenManager.GetBaubeschleunigungsPreis(_stadtId);
+		int jahre = _anwesenManager.GetRestlicheBauzeit(_stadtId) - 1;
+
+		if (!_anwesenManager.KannBezahlen(preis))
+		{
+			await SW.UI.ShowText.ShowDialog("Die " + preis.ToStringGeld(false) + " Taler für dieses Vorhaben besitzt Ihr nicht.");
+		}
+		else if (await SW.UI.YesNoQuestion.ShowDialogText(
+			         "Der Baumeister lässt durchblicken, dass sich die Arbeiten\nfür " + preis.ToStringGeld() +
+			         " um " + jahre + " Jahre verkürzen ließen.\nWollt Ihr zahlen?",
+			         "Ja", "Lieber nicht!") == DialogResultGame.Yes)
+		{
+			_anwesenManager.BeschleunigeBau(_stadtId);
+			SoundManager.Instance.PlayCoins();
+			await SW.UI.ShowText.ShowDialog("Ihr drückt dem Baumeister einen Beutel in die Hand. Im nächsten Jahr könnt Ihr einziehen!");
 			Refresh();
 		}
 

@@ -778,11 +778,15 @@ public partial class Kontor : Control
 		if (_rundenManager.IstLetzterSpielerImJahr())
 		{
 			FuehreWirtschaftlichesRundenendeDurch();
+			FuehreKiJahreswechselDurch();
+			await ZeigeKiGesetzesaenderungen();
+			await FuehreAmtsenthebungenDurch();
 			await HalteWahlenAb();
 			// KI-Spieler begehen zufällig Straftaten (Issue #18); sie werden per Spione als Beweise
 			// erkennbar und bei einer Anklage im nächsten Jahr vor Gericht herangezogen.
 			new RundenEndeManager().FuehreKiStraftatenDurch();
 			await ZeigeKiTodesfaelle();
+			SW.Dynamisch.DeliktpunkteBerechnen();
 			new FamilieManager().VerheirateKis();
 			await ZeigeKatastrophe();
 			await ZeigeKampfereignisse();
@@ -790,6 +794,56 @@ public partial class Kontor : Control
 
 		_rundenManager.SchalteZumNaechstenSpieler();
 		return false;
+	}
+
+	/// <summary>
+	/// Der Jahreswechsel der KI-Spieler (<c>DynamischeSpieldaten.KIAktionenDurchfuehren</c>, im Original
+	/// <c>Main.KIAktionen</c>). <b>Dieser Aufruf fehlte im Godot-Client vollständig</b> – mit weitreichenden
+	/// Folgen, die beim Spielen als mehrere unabhängige Fehler erschienen:
+	/// <list type="bullet">
+	/// <item>Die KI-Spieler alterten nie. Da die Sterbeformel des <c>RundenEndeManager</c> auf den
+	/// verbleibenden Lebensjahren beruht, starb praktisch keine KI – und weil ein Amt nur durch den Tod
+	/// seines Inhabers frei wird, kam über ein ganzes Spiel hinweg <b>keine einzige Wahl</b> zustande.</item>
+	/// <item>Damit war auch die Handelszertifikat-Verleihung unerreichbar: Sie hängt am Amtsgewinn
+	/// (<c>AmtAufStufeXGebietYidZanWvergeben</c>) bzw. am Stützpunktkauf. Wer kein Amt gewinnen kann,
+	/// bekommt nie ein Rohstoffrecht über das eine der Startwerkstatt hinaus.</item>
+	/// <item>Die Beziehungen der KIs – auch die zum Spieler – schwankten nie, und keine KI beantragte je
+	/// die Absetzung eines unliebsamen Untergebenen.</item>
+	/// </list>
+	/// </summary>
+	private static void FuehreKiJahreswechselDurch()
+	{
+		SW.Dynamisch.KIAktionenDurchfuehren();
+	}
+
+	/// <summary>
+	/// Die jährliche Gesetzgebung der KI-Minister (Issue: fehlender Rundenende-Block). Ein KI-Ressortchef
+	/// ändert selten, dann aber alle Gesetze seines Ressorts; hält der Spieler das Amt, bleibt es unberührt.
+	/// </summary>
+	private async Task ZeigeKiGesetzesaenderungen()
+	{
+		foreach (var meldung in new KiGesetzgebungManager().FuehreGesetzesaenderungenDurch())
+			await _main.RundenNachrichtenDialog.ShowDialog(meldung.Ressort + "\n\n" + meldung.Text);
+	}
+
+	/// <summary>
+	/// Wickelt die beantragten Amtsenthebungen ab. Ist ein Mensch beteiligt (als Opfer oder als Wähler),
+	/// läuft die Abstimmung als eigener Bildschirm; rein unter KIs entscheidet der Manager still.
+	/// Ein Erfolg macht das Amt frei, sodass es in der Wahl direkt danach neu besetzt wird.
+	/// </summary>
+	private async Task FuehreAmtsenthebungenDurch()
+	{
+		var manager = new AmtsenthebungsManager();
+
+		foreach (var verfahren in manager.ErmittleVerfahren())
+		{
+			if (verfahren.MenschlichBeteiligt)
+				await _main.AmtsenthebungDialog.ZeigeVerfahren(manager, verfahren);
+			else
+				manager.WerteAus(verfahren);
+		}
+
+		UpdateHud();
 	}
 
 	/// <summary>
@@ -944,7 +998,7 @@ public partial class Kontor : Control
 			string angebeteter = hochzeit.PartnerMaennlich ? "Euer Angebeteter " : "Eure Angebetete ";
 
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Hochzeit);
-			await _main.RundenNachrichtenDialog.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
+			await _main.HochzeitDialog.ShowDialog("Große Ereignisse werfen ihre Schatten voraus!\n" + angebeteter + hochzeit.PartnerName +
 			                                " hat sich endlich bereit erklärt, Euch zu heiraten. Ihr schwebt im siebten Himmel...");
 			SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 			UpdateHud();

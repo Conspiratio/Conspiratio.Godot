@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Kampf;
@@ -57,7 +57,7 @@ public partial class StuetzpunktVerwalten : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		SoundManager.Instance.PlayRightClick();

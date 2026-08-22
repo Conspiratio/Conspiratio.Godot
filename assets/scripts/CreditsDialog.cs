@@ -1,4 +1,4 @@
-using Conspiratio.Godot.assets.scripts.managers;
+﻿using Conspiratio.Godot.assets.scripts.managers;
 using Godot;
 
 namespace Conspiratio.Godot.assets.scripts;
@@ -28,7 +28,7 @@ public partial class CreditsDialog : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		SoundManager.Instance.PlayRightClick();

@@ -1,4 +1,4 @@
-using Conspiratio.Godot.assets.scripts.managers;
+﻿using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
@@ -24,7 +24,7 @@ public partial class LocalGameDialog : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		HideAndDisableInput();

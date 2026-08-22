@@ -166,6 +166,14 @@ The game needs the editor to play, so changes are verified in three complementar
    cross-seed differences below ~10 000 talers as nothing. The balancing constants were deliberately
    left untouched on the strength of these numbers.
 
+   **Every number above is superseded again by the restored AI year-change** (`KIAktionenDurchfuehren`
+   in `Kontor.cs`, missing until then). It adds ~300 000 random draws per year (390 AIs x 390
+   relationships), which reshapes the random stream from the first turn on, so no seed keeps its old
+   outcome. Measured after: seed 1234, 15 years, `--ohne-aktionen --spieler=1` gives **+68 392** where
+   the same invocation gave +19 882 before. Do not compare across that change; re-measure instead. Its
+   own baseline is deliberately not written down yet - it should be established over several seeds
+   first, the way the band above was.
+
    Three traps this re-measurement closed, worth not falling into again:
    - **`GetWerkstattVerkaufspreis` must not inherit the purchase-price scaling.** The factor
      `SteigerungProzent` per owned workshop multiplies the *goods'* base price (tier 1 = 2 000,
@@ -284,14 +292,24 @@ To **iterate on the Lib locally before a release**: the Lib builds with `Generat
 dotnet build
 # 2. purge the cached copy — NuGet will not re-extract a version it already has
 rm -rf ~/.nuget/packages/conspiratio.lib/<version>
-# 3. restore the harness from the local feed; this fills the global cache
+# 3. restore a throwaway project from the local feed; this fills the global cache
 dotnet restore --source "D:/Projekte/C# Projekte/Conspiratio.Lib/Conspiratio.Lib/bin/Debug"
+# That project must reference the Lib as a <PackageReference> at the exact version. A ProjectReference
+# (as in Conspiratio.Lib.Tests) restores fine but leaves the global cache untouched — a silent no-op.
+# Verify with `ls ~/.nuget/packages/conspiratio.lib/`.
 # 4. now bump the PackageReference in Conspiratio.Godot.csproj and build normally
 ```
 
 Step 2 is the one that bites: rebuilding the Lib without purging the cache leaves the old code in place, and the Godot build silently keeps using it. Don't commit a local source into the checked-in `nuget.config`.
 
 Game logic belongs in the Lib, not here. The established pattern: extract logic from the WinForms client into a Lib manager class (e.g. `NewGameManager`), then build a thin Godot view on top.
+
+**When a mechanic "just never happens", first check whether the Lib call exists at all** — `grep -rn
+"<MethodName>" assets/scripts/`. The migration has dropped whole round-end blocks twice now:
+`FuehreWirtschaftlichesRundenendeDurch` (prices, stock, bribes) and `KIAktionenDurchfuehren` (AI ageing
+→ deaths → vacant offices → elections → trade certificates, plus AI relationship drift). Both presented
+as several unrelated-looking bugs. `Main.cs:6355-6379` in WinForms is the reference list of what the
+round end owes.
 
 **Design fidelity is mandatory**: migrated screens must reproduce the WinForms original's look & feel — background graphics, icons, control positions (extract them from `Main.Designer.cs` and the "Controls ausrichten"/"Markierungen festlegen" regions in `Main.cs`; coordinates are based on 1366×768 bzw. 1024×768 and scale via `NormB`/`NormH` to our fixed 1600×900) and interaction patterns (NumericButton digit clicking, right-click semantics). Convert needed images from `Conspiratio.WinForms\Conspiratio\Images\` (TIF → PNG); already converted assets live in `assets/images/` and `assets/backgrounds/`.
 
@@ -328,10 +346,16 @@ Discovered the hard way; check these before designing around an assumption:
 ### Conventions & patterns
 
 - **Scripts** live in `assets/scripts/` (namespace mirrors folders: `Conspiratio.Godot.assets.scripts[.controls|.managers]`), **scenes** in `scenes/`. Godot signal handlers use the snake_case naming from the editor (`_on_button_start_game_pressed`) and are connected in the `.tscn`, not in code.
-- **Node wiring**: `[Export] public NodePath XPath { get; set; }` + `GetNode<T>(XPath)` in `_Ready()`.
+- **Node wiring**: inside a scene, `[Export] public NodePath XPath { get; set; }` + `GetNode<T>(XPath)`
+  in `_Ready()`. **Dialogs hanging off `Main` need neither**: `Main.VerdrahteKnoten` wires every public
+  `Node` field by type name, so a new dialog is just a public field plus a same-named node in `Main.tscn`.
 - **Async dialogs**: dialogs return `Task<DialogResultGame>` (or `Task`) via a `TaskCompletionSource` that is resolved when a button closes the dialog (see `YesNoDialog.cs`). Callers `await SW.UI.YesNoQuestion.ShowDialogText(...)` or `await _main.SomeDialog.ShowDialog(...)`.
 - **Parchment dialog pattern**: most content dialogs are a `NinePatchRect` named `Rahmen` using `BackgroundDialog.png` (`uid://cq1th2hp46uxa`) with `patch_margin` 15 on all sides, dark text `Color(0.16, 0.11, 0.05)`, on the shared theme (`uid://bkne0d4c2vxts`). `ShowDialog()` shows the node + `SetProcessInput(true)` + returns a fresh `TaskCompletionSource.Task`; `_Input` closes on `ui_next_or_close`. Copy an existing one (`StatistikDialog`, `StadtInformationenDialog`) rather than starting fresh. For data-driven icon grids, author static labels in the `.tscn` and add the icons in code from the manager's data, scaling the WinForms Designer coordinates by a constant factor into the parchment.
 - **`TextureRect` sizing gotcha**: the default `ExpandMode.KeepSize` forces the texture's native size as the control minimum. To size an icon freely, set `ExpandMode = IgnoreSize` **before** assigning `Size` (object-initializer order matters — the initializer runs before post-construction assignments).
+- **`Font.GetMultilineStringSize` ignores wrapping**, despite taking a width parameter: it counts only
+  explicit `\n`. Measuring a wrapped label with it undercounts badly (231 px for an eight-line text that
+  needs ~300). To size a container to wrapped text before the first draw, wrap word by word yourself —
+  see `YesNoDialog.ZaehleZeilen`.
 - **Labels don't clip by default.** Without `autowrap_mode`, a `Label` draws straight past its rect instead of wrapping or truncating — side-by-side columns then overprint each other (this was the „Informationen zur Wahl" bug). For any label holding data of unknown length, set `autowrap_mode` and prefer a `VBoxContainer` over absolutely positioned columns. Conversely `clip_text = true` silently cuts long text off — that was the truncated duel message.
 - **Controls instantiated in code inherit the parchment theme** (dark brown text), which is invisible on a dark full-screen background. Give such buttons explicit theme overrides (`AddThemeColorOverride("font_color", …)`, `font_outline_color`, `outline_size`) and `SizeFlagsHorizontal = SizeFlags.ShrinkCenter` to centre them in a `VBoxContainer`. See `DuellDialog.StyleAuswahlKnopf`.
 - **Choice buttons in a dialog**: reuse the pattern from `GerichtDialog.WaehleOption` — instantiate `LinkButtonWithSounds.tscn` into a `VBoxContainer`, resolve a `TaskCompletionSource<int>` from `Pressed`, then clear the box. While such a choice is open, `ui_next_or_close` must do nothing (a button press is required); guard for it in the dialog's `OnNextOrClose`.
@@ -349,7 +373,20 @@ A feature that touches both repos is committed **Lib first, then Godot**: the tw
 Two mechanics that have gone wrong before:
 
 - **Write commit messages with a POSIX heredoc**, `git commit -F - <<'EOF' … EOF`. The Bash tool is Git Bash, not PowerShell: a PowerShell here-string (`@'…'@`) is not parsed and ends up prefixing a stray `@` to the subject line.
-- **For multi-line or non-ASCII edits use a Python heredoc**, not `sed -i`: `python - <<'PY' … PY` with an
-  `assert old in s` before each replace fails loudly when the anchor moved, while `sed` silently does
-  nothing and its `s|…|` breaks on `|` or umlauts in the replacement. There is no PyYAML here.
+- **For multi-line or non-ASCII edits use a Python script**, not `sed -i`: an `assert old in s` before
+  each replace fails loudly when the anchor moved, while `sed` silently does nothing and its `s|…|`
+  breaks on `|` or umlauts in the replacement. There is no PyYAML here (Pillow was installed via pip
+  for the TIF→PNG conversions). Three things that cost time here, in order of how much:
+  - **Write the script to a file and run it**, rather than piping it in as a heredoc. A quoted heredoc
+    (`<<'PY'`) is supposed to pass the body through verbatim, but an apostrophe in the text still broke
+    the command (`unexpected EOF while looking for matching ‘`), and **a single backslash is eaten one
+    level on the way in** — `'\n'` written in the script body arrives at Python as a real newline, so an
+    anchor containing a C# `\n` escape never matches. A file has neither problem.
+  - **Preserve CRLF.** Both repos use CRLF. Reading with `io.open(p, encoding='utf-8-sig')` normalises
+    line endings to `\n`, so writing back with `newline=''` silently converts the whole file to LF and
+    turns a three-line change into a full-file diff. Always write with `newline='\r\n'`; check with
+    `git diff --stat` that the diff is the size you expect.
+  - **Insert whole blocks, not fragments.** Splicing a method in front of a `public` signature landed it
+    between that method’s `<summary>` and its `<param>` tags, splitting the XML doc in two. Anchor on the
+    start of the doc comment, not on the signature.
 - **Don't reach for `git add -A` blindly.** The Lib working copy carries untracked files that are not part of the current change (e.g. `CONTRIBUTING.md`); stage the paths you touched, or check `git status` before committing and unstage the rest.

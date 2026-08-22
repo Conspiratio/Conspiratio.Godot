@@ -1,4 +1,4 @@
-[gd_scene load_steps=67 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=69 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -68,6 +68,8 @@
 [ext_resource type="PackedScene" uid="uid://cduelldialog1" path="res://scenes/dialogs/DuellDialog.tscn" id="65_duel"]
 [ext_resource type="Script" path="res://assets/scripts/ErpressungDialog.cs" id="66_erpr"]
 [ext_resource type="PackedScene" uid="uid://schuldproz001" path="res://scenes/dialogs/SchuldenProzessDialog.tscn" id="67_sprz"]
+[ext_resource type="PackedScene" uid="uid://amtsenthebung01" path="res://scenes/dialogs/AmtsenthebungDialog.tscn" id="68_amte"]
+[ext_resource type="PackedScene" uid="uid://hochzeitdlg001" path="res://scenes/dialogs/HochzeitDialog.tscn" id="69_hoch"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -255,6 +257,12 @@ visible = false
 visible = false
 
 [node name="SchuldenProzessDialog" parent="." instance=ExtResource("67_sprz")]
+visible = false
+
+[node name="AmtsenthebungDialog" parent="." instance=ExtResource("68_amte")]
+visible = false
+
+[node name="HochzeitDialog" parent="." instance=ExtResource("69_hoch")]
 visible = false
 
 

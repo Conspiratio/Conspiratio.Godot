@@ -1,4 +1,4 @@
-using Conspiratio.Godot.assets.scripts.managers;
+﻿using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -50,7 +50,7 @@ public partial class Kirche : Control
 
 	public override async void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		// Rechtsklick auf einen Bereich zeigt wie im Original seine Beschreibung an

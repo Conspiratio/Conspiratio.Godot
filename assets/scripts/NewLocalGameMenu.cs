@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using Conspiratio.Godot.assets.scripts.controls;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
@@ -76,7 +76,7 @@ public partial class NewLocalGameMenu : Control
 
 	public override async void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		SetProcessInput(false);

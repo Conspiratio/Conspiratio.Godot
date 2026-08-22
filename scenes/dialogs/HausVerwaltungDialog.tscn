@@ -21,6 +21,7 @@ LinkBauenPath = NodePath("Panel/NinePatchRect/LinkBauen")
 LinkRenovierenPath = NodePath("Panel/NinePatchRect/LinkRenovieren")
 LinkErweiternPath = NodePath("Panel/NinePatchRect/LinkErweitern")
 LinkVerkaufenPath = NodePath("Panel/NinePatchRect/LinkVerkaufen")
+LinkBestechenPath = NodePath("Panel/NinePatchRect/LinkBestechen")
 LabelZustandPath = NodePath("Panel/NinePatchRect/LabelZustand")
 
 [node name="Panel" type="Panel" parent="."]
@@ -86,6 +87,15 @@ offset_bottom = 270.0
 theme = ExtResource("4_hvdlg")
 text = "Renovieren"
 
+[node name="LinkBestechen" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
+layout_mode = 0
+offset_left = 75.0
+offset_top = 230.0
+offset_right = 375.0
+offset_bottom = 270.0
+theme = ExtResource("4_hvdlg")
+text = "Baumeister bestechen"
+
 [node name="LinkErweitern" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
 layout_mode = 0
 offset_left = 75.0
@@ -116,10 +126,11 @@ stretch_mode = 5
 [node name="LabelZustand" type="Label" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 55.0
-offset_top = 470.0
+offset_top = 450.0
 offset_right = 440.0
-offset_bottom = 506.0
+offset_bottom = 526.0
 text = "Zustand: 100 %"
+autowrap_mode = 3
 
 [node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_hvdlg")]
 layout_mode = 0

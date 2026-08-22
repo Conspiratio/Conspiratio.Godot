@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Privilegien;
@@ -94,7 +94,7 @@ public partial class Weltkarte : Control, IPolitischeWeltkarteDialog
 			return;
 		}
 
-		if (Input.IsActionPressed("ui_next_or_close"))
+		if (@event.IsActionPressed("ui_next_or_close"))
 		{
 			SoundManager.Instance.PlayRightClick();
 			Schliessen();

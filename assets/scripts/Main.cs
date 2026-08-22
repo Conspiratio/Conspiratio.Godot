@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -56,6 +56,8 @@ public partial class Main : Control
 	public NaechsterSpielerDialog NaechsterSpielerDialog;
 	public SchuldturmDialog SchuldturmDialog;
 	public SchuldenProzessDialog SchuldenProzessDialog;
+	public AmtsenthebungDialog AmtsenthebungDialog;
+	public HochzeitDialog HochzeitDialog;
 	public RundenNachrichtenDialog RundenNachrichtenDialog;
 	public JahresbuchDialog JahresbuchDialog;
 	public IngameMenuDialog IngameMenuDialog;

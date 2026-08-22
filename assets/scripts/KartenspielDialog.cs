@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Hinterzimmer;
@@ -51,7 +51,7 @@ public partial class KartenspielDialog : Control
 	{
 		// Der Rechtsklick blättert nur weiter, wenn gerade auf eine Blättern-Eingabe gewartet wird
 		// (das Kartenspiel lässt sich – wie im Original – nicht mittendrin abbrechen).
-		if (_weiter != null && Input.IsActionPressed("ui_next_or_close"))
+		if (_weiter != null && @event.IsActionPressed("ui_next_or_close"))
 		{
 			SoundManager.Instance.PlayRightClick();
 			var tcs = _weiter;

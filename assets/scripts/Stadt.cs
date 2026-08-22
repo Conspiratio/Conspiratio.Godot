@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.controls;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
@@ -151,7 +151,7 @@ public partial class Stadt : Control
 
 	public override async void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		// Rechtsklick auf eine vorhandene Werkstätte bedeutet wie im Original: Werkstätte verkaufen
@@ -287,6 +287,40 @@ public partial class Stadt : Control
 		}
 	}
 
+	/// <summary>
+	/// Der Tooltip auf der Ware der Auftragszeile: Er nennt das Arbeiter-pro-Stätte-Verhältnis, das die
+	/// Ware verlangt, und wie die aktuelle Einstellung dazu steht. Ohne diese Angabe stand nirgends im
+	/// Spiel, wie viele Arbeiter eine Werkstätte eigentlich braucht – zu wenige drücken den Ertrag
+	/// anteilig (<c>Produktionsslot.GetProduktion</c>), zu viele kosten nur Lohn.
+	/// </summary>
+	private static string ErmittleVerhaeltnisTooltip(int rohstoffId, Produktionsslot produktionsslot,
+	                                                 string staetteEinzahl, string staetteMehrzahl)
+	{
+		var rohstoff = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
+		int arbeiterJeStaette = rohstoff.GetArbeiter() / rohstoff.GetWerkstaetten();
+
+		int staetten = produktionsslot.GetProduktionStaetten();
+		int arbeiter = produktionsslot.GetProduktionArbeiter();
+		int benoetigt = staetten * arbeiterJeStaette;
+
+		string text = rohstoff.GetRohName() + "\n" +
+		              rohstoff.GetArbeiter() + " Arbeiter je " + rohstoff.GetWerkstaetten() + " " +
+		              (rohstoff.GetWerkstaetten() == 1 ? staetteEinzahl : staetteMehrzahl);
+
+		if (staetten <= 0)
+			return text;
+
+		text += "\nFür " + staetten + " " + (staetten == 1 ? staetteEinzahl : staetteMehrzahl) +
+		        " benötigt Ihr " + benoetigt + " Arbeiter";
+
+		if (arbeiter < benoetigt)
+			text += "\nEs fehlen " + (benoetigt - arbeiter) + " – der Ertrag sinkt entsprechend";
+		else if (arbeiter > benoetigt)
+			text += "\n" + (arbeiter - benoetigt) + " zu viel – sie kosten Lohn ohne Mehrertrag";
+
+		return text;
+	}
+
 	private void RefreshSlot(int slot)
 	{
 		var produktionsslot = _handelsManager.GetProduktionsslot(_stadtId, slot);
@@ -321,6 +355,7 @@ public partial class Stadt : Control
 			string staetteMehrzahl = produktionsText.Substring(produktionsText.IndexOf('.') + 1);
 
 			_buttonsProdukt[slot].Text = verb + " mit";
+			_buttonsProdukt[slot].TooltipText = ErmittleVerhaeltnisTooltip(rohstoffId, produktionsslot, staetteEinzahl, staetteMehrzahl);
 
 			_numericsMenge[slot].TausenderTrenner = false;
 			_numericsMenge[slot].NurEinserSchritte = false;

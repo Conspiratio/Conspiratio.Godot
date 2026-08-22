@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Godot;
@@ -48,7 +48,11 @@ public abstract partial class DialogBase : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		if (!Input.IsActionPressed("ui_next_or_close"))
+		// Nur auf das diskrete Drücken reagieren (@event statt globalem Input.IsActionPressed): Die
+		// Zustandsabfrage liefert true, solange die rechte Maustaste gehalten wird, und zwar bei jedem
+		// eintreffenden Ereignis – schon eine Mausbewegung genügt. Ein gehaltener Rechtsklick schloss so
+		// mehrere Dialoge nacheinander ("Prellen"), statt nur den obersten.
+		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
 		OnNextOrClose();

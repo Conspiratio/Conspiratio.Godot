@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
@@ -46,7 +46,7 @@ public partial class GerichtDialog : Control
 
 	public override void _Input(InputEvent @event)
 	{
-		if (_weiter != null && Input.IsActionPressed("ui_next_or_close"))
+		if (_weiter != null && @event.IsActionPressed("ui_next_or_close"))
 		{
 			SoundManager.Instance.PlayRightClick();
 			var tcs = _weiter;
