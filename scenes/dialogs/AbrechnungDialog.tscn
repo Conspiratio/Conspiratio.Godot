@@ -57,17 +57,17 @@ horizontal_alignment = 1
 [node name="GridContainerPositionen" type="GridContainer" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 120.0
-offset_top = 85.0
+offset_top = 74.0
 offset_right = 480.0
-offset_bottom = 480.0
+offset_bottom = 528.0
 columns = 2
 
 [node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_abrdg")]
 layout_mode = 0
 offset_left = 220.0
-offset_top = 505.0
+offset_top = 536.0
 offset_right = 381.0
-offset_bottom = 545.0
+offset_bottom = 576.0
 theme = ExtResource("4_abrdg")
 text = "Weiter"
 

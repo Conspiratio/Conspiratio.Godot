@@ -48,6 +48,7 @@ public partial class AbrechnungDialog : DialogBase
 		AddPosition("Kirchenzehnt", ergebnis.Kirchenzehnt);
 		AddPosition("Zölle", ergebnis.Zollkosten);
 		AddPosition("Sold", ergebnis.Sold);
+		AddPosition("Hofhaltung", ergebnis.Hofhaltung);
 		AddPosition("Gesamtkosten", ergebnis.Gesamtkosten);
 	}
 
