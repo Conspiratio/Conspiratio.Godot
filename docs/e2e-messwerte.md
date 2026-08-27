@@ -145,6 +145,40 @@ und 44 gespielte Jahre bei +191 550 / +168 067 / +82 005. Mit zwei Spielern eben
 40 von 40 Jahren, sieben von acht Spielerergebnissen positiv, bis +285 980. Vorher endete jeder solche
 Lauf nach 21 bis 33 Jahren mit erloschener Dynastie.
 
+### Das 40-Jahre-Band — und warum es Paket A/B trotzdem nicht misst
+
+Zehn Seeds, `--jahre=40 --spieler=1 --ohne-aktionen`, alle Exit 0, alle über 40 Jahre:
+
+| Seed | 4711 | 13 | 90210 | 42 | 2023 | 31337 | 1234 | 7 | 2718 | 555 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Taler | 37 521 | 94 185 | 99 782 | 110 307 | 121 357 | 128 998 | 153 716 | 158 828 | 161 291 | 178 117 |
+
+Band **+38 000 bis +178 000**, Mittel 124 410, Median 125 177, **0 von 10 negativ**.
+
+**Der Treiber läuft in ein Fließgleichgewicht.** Seed 42 in den letzten acht Jahren: 139 763 →
+125 049 → 151 351 → 122 905 → 129 021 → 100 641 → 126 137 → 110 307. Kein Aufwärtstrend mehr, nur der
+Sägezahn zwischen Export- und Verkaufsjahren; Einnahmen decken die Kosten und sonst nichts.
+
+Die Ursache ist die Treiberstrategie, nicht das Spiel: Die Handelsrunde bespielt **einen** Werkstattplatz
+in **einer** Stadt (`werkstattNr` ist die erste gefundene Werkstatt, konfiguriert wird nur Slot 0), und
+die Stättenzahl deckelt `GetMaxArbeiterAnzahl()` bei 99 Arbeitern. Ein Betrieb dieser Größe trägt
+rund 125 000 Taler und dann nichts mehr.
+
+**Damit bleibt die Ausgangsfrage offen — aber aus einem klaren Grund.** Die Spätspielbremsen aus
+Paket A/B greifen weit oberhalb dieses Plateaus:
+
+| Bremse | Greift ab | Treiber erreicht |
+|---|---|---|
+| Gesetz #3 „Maximale Taler" | 2 bis 6 Mio. | 178 000 (Faktor 16 bis 34 darunter) |
+| Werkstatt-Staffel jenseits `MaxSteigerungsstufen` | 21. Betrieb | 1 Betrieb |
+| Hofhaltung (Herzog) | 50 000 im Jahr | nur bei hohem Titel |
+
+Ein E2E-Lauf kann Paket A/B also **prinzipiell nicht** bewerten, egal wie lang er ist — der Engpass ist
+die Anzahl der Betriebe, nicht die Spieldauer. Wer das messen will, braucht entweder einen Treiber, der
+in mehreren Städten Wohnsitze und Werkstätten kauft, oder eine Konsolen-Harness, die einen reichen
+Spieler direkt aufbaut und nur die Abrechnung durchrechnet. Letzteres ist deutlich billiger und ohne
+Zufallsstrom auch aussagekräftiger.
+
 ### Warum die Rücklage mitwachsen muss — die Diagnose
 
 Die ersten drei Änderungen allein ergaben ein **zweigipfliges** Band: −49 266 bis +60 466, drei von

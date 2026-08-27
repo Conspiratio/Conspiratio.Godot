@@ -166,6 +166,13 @@ The game needs the editor to play, so changes are verified in three complementar
      over ten seeds rather than a before/after pair.
    - A run's wealth is **not** comparable per game year: the driver always plays `--jahre` turns, but
      `Gespielte Jahre` can exceed that because a debtor's-tower year costs a turn without playing one.
+   - **An E2E run cannot evaluate the late-game balancing, however long it is.** Over 40 years the band
+     is +38 000 to +178 000 (ten seeds, median 125 177) and every run flattens into a steady state —
+     income covers costs and nothing more. The ceiling is the driver's strategy, not the game: the trade
+     round works **one** workshop slot in **one** city, and `GetMaxArbeiterAnzahl()` caps that at 99
+     workers. Paket A/B bites far above it — Gesetz #3 starts at 2 to 6 million (16× the ceiling), and
+     the workshop surcharge beyond `MaxSteigerungsstufen` needs a 21st business where the driver owns
+     one. Measuring those needs a console harness that builds a rich player directly, not a longer run.
    - **Only `--ohne-aktionen` measures the game; the default settings measure the driver.** Same seeds,
      15 years: +49 710 without actions against −19 033 with them (1 player), +15 147 against −11 798
      (2 players) — the sign flips with the switch, in both player counts. With actions the driver burns
