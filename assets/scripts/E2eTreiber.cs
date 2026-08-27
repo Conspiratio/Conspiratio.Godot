@@ -101,10 +101,11 @@ public partial class E2eTreiber : Node
 	private const int MaxAktionenProBereich = 2;
 
 	/// <summary>
-	/// Talerpolster, das beim Lagerausbau stehen bleibt. Ein Kaufmann investiert aus Überschuss,
-	/// nicht bis an den Rand der Zahlungsunfähigkeit – sonst reißt der nächste Kostenblock ihn ins Minus.
+	/// Untergrenze des Talerpolsters. Ein Kaufmann investiert aus Überschuss, nicht bis an den Rand der
+	/// Zahlungsunfähigkeit – sonst reißt der nächste Kostenblock ihn ins Minus. Die tatsächliche
+	/// Rücklage wächst mit dem Betrieb, siehe <see cref="BerechneRuecklage"/>.
 	/// </summary>
-	private const int RuecklageFuerAusbau = 1500;
+	private const int RuecklageMindestens = 1500;
 
 	/// <summary>
 	/// So oft wird in einem Dialog ein Knopf gedrückt, bevor der Treiber ihn per Rechtsklick verlässt.
@@ -202,6 +203,26 @@ public partial class E2eTreiber : Node
 
 	/// <summary>Steht ein Spielzustand bereit? Erst dann darf der Bericht ihn auswerten.</summary>
 	private bool _spielLaeuft;
+
+	/// <summary>
+	/// Ist das Spiel regulär zu Ende gegangen? Für den Treiber sieht das zunächst genauso aus wie ein
+	/// Hänger – es kommt kein Kontor mehr –, ist aber ein gültiger Ausgang und kein Fehler.
+	/// </summary>
+	private bool _spielBeendet;
+
+	/// <summary>Jahr des regulären Spielendes; nur gültig, wenn <see cref="_spielBeendet"/> gesetzt ist.</summary>
+	private int _endeJahr;
+
+	/// <summary>Stand von <c>_verkaufteWaren</c> am Ende des Vorjahres, für die Jahresdifferenz.</summary>
+	private int _verkauftVorjahr;
+
+	/// <summary>
+	/// Das Polster, das der Treiber im laufenden Zug nicht antastet. Wird von der Handelsrunde aus der
+	/// Betriebsgröße gesetzt und danach auch außerhalb der Stadt beachtet – etwa bei der Kupplerin, die
+	/// sonst genau das Geld ausgibt, das die Handelsrunde als Reserve stehen gelassen hat.
+	/// </summary>
+	private int _ruecklage = RuecklageMindestens;
+
 	private bool _mitSpeicherprobe = true;
 	private bool _mitBildern;
 	private string _bilderOrdner;
@@ -318,7 +339,13 @@ public partial class E2eTreiber : Node
 			}
 
 			PruefeZustand(jahrVorher, alterVorJahr);
-			GD.Print("Jahr " + jahrVorher + " abgeschlossen → " + SW.Dynamisch.GetAktuellesJahr());
+
+			// Der Talerstand gehört in die Jahreszeile, nicht nur in den Schlussbericht: Ein Lauf, der
+			// negativ endet, verrät sonst nicht, ob er langsam abrutschte oder in einem einzigen Jahr
+			// einbrach. Genau diese Frage liess sich bei der zweigipfligen Grundlinie aus den Logs nicht
+			// beantworten, obwohl beide Läufe reproduzierbar vorlagen.
+			GD.Print("Jahr " + jahrVorher + " abgeschlossen → " + SW.Dynamisch.GetAktuellesJahr()
+			         + " (" + Talerstand() + ")");
 		}
 
 		int gespielt = SW.Dynamisch.GetAktuellesJahr() - startJahr;
@@ -339,6 +366,11 @@ public partial class E2eTreiber : Node
 	{
 		if (!await WarteBisKontorBereit())
 		{
+			// Kein Kontor mehr kann zweierlei heißen. Ist das Spiel regulär zu Ende, ist der Durchlauf
+			// fertig und nicht kaputt – gemeldet wird er im Bericht, nicht als Fehler.
+			if (_spielBeendet)
+				return false;
+
 			_fehler.Add("Der Kontor wurde im Jahr " + SW.Dynamisch.GetAktuellesJahr()
 			            + " nicht bedienbereit. " + Zustandsbericht());
 			return false;
@@ -379,6 +411,14 @@ public partial class E2eTreiber : Node
 
 			await Schiesse(bildschirm);
 
+			// Aus demselben Grund wie die Heimatstadt laufen Brautwerbung und Testament immer mit: ohne
+			// Ehe keine Kinder, ohne bestimmten Erben keine Dynastie ueber den ersten Todesfall hinaus.
+			if (bildschirm == nameof(Kirche))
+			{
+				await WirbUmPartner();
+				await BestimmeErben();
+			}
+
 			// Die Heimatstadt wird immer angesteuert: Produktion und Verkauf sind der Kern des Spiels,
 			// keine der zufaelligen Handlungen, die --ohne-aktionen abschaltet.
 			if (_mitAktionen || bildschirm == nameof(Weltkarte))
@@ -391,6 +431,131 @@ public partial class E2eTreiber : Node
 		}
 
 		return true;
+	}
+
+	/// <summary>
+	/// Sucht in der Kirche die Kupplerin auf und wirbt um einen Ehepartner. Läuft wie die Handelsrunde
+	/// **immer** mit, auch mit <c>--ohne-aktionen</c>: Ohne Ehe gibt es keinen Erben, und ohne Erben
+	/// beendet der erste Todesfall die Dynastie (<c>Kontor.cs</c>, Pfad <c>testament.SpielVorbei</c>).
+	/// Gemessen kam deshalb kein Lauf über rund 25 Jahre hinaus, und eine Spätspiel-Messung war
+	/// unmöglich. Der Fortbestand der Dynastie ist Kern des Spiels, keine Zufallshandlung.
+	///
+	/// Die Kirche lehnt von sich aus ab, wenn nichts zu werben ist – schon verheiratet, bereits werbend,
+	/// kein passender Vorschlag, zu teuer. Jeder dieser Wege endet in einer schlichten Textmeldung, die
+	/// die übliche Dialogbedienung wegklickt; Sonderfälle braucht es hier also nicht. Die Vorabfrage
+	/// spart nur den Weg, damit die Kupplerin nicht jedes Jahr aufs Neue behelligt wird.
+	/// </summary>
+	private async Task WirbUmPartner()
+	{
+		if (!new FamilieManager().KannPartnerSuchen(out _))
+			return;
+
+		// Nur aus echtem Überschuss werben. Die Handelsrunde läuft im selben Zug vor der Kirche und hat
+		// bis auf die Rücklage alles investiert; die Kupplerin nähme ihren Lohn also genau aus dem
+		// Polster. Gemessen war das der Tropfen, der drei von zehn Läufen in den Schuldturm kippte.
+		// Der doppelte Betrag, weil der Preis der Kupplerin vorher nicht feststeht – ihn abzufragen
+		// hieße, den Vorschlag zweimal zu ziehen und damit den Zufallsstrom zu verschieben.
+		if (SW.Dynamisch.GetAktHum().GetTaler() < _ruecklage * 2)
+			return;
+
+		var kirche = _main.GetNodeOrNull<Control>(nameof(Kirche));
+		var hochzeit = kirche?.GetNodeOrNull<BaseButton>("AreaHochzeit");
+
+		if (hochzeit == null)
+		{
+			_fehler.Add("In der Kirche wurde der Bereich „AreaHochzeit\" nicht gefunden.");
+			return;
+		}
+
+		if (_ausfuehrlich)
+			GD.Print("    Brautwerbung: Kupplerin aufgesucht");
+
+		_bedienteKnoepfe.Add("Kirche.Brautwerbung");
+		hochzeit.EmitSignal(BaseButton.SignalName.Pressed);
+
+		// Die Zusage selbst faellt in der ueblichen Dialogbedienung: Ausserhalb einer Aktion drueckt die
+		// den ersten sichtbaren Knopf, und das ist im Ja/Nein-Dialog „Ja". Ebenso beim jaehrlichen
+		// Werbegeschenk, wo der erste Knopf die billigste echte Gabe ist – „nichts schenken" haengt der
+		// BrautwerbungDialog bewusst hinten an, und es wuerde die Werbung nie voranbringen.
+		await WarteBisBildschirmZurueck(nameof(Kirche), "Kirche.Brautwerbung");
+	}
+
+	/// <summary>
+	/// Bestimmt im Testament einen Erben. Ohne diesen Schritt bleibt die Ehe wirkungslos:
+	/// <c>FamilieManager.FuehreTestamentAus</c> liest <c>GetErbeSpielerID()</c>, und steht die auf 0,
+	/// endet die Dynastie beim ersten Todesfall – **Kinder erben nicht von allein**. Gemessen: Mit Ehe,
+	/// aber ohne Testament kam ein 40-Jahre-Lauf auf 25 bzw. 33 Jahre statt auf 40.
+	///
+	/// Gewählt wird die letzte Option, denn <c>GetErbeOptionen</c> listet in fester Reihenfolge das
+	/// Erzbistum (Id 0, also kein Erbe), dann den Ehepartner, dann die Kinder. Ein Kind trägt die
+	/// Dynastie weiter; der etwa gleichaltrige Ehepartner nur eine Generation.
+	/// </summary>
+	private async Task BestimmeErben()
+	{
+		var familie = new FamilieManager();
+		var optionen = familie.GetErbeOptionen();
+
+		// Nur das Erzbistum zur Wahl: unverheiratet und kinderlos, es gibt nichts zu bestimmen.
+		if (optionen.Count <= 1)
+			return;
+
+		int ziel = optionen[optionen.Count - 1].ErbeId;
+
+		if (familie.GetAktuellerErbeId() == ziel)
+			return;
+
+		var kirche = _main.GetNodeOrNull<Control>(nameof(Kirche));
+		var bereich = kirche?.GetNodeOrNull<BaseButton>("AreaTestament");
+
+		if (bereich == null)
+		{
+			_fehler.Add("In der Kirche wurde der Bereich „AreaTestament\" nicht gefunden.");
+			return;
+		}
+
+		bereich.EmitSignal(BaseButton.SignalName.Pressed);
+
+		if (!await WarteAufSichtbar(nameof(TestamentDialog)))
+		{
+			_fehler.Add("Das Testament ging nicht auf. " + Zustandsbericht());
+			return;
+		}
+
+		// Ein einziger Knopf blaettert durch die Erben und setzt dabei jedes Mal den neuen. Hoechstens so
+		// oft druecken, wie es Optionen gibt – dann ist die Liste einmal ganz herum.
+		var knopf = _main.TestamentDialog.GetNodeOrNull<BaseButton>(_main.TestamentDialog.ButtonErbePath);
+
+		for (int i = 0; knopf != null && i < optionen.Count && familie.GetAktuellerErbeId() != ziel; i++)
+		{
+			knopf.EmitSignal(BaseButton.SignalName.Pressed);
+			await NaechsterFrame();
+		}
+
+		_bedienteKnoepfe.Add("Kirche.Testament");
+
+		// Ueber den eigenen Schliessknopf, nicht per Rechtsklick: Der wirkt erst im naechsten Frame, und
+		// bis dahin uebernimmt die allgemeine Dialogbedienung den noch offenen Dialog – sie drueckt
+		// denselben Blaetterknopf weiter und stellte den eben bestimmten Erben gemessen bis zurueck aufs
+		// Erzbistum. Der Schliessknopf ist jeder Knopf ausser dem Blaetterknopf.
+		var knoepfe = new List<BaseButton>();
+		SammleKnoepfe(_main.TestamentDialog, knoepfe);
+		var schliessen = knoepfe.Find(k => k != knopf);
+
+		if (schliessen != null)
+			schliessen.EmitSignal(BaseButton.SignalName.Pressed);
+		else
+			SchickeAbbruch();
+
+		// Vor dem Warten pruefen, solange der Stand noch der eben gesetzte ist.
+		int erbe = familie.GetAktuellerErbeId();
+
+		if (erbe == 0)
+			_fehler.Add("Im Testament blieb der Erbe auf „kein Erbe\", obwohl " + optionen.Count
+			            + " Optionen zur Wahl standen.");
+		else if (_ausfuehrlich)
+			GD.Print("    Testament: Erbe bestimmt – " + familie.GetErbeBezeichnung(erbe));
+
+		await WarteBisBildschirmZurueck(nameof(Kirche), "Kirche.Testament");
 	}
 
 	/// <summary>
@@ -577,6 +742,8 @@ public partial class E2eTreiber : Node
 		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", arbeiter);
 		await NaechsterFrame();
 
+		_ruecklage = BerechneRuecklage(ware, staetten, arbeiter);
+
 		// Lager nur erweitern, solange es die bindende Grenze ist. Ist stattdessen die Arbeiterzahl am
 		// Anschlag, waere zusaetzlicher Lagerraum totes Kapital – gemessen kostete ein blindes
 		// Weiterkaufen ueber 15 Jahre rund 31 000 Taler und drehte das Ergebnis ins Minus.
@@ -628,8 +795,30 @@ public partial class E2eTreiber : Node
 	}
 
 	/// <summary>
-	/// Kauft Lagerraum, aber nur aus dem Überschuss: Es bleibt <see cref="RuecklageFuerAusbau"/> stehen,
-	/// und es wird das größte Angebot genommen, das dieses Polster nicht antastet. Gekauft wird über den
+	/// Das Polster, das eine Handelsrunde stehen lässt: die Produktionskosten, die sie mit dieser
+	/// Einstellung im laufenden Jahr selbst auslöst, verdoppelt. Der Aufschlag deckt die übrigen
+	/// Kostenblöcke der Jahresabrechnung ab, die der Treiber nicht vorausberechnen kann, ohne sie zu
+	/// verbuchen – Verkaufssteuern, Kirchenzehnt, Zoll, Kreditzinsen, Hofhaltung.
+	///
+	/// Die Formel spiegelt <c>AbrechnungsManager</c>: Arbeiterkosten sind Arbeiter mal
+	/// <c>GetWSArbeiterpreis</c>, Betriebskosten Stätten mal <c>GetWSEinzelpreis</c>.
+	///
+	/// Vorher stand hier eine feste Zahl, unabhängig von der Betriebsgröße. Gemessen stand der Treiber
+	/// damit jedes Jahr am Rand der Zahlungsunfähigkeit: In den ersten sieben Jahren war er bei beiden
+	/// untersuchten Seeds durchgehend negativ, und in drei von zehn Läufen fiel er in den Schuldturm –
+	/// einen absorbierenden Zustand, denn ein Kerkerjahr kostet den Zug, damit die Handelsrunde, damit
+	/// die Einnahme, die ihn herausholen würde.
+	/// </summary>
+	private static int BerechneRuecklage(Rohstoff ware, int staetten, int arbeiter)
+	{
+		int produktionskosten = arbeiter * ware.GetWSArbeiterpreis() + staetten * ware.GetWSEinzelpreis();
+
+		return Math.Max(RuecklageMindestens, produktionskosten * 2);
+	}
+
+	/// <summary>
+	/// Kauft Lagerraum, aber nur aus dem Überschuss: Es bleibt <see cref="_ruecklage"/> stehen, und es
+	/// wird das größte Angebot genommen, das dieses Polster nicht antastet. Gekauft wird über den
 	/// <c>LagerraumManager</c> der Lib, nicht über den Bildschirm – der Lagerraum-Dialog gehört nicht zur
 	/// Handelsrunde, und ihn hier aufzuziehen würde die Zugsteuerung durcheinanderbringen.
 	/// </summary>
@@ -642,7 +831,7 @@ public partial class E2eTreiber : Node
 		{
 			int preis = lager.GetPreis(angebot);
 
-			if (preis > 0 && taler - preis >= RuecklageFuerAusbau && lager.Kaufe(angebot))
+			if (preis > 0 && taler - preis >= _ruecklage && lager.Kaufe(angebot))
 			{
 				_bedienteKnoepfe.Add("Stadt.Lagerausbau");
 				return;
@@ -1016,11 +1205,22 @@ public partial class E2eTreiber : Node
 				_imZugende = false;
 				return true;
 			}
+			else if (ErkenneSpielende())
+			{
+				// Der Zug endete das Spiel (erloschene Dynastie, erfüllter Auftrag): Jahr und Spieler
+				// wechseln dann nicht mehr, weil es keinen nächsten Zug gibt.
+				_imZugende = false;
+				return false;
+			}
 
 			await NaechsterFrame();
 		}
 
 		_imZugende = false;
+
+		if (_spielBeendet)
+			return false;
+
 		_fehler.Add("Der Zug im Jahr " + jahrVorher + " ließ sich nicht beenden. " + Zustandsbericht());
 		return false;
 	}
@@ -1191,6 +1391,33 @@ public partial class E2eTreiber : Node
 		SW.Dynamisch.SetAktiverSpieler(1);
 	}
 
+	/// <summary>
+	/// Ist das Spiel regulär zu Ende gegangen? Für den Treiber sieht das aus wie ein Hänger: Es kommt
+	/// kein bedienbares Kontor mehr. Unterscheiden lässt es sich am Bildschirm – der Client blendet im
+	/// Spielende-Zweig das Kontor aus (<c>Kontor.BeendeZug</c>), wodurch das Hauptmenü wieder zum
+	/// Vorschein kommt. Gründe: erloschene Dynastie, erfüllter Auftrag, ausgeschiedener letzter Spieler.
+	///
+	/// Die Abfrage gilt erst, wenn ein Spiel steht: Während der Spielanlage über die Menüs ist das
+	/// Hauptmenü sichtbar und das Kontor verborgen – genau dasselbe Bild.
+	/// </summary>
+	private bool ErkenneSpielende()
+	{
+		if (_spielBeendet)
+			return true;
+
+		if (!_spielLaeuft)
+			return false;
+
+		var menue = _main.GetNodeOrNull<Control>(nameof(Mainmenu));
+
+		if (menue == null || !menue.IsVisibleInTree() || _main.Kontor.IsVisibleInTree())
+			return false;
+
+		_spielBeendet = true;
+		_endeJahr = SW.Dynamisch.GetAktuellesJahr();
+		return true;
+	}
+
 	private async Task<bool> WarteBisKontorBereit()
 	{
 		int ruhig = 0;
@@ -1215,12 +1442,40 @@ public partial class E2eTreiber : Node
 					await Schiesse("Kontor");
 					return true;
 				}
+
+				// Nach derselben Ruhephase ohne Kontor: Statt die vollen MaxSchritte abzuwarten und
+				// einen Hänger zu melden, wird geprüft, ob das Spiel schlicht vorbei ist.
+				if (ruhig >= RuheFrames && ErkenneSpielende())
+					return false;
 			}
 
 			await NaechsterFrame();
 		}
 
 		return false;
+	}
+
+	/// <summary>
+	/// Talerstand aller menschlichen Spieler und die in diesem Jahr vor Ort abgesetzte Menge – die zwei
+	/// Zahlen, an denen eine Abwärtsspirale erkennbar wird. Der Lokalverkauf steht dabei, weil genau er
+	/// in den negativen Läufen einbricht, während der Export weiterläuft.
+	/// </summary>
+	private string Talerstand()
+	{
+		var teile = new List<string>();
+
+		for (int i = 1; i <= SW.Dynamisch.GetAktivSpielerAnzahl(); i++)
+		{
+			var sp = SW.Dynamisch.GetHumWithID(i);
+
+			if (sp != null)
+				teile.Add("S" + i + " " + sp.GetTaler() + " T");
+		}
+
+		teile.Add("Verkauf " + (_verkaufteWaren - _verkauftVorjahr));
+		_verkauftVorjahr = _verkaufteWaren;
+
+		return string.Join(", ", teile);
 	}
 
 	/// <summary>
@@ -1558,6 +1813,14 @@ public partial class E2eTreiber : Node
 		}
 
 		GD.Print("Gespielte Jahre:   " + (SW.Dynamisch.GetAktuellesJahr() - SW.Statisch.StartJahr) + " von " + jahre + " geplant");
+
+		// Ein reguläres Spielende ist ein gültiger Ausgang, kein Fehler – aber es muss im Bericht stehen,
+		// sonst ist ein Lauf, der nach 12 von 40 Jahren endete, nicht von einem vollständigen zu
+		// unterscheiden. Bewusst ohne Schwellwert, ab wann ein Ende „zu früh" wäre: Die Zeile macht es
+		// sichtbar, die Bewertung gehört zum Anlass der Messung.
+		if (_spielBeendet)
+			GD.Print("Spiel beendet:     regulär im Jahr " + _endeJahr
+			         + " (erloschene Dynastie, erfüllter Auftrag oder letzter Spieler ausgeschieden)");
 		GD.Print("Züge:              " + _gespielteZuege);
 		// Rechtsklicks fallen bei inszenierten Sequenzen (Duell) reichlich an, ohne etwas zu bewirken –
 		// aussagekräftig ist vor allem, wie oft wirklich ein Knopf gedrückt wurde.

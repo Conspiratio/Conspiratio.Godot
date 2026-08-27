@@ -141,22 +141,50 @@ The game needs the editor to play, so changes are verified in three complementar
    Workers are always set to `sites × (Rohstoff.GetArbeiter() / Rohstoff.GetWerkstaetten())` — the exact
    ratio the goods demand; a fixed worker count is either understaffed or measurably loses money once
    overstaffed. **Storage is expanded from surplus** (`LagerraumManager`, largest offer that leaves
-   `RuecklageFuerAusbau` = 1 500 standing) but **only while storage is the binding cap** — once the worker
+   the reserve standing) but **only while storage is the binding cap** — once the worker
    cap binds instead, extra storage is dead capital: an earlier version that kept buying regardless turned
    a positive 15-year result negative.
+   **The reserve has to grow with the business** (`BerechneRuecklage`): it mirrors `AbrechnungsManager`
+   — workers × `GetWSArbeiterpreis` plus sites × `GetWSEinzelpreis` — and doubles that, the surcharge
+   standing in for the cost blocks that cannot be predicted without booking them (sales tax, tithe,
+   tolls, interest, Hofhaltung). `RuecklageMindestens` = 1 500 is only the floor now. As a flat 1 500 it
+   was independent of business size, and the driver ended up insolvent nearly every year: the debtor's
+   tower is an **absorbing state** — a jail year costs the turn, hence the trade round, hence the income
+   that would pay the debt off. Three of ten seeds never escaped. The courtship is gated on twice the
+   reserve for the same reason: it was spending exactly the cushion the trade round had left.
 
    **The measurement history lives in [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md)**, not here — it
    is a chain in which each layer invalidates the one before, and keeping it in this file made the
    current state hard to find. What carries over as method:
    - **Read a band, never a single number.** The seed dominates everything else; cross-seed differences
-     below ~10 000 talers mean nothing. The last band measured was roughly +20 000 to +90 000 over four
-     seeds, mean ~44 000 against a pre-project mean of ~72 000.
+     below ~10 000 talers mean nothing. The current band (Schicht 5, ten seeds) is **+3 900 to
+     +53 000**, mean 24 862, median 22 480, none negative, against a pre-project mean of ~72 000.
    - **Never compare across a change that reshapes the random stream** — re-measure instead. The
      restored AI year-change (`KIAktionenDurchfuehren`) alone adds ~300 000 draws per year (390 AIs ×
-     390 relationships), so no seed keeps its old outcome. Its own baseline is deliberately not written
-     down yet; it should be established over several seeds first.
+     390 relationships), so no seed keeps its old outcome. Paket A/B reshaped it again on top of that:
+     seed 1234 went from 68 392 to 41 805 without any trading change, which is why Schicht 4 is a band
+     over ten seeds rather than a before/after pair.
    - A run's wealth is **not** comparable per game year: the driver always plays `--jahre` turns, but
      `Gespielte Jahre` can exceed that because a debtor's-tower year costs a turn without playing one.
+   - **Only `--ohne-aktionen` measures the game; the default settings measure the driver.** Same seeds,
+     15 years: +49 710 without actions against −19 033 with them (1 player), +15 147 against −11 798
+     (2 players) — the sign flips with the switch, in both player counts. With actions the driver burns
+     its click budget on random purchases and stops finishing the trade round (local sales collapse from
+     5 000–8 500 to 241–300). A default-settings run is a fine regression signal and a worthless
+     balancing statement. Player count, by contrast, is real: halving the result is market saturation on
+     a shared market.
+   - **The driver marries and writes a will**, and both run even with `--ohne-aktionen` — same reason
+     as the trade round: dynastic continuity is the game's core, not a random action. Without it no run
+     survived past ~25 years, because `FuehreTestamentAus` reads `GetErbeSpielerID()` and **children do
+     not inherit by themselves**: a marriage alone still ends the dynasty at the first death. With both,
+     40-year runs complete (measured: 73/44/41 played years). Two traps that cost a test round each —
+     an heir has to be *designated*, and the will dialog must be closed by its own close button, because
+     a right-click only lands a frame later and the generic dialog handling meanwhile pages the freshly
+     chosen heir onward, all the way back to "no heir".
+   - **A legitimate game over is not a hang.** `ErkenneSpielende()` reads it off the screen — the client
+     hides the Kontor in the game-over branch, which uncovers the Mainmenu again — and the run then ends
+     cleanly with a "Spiel beendet" line instead of an error. Guarded by `_spielLaeuft`, since game setup
+     through the menus shows exactly the same picture.
 
    Three traps a re-measurement closed, worth not falling into again:
    - **`GetWerkstattVerkaufspreis` must not inherit the purchase-price scaling.** The factor
