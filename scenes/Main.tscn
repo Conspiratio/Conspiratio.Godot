@@ -1,4 +1,4 @@
-[gd_scene load_steps=69 format=3 uid="uid://cwhsddmao6lwd"]
+[gd_scene load_steps=70 format=3 uid="uid://cwhsddmao6lwd"]
 
 [ext_resource type="PackedScene" uid="uid://b2pe5xu3300xv" path="res://scenes/Mainmenu.tscn" id="1_6ai1b"]
 [ext_resource type="Script" path="res://assets/scripts/Main.cs" id="1_72k8v"]
@@ -70,6 +70,7 @@
 [ext_resource type="PackedScene" uid="uid://schuldproz001" path="res://scenes/dialogs/SchuldenProzessDialog.tscn" id="67_sprz"]
 [ext_resource type="PackedScene" uid="uid://cniwxaalqe6nw" path="res://scenes/dialogs/AmtsenthebungDialog.tscn" id="68_amte"]
 [ext_resource type="PackedScene" uid="uid://3yf1t2yvb4rc" path="res://scenes/dialogs/HochzeitDialog.tscn" id="69_hoch"]
+[ext_resource type="PackedScene" uid="uid://hofhaltungdlg1" path="res://scenes/dialogs/HofhaltungDialog.tscn" id="70_hhdl"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -335,6 +336,10 @@ visible = false
 layout_mode = 1
 
 [node name="DuellDialog" parent="." instance=ExtResource("65_duel")]
+visible = false
+layout_mode = 1
+
+[node name="HofhaltungDialog" parent="." instance=ExtResource("70_hhdl")]
 visible = false
 layout_mode = 1
 

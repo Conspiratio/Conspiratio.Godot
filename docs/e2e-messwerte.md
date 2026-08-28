@@ -216,6 +216,106 @@ erst ab dem doppelten Rücklagenbetrag. Der Faktor 2 ist eine **Heuristik**, kei
 ist nur ihre Wirkung: Spannweite von 109 732 auf 49 282 halbiert, Katastrophenschwanz weg, Median
 nahezu unverändert (27 376 → 22 480).
 
+## Schicht 6 — Moneysink: Unterhalt, Hofhaltung, verdiente Geltung (Lib 4.5.0)
+
+Drei Änderungen der Lib wirken zusammen: ein progressiver **Unterhalt je Betrieb** (der n-te kostet
+100 × n im Jahr), eine wählbare **Hofhaltungsstufe** (50/100/200 % des standesgemäßen Aufwands) und
+**Ansehen aus Taten statt aus dem Kontostand** — der Geldterm in `HumSpieler.AnsehenAktualisieren` ist
+ersatzlos weg, dafür bringen Hofaufwand über Stand und gut ausgelastete Betriebe je bis zu 5 Punkte im
+Jahr. Der Zufallsstrom verschiebt sich damit erneut: **Schicht 5 ist als Vergleichsband entwertet.**
+
+### Seeds spielen sich nicht mehr gleich ab — und zwar schon vor dieser Änderung
+
+Bevor irgendetwas verglichen werden konnte, ist die Voraussetzung weggebrochen. Drei identische Aufrufe
+des **unveränderten** Stands (Lib 4.4.1, diese Änderung weggestasht), `--jahre=15 --spieler=1
+--ohne-aktionen --seed=1234`:
+
+| Lauf | a | b | c |
+|---|---:|---:|---:|
+| Taler | 1 390 | 1 390 | 58 520 |
+| Klicks | 209 | 209 | 1 072 |
+
+a und b sind bis auf den Klick identisch, c weicht ab Klick [122] ab: Der Brautwerbungs-Dialog bietet
+dort ein **anderes Geschenk** an, obwohl die Protokolle bis dahin Zeile für Zeile gleich sind — gleiche
+Taler, gleiche Jahre, gleiche Dialogfolge. Der Zufallszustand ist also auseinandergelaufen, ohne dass
+sich das an einer Handlung ablesen ließe; irgendetwas zieht Zufall außerhalb der protokollierten
+Aktionsfolge. Der Satz „`--seed=N` spielt einen Lauf exakt nach" aus `CLAUDE.md` gilt so nicht mehr.
+
+**Folge für die Methode:** Von den zehn Schicht-5-Seeds reproduzierten heute nur drei ihren notierten
+Wert (2718, 555, 13). Schicht 5 taugte damit von vornherein nicht als Vergleichsband — unabhängig davon,
+was sich geändert hat. **Die Grundlinie wurde deshalb neu gemessen**, auf derselben Maschine, in
+derselben Sitzung, mit der Änderung im Stash. Nur dieser Vergleich ist ehrlich. Und weil ein einzelner
+Lauf nichts mehr aussagt, steht jeder Stand hier für **zwei Wiederholungen** über dieselben zehn Seeds
+(n = 20).
+
+### Das Band
+
+`--jahre=15 --spieler=1 --ohne-aktionen`, zehn Seeds, je zwei Wiederholungen:
+
+| Stand | Band | Mittel | Median | negativ |
+|---|---|---:|---:|---:|
+| Grundlinie 4.4.1, heute gemessen | −1 099 bis +46 696 | 19 074 | 15 769 | 1 von 20 |
+| Neu 4.5.0 | +1 415 bis +46 046 | 20 331 | 16 951 | 0 von 20 |
+
+Das Vermögen bleibt also, wo es war — Mittel und Median liegen rund 1 200 Taler auseinander, weit
+innerhalb des Rauschens, und der einzige negative Lauf der Grundlinie hat keine Entsprechung. Ein
+Vergleich **je Seed** wäre nach dem Abschnitt oben unseriös; die Einzelwerte (Mittel der beiden
+Wiederholungen) stehen nur der Vollständigkeit halber hier:
+
+| Seed | 90210 | 2718 | 555 | 2023 | 4711 | 7 | 31337 | 42 | 13 | 1234 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4.4.1 | 1 390 | 8 445 | 11 862 | 8 357 | 17 613 | 18 799 | 33 617 | 35 452 | 46 696 | 8 510 |
+| 4.5.0 | 11 116 | 5 872 | 4 777 | 7 662 | 21 808 | 37 724 | 26 622 | 13 380 | 40 619 | 33 732 |
+
+### Der Schuldenprozess — das entscheidende Kriterium
+
+`MussSichVorGlaeubigernVerantworten` prüft `Taler < GetMaxSchulden() − Ansehen × 10`, und
+`maxSchulden` ist −500. Mit dem alten Geldansehen (rund 1 160 Punkte bei 2 500 Talern je Punkt) lag die
+geduldete Schuld bei etwa −12 000; jetzt, mit Ansehen im niedrigen zweistelligen Bereich, bei etwa
+−600. Erwartbar war also ein deutlicher Anstieg. Gemessen:
+
+| Stand | Kerkerjahre (Summe) | Läufe mit Kerker | Schuldenprozesse (Summe) | je Wiederholung |
+|---|---:|---:|---:|---|
+| Grundlinie 4.4.1 | 41 | 17 von 20 | 82 | 40 / 42 |
+| Neu 4.5.0 | 43 | 18 von 20 | 98 | 48 / 50 |
+
+- **Der Schuldturm trifft nicht häufiger.** Kerkerjahre 41 gegen 43 — die beiden Wiederholungen eines
+  Stands liegen mit 20/21 bzw. 21/22 selbst schon einen Punkt auseinander. („Kerkerjahre" = gespielte
+  Jahre minus Züge; ein Jahr im Turm kostet einen Zug, ohne einen zu spielen.)
+- **Der Prozess selbst läuft rund ein Fünftel häufiger** — 82 gegen 98, und zwar in beiden
+  Wiederholungen gleichgerichtet (+20 % und +19 %), also kein Rauschen. Er endet nur eben nicht
+  häufiger mit einem Schuldspruch.
+
+Das passt zur Strategie des Treibers: Er fährt das Vermögen auf die Rücklage herunter und rutscht dabei
+knapp ins Minus, aber nie tief. Genau diese flachen Fälle hat die alte, großzügige Schwelle geschluckt;
+sie kommen jetzt vor die Gläubiger und werden dort mehrheitlich freigesprochen. Der absorbierende
+Zustand wird also nicht häufiger erreicht.
+
+### 40 Jahre — hier zeigt sich etwas
+
+Sechs Seeds je Stand, `--jahre=40 --spieler=1 --ohne-aktionen`, alle Exit 0:
+
+| Seed | 4.4.1 | 4.5.0 |
+|---|---|---|
+| 42 | 133 469 | 193 857 |
+| 1234 | 202 292 | 200 970 |
+| 13 | 142 336 | 64 652 |
+| 2023 | 16 053 | 72 491 |
+| 555 | 116 571 | Dynastie erloschen, Jahr 1625 |
+| 7 | 177 046 | Dynastie erloschen, Jahr 1630 |
+
+Sechs von sechs vollständigen Läufen gegen **vier von sechs**. Beide vorzeitigen Enden sind reguläre
+Spielenden, keine Hänger: Der Spieler starb ohne bestimmten Erben. Bei 555 wurde im ganzen Lauf **kein
+Kind geboren** (0 Geburtsdialoge gegen 6 in der Grundlinie), bei 7 wurde nur einmal ein Erbe bestimmt
+statt siebenmal.
+
+Eine plausible Kette — **nicht belegt**: Der Schuldenprozess greift früher, der Treiber ist häufiger
+knapp bei Kasse, und seine Brautwerbung hängt an genau dieser Kasse (`Taler < Rücklage × 2`). Wer nicht
+wirbt, heiratet nicht; wer nicht heiratet, hat kein Kind; wer kein Kind hat, hat keinen Erben. Sechs
+Läufe je Stand können das bei der oben belegten Nicht-Reproduzierbarkeit aber nicht von Zufall trennen.
+Wer es klären will, braucht deutlich mehr Läufe je Stand — oder einen Treiber, dessen Brautwerbung nicht
+am Vermögen hängt, denn dieses Nadelöhr ist eine Eigenheit des Treibers und keine des Spiels.
+
 ## KI-Aggressivität (`--aggressivitaet=N`)
 
 **Vor dem Handelsbalancing gemessen**, drei Seeds × 15 Jahre × 2 Spieler. Jede Einstellung von 1 bis 100

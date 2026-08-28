@@ -166,9 +166,30 @@ mouse_filter = 2
 text = "Kontrahenten"
 horizontal_alignment = 1
 
+[node name="AreaHofhaltung" type="Button" parent="."]
+layout_mode = 0
+offset_left = 530.0
+offset_top = 153.0
+offset_right = 1000.0
+offset_bottom = 305.0
+flat = true
+
+[node name="LabelHofhaltung" type="Label" parent="."]
+visible = false
+layout_mode = 0
+offset_left = 530.0
+offset_top = 105.0
+offset_right = 1000.0
+offset_bottom = 141.0
+theme_override_colors/font_color = Color(1, 0.843137, 0, 1)
+mouse_filter = 2
+text = "Hofhaltung"
+horizontal_alignment = 1
+
 [connection signal="pressed" from="AreaBewerbung" to="." method="_on_area_bewerbung_pressed"]
 [connection signal="pressed" from="AreaGeldleiher" to="." method="_on_area_geldleiher_pressed"]
 [connection signal="pressed" from="AreaGesetze" to="." method="_on_area_gesetze_pressed"]
 [connection signal="pressed" from="AreaKreditbuch" to="." method="_on_area_kreditbuch_pressed"]
 [connection signal="pressed" from="AreaPrivilegien" to="." method="_on_area_privilegien_pressed"]
 [connection signal="pressed" from="AreaKontrahenten" to="." method="_on_area_kontrahenten_pressed"]
+[connection signal="pressed" from="AreaHofhaltung" to="." method="_on_area_hofhaltung_pressed"]

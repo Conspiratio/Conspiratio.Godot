@@ -17,6 +17,7 @@ public partial class Main : Control
 	public Schreibstube Schreibstube;
 	public KreditbuchDialog KreditbuchDialog;
 	public GesetzeDialog GesetzeDialog;
+	public HofhaltungDialog HofhaltungDialog;
 	public Weltkarte Weltkarte;
 	public HausVerwaltungDialog HausVerwaltungDialog;
 	public HausWaehlenDialog HausWaehlenDialog;

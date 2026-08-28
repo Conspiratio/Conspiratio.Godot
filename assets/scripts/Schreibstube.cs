@@ -6,13 +6,13 @@ using Godot;
 namespace Conspiratio.Godot.assets.scripts;
 
 /// <summary>
-/// Die Schreibstube nach der Vorlage des WinForms-Clients: sechs Klickbereiche
-/// (Bewerbung, Geldleiher, Gesetze, Kreditbuch, Privilegien, Kontrahenten) mit goldenen
+/// Die Schreibstube nach der Vorlage des WinForms-Clients: sieben Klickbereiche
+/// (Bewerbung, Geldleiher, Gesetze, Kreditbuch, Privilegien, Kontrahenten, Hofhaltung) mit goldenen
 /// Hover-Beschriftungen; Rechtsklick auf einen Bereich zeigt seine Beschreibung.
 /// </summary>
 public partial class Schreibstube : Control
 {
-	private static readonly string[] AreaNamen = { "AreaBewerbung", "AreaGeldleiher", "AreaGesetze", "AreaKreditbuch", "AreaPrivilegien", "AreaKontrahenten" };
+	private static readonly string[] AreaNamen = { "AreaBewerbung", "AreaGeldleiher", "AreaGesetze", "AreaKreditbuch", "AreaPrivilegien", "AreaKontrahenten", "AreaHofhaltung" };
 
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
@@ -101,6 +101,8 @@ public partial class Schreibstube : Control
 				return "Hier könnt Ihr Kredite tilgen";
 			case "AreaPrivilegien":
 				return "Hier könnt Ihr Eure Privilegien einsehen";
+			case "AreaHofhaltung":
+				return "Hier könnt Ihr bestimmen, wie aufwendig Ihr Hof haltet";
 			default:
 				return "Hier könnt Ihr Eure Kontrahenten einsehen";
 		}
@@ -212,6 +214,19 @@ public partial class Schreibstube : Control
 
 		// Reine Übersicht der Kontrahenten (Klick auf einen Namen öffnet dessen Detailfenster inkl. Beweislast).
 		await _main.KontrahentenDialog.ShowDialog(KontrahentenDialog.ModusUebersicht);
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	private async void _on_area_hofhaltung_pressed()
+	{
+		SetProcessInput(false);
+
+		// Der Aufwand der Hofhaltung ist eine Standesfrage, kein Handel – deshalb steht die Wahl bei den
+		// Verwaltungspunkten der Schreibstube und nicht im Kontor.
+		await _main.HofhaltungDialog.ShowDialog();
+		UpdateHud();
 
 		if (Visible)
 			SetProcessInput(true);

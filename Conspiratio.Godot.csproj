@@ -12,7 +12,7 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Conspiratio.Lib" Version="4.4.1" />
+    <PackageReference Include="Conspiratio.Lib" Version="4.5.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
   </ItemGroup>
 </Project>
