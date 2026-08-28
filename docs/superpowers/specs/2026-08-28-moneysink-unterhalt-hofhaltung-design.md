@@ -34,30 +34,40 @@ Horten ist die einzige Antwort — die gerade nicht bestraft wird.
 
 Ein Moneysink, gegen den sich anwirtschaften lässt. Statt Geld wegzunehmen wird Geld **gebunden** und in
 etwas verwandelt, das man nicht horten kann. Die Belastung hängt an Entscheidungen des Spielers
-(was besitze ich, wie repräsentiere ich), nicht an seinem Kontostand.
+(wie gut nutze ich, was ich besitze; wie repräsentiere ich), nicht an seinem Kontostand.
 
 Randbedingung aus früheren Runden: **Einsteiger sollen davon nichts merken.**
 
-## Baustein A — Unterhalt, progressiv je Betrieb
+## Baustein A — Unterhalt auf ungenutzte Kapazität
 
-Jede besessene Werkstätte kostet jährlich Unterhalt, steigend mit der Anzahl: Der *n*-te Betrieb kostet
-`Grundunterhalt × n`, für N Betriebe also `Grundunterhalt × N(N+1)/2`. Quadratisch in der Betriebszahl,
-im Frühspiel praktisch unsichtbar.
+Unterhalt zahlt nur, wer Kapazität brachliegen lässt. Eine voll ausgelastete Werkstätte kostet **nichts**;
+eine stillgelegte kostet vollen Unterhalt. Damit trifft der Posten das Horten und nicht das Wirtschaften.
 
-Bewusst **linear-progressiv statt geometrisch**: `HandelsManager.SteigerungProzent` arbeitet beim
-Kaufpreis mit 125 % je Betrieb; über zwanzig Stufen wäre das Faktor 86 und würde Expansion nicht
-bremsen, sondern verbieten.
+**Stufenlos statt Schwelle.** Eine Werkstätte gilt nicht entweder als genutzt oder ungenutzt, sondern
+zahlt anteilig zu ihrer Untätigkeit: `Unterhalt = Grundunterhalt × (1 − Auslastung)`. Als Auslastung
+dient das Verhältnis, das `Produktionsslot.GetProduktion` ohnehin verwendet — gesetzte Arbeiter zu
+benötigten Arbeitern (`Staetten × Arbeiter / Werkstaetten` der Ware), gedeckelt bei 1.
+
+Der Grund für die Stufenlosigkeit ist ein Schlupfloch: Bei einer harten Schwelle („produziert ja/nein")
+genügte es, jede Werkstätte mit einem Arbeiter mitlaufen zu lassen, um den Posten vollständig zu
+umgehen. Anteilig gerechnet kostet ein Betrieb auf 10 % Auslastung 90 % des Unterhalts — es gibt nichts
+auszunutzen, und jede Verbesserung der Auslastung zahlt sich sofort aus.
+
+**Progressiv in der Zahl der brachliegenden Betriebe.** Summiert wird über die ungenutzten Anteile,
+und der *n*-te davon kostet `Grundunterhalt × n` — für N vollständig stillgelegte Betriebe also
+`Grundunterhalt × N(N+1)/2`. Bewusst linear-progressiv statt geometrisch:
+`HandelsManager.SteigerungProzent` arbeitet beim Kaufpreis mit 125 % je Betrieb; über zwanzig Stufen
+wäre das Faktor 86 und würde Horten nicht bremsen, sondern verbieten.
 
 - Neuer Posten `AbrechnungsErgebnis.Unterhalt`, in `Gesamtkosten` enthalten.
-- Bemessen wird auf **besessene**, nicht auf produzierende Werkstätten — das ist der Punkt der Änderung.
-- Gegenwehr des Spielers: auslasten oder abstoßen. Damit die Rechnung aufgeht, muss der Unterhalt klar
-  unter dem Deckungsbeitrag einer genutzten Werkstätte liegen; sonst ist es wieder nur eine Steuer.
+- Gegenwehr des Spielers: auslasten oder abstoßen — beides jederzeit möglich, beides sofort wirksam.
+- Ein Einsteiger, der seine ein bis zwei Betriebe ohnehin bespielt, zahlt strukturell null.
 
 ## Baustein B — Hofhaltung als Entscheidung
 
 Der Spieler wählt, wie aufwendig er Hof hält, als Vielfaches des standesgemäßen Aufwands seines Titels
-(`Adelstitel.GetJahresaufwand()`) in fünf Stufen: karg, sparsam, standesgemäß, aufwendig, fürstlich.
-Gespeichert wird die Abweichung von der Mitte, also −2 bis +2.
+(`Adelstitel.GetJahresaufwand()`) in drei Stufen: sparsam, standesgemäß, aufwendig.
+Gespeichert wird die Abweichung von der Mitte, also −1 bis +1.
 
 - **Über standesgemäß**: Der Mehraufwand wird in `PermaAnsehen` umgemünzt, mit einer Jahresobergrenze —
   Geltung wächst über Jahre, nicht in einem Zug.
@@ -118,7 +128,7 @@ E2E-Grundlinie geprüft werden, weil der Schuldturm ein absorbierender Zustand i
 Genau **ein** neues serialisiertes Feld: die Hofhaltungsstufe auf `HumSpieler`.
 
 Serialisierung ist feldbasiert und umgeht Konstruktoren, ein `int` kommt aus einem alten Spielstand also
-als `0` an. Gespeichert wird deshalb die **Abweichung** vom standesgemäßen Aufwand (−2 bis +2), nicht die
+als `0` an. Gespeichert wird deshalb die **Abweichung** vom standesgemäßen Aufwand (−1 bis +1), nicht die
 Stufe selbst: Dann bedeutet die 0 aus dem alten Stand „standesgemäß", also exakt das heutige Verhalten.
 Keine Migration, kein Lazy-Init-Accessor nötig.
 
@@ -134,8 +144,10 @@ Lib zuerst, Godot danach; der Godot-Commit nennt die Lib-Version im Betreff.
 **Lib.** Neuer Abrechnungsposten, Hofhaltungsstufe samt Umrechnung, Wegfall des Geldanteils. Neue Tests
 neben `HofhaltungTests`:
 
-- Unterhaltsstaffel: der zwanzigste Betrieb kostet das Zwanzigfache des ersten, die Summe stimmt.
-- Ein Einsteiger mit wenigen Betrieben zahlt einen vernachlässigbaren Betrag (die Randbedingung als Test).
+- Eine voll ausgelastete Werkstätte kostet keinen Unterhalt, eine stillgelegte den vollen.
+- Halbe Auslastung kostet den halben Unterhalt — der Test, der das Schwellen-Schlupfloch ausschliesst.
+- Unterhaltsstaffel: der zwanzigste brachliegende Betrieb kostet das Zwanzigfache des ersten.
+- Ein Einsteiger, der seine Betriebe bespielt, zahlt null (die Randbedingung als Test).
 - Aufwand über/unter standesgemäß ändert `PermaAnsehen` in der erwarteten Richtung, gedeckelt pro Jahr.
 - Die Abweichung 0 aus einem alten Spielstand bedeutet „standesgemäß" — der Savegame-Test.
 - Das Geldansehen wirkt nicht mehr: gleicher Spieler, zehnfache Barschaft, gleiches Ansehen.
@@ -154,7 +166,7 @@ heute, sonst kippt der Treiber wieder in die Schuldturm-Spirale.
 Bewusst nicht festgelegt, weil sie kalibriert und nicht geraten gehören. Die Harness kann alle drei
 messen:
 
-1. `Grundunterhalt` je Werkstätte (Ausgangspunkt der Staffel).
+1. `Grundunterhalt` je vollständig brachliegender Werkstätte (Ausgangspunkt der Staffel).
 2. Ansehenskurs je Taler Mehraufwand bei der Hofhaltung.
 3. Jahresobergrenze des Ansehensgewinns aus der Hofhaltung.
 
