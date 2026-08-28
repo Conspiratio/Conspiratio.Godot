@@ -34,34 +34,55 @@ Horten ist die einzige Antwort — die gerade nicht bestraft wird.
 
 Ein Moneysink, gegen den sich anwirtschaften lässt. Statt Geld wegzunehmen wird Geld **gebunden** und in
 etwas verwandelt, das man nicht horten kann. Die Belastung hängt an Entscheidungen des Spielers
-(wie gut nutze ich, was ich besitze; wie repräsentiere ich), nicht an seinem Kontostand.
+(was besitze ich und wie gut lasse ich es aus, wie repräsentiere ich), nicht an seinem Kontostand.
 
 Randbedingung aus früheren Runden: **Einsteiger sollen davon nichts merken.**
 
-## Baustein A — Unterhalt auf ungenutzte Kapazität
+## Baustein A — Unterhalt auf jede besessene Werkstätte
 
-Unterhalt zahlt nur, wer Kapazität brachliegen lässt. Eine voll ausgelastete Werkstätte kostet **nichts**;
-eine stillgelegte kostet vollen Unterhalt. Damit trifft der Posten das Horten und nicht das Wirtschaften.
+Jede besessene Werkstätte kostet jährlichen Unterhalt, **unabhängig davon, ob sie produziert**. Das hat
+zwei Wirkungen zugleich: Expansion wird grundsätzlich teurer, und schlechte Auslastung bestraft sich von
+selbst — ein Betrieb, der nichts erwirtschaftet, kostet trotzdem. Der Spieler muss ihn auslasten oder
+abstoßen; eine eigene Auslastungsregel braucht es dafür nicht.
 
-**Stufenlos statt Schwelle.** Eine Werkstätte gilt nicht entweder als genutzt oder ungenutzt, sondern
-zahlt anteilig zu ihrer Untätigkeit: `Unterhalt = Grundunterhalt × (1 − Auslastung)`. Als Auslastung
-dient das Verhältnis, das `Produktionsslot.GetProduktion` ohnehin verwendet — gesetzte Arbeiter zu
-benötigten Arbeitern (`Staetten × Arbeiter / Werkstaetten` der Ware), gedeckelt bei 1.
+Das ist die eigentliche Umkehrung gegenüber heute: `AbrechnungsManager` summiert `Betriebskosten` über
+`produktionsslot.GetProduktionStaetten()`, also Stätten *in Produktion*. Genau deshalb ist Horten
+derzeit gratis und Wirtschaften teuer.
 
-Der Grund für die Stufenlosigkeit ist ein Schlupfloch: Bei einer harten Schwelle („produziert ja/nein")
-genügte es, jede Werkstätte mit einem Arbeiter mitlaufen zu lassen, um den Posten vollständig zu
-umgehen. Anteilig gerechnet kostet ein Betrieb auf 10 % Auslastung 90 % des Unterhalts — es gibt nichts
-auszunutzen, und jede Verbesserung der Auslastung zahlt sich sofort aus.
-
-**Progressiv in der Zahl der brachliegenden Betriebe.** Summiert wird über die ungenutzten Anteile,
-und der *n*-te davon kostet `Grundunterhalt × n` — für N vollständig stillgelegte Betriebe also
-`Grundunterhalt × N(N+1)/2`. Bewusst linear-progressiv statt geometrisch:
-`HandelsManager.SteigerungProzent` arbeitet beim Kaufpreis mit 125 % je Betrieb; über zwanzig Stufen
-wäre das Faktor 86 und würde Horten nicht bremsen, sondern verbieten.
+**Progressiv in der Zahl der Betriebe.** Der *n*-te Betrieb kostet `Grundunterhalt × n`, für N Betriebe
+also `Grundunterhalt × N(N+1)/2` — quadratisch in der Betriebszahl. Bewusst linear-progressiv statt
+geometrisch: `HandelsManager.SteigerungProzent` arbeitet beim Kaufpreis mit 125 % je Betrieb; über
+zwanzig Stufen wäre das Faktor 86 und würde Expansion nicht bremsen, sondern verbieten.
 
 - Neuer Posten `AbrechnungsErgebnis.Unterhalt`, in `Gesamtkosten` enthalten.
 - Gegenwehr des Spielers: auslasten oder abstoßen — beides jederzeit möglich, beides sofort wirksam.
-- Ein Einsteiger, der seine ein bis zwei Betriebe ohnehin bespielt, zahlt strukturell null.
+- **Die Einsteiger-Randbedingung wird hier zur Kalibrierungsfrage.** Anders als bei einer Bemessung auf
+  ungenutzte Kapazität zahlt auch ein Anfänger, der seine zwei Betriebe voll auslastet
+  (`Grundunterhalt × 3`). Die Progression hält den Betrag klein, aber „strukturell null" ist er nicht
+  mehr — `Grundunterhalt` muss deshalb so gewählt werden, dass die ersten Betriebe im Rauschen
+  verschwinden, und der Einsteiger-Test unten wacht darüber.
+
+### Die Gegenrichtung: gut geführte Werke bringen Geltung
+
+Der Unterhalt allein bestraft nur — wer gut wirtschaftet, vermeidet damit lediglich Verlust. Damit gutes
+Wirtschaften auch *gewinnt*, bekommt hohe Auslastung eine eigene Belohnung, und zwar in derselben
+Währung, die Baustein B verbraucht: `PermaAnsehen`. Der Ruf eines Kaufmanns, dessen Werke laufen.
+
+Als Auslastung dient das Verhältnis, das `Produktionsslot.GetProduktion` ohnehin verwendet — gesetzte zu
+benötigten Arbeitern (`Staetten × Arbeiter / Werkstaetten` der Ware), gedeckelt bei 1 und über die
+Werkstätten des Spielers gemittelt. Oberhalb einer Schwelle (Vorschlag: 80 % im Jahresmittel) gibt es
+einen Ansehensgewinn, gestaffelt nach Auslastung und Betriebszahl, mit derselben Jahresobergrenze wie
+die Hofhaltung.
+
+Damit schließt sich der Kreis, den das ganze Vorhaben braucht: **Geltung lässt sich erwirtschaften oder
+erkaufen** — das eine kostet Können, das andere Geld. Ein reicher, aber schlecht geführter Betrieb muss
+seine Geltung teuer kaufen; ein kleiner, exzellent geführter verdient sie sich. Genau das ist die
+Antwort auf „ein Moneysink, gegen den man anwirtschaften kann": Der Spieler kann die Kosten nicht
+wegzaubern, aber er kann sich das, wofür er sonst zahlen müsste, durch Können verdienen.
+
+Die Schwelle ist bewusst hoch angesetzt: Sie soll eine Auszeichnung sein, kein Grundzustand. Ein Betrieb
+knapp unter der Schwelle bekommt nichts — anders als beim Unterhalt gibt es hier nichts auszunutzen,
+weil die Belohnung nur nach oben wirkt.
 
 ## Baustein B — Hofhaltung als Entscheidung
 
@@ -144,10 +165,13 @@ Lib zuerst, Godot danach; der Godot-Commit nennt die Lib-Version im Betreff.
 **Lib.** Neuer Abrechnungsposten, Hofhaltungsstufe samt Umrechnung, Wegfall des Geldanteils. Neue Tests
 neben `HofhaltungTests`:
 
-- Eine voll ausgelastete Werkstätte kostet keinen Unterhalt, eine stillgelegte den vollen.
-- Halbe Auslastung kostet den halben Unterhalt — der Test, der das Schwellen-Schlupfloch ausschliesst.
-- Unterhaltsstaffel: der zwanzigste brachliegende Betrieb kostet das Zwanzigfache des ersten.
-- Ein Einsteiger, der seine Betriebe bespielt, zahlt null (die Randbedingung als Test).
+- Unterhaltsstaffel: der zwanzigste Betrieb kostet das Zwanzigfache des ersten, die Summe stimmt.
+- Der Unterhalt haengt nicht an der Produktion: ein stillgelegter und ein voll ausgelasteter Betrieb
+  kosten denselben Unterhalt (die Umkehrung gegenueber `Betriebskosten` als Test).
+- Ein Einsteiger mit zwei Betrieben zahlt einen vernachlaessigbaren Betrag (die Randbedingung als Test,
+  und die Schranke fuer die Kalibrierung von `Grundunterhalt`).
+- Hohe Auslastung bringt `PermaAnsehen`, knapp unter der Schwelle nichts, und der Gewinn ist auf die
+  Jahresobergrenze gedeckelt.
 - Aufwand über/unter standesgemäß ändert `PermaAnsehen` in der erwarteten Richtung, gedeckelt pro Jahr.
 - Die Abweichung 0 aus einem alten Spielstand bedeutet „standesgemäß" — der Savegame-Test.
 - Das Geldansehen wirkt nicht mehr: gleicher Spieler, zehnfache Barschaft, gleiches Ansehen.
@@ -166,9 +190,12 @@ heute, sonst kippt der Treiber wieder in die Schuldturm-Spirale.
 Bewusst nicht festgelegt, weil sie kalibriert und nicht geraten gehören. Die Harness kann alle drei
 messen:
 
-1. `Grundunterhalt` je vollständig brachliegender Werkstätte (Ausgangspunkt der Staffel).
+1. `Grundunterhalt` je Werkstätte (Ausgangspunkt der Staffel). Untere Schranke: Zwei Betriebe
+   dürfen einen Einsteiger nicht spürbar belasten. Obere Schranke: Der Unterhalt muss klar unter dem
+   Deckungsbeitrag einer ausgelasteten Werkstätte liegen, sonst lohnt Expansion nie.
 2. Ansehenskurs je Taler Mehraufwand bei der Hofhaltung.
 3. Jahresobergrenze des Ansehensgewinns aus der Hofhaltung.
+4. Auslastungsschwelle und Ansehenskurs der Werkstatt-Belohnung.
 
 ## Messgrundlage
 
