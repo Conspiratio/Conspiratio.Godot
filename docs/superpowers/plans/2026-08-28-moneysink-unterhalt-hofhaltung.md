@@ -52,7 +52,7 @@ Conspiratio.Godot (Godot 4.7 / .NET 8, Verifikation über den E2E-Treiber und di
 | `Conspiratio.Godot.csproj` | Lib-Version anheben |
 | `assets/scripts/AbrechnungDialog.cs` | Posten `Unterhalt` anzeigen |
 | `assets/scripts/HofhaltungDialog.cs` + `scenes/dialogs/HofhaltungDialog.tscn` | neu — Stufenwahl |
-| `assets/scripts/Kontor.cs` | Einstieg in den Hofhaltungs-Dialog |
+| `assets/scripts/Schreibstube.cs` + `scenes/Schreibstube.tscn` | Klickflaeche AreaHofhaltung als Einstieg |
 | `CHANGELOG.md` | bilingualer Eintrag |
 
 ---
