@@ -108,10 +108,18 @@ namespace Conspiratio.Lib.Tests
             TestSpielwelt.Starte();
             SetzeWerkstaetten(20);
 
+            // Nicht gegen die Literalzahl 20 pruefen: PlayerSetupManager schaltet beim Anlegen bereits
+            // eine Werkstatt frei, und die liegt in der Heimatstadt - je nach deren ID ausserhalb der
+            // ersten 20 durchlaufenen Plaetze. Der Test geht deshalb vom tatsaechlichen Bestand aus.
+            int besessen = SW.Dynamisch.GetAktHum().ZaehleWerkstaetten();
+
+            Assert.True(besessen >= 20, "Der Aufbau muss mindestens 20 Betriebe ergeben haben.");
+
             var ergebnis = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
             // Der n-te Betrieb kostet Grundunterhalt * n, die Summe also N*(N+1)/2 Grundeinheiten.
-            Assert.Equal(AbrechnungsManager.GrundunterhaltProWerkstatt * 20 * 21 / 2, ergebnis.Unterhalt);
+            Assert.Equal(AbrechnungsManager.GrundunterhaltProWerkstatt * besessen * (besessen + 1) / 2,
+                         ergebnis.Unterhalt);
         }
 
         [Fact]
@@ -217,8 +225,16 @@ An `UnterhaltTests.cs` anhängen:
         [Fact]
         public void Ein_Einsteiger_mit_zwei_Betrieben_zahlt_kaum_Unterhalt()
         {
+            // Kein SetzeWerkstaetten: Ein frisch angelegter Spieler besitzt genau die eine Werkstatt,
+            // die PlayerSetupManager ihm gibt. Genau das ist der Einsteigerfall.
             TestSpielwelt.Starte();
-            SetzeWerkstaetten(2);
+
+            var spieler = SW.Dynamisch.GetAktHum();
+            spieler.GetSpielerHatInStadtXWerkstaettenY(1, 1).SetEnabled(true);
+
+            int besessen = spieler.ZaehleWerkstaetten();
+
+            Assert.Equal(2, besessen);
 
             var ergebnis = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
 
