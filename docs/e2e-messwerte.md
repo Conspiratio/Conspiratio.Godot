@@ -282,9 +282,14 @@ geduldete Schuld bei etwa −12 000; jetzt, mit Ansehen im niedrigen zweistellig
 - **Der Schuldturm trifft nicht häufiger.** Kerkerjahre 41 gegen 43 — die beiden Wiederholungen eines
   Stands liegen mit 20/21 bzw. 21/22 selbst schon einen Punkt auseinander. („Kerkerjahre" = gespielte
   Jahre minus Züge; ein Jahr im Turm kostet einen Zug, ohne einen zu spielen.)
-- **Der Prozess selbst läuft rund ein Fünftel häufiger** — 82 gegen 98, und zwar in beiden
-  Wiederholungen gleichgerichtet (+20 % und +19 %), also kein Rauschen. Er endet nur eben nicht
-  häufiger mit einem Schuldspruch.
+- **Der Prozess selbst läuft häufiger** — 82 gegen 98, in beiden Wiederholungen gleichgerichtet
+  (+20 % und +19 %). Er endet nur eben nicht häufiger mit einem Schuldspruch.
+  **Die Richtung trägt der Mechanismus, nicht die Statistik.** Die beiden Wiederholungen sind keine
+  unabhängigen Stichproben — sie laufen über dieselben zehn Seeds, und die oben belegte Streuung
+  innerhalb eines einzigen Seeds (1 390 gegen 58 520 Taler) ist um ein Vielfaches größer als der
+  Effekt. Dass beide in dieselbe Richtung zeigen, ist deshalb kein Beleg. Glaubwürdig ist der
+  Anstieg, weil die Schwelle nachweislich von rund − 12 000 auf rund − 600 gefallen ist; die Zahlen
+  sind damit vereinbar, mehr sagen sie nicht.
 
 Das passt zur Strategie des Treibers: Er fährt das Vermögen auf die Rücklage herunter und rutscht dabei
 knapp ins Minus, aber nie tief. Genau diese flachen Fälle hat die alte, großzügige Schwelle geschluckt;
@@ -293,7 +298,10 @@ Zustand wird also nicht häufiger erreicht.
 
 ### 40 Jahre — hier zeigt sich etwas
 
-Sechs Seeds je Stand, `--jahre=40 --spieler=1 --ohne-aktionen`, alle Exit 0:
+Sechs Seeds je Stand, `--jahre=40 --spieler=1 --ohne-aktionen`, alle Exit 0. **Ein Lauf je Seed und
+Stand** — also genau der Vergleich, den der Abschnitt „Seeds spielen sich nicht mehr gleich ab" oben
+für unzulässig erklärt. Die Tabelle steht hier, weil sie der einzige vorhandene Blick auf das
+Spätspiel ist; jede Zeile ist eine Beobachtung, kein Messwert:
 
 | Seed | 4.4.1 | 4.5.0 |
 |---|---|---|
@@ -304,7 +312,8 @@ Sechs Seeds je Stand, `--jahre=40 --spieler=1 --ohne-aktionen`, alle Exit 0:
 | 555 | 116 571 | Dynastie erloschen, Jahr 1625 |
 | 7 | 177 046 | Dynastie erloschen, Jahr 1630 |
 
-Sechs von sechs vollständigen Läufen gegen **vier von sechs**. Beide vorzeitigen Enden sind reguläre
+Sechs von sechs vollständigen Läufen gegen **vier von sechs** — bei einem Lauf je Zelle also nicht
+mehr als ein Anhaltspunkt. Beide vorzeitigen Enden sind reguläre
 Spielenden, keine Hänger: Der Spieler starb ohne bestimmten Erben. Bei 555 wurde im ganzen Lauf **kein
 Kind geboren** (0 Geburtsdialoge gegen 6 in der Grundlinie), bei 7 wurde nur einmal ein Erbe bestimmt
 statt siebenmal.

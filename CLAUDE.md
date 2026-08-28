@@ -256,10 +256,19 @@ The game needs the editor to play, so changes are verified in three complementar
    Setting a `NumericButton`'s `Wert` does **not** emit `WertChanged` — only digit entry does; the driver
    emits it explicitly, otherwise the city never learns of the change.
 
-   Runs are reproducible: `--seed=N` replays a run exactly (measured: identical down to the click
-   count), `--seed=0` draws one and prints it. The seed is set **twice**, once before setup and once the
-   game stands, so a change to the setup path no longer invalidates noted seeds — it cannot equalise the
-   two setup paths though, since the starting state comes out of the setup itself. Sound is muted at
+   **Seeds no longer replay a run exactly.** `--seed=N` pins the game's own draws and `--seed=0` draws
+   one and prints it, but the outcome still varies between identical invocations: three runs of an
+   unmodified working tree (`--jahre=15 --spieler=1 --ohne-aktionen --seed=1234`) gave **1 390 / 1 390
+   / 58 520** talers at **209 / 209 / 1 072** dialog clicks. The third diverges at click [122], where
+   the courtship dialog offers a different gift although the logs are identical line for line up to
+   there — so something consumes randomness outside the recorded action sequence. The cause is not
+   diagnosed; it is **not** caused by any recent change (measured on unmodified HEAD).
+   **So never read a change off a seed pair.** Measure both states in the same session over several
+   seeds with repeated runs each, and compare the distributions — that is what Schicht 6 in
+   [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md) does and why it had to re-measure its own
+   baseline. The seed is still set **twice**, once before setup and once the game stands, so a change
+   to the setup path no longer invalidates noted seeds — it cannot equalise the two setup paths
+   though, since the starting state comes out of the setup itself. Sound is muted at
    runtime (`--mit-ton` re-enables). "Report a problem" is blocked: it zips a report and opens the system
    mail client, which tests the environment, not the game.
 
