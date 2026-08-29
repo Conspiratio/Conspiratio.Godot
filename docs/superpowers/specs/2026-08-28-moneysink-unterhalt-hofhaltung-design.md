@@ -175,17 +175,33 @@ je höher das Ansehen ist — und das Ansehen kam aus dem Geld. Wer viel besaß,
 Nach der Änderung greift der Schuldenprozess früher; das ist beabsichtigt, muss aber gegen die
 E2E-Grundlinie geprüft werden, weil der Schuldturm ein absorbierender Zustand ist.
 
-**Gerichtsverhandlung: geprüft, absichtlich unverändert gelassen.** `GerichtsverhandlungManager` hält die
-Schwellen des Verteidigungsplädoyers als absolute Ansehenswerte: `AnsehenHoch = 80` und
-`AnsehenMittel = 30` (Zeilen 44–45), gelesen bei der Urteilsfindung (`:128`) und beim Formulieren des
-Plädoyers (`:546–549`). Beide wurden kalibriert, als Ansehen faktisch der Kontostand war. Nach dem
-Wegfall des Geldansehens liegt ein ganzer KI-Spieler bei 15 bis 60 — **80 liegt damit oberhalb der
-gesamten KI-Spanne**, und `PlaedoyerBonusHoch` (−6) fällt für KI-Angeklagte praktisch aus; einen
-menschlichen Spieler trägt dorthin nur noch der Wohnsitz- und Stiftungsbestand aus dem Kasten oben, also
-gerade die Quelle, die eigentlich entwertet werden sollte. Die Werte **bleiben unverändert**: Sie auf die
-neue Skala zu ziehen ist eine Balancing-Entscheidung mit spürbarer Wirkung auf Urteile und gehört dem
-Nutzer, nicht einer Dokumentations-Fixrunde. Hier steht sie, damit sie nicht verloren geht; im Code steht
-derselbe Vermerk über den beiden Konstanten.
+**Gerichtsverhandlung: nachträglich richtiggestellt und entschieden.** Hier stand zuvor, die Schwellen
+des Verteidigungsplädoyers (`AnsehenHoch = 80`, `AnsehenMittel = 30`) seien kalibriert worden, als sich
+das Ansehen überwiegend aus dem Kontostand speiste. **Das war falsch.** Ein Blick auf die Titeltabelle
+zeigt, woran sie tatsächlich hängen: an der **Titelleiter**. `Adelstitel.BonusAnsehen` vergibt Bürger 5,
+Edelmann 10, Ritter 20, Landherr 35, Freiherr 55, Baron 75, Graf 100, Fürst 125, Herzog 150 — **80
+liegt genau zwischen Baron (75) und Graf (100), 30 genau zwischen Ritter (20) und Landherr (35)**. Das
+Feld war nur nirgends gelesen worden, weshalb die Schwellen ins Leere liefen.
+
+**Entschieden und umgesetzt (Conspiratio.Lib, Folgearbeit):** `BonusAnsehen` ist aktiviert — über den
+neuen Zugriff `Spieler.GetStandesAnsehen()` = Ansehen + Titelbonus. Damit greift die ursprünglich
+gemeinte Regel wieder: Graf und darüber erhalten den vollen Plädoyerbonus, Landherr bis Baron den
+halben, darunter keinen. Umgestellt sind genau drei Stellen, alle drei Beurteilungen einer **Person**:
+`GerichtsverhandlungManager` (Plädoyerbonus und Plädoyertext) und der Geschworenenspruch des
+Schuldenprozesses (`ZugNachrichtenManager:248`).
+
+**Nicht** umgestellt sind `AemterManager:272` (Wahlbonus), `ZugNachrichtenManager:219`
+(Schuldentoleranz) und `Stuetzpunkt:649` (Militärbonus). Der Grund ist derselbe, aus dem das
+Geldansehen weggefallen ist: Titel werden nach Talerschwellen verliehen, ein Titelbonus im Wahlbonus
+würde den Weg von Geld zu Einfluss sofort wieder öffnen. **Der Titel öffnet Türen bei Hofe, er kauft
+keine Stimmen.**
+
+Der Zugriff sitzt bewusst auf `Spieler` und nicht als Summand in `HumSpieler.AnsehenAktualisieren`:
+Jene Methode gibt es nur auf `HumSpieler` und sie läuft nur für den aktiven Menschen — dort eingebaut
+hätte der Titelbonus wieder nur Menschen gestärkt und die KI nie, also genau die Asymmetrie
+wiederhergestellt, die beim Geldansehen der Fehler war. Auf `Spieler` gilt er für beide, denn auch
+KI-Spieler tragen Titel. Der Vermerk über den beiden Konstanten im Code ist entsprechend
+richtiggestellt.
 
 ## Spielstandverträglichkeit
 
