@@ -248,6 +248,7 @@ public partial class GerichtDialog : Control
 		{
 			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
 			button.Text = buttonTexte[i];
+			StyleAuswahlKnopf(button);
 
 			int index = i;
 			button.Pressed += () => _optionGewaehlt?.TrySetResult(index);
@@ -264,6 +265,26 @@ public partial class GerichtDialog : Control
 		LeereAussageAuswahl();
 
 		return gewaehlt;
+	}
+
+	/// <summary>
+	/// Setzt die im Code erzeugten Auswahlknöpfe auf die Schriftrolle: Ohne diese Überschreibungen erben
+	/// sie das dunkelbraune Pergament-Theme und sind vor dem dunklen Gerichtsbild kaum zu lesen. Zugleich
+	/// zentriert <see cref="Control.SizeFlags.ShrinkCenter"/> sie, statt sie über die volle Breite des
+	/// VBox zu strecken und den Text links kleben zu lassen. Gleiche Gestaltung wie im
+	/// <see cref="DuellDialog"/>.
+	/// </summary>
+	private static void StyleAuswahlKnopf(controls.LinkButtonWithSounds button)
+	{
+		button.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+
+		button.AddThemeColorOverride("font_color", new Color(0.93f, 0.83f, 0.55f));
+		button.AddThemeColorOverride("font_hover_color", new Color(1f, 0.95f, 0.7f));
+		button.AddThemeColorOverride("font_pressed_color", new Color(1f, 1f, 0.85f));
+		button.AddThemeColorOverride("font_focus_color", new Color(0.93f, 0.83f, 0.55f));
+		button.AddThemeColorOverride("font_outline_color", new Color(0.05f, 0.04f, 0.02f));
+		button.AddThemeConstantOverride("outline_size", 6);
+		button.AddThemeFontSizeOverride("font_size", 28);
 	}
 
 	private void LeereAussageAuswahl()
