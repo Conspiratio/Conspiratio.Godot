@@ -75,7 +75,7 @@ public partial class KartenspielDialog : Control
 		_text = "";
 		_hboxEinsatz.Visible = false;
 		_hboxJaNein.Visible = false;
-		Show();
+		DialogBase.ZeigeUeberNachrichtenschirm(this);
 		SetProcessInput(true);
 
 		// Zu wenig Taler: der Gegner verlässt verärgert den Tisch.

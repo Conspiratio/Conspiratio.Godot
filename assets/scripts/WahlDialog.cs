@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
@@ -42,9 +42,20 @@ public partial class WahlDialog : Control
 	private static readonly Color GoldschriftHell = new(1f, 0.95f, 0.7f);
 	private static readonly Color Randfarbe = new(0.05f, 0.04f, 0.02f);
 
+	/// <summary>Kantenlänge eines Stimmsymbols; passt zur 30er-Schrift der Kandidatennamen.</summary>
+	private const int Muenzgroesse = 34;
+
+	/// <summary>Abstand zwischen zwei Stimmsymbolen (im Original 35 px Rasterabstand bei 31 px Symbol).</summary>
+	private const int Muenzabstand = 4;
+
 	private AemterManager _aemterManager;
 	private readonly List<Label> _kandidatenLabels = new List<Label>();
+
+	/// <summary>Je Kandidat der Kasten rechts neben dem Namen, in dem die Stimmen als Münzen liegen.</summary>
+	private readonly List<HBoxContainer> _stimmenKaesten = new List<HBoxContainer>();
+
 	private List<WahlKandidat> _kandidaten;
+	private Texture2D _muenze;
 
 	private TaskCompletionSource<bool> _weiter;
 	private TaskCompletionSource<int> _stimme;
@@ -58,6 +69,7 @@ public partial class WahlDialog : Control
 		_vBoxStimmen = GetNode<VBoxContainer>(VBoxStimmenPath);
 		_linkWeiter = GetNode<controls.LinkButtonWithSounds>(LinkWeiterPath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
+		_muenze = GD.Load<Texture2D>("res://assets/images/symbole/SymbStimme.png");
 
 		_linkWeiter.Pressed += () => _weiter?.TrySetResult(true);
 
@@ -84,7 +96,7 @@ public partial class WahlDialog : Control
 	{
 		_aemterManager = aemterManager;
 
-		Show();
+		DialogBase.ZeigeUeberNachrichtenschirm(this);
 		SetProcessInput(true);
 
 		await RunWahl(wahlId);
@@ -99,7 +111,7 @@ public partial class WahlDialog : Control
 		_kandidaten = ansicht.Kandidaten;
 
 		_labelTitle.Text = "Wahl des " + ansicht.AmtName + " in " + ansicht.GebietName;
-		BaueKandidaten();
+		BaueKandidaten(ansicht.Waehler.Count);
 		LeereStimmButtons();
 
 		var kandidatenIds = new List<int>();
@@ -166,7 +178,12 @@ public partial class WahlDialog : Control
 		await WarteWeiter();
 	}
 
-	private void BaueKandidaten()
+	/// <summary>
+	/// Baut je Kandidat eine Zeile aus Name und dem Kasten für die Stimmen. Der Kasten bekommt schon
+	/// jetzt die Breite für <paramref name="waehlerAnzahl"/> Münzen reserviert: Sonst wanderte der
+	/// zentrierte Name bei jeder eintreffenden Stimme nach links.
+	/// </summary>
+	private void BaueKandidaten(int waehlerAnzahl)
 	{
 		foreach (Node child in _vBoxKandidaten.GetChildren())
 		{
@@ -175,13 +192,23 @@ public partial class WahlDialog : Control
 		}
 
 		_kandidatenLabels.Clear();
+		_stimmenKaesten.Clear();
+
+		float reserve = waehlerAnzahl <= 0
+			? 0
+			: waehlerAnzahl * Muenzgroesse + (waehlerAnzahl - 1) * Muenzabstand;
 
 		foreach (var kandidat in _kandidaten)
 		{
+			// Die Zeile trägt Name und Münzen nebeneinander und wird als Ganzes zentriert.
+			var zeile = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center };
+			zeile.AddThemeConstantOverride("separation", 12);
+
 			var label = new Label
 			{
 				Text = kandidat.Name,
-				HorizontalAlignment = HorizontalAlignment.Center
+				HorizontalAlignment = HorizontalAlignment.Center,
+				VerticalAlignment = VerticalAlignment.Center
 			};
 
 			// Die Kandidaten stehen auf dem dunklen Ratstisch – ohne Goldschrift wären sie unlesbar.
@@ -190,16 +217,51 @@ public partial class WahlDialog : Control
 			label.AddThemeConstantOverride("outline_size", 6);
 			label.AddThemeFontSizeOverride("font_size", 30);
 
+			var kasten = new HBoxContainer
+			{
+				Alignment = BoxContainer.AlignmentMode.Begin,
+				CustomMinimumSize = new Vector2(reserve, Muenzgroesse)
+			};
+			kasten.AddThemeConstantOverride("separation", Muenzabstand);
+
+			zeile.AddChild(label);
+			zeile.AddChild(kasten);
+
 			_kandidatenLabels.Add(label);
-			_vBoxKandidaten.AddChild(label);
+			_stimmenKaesten.Add(kasten);
+			_vBoxKandidaten.AddChild(zeile);
 		}
 	}
 
+	/// <summary>
+	/// Legt je abgegebener Stimme eine Münze neben den Kandidaten – wie im WinForms-Original, das die
+	/// Stimmen als <c>SymbStimme</c>-Bilder rechts neben den Namen setzte, statt sie auszuzählen.
+	/// </summary>
 	private void AktualisiereStimmen(int[] tally)
 	{
-		for (int i = 0; i < _kandidatenLabels.Count; i++)
+		for (int i = 0; i < _stimmenKaesten.Count; i++)
 		{
-			_kandidatenLabels[i].Text = _kandidaten[i].Name + (tally[i] > 0 ? "   (" + tally[i] + ")" : "");
+			var kasten = _stimmenKaesten[i];
+
+			foreach (Node child in kasten.GetChildren())
+			{
+				kasten.RemoveChild(child);
+				child.QueueFree();
+			}
+
+			for (int stimme = 0; stimme < tally[i]; stimme++)
+			{
+				// ExpandMode zuerst: KeepSize erzwänge sonst die native Größe der Textur als Mindestmaß.
+				var muenze = new TextureRect
+				{
+					Texture = _muenze,
+					ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+					StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+					CustomMinimumSize = new Vector2(Muenzgroesse, Muenzgroesse)
+				};
+
+				kasten.AddChild(muenze);
+			}
 		}
 	}
 

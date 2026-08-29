@@ -15,8 +15,11 @@ grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 script = ExtResource("1_prdlg")
-VBoxPrivilegienPath = NodePath("Panel/NinePatchRect/ScrollContainer/VBoxPrivilegien")
+VBoxPrivilegienPath = NodePath("Panel/NinePatchRect/VBoxPrivilegien")
 LabelKeinePath = NodePath("Panel/NinePatchRect/LabelKeine")
+LinkZurueckPath = NodePath("Panel/NinePatchRect/LinkZurueck")
+LinkWeiterPath = NodePath("Panel/NinePatchRect/LinkWeiter")
+LabelSeitePath = NodePath("Panel/NinePatchRect/LabelSeite")
 
 [node name="Panel" type="Panel" parent="."]
 layout_mode = 1
@@ -65,26 +68,54 @@ text = "Ihr besitzt derzeit keine Privilegien. Privilegien erhaltet Ihr durch Ä
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="ScrollContainer" type="ScrollContainer" parent="Panel/NinePatchRect"]
+[node name="VBoxPrivilegien" type="VBoxContainer" parent="Panel/NinePatchRect"]
 layout_mode = 0
 offset_left = 200.0
-offset_top = 90.0
+offset_top = 100.0
 offset_right = 600.0
-offset_bottom = 500.0
-horizontal_scroll_mode = 0
+offset_bottom = 350.0
+theme_override_constants/separation = 14
 
-[node name="VBoxPrivilegien" type="VBoxContainer" parent="Panel/NinePatchRect/ScrollContainer"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 10
+[node name="LinkZurueck" parent="Panel/NinePatchRect" instance=ExtResource("3_prdlg")]
+visible = false
+layout_mode = 0
+offset_left = 170.0
+offset_top = 370.0
+offset_right = 330.0
+offset_bottom = 410.0
+theme = ExtResource("4_prdlg")
+text = "< Zurück"
+
+[node name="LabelSeite" type="Label" parent="Panel/NinePatchRect"]
+visible = false
+layout_mode = 0
+offset_left = 340.0
+offset_top = 370.0
+offset_right = 460.0
+offset_bottom = 410.0
+text = "1/1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="LinkWeiter" parent="Panel/NinePatchRect" instance=ExtResource("3_prdlg")]
+visible = false
+layout_mode = 0
+offset_left = 470.0
+offset_top = 370.0
+offset_right = 630.0
+offset_bottom = 410.0
+theme = ExtResource("4_prdlg")
+text = "Weiter >"
 
 [node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_prdlg")]
 layout_mode = 0
 offset_left = 310.0
-offset_top = 525.0
+offset_top = 470.0
 offset_right = 490.0
-offset_bottom = 565.0
+offset_bottom = 510.0
 theme = ExtResource("4_prdlg")
 text = "Schließen"
 
+[connection signal="pressed" from="Panel/NinePatchRect/LinkZurueck" to="." method="_on_link_zurueck_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkWeiter" to="." method="_on_link_weiter_pressed"]
 [connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]

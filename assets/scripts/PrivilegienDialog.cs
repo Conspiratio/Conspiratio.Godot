@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Gameplay.Spielwelt;
@@ -19,9 +19,30 @@ public partial class PrivilegienDialog : DialogBase
 	[Export]
 	public NodePath LabelKeinePath { get; set; }
 
+	[Export]
+	public NodePath LinkZurueckPath { get; set; }
+
+	[Export]
+	public NodePath LinkWeiterPath { get; set; }
+
+	[Export]
+	public NodePath LabelSeitePath { get; set; }
+
+	/// <summary>
+	/// Privilegien je Seite – wie im WinForms-Original (<c>PrivilegienAnzeigen._maxPrivProSeite</c>).
+	/// Geblättert statt gescrollt: Ein Rollbalken auf dem Pergament fällt optisch aus dem Rahmen.
+	/// </summary>
+	private const int ProSeite = 5;
+
 	private VBoxContainer _vBoxPrivilegien;
 	private Label _labelKeine;
+	private controls.LinkButtonWithSounds _linkZurueck;
+	private controls.LinkButtonWithSounds _linkWeiter;
+	private Label _labelSeite;
 	private PackedScene _linkButtonScene;
+
+	/// <summary>Aktuelle Seite (0-basiert) der Privilegienliste.</summary>
+	private int _seite;
 
 	private PrivilegienManager _privilegienManager;
 	private Main _main;
@@ -30,6 +51,9 @@ public partial class PrivilegienDialog : DialogBase
 	{
 		_vBoxPrivilegien = GetNode<VBoxContainer>(VBoxPrivilegienPath);
 		_labelKeine = GetNode<Label>(LabelKeinePath);
+		_linkZurueck = GetNode<controls.LinkButtonWithSounds>(LinkZurueckPath);
+		_linkWeiter = GetNode<controls.LinkButtonWithSounds>(LinkWeiterPath);
+		_labelSeite = GetNode<Label>(LabelSeitePath);
 		_linkButtonScene = GD.Load<PackedScene>("res://scenes/controls/LinkButtonWithSounds.tscn");
 		_main = GetParentOrNull<Main>();
 	}
@@ -44,6 +68,7 @@ public partial class PrivilegienDialog : DialogBase
 		_privilegienManager = privilegienManager;
 		_privilegienManager.AktualisierePrivilegien();
 		_erpresstesOpfer = 0;
+		_seite = 0;
 		Fill();
 
 		await ShowAndAwait();
@@ -66,16 +91,41 @@ public partial class PrivilegienDialog : DialogBase
 		_labelKeine.Visible = privilegien.Count == 0;
 		_vBoxPrivilegien.Visible = privilegien.Count > 0;
 
-		foreach (var privileg in privilegien)
+		// Die Liste kann zwischen zwei Aufrufen kürzer werden (z. B. „Amt niederlegen"): Dann auf die
+		// letzte noch vorhandene Seite zurückgehen, statt eine leere anzuzeigen.
+		int seiten = System.Math.Max(1, (privilegien.Count + ProSeite - 1) / ProSeite);
+		_seite = System.Math.Clamp(_seite, 0, seiten - 1);
+
+		for (int i = _seite * ProSeite; i < System.Math.Min(privilegien.Count, (_seite + 1) * ProSeite); i++)
 		{
 			var button = _linkButtonScene.Instantiate<controls.LinkButtonWithSounds>();
-			button.Text = privileg.Name;
+			button.Text = privilegien[i].Name;
 
-			int id = privileg.Id;
+			int id = privilegien[i].Id;
 			button.Pressed += () => OnPrivilegPressed(id);
 
 			_vBoxPrivilegien.AddChild(button);
 		}
+
+		// Die Blätterzeile erscheint nur, wenn es tatsächlich mehr als eine Seite gibt; „Zurück" und
+		// „Weiter" jeweils nur dort, wo sie auch etwas bewirken.
+		bool mehrereSeiten = seiten > 1;
+		_labelSeite.Visible = mehrereSeiten;
+		_labelSeite.Text = (_seite + 1) + "/" + seiten;
+		_linkZurueck.Visible = mehrereSeiten && _seite > 0;
+		_linkWeiter.Visible = mehrereSeiten && _seite < seiten - 1;
+	}
+
+	private void _on_link_zurueck_pressed()
+	{
+		_seite--;
+		Fill();
+	}
+
+	private void _on_link_weiter_pressed()
+	{
+		_seite++;
+		Fill();
 	}
 
 	private async void OnPrivilegPressed(int privilegId)
@@ -84,6 +134,7 @@ public partial class PrivilegienDialog : DialogBase
 		if (privilegId == PrivilegienManager.EigenePrivilegienId)
 		{
 			_erpresstesOpfer = 0;
+			_seite = 0;
 			Fill();
 			return;
 		}
@@ -92,6 +143,7 @@ public partial class PrivilegienDialog : DialogBase
 		if (opferId != 0)
 		{
 			_erpresstesOpfer = opferId;
+			_seite = 0;
 			Fill();
 			return;
 		}

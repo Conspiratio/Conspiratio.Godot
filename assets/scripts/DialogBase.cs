@@ -121,6 +121,25 @@ public abstract partial class DialogBase : Control
 		}
 	}
 
+	/// <summary>
+	/// Blendet einen Vollbild-Overlay ein, der <b>nicht</b> von <see cref="DialogBase"/> erbt (WahlDialog,
+	/// GerichtDialog, KartenspielDialog). Solche Bildschirme mussten sich sonst selbst einblenden und
+	/// standen damit außerhalb des <see cref="OffenerNachrichtenschirm"/>-Protokolls: Der
+	/// Rundennachrichten-Schirm bleibt nach dem Weiterklicken absichtlich sichtbar und wird
+	/// <see cref="ShowAndAwait"/> nur von einem anderen <see cref="DialogBase"/> ausgeblendet. Ein
+	/// bloßes <c>Show()</c> erschien deshalb <i>hinter</i> der letzten Meldung – die Wahl am Jahresende
+	/// lief unsichtbar ab, während die Rechtsklicks des Spielers sie Schritt für Schritt durchklickten
+	/// und auf dem Bildschirm weiterhin „Resümee“ stand.
+	/// </summary>
+	public static void ZeigeUeberNachrichtenschirm(Control dialog)
+	{
+		VerbergeNachrichtenschirm();
+		dialog.Show();
+		// Wie in ShowAndAwait: über die gleichrangigen Geschwister holen, damit kein früher per
+		// MoveToFront nach vorn geholter Dialog darüberliegt.
+		dialog.MoveToFront();
+	}
+
 	/// <summary>Blendet den Dialog aus und deaktiviert die Eingabeverarbeitung.</summary>
 	protected void HideAndDisableInput()
 	{

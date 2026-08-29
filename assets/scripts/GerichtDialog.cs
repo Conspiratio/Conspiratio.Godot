@@ -69,7 +69,7 @@ public partial class GerichtDialog : Control
 
 		_labelHaupt.Text = "";
 		_labelUrteile.Text = "";
-		Show();
+		DialogBase.ZeigeUeberNachrichtenschirm(this);
 		SetProcessInput(true);
 
 		foreach (int index in indizes)
