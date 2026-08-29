@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -228,8 +228,19 @@ public partial class E2eTreiber : Node
 	private string _bilderOrdner;
 	private int _aggressivitaet;
 
+	/// <summary>
+	/// Ordner für alles, was der Durchlauf schreibt: Autosaves, Profile, Bestenlisten und die
+	/// Speicherprobe. Liegt im Temp-Bereich, damit der Lauf die echten Spielstände nicht anfasst.
+	/// </summary>
+	private static string SpielstandOrdner => Path.Combine(Path.GetTempPath(), "conspiratio-e2e");
+
 	public override async void _Ready()
 	{
+		// Als Allererstes umlenken – noch vor dem Anlegen von Main, dessen Kontor, Profil- und
+		// Bestenlisten-Manager sonst am echten Spielstandordner hängen. Warum das sein muss, steht bei
+		// ClientSettings.UeberschreibeSavegamePath: Der Autosave räumt gleichnamige Stände des Spielers weg.
+		ClientSettings.UeberschreibeSavegamePath(SpielstandOrdner);
+
 		var argumente = OS.GetCmdlineUserArgs();
 		int jahre = LiesZahl(argumente, "--jahre=", StandardJahre);
 		int spieler = LiesZahl(argumente, "--spieler=", StandardSpieler);
@@ -1232,7 +1243,7 @@ public partial class E2eTreiber : Node
 	/// </summary>
 	private void PruefeSpeichernUndLaden()
 	{
-		var speicher = new SpeicherManager(Path.Combine(Path.GetTempPath(), "conspiratio-e2e"));
+		var speicher = new SpeicherManager(SpielstandOrdner);
 
 		int jahrVorher = SW.Dynamisch.GetAktuellesJahr();
 		string nameVorher = SW.Dynamisch.GetHumWithID(1).GetName();

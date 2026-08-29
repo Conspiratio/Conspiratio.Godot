@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using Godot;
 
@@ -12,12 +12,32 @@ public static class ClientSettings
 {
 	private const string ConfigPath = "user://client.cfg";
 
+	/// <summary>Umgelenkter Spielstandordner (siehe <see cref="UeberschreibeSavegamePath"/>); sonst null.</summary>
+	private static string _savegamePathUmgelenkt;
+
 	/// <summary>
 	/// Der Ordner, in dem die Spielstände liegen (identisch mit dem WinForms-Client,
 	/// damit beide Clients dieselben Spielstände sehen).
 	/// </summary>
 	public static string SavegamePath =>
+		_savegamePathUmgelenkt ??
 		Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData), "Conspiratio");
+
+	/// <summary>
+	/// Lenkt Spielstände, Profile und Bestenlisten in einen anderen Ordner um – ausschließlich für den
+	/// E2E-Treiber, der sonst in die echten Spielstände des Spielers schreibt.
+	///
+	/// <b>Warum das nötig ist:</b> Der Autosave zu Zugbeginn speichert unter
+	/// „&lt;Spielname&gt;_&lt;Jahr&gt;“ und löscht dabei „&lt;Spielname&gt;_&lt;Jahr−2&gt;“
+	/// (<c>SpeicherManager.Autosave</c>). Der Treiber nennt sein Spiel „E2E“ – ein lokaler Durchlauf hat
+	/// damit reihenweise gleichnamige Spielstände des Spielers gelöscht und nebenbei dessen
+	/// <c>profile.json</c> fortgeschrieben. Ein Testlauf darf am echten Ordner nichts ändern.
+	/// </summary>
+	public static void UeberschreibeSavegamePath(string pfad)
+	{
+		_savegamePathUmgelenkt = pfad;
+		Directory.CreateDirectory(pfad);
+	}
 
 	public static string LetzterSpielstand
 	{
@@ -118,6 +138,12 @@ public static class ClientSettings
 
 	private static void SetValue(string section, string key, Variant wert)
 	{
+		// Im umgelenkten Betrieb (E2E-Durchlauf) bleibt auch die client.cfg unangetastet: Der Lauf schreibt
+		// sonst den zuletzt gespielten Spielstand auf einen Namen, den es nur im Temp-Ordner gibt, und ein
+		// zufällig betätigter Knopf im Optionsfenster verstellte die echten Einstellungen des Spielers.
+		if (_savegamePathUmgelenkt != null)
+			return;
+
 		var config = new ConfigFile();
 		config.Load(ConfigPath);
 		config.SetValue(section, key, wert);
