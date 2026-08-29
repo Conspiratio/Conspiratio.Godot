@@ -25,15 +25,21 @@ public partial class AbrechnungDialog : DialogBase
 		_linkButtonClose = GetNode<controls.LinkButtonWithSounds>(LinkButtonClosePath);
 	}
 
-	public async Task ShowDialog(AbrechnungsErgebnis ergebnis)
+	/// <summary>
+	/// Zeigt die Jahresabrechnung. <paramref name="ansehenAenderung"/> ist die Geltung, die dieselbe
+	/// Abrechnung dem Spieler gebracht oder gekostet hat (Hofhaltung und Auslastung); sie steht nicht im
+	/// <see cref="AbrechnungsErgebnis"/>, weil die Lib sie direkt verbucht, und wird deshalb vom Aufrufer
+	/// gemessen. Ohne sie sieht der Spieler nur die Kostenseite seiner Hofhaltungswahl.
+	/// </summary>
+	public async Task ShowDialog(AbrechnungsErgebnis ergebnis, int ansehenAenderung = 0)
 	{
-		FillPositionen(ergebnis);
+		FillPositionen(ergebnis, ansehenAenderung);
 		SoundManager.Instance.PlayCoins();
 
 		await ShowAndAwait();
 	}
 
-	private void FillPositionen(AbrechnungsErgebnis ergebnis)
+	private void FillPositionen(AbrechnungsErgebnis ergebnis, int ansehenAenderung)
 	{
 		foreach (Node child in _gridContainerPositionen.GetChildren())
 			child.QueueFree();
@@ -51,14 +57,35 @@ public partial class AbrechnungDialog : DialogBase
 		AddPosition("Unterhalt", ergebnis.Unterhalt);
 		AddPosition("Hofhaltung", ergebnis.Hofhaltung);
 		AddPosition("Gesamtkosten", ergebnis.Gesamtkosten);
+
+		// Der Gegenwert zur Kostenseite: was die Hofhaltungsstufe und die Auslastung der Betriebe in
+		// diesem Jahr an Geltung eingebracht haben. Auch die 0 wird gezeigt - "nichts gewonnen" ist die
+		// Antwort auf "sparsam" und gehoert zur Entscheidung, und die Zeilenzahl bleibt so fest.
+		AddZeile("Ansehen", FormatiereAnsehen(ansehenAenderung));
+	}
+
+	private static string FormatiereAnsehen(int aenderung)
+	{
+		if (aenderung > 0)
+			return "+" + aenderung + " Punkte";
+
+		if (aenderung < 0)
+			return aenderung + (aenderung == -1 ? " Punkt" : " Punkte");
+
+		return "±0 Punkte";
 	}
 
 	private void AddPosition(string bezeichnung, int kosten)
 	{
+		AddZeile(bezeichnung, kosten.ToStringGeld(false) + " Taler");
+	}
+
+	private void AddZeile(string bezeichnung, string wert)
+	{
 		_gridContainerPositionen.AddChild(new Label { Text = bezeichnung });
 		_gridContainerPositionen.AddChild(new Label
 		{
-			Text = kosten.ToStringGeld(false) + " Taler",
+			Text = wert,
 			HorizontalAlignment = HorizontalAlignment.Right,
 			SizeFlagsHorizontal = SizeFlags.ExpandFill
 		});

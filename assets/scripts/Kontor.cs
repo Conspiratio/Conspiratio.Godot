@@ -575,10 +575,16 @@ public partial class Kontor : Control
 		foreach (string kreditMeldung in new SchreibstubeManager().TilgeUeberfaelligeKredite())
 			await _main.RundenNachrichtenDialog.ShowDialog("Fälliger Kredit\n\n" + kreditMeldung);
 
-		// Jahresabrechnung berechnen, verbuchen und anzeigen
+		// Jahresabrechnung berechnen, verbuchen und anzeigen. Die Abrechnung verbucht neben den Kosten
+		// auch die Geltung aus Hofhaltung und Auslastung direkt auf dem Spieler und meldet sie nicht
+		// zurueck - deshalb wird das permanente Ansehen davor und danach abgegriffen. Ohne diese Zeile
+		// steht dem sichtbaren Kostenblock kein sichtbarer Gegenwert gegenueber, und der Spieler kann
+		// die Hofhaltungsstufe nicht beurteilen.
+		int permaAnsehenVorher = spielerAmZugende.GetPermaAnsehen();
 		var abrechnung = new AbrechnungsManager().ErstelleAbrechnungFuerAktivenSpieler();
+		int ansehenAenderung = spielerAmZugende.GetPermaAnsehen() - permaAnsehenVorher;
 		UpdateHud();
-		await _main.AbrechnungDialog.ShowDialog(abrechnung);
+		await _main.AbrechnungDialog.ShowDialog(abrechnung, ansehenAenderung);
 
 		// Zug abschließen (Altern und Zug-Flags), damit die Zugnachrichten mit dem neuen Alter rechnen
 		_rundenManager.SchliesseZugAb();

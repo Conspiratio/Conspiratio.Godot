@@ -111,7 +111,11 @@ Voraussetzung für Baustein B, und für sich genommen die Korrektur einer Schief
 | Geldbestand bei 2,9 Mio. | **1 160** |
 | Ämter-Bonus (Ratsherr … Bürgermeister) | 3 … 12 |
 | KI-Ansehen insgesamt (`bonans × 5`) | 15 … 60 |
-| Landhaus | 5 |
+| Landhaus (`StatischeSpieldaten:1193`) | 5 |
+| **Schloss** (`StatischeSpieldaten:1197`, oberster Eintrag derselben Tabelle) | **50** |
+| **Vier Schlösser** (Anwesengesetz im Standard, `GesetzDefUntergrenze[2] = 4`) | **200** |
+| **Vierzehn Schlösser** (Anwesengesetz an seiner Obergrenze, `GesetzDefObergrenze[2] = 14`) | **700** |
+| **Bauwerksstiftung** (`BauwerkStiftenManager:66`, `Preis / 1000` für 5 000 Taler) | **5** je Stiftung, ungedeckelt und im selben Zug wiederholbar |
 | Kirchenaustritt | −100 |
 
 **Ansehen ist heute faktisch der Kontostand.** In der Wahl (`AemterManager:272`,
@@ -123,8 +127,35 @@ Menschen (`RundenManager:27`). Das Geldansehen ist also ein reiner Spielervortei
 sein Wegfall macht das Feld eben, statt den Menschen zu benachteiligen.
 
 Nach der Änderung speist sich Ansehen aus `PermaAnsehen` (Taten, künftig auch Hofhaltung), Amt und
-Wohnsitzen und liegt damit in derselben Größenordnung wie das der KI. Daraus folgt die Zielgröße für die
-Umrechnung in Baustein B: **Zehnerbeträge pro Jahr, nicht Hunderter.**
+Wohnsitzen.
+
+> **Berichtigung nach der Schlussdurchsicht (2026-08-29).** Die Tabelle oben tastete ursprünglich nur das
+> *Landhaus* (5) ab und schloss daraus, Ansehen liege nach der Änderung „in derselben Größenordnung wie
+> das der KI". Das ist so nicht richtig, und die daraus abgeleitete Zielgröße für Baustein B
+> („Zehnerbeträge pro Jahr, nicht Hunderter") steht auf einer zu schmalen Stichprobe — sie war die
+> Grundlage von zwei der drei kalibrierten Konstanten (`AnsehenJeTalerHofhaltung`, `AnsehenMaxProJahr`).
+>
+> Was tatsächlich geliefert wurde: Der **Barbestand** als Ansehensquelle ist entfallen, sonst nichts.
+> Käuflich bleibt Geltung über zwei Wege, die beide unangetastet sind:
+>
+> - **Wohnsitze.** Dieselbe Haustabelle endet beim Schloss mit 50 Punkten. Ein Spieler bei 2,9 Mio.
+>   Talern kann sich die vier Anwesen leisten, die das Gesetz im Standard erlaubt, und hält damit
+>   **200 Punkte** allein aus Wohnsitzen — an der Gesetzesobergrenze 700.
+> - **Stiftungen.** `BauwerkStiftenManager.FuehreStiftungAus` gibt `Preis / 1000` Punkte für einen festen
+>   Preis von 5 000 Talern, ohne Deckel und ohne Sperre für den laufenden Zug. **60 000 Taler kaufen
+>   60 Punkte** — die Spitze der gesamten KI-Spanne, in einem einzigen Zug.
+>
+> Die Größenordnung nach der Änderung ist also nicht 15–60 wie bei der KI, sondern **200+ und in einem
+> Zug beliebig erweiterbar**. Damit ist Baustein B kein Haupthebel, sondern ein Aufschlag auf diese
+> Quellen: fünf Punkte im Jahr neben 200, die schon dastehen, und 60, die für den Preis eines guten
+> Handelsjahres dazukommen. Die Konstanten sind trotzdem so belassen worden, wie die Kalibrierung sie
+> ergeben hat — sie im Nachhinein zu vergrößern hieße, die falsche Seite zu bewegen.
+>
+> **Offene Entscheidung für den Nutzer** (bewusst nicht in der Fix-Welle erledigt, weil es eine
+> Balancing- und keine Wahrheitsfrage ist): ob Wohnsitzansehen und Stiftungen gedeckelt gehören — etwa
+> eine Stiftung je Zug, ein Jahresdeckel auf gestifteter Geltung, oder ein Wohnsitzbonus, der nicht mit
+> jedem weiteren Anwesen voll addiert. Erst danach ist die Aussage „Ansehen liegt in derselben
+> Größenordnung wie das der KI" belegbar.
 
 ### Was davon betroffen ist
 
@@ -143,6 +174,18 @@ Besondere Aufmerksamkeit verdient die Schuldenprozess-Schwelle: Sie toleriert he
 je höher das Ansehen ist — und das Ansehen kam aus dem Geld. Wer viel besaß, war also doppelt geschützt.
 Nach der Änderung greift der Schuldenprozess früher; das ist beabsichtigt, muss aber gegen die
 E2E-Grundlinie geprüft werden, weil der Schuldturm ein absorbierender Zustand ist.
+
+**Gerichtsverhandlung: geprüft, absichtlich unverändert gelassen.** `GerichtsverhandlungManager` hält die
+Schwellen des Verteidigungsplädoyers als absolute Ansehenswerte: `AnsehenHoch = 80` und
+`AnsehenMittel = 30` (Zeilen 44–45), gelesen bei der Urteilsfindung (`:128`) und beim Formulieren des
+Plädoyers (`:546–549`). Beide wurden kalibriert, als Ansehen faktisch der Kontostand war. Nach dem
+Wegfall des Geldansehens liegt ein ganzer KI-Spieler bei 15 bis 60 — **80 liegt damit oberhalb der
+gesamten KI-Spanne**, und `PlaedoyerBonusHoch` (−6) fällt für KI-Angeklagte praktisch aus; einen
+menschlichen Spieler trägt dorthin nur noch der Wohnsitz- und Stiftungsbestand aus dem Kasten oben, also
+gerade die Quelle, die eigentlich entwertet werden sollte. Die Werte **bleiben unverändert**: Sie auf die
+neue Skala zu ziehen ist eine Balancing-Entscheidung mit spürbarer Wirkung auf Urteile und gehört dem
+Nutzer, nicht einer Dokumentations-Fixrunde. Hier steht sie, damit sie nicht verloren geht; im Code steht
+derselbe Vermerk über den beiden Konstanten.
 
 ## Spielstandverträglichkeit
 

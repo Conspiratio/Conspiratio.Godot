@@ -44,11 +44,17 @@ public partial class HofhaltungDialog : DialogBase
 		int standesgemaess = SW.Statisch.GetTitelX(spieler.GetTitel()).GetJahresaufwand();
 		int abweichung = spieler.GetHofhaltungAbweichung();
 
+		// Die Wahl kostet sichtbar Taler und bringt Geltung – also muss auch die Geltung sichtbar sein,
+		// sonst wägt der Spieler eine Zahl gegen ein Gefühl ab. Gezeigt wird das Gesamtansehen, weil
+		// genau dieser Wert gelesen wird, wo Ansehen zählt: Wahl, Gericht, Stützpunkt, Schuldenschwelle.
+		string ansehenZeile = "\nEuer Ansehen beträgt derzeit " + spieler.GetAnsehen() + ".";
+
 		_labelText.Text = standesgemaess > 0
 			? "Wie wollt Ihr Hof halten?\nStandesgemäß kostet Euch das " + standesgemaess.ToStringGeld()
-			  + " im Jahr.\nWer über seinen Stand hinaus aufwendet, gewinnt an Geltung; wer spart, verliert."
+			  + " im Jahr.\nWer mehr Aufwand treibt, als sein Stand verlangt, gewinnt an Geltung; wer spart, verliert."
+			  + ansehenZeile
 			: "Ohne Adelstitel haltet Ihr keinen Hof – der Aufwand kostet Euch derzeit nichts.\n"
-			  + "Mit dem ersten Titel wird die Wahl spürbar.";
+			  + "Mit dem ersten Titel wird die Wahl spürbar." + ansehenZeile;
 
 		foreach (Node kind in _vBoxStufen.GetChildren())
 		{
