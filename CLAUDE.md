@@ -296,9 +296,23 @@ The game needs the editor to play, so changes are verified in three complementar
    seeds (regression) and three on random ones (`--seed=0`, which prints the value it drew so a striking
    run can be replayed). Length alone reaches what a 10-year push run never does: measured in one
    40-year game — `SpielerTodDialog` 2×, `KindestodDialog` 3×, `GeburtDialog` 4×, `Kirchgang` 20×,
-   `TestamentDialog` 29×. Still not reached even there: `GerichtDialog`, `WahlDialog`,
-   `StuetzpunktVerwalten`, `AuftragSiegDialog` — those need a game *state* the driver does not set up
-   (an indictment, a running candidacy, an owned base), not more years.
+   `TestamentDialog` 29×. Four views need a game *state* rather than more years — `GerichtDialog`,
+   `WahlDialog`, `StuetzpunktVerwalten`, `AuftragSiegDialog` — and **`--zustaende` now builds those
+   states and asserts them**: it arranges an indictment, an office that makes the player an elector, a
+   bought base and a mission victory, and fails the run naming any view it did not reach. It is **off by
+   default and must never be set in a measurement run** — cheat-built state distorts the wealth band —
+   needs >= ~12 years, ends the game early through the mission victory, and skips the save/load probe.
+   No CI or weekly job passes it yet, so the assertion only protects what someone runs by hand.
+   Two obstacles it had to work around, both worth knowing: an office whose only elector is the Regent
+   gets deposed by one hostile AI every year, and `FuehreAmtsenthebungenDurch` runs immediately before
+   `HalteWahlenAb` - the player loses the office before ever voting; pick an office with no electors of
+   its own (Regent, Erzbischof, Feldmarschall), whose deposition motions expire unvoted. And a base
+   purchase does not fail only on money: `KaufangebotAbgeben` rolls a die, and only the amount *above*
+   the valuation feeds the acceptance term.
+   `AuftragSiegDialog` is unreachable without the switch at all - the setup menu leaves the difficulty
+   at `KeinAuftrag` and `CreateNewGame` never sets one, so a driver game has no mission to win. The
+   switch therefore assigns the mission as well as fulfilling it: that proves the evaluation chain
+   (threshold, victory screen, highscore entry, clean end), not that the menu stores the choice.
    Runs `--verbose` on purpose: when something fails only after an hour, the log is the only trace and
    a second attempt costs another hour. Logs are uploaded either way, so you can read off which events
    a run actually hit. Weekly rather than nightly for cost: six runs are roughly 40 CI minutes, so daily
