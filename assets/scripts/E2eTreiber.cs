@@ -261,6 +261,13 @@ public partial class E2eTreiber : Node
 	/// <summary>Der nächste herzustellende Zustand als Index in <see cref="Zustandsansichten"/>.</summary>
 	private int _zustandSchritt;
 
+	/// <summary>
+	/// Wovon die Zustandsherstellung schon einmal berichtet hat. Siehe
+	/// <see cref="MeldeZustandsfehler"/>: Die Schritte laufen jedes Jahr erneut, ihre Fehler dürfen es
+	/// nicht.
+	/// </summary>
+	private readonly HashSet<string> _zustandsfehler = new();
+
 	/// <summary>Steht ein Spielzustand bereit? Erst dann darf der Bericht ihn auswerten.</summary>
 	private bool _spielLaeuft;
 
@@ -453,10 +460,16 @@ public partial class E2eTreiber : Node
 
 		// Vor dem Rundgang, damit der herzustellende Zustand noch in diesen Zug wirkt: Die
 		// Gerichtsverhandlung fällt am Zugende, die Wahl am Jahresende.
-		if (_mitZustaenden)
-			await StelleZustaendeHer();
+		if (_mitZustaenden && !await StelleZustaendeHer(nachRundgang: false))
+			return false;
 
 		if (_mitBereichen && !await BesucheBereiche())
+			return false;
+
+		// Der Auftragssieg dagegen erst danach: Sein Ziel ist ein Talerstand, und der Rundgang gibt im
+		// selben Zug wieder Geld aus. Warum das die Prüfung sonst verfehlt, steht bei
+		// BereiteAuftragssiegVor.
+		if (_mitZustaenden && !await StelleZustaendeHer(nachRundgang: true))
 			return false;
 
 		return await BeendeZug(jahrVorher);
@@ -1319,21 +1332,38 @@ public partial class E2eTreiber : Node
 	/// Erst weitergeschaltet wird, wenn die Ansicht des laufenden Schritts wirklich zu sehen war
 	/// (<see cref="NotiereZustandsansichten"/>). Ein Schritt, der nicht gegriffen hat, wird also im
 	/// nächsten Zug wiederholt, statt still übersprungen zu werden.
+	///
+	/// Aufgerufen wird zweimal je Zug, und das ist kein Schmuck: Die ersten drei Schritte müssen
+	/// <b>vor</b> den Rundgang, weil der Zug danach nichts mehr Passendes tut – der Prozess fällt am
+	/// Zugende, die Wahl am Jahresende, und das Kaufangebot ist auf eines je Jahr begrenzt. Der
+	/// Auftragssieg muss <b>danach</b>, weil sein Ziel ein Talerstand ist, den der Rundgang im selben
+	/// Zug wieder ausgibt (Handelsrunde, Lagerausbau, Zufallskäufe).
+	///
+	/// Liefert false, wenn der Treiber dabei hängen geblieben ist und der Zug abgebrochen gehört –
+	/// dieselbe Zusage wie bei <see cref="BesucheBereiche"/>.
 	/// </summary>
-	private async Task StelleZustaendeHer()
+	private async Task<bool> StelleZustaendeHer(bool nachRundgang)
 	{
 		if (SW.Dynamisch.GetAktuellesJahr() - SW.Statisch.StartJahr < ZustaendeAbJahr)
-			return;
+			return true;
 
 		// Alle vier Zustände gehören demselben Kaufmann. Im Hot-Seat sonst zweimal je Jahr, und der
 		// zweite Anlauf schüge fehl: Das Wähleramt gehört dann bereits einem menschlichen Mitspieler,
 		// und <c>UebernehmeAmt</c> lehnt genau das ab.
 		if (SW.Dynamisch.GetAktiverSpieler() != 1)
-			return;
+			return true;
 
 		while (_zustandSchritt < Zustandsansichten.Length
 		       && _erreichteAnsichten.Contains(Zustandsansichten[_zustandSchritt]))
 			_zustandSchritt++;
+
+		if (nachRundgang)
+		{
+			if (_zustandSchritt == 3)
+				BereiteAuftragssiegVor();
+
+			return true;
+		}
 
 		switch (_zustandSchritt)
 		{
@@ -1344,12 +1374,22 @@ public partial class E2eTreiber : Node
 				BereiteWahlVor();
 				break;
 			case 2:
-				await BereiteStuetzpunktVor();
-				break;
-			case 3:
-				BereiteAuftragssiegVor();
-				break;
+				return await BereiteStuetzpunktVor();
 		}
+
+		return true;
+	}
+
+	/// <summary>
+	/// Meldet einen Fehler aus der Zustandsherstellung genau einmal. Ein Schritt wird jedes Jahr
+	/// wiederholt, solange seine Ansicht aussteht – ist der Zustand dauerhaft blockiert, schriebe er
+	/// sonst je Jahr dieselbe Zeile in die Fehlerliste, und der eigentliche Befund (die unerreichte
+	/// Ansicht aus <see cref="BerichteZustaende"/>) ginge zwischen zwölf Wiederholungen unter.
+	/// </summary>
+	private void MeldeZustandsfehler(string schluessel, string meldung)
+	{
+		if (_zustandsfehler.Add(schluessel))
+			_fehler.Add(meldung);
 	}
 
 	/// <summary>
@@ -1394,7 +1434,7 @@ public partial class E2eTreiber : Node
 
 		if (amt == 0)
 		{
-			_fehler.Add("In der Amtstafel stand kein Amt, das andere Ämter wählt.");
+			MeldeZustandsfehler("KeinWaehleramt", "In der Amtstafel stand kein Amt, das andere Ämter wählt.");
 			return;
 		}
 
@@ -1410,8 +1450,8 @@ public partial class E2eTreiber : Node
 
 		if (SW.Dynamisch.GetAktHum().GetAmtID() != amt)
 		{
-			_fehler.Add("Das Wähleramt " + SW.Statisch.GetAmtwithID(amt).GetAmtsname(true)
-			            + " ließ sich nicht übernehmen: " + meldung);
+			MeldeZustandsfehler("Waehleramt", "Das Wähleramt " + SW.Statisch.GetAmtwithID(amt).GetAmtsname(true)
+								     + " ließ sich nicht übernehmen: " + meldung);
 			return;
 		}
 
@@ -1593,7 +1633,7 @@ public partial class E2eTreiber : Node
 	/// laufen, das das Spiel nie erwirtschaftet hat. Der Stützpunkt kostet den Spieler dadurch nichts –
 	/// geprüft werden soll seine Verwaltung, nicht sein Preis.
 	/// </summary>
-	private async Task BereiteStuetzpunktVor()
+	private async Task<bool> BereiteStuetzpunktVor()
 	{
 		var manager = new SoeldnerRaeuberManager();
 		int eigener = FindeStuetzpunkt(manager, eigen: true);
@@ -1602,9 +1642,9 @@ public partial class E2eTreiber : Node
 			eigener = await KaufeStuetzpunkt(manager);
 
 		if (eigener == 0)
-			return;   // Angebot abgelehnt – im nächsten Zug erneut (pro Jahr ist nur eines erlaubt)
+			return true;   // Angebot abgelehnt – im nächsten Zug erneut (pro Jahr ist nur eines erlaubt)
 
-		await OeffneStuetzpunktVerwaltung(eigener);
+		return await OeffneStuetzpunktVerwaltung(eigener);
 	}
 
 	/// <summary>Der erste Stützpunkt in eigener bzw. (<paramref name="eigen"/> = false) in KI-Hand.</summary>
@@ -1634,73 +1674,95 @@ public partial class E2eTreiber : Node
 
 		if (ziel == 0)
 		{
-			_fehler.Add("Kein Stützpunkt in KI-Besitz – es gab keinen zu kaufen.");
+			MeldeZustandsfehler("KeinStuetzpunkt", "Kein Stützpunkt in KI-Besitz – es gab keinen zu kaufen.");
 			return 0;
 		}
 
 		var spieler = SW.Dynamisch.GetAktHum();
 		int talerVorher = spieler.GetTaler();
 		int preis = manager.GetKaufInfo(ziel).Wert + AngebotsAufschlag;
-		spieler.SetTaler(preis + RuecklageMindestens);
 
-		var angebot = manager.KaufangebotAbgeben(ziel, preis);
-
-		// Die Lib fragt über SW.UI zurück („Wollt Ihr wirklich …“) und meldet danach das Ergebnis; beides
-		// läuft über Dialoge, die jemand bedienen muss, während hier auf die Aufgabe gewartet wird.
-		for (int schritt = 0; !angebot.IsCompleted && schritt < MaxSchritte; schritt++)
+		// Das Zurücknehmen gehört in ein finally: Dies ist die einzige Stelle im Treiber, die dem Spieler
+		// eine siebenstellige Summe in die Hand drückt. Fördert die Dialogbedienung dazwischen eine
+		// Ausnahme zutage, liefe der Rest des Spiels sonst mit einem Vermögen weiter, das niemand
+		// erwirtschaftet hat – und der Bericht am Ende wiese es aus, als wäre es erspielt.
+		try
 		{
-			var dialog = FindeOffenenDialog();
+			spieler.SetTaler(preis + RuecklageMindestens);
 
-			if (dialog != null)
-				await VersucheZuBedienen(dialog);
+			var angebot = manager.KaufangebotAbgeben(ziel, preis);
 
-			await NaechsterFrame();
+			// Die Lib fragt über SW.UI zurück („Wollt Ihr wirklich …“) und meldet danach das Ergebnis;
+			// beides läuft über Dialoge, die jemand bedienen muss, während hier gewartet wird.
+			for (int schritt = 0; !angebot.IsCompleted && schritt < MaxSchritte; schritt++)
+			{
+				var dialog = FindeOffenenDialog();
+
+				if (dialog != null)
+					await VersucheZuBedienen(dialog);
+
+				await NaechsterFrame();
+			}
+
+			if (!angebot.IsCompleted)
+			{
+				MeldeZustandsfehler("Kaufangebot", "Das Kaufangebot für Stützpunkt " + ziel
+									  + " kam nie zu einem Ergebnis. " + Zustandsbericht());
+				return 0;
+			}
+
+			bool gekauft = await angebot;
+
+			if (_ausfuehrlich)
+				GD.Print("  Zustand: Angebot über " + preis + " Taler für Stützpunkt " + ziel + " – "
+				         + (gekauft ? "angenommen" : "abgelehnt, nächstes Jahr erneut"));
+
+			return gekauft ? ziel : 0;
 		}
-
-		if (!angebot.IsCompleted)
+		finally
 		{
-			_fehler.Add("Das Kaufangebot für Stützpunkt " + ziel + " kam nie zu einem Ergebnis. " + Zustandsbericht());
 			spieler.SetTaler(talerVorher);
-			return 0;
 		}
-
-		bool gekauft = await angebot;
-		spieler.SetTaler(talerVorher);
-
-		if (_ausfuehrlich)
-			GD.Print("  Zustand: Angebot über " + preis + " Taler für Stützpunkt " + ziel + " – "
-			         + (gekauft ? "angenommen" : "abgelehnt, nächstes Jahr erneut"));
-
-		return gekauft ? ziel : 0;
 	}
 
-	/// <summary>Öffnet die Militärkarte und darauf den eigenen Stützpunkt, kehrt danach zum Kontor zurück.</summary>
-	private async Task OeffneStuetzpunktVerwaltung(int stuetzpunktId)
+	/// <summary>
+	/// Öffnet die Militärkarte und darauf den eigenen Stützpunkt, kehrt danach zum Kontor zurück.
+	/// Liefert, ob der Kontor wieder erreicht wurde – ist er es nicht, steht der Treiber in einer
+	/// fremden Ansicht und der Rundgang liefe ins Leere; der Zug wird dann abgebrochen, genau wie es
+	/// <see cref="BesucheBereiche"/> beim selben Befund tut.
+	/// </summary>
+	private async Task<bool> OeffneStuetzpunktVerwaltung(int stuetzpunktId)
 	{
 		var knopf = _main.Kontor.GetNodeOrNull<BaseButton>("AreaKampf");
 
 		if (knopf == null || knopf.Disabled)
 		{
-			_fehler.Add("Der Bereich AreaKampf war nicht bedienbar, die Stützpunktverwaltung blieb zu.");
-			return;
+			// Der Kontor steht noch – vermerkt, aber der Zug kann weiterlaufen.
+			MeldeZustandsfehler("AreaKampf",
+							"Der Bereich AreaKampf war nicht bedienbar, die Stützpunktverwaltung blieb zu.");
+			return true;
 		}
 
 		knopf.EmitSignal(BaseButton.SignalName.Pressed);
 
 		if (!await WarteAufSichtbar(nameof(SoeldnerRaeuberKarte)))
 		{
-			_fehler.Add("Die Militärkarte ging nicht auf. " + Zustandsbericht());
-			return;
+			MeldeZustandsfehler("Militaerkarte", "Die Militärkarte ging nicht auf. " + Zustandsbericht());
+		}
+		else
+		{
+			_main.SoeldnerRaeuberKarte.WaehleStuetzpunkt(stuetzpunktId);
+
+			if (!await WarteAufSichtbar(nameof(StuetzpunktVerwalten)))
+				MeldeZustandsfehler("Verwaltung", "Die Verwaltung des eigenen Stützpunkts " + stuetzpunktId
+									   + " ging nicht auf. " + Zustandsbericht());
+			else if (_ausfuehrlich)
+				GD.Print("  Zustand: Stützpunkt " + stuetzpunktId + " wird verwaltet");
 		}
 
-		_main.SoeldnerRaeuberKarte.WaehleStuetzpunkt(stuetzpunktId);
-
-		if (!await WarteAufSichtbar(nameof(StuetzpunktVerwalten)))
-			_fehler.Add("Die Verwaltung des eigenen Stützpunkts " + stuetzpunktId + " ging nicht auf. " + Zustandsbericht());
-		else if (_ausfuehrlich)
-			GD.Print("  Zustand: Stützpunkt " + stuetzpunktId + " wird verwaltet");
-
-		await KehreZumKontorZurueck("AreaKampf");
+		// Auch auf den Fehlerpfaden: Der Rechtsklick-Rückweg ist zugleich die Erholung, wenn die Karte
+		// gar nicht erst aufging.
+		return await KehreZumKontorZurueck("AreaKampf");
 	}
 
 	/// <summary>
@@ -1708,6 +1770,15 @@ public partial class E2eTreiber : Node
 	/// beendet das Spiel (<c>Kontor.PruefeAuftragErfuellt</c>); danach lässt sich nichts mehr herstellen.
 	/// Gewählt wird „Kleiner Wohlstand“, weil sein Ziel ein reiner Talerstand ist – ein Zustand, der
 	/// sich setzen lässt, ohne einen zweiten Mechanismus zu bemühen.
+	///
+	/// <b>Der Auftrag wird hier auch erst gesetzt.</b> Ein Spiel des Treibers hat nie einen: Die
+	/// Spielanlage über die Menüs lässt die Schwierigkeit auf „Keine (freies Spiel)“, der direkte Weg
+	/// über <c>NewGameManager</c> kennt das Feld gar nicht. Der Schritt tut damit beides, was ein
+	/// Spieler in zwei getrennten Momenten täte – den Auftrag bei der Spielanlage wählen und ihn
+	/// später erfüllen. Geprüft ist dadurch die Auswertung, nicht der Weg dorthin: dass
+	/// <c>AktualisiereFortschrittUndPruefe</c> anschlägt, der Siegesbildschirm aufgeht, sich in die
+	/// Bestenliste einträgt und das Spiel sauber beendet. Ob ein Spieler die 100 000 Taler je
+	/// zusammenbekäme, sagt der Lauf nicht – das ist eine Frage der Balance, keine der Verdrahtung.
 	///
 	/// Dass der Durchlauf dann vor dem geplanten Jahr endet, ist kein Fehler: <c>ErkenneSpielende</c>
 	/// erkennt das reguläre Ende, und <c>Spiele</c> verlässt die Jahresschleife, ohne zu wenige Jahre
@@ -1719,7 +1790,7 @@ public partial class E2eTreiber : Node
 
 		if (info == null)
 		{
-			_fehler.Add("Zum Auftrag „Kleiner Wohlstand“ gab es keine Daten.");
+			MeldeZustandsfehler("Auftragsdaten", "Zum Auftrag „Kleiner Wohlstand“ gab es keine Daten.");
 			return;
 		}
 
@@ -1727,8 +1798,16 @@ public partial class E2eTreiber : Node
 
 		var spieler = SW.Dynamisch.GetAktHum();
 
-		if (spieler.GetTaler() < info.Zielwert)
-			spieler.SetTaler(info.Zielwert);
+		// Mit Polster statt auf den Zielwert genau: Zwischen diesem Zug und der Prüfung am Zugende liegt
+		// noch die Jahresabrechnung (Löhne, Betriebskosten, Steuern, Zehnt, Zoll, Zinsen, Hofhaltung).
+		// Träfe sie einen Stand von genau 100 000, bliebe der Auftrag unerfüllt und der Bildschirm aus.
+		// Genommen wird die Rücklage – die Handelsrunde führt sie ohnehin als Schätzung genau dieser
+		// Kostenblöcke (siehe BerechneRuecklage). Reicht sie einmal nicht, wiederholt sich der Schritt
+		// im nächsten Zug, weil die Ansicht dann nicht vermerkt ist.
+		int ziel = info.Zielwert + _ruecklage;
+
+		if (spieler.GetTaler() < ziel)
+			spieler.SetTaler(ziel);
 
 		if (_ausfuehrlich)
 			GD.Print("  Zustand: Auftrag „" + info.Name + "“ gesetzt und erfüllt – das Spiel endet zum Zugende");
@@ -2143,14 +2222,25 @@ public partial class E2eTreiber : Node
 		// bewusst. Für den Treiber war ein solcher Dialog eine Sackgasse: nichts zu drücken, und der
 		// Rechtsklick läuft ins Leere. Deshalb wird hier ein Name eingetragen und abgeschickt.
 		//
-		// Höchstens einmal je Anlauf, sonst nie wieder ein Rechtsklick: Der Siegesbildschirm des
-		// Auftrags trägt ein Namensfeld für die Bestenliste und einen Knopf, der sich nach dem
-		// Eintragen selbst sperrt. Danach ist kein Knopf mehr da, und der Treiber schickte den Namen
-		// gemessen 4 000-mal ab, während der einzige Ausgang – der Rechtsklick – nie an die Reihe kam.
-		// Nach dem Rechtsklick wird die Merkung zusammen mit dem Klickzähler zurückgesetzt, sodass
-		// beides sich abwechselt und der Geburtsdialog, der nur über sein Feld weitergeht, weiterhin
-		// bedient wird.
-		if (!_eingabeGeschickt && dialog.FindChild("*LineEdit*", true, false) is LineEdit feld && feld.IsVisibleInTree())
+		// Mit --zustaende höchstens einmal je Anlauf, sonst nie wieder ein Rechtsklick: Der
+		// Siegesbildschirm des Auftrags trägt ein Namensfeld für die Bestenliste und einen Knopf, der
+		// sich nach dem Eintragen selbst sperrt. Danach ist kein Knopf mehr da, und der Treiber schickte
+		// den Namen gemessen 4 000-mal ab, während der einzige Ausgang – der Rechtsklick – nie an die
+		// Reihe kam. Nach dem Rechtsklick wird die Merkung zusammen mit dem Klickzähler zurückgesetzt,
+		// sodass beides sich abwechselt und der Geburtsdialog, der nur über sein Feld weitergeht,
+		// weiterhin bedient wird.
+		//
+		// Warum nur mit dem Schalter, obwohl es ein echter Fehler ist: Erreichbar ist dieser Zustand
+		// allein über --zustaende. Ein Auftrag ist im Durchlauf sonst nie aktiv – die Spielanlage lässt
+		// die Schwierigkeit auf „Keine (freies Spiel)“ (NewLocalGameMenu.GetSelectedAuftrag), und
+		// NewGameManager setzt gar keinen –, also zeigt Kontor.PruefeAuftragErfuellt den Bildschirm nie.
+		// Kein anderer Dialog des Standardpfads hat ein Eingabefeld und zugleich keinen Ausweg per Knopf.
+		// Die Änderung würde dort also nichts heilen, aber die Klickfolge verschieben – und damit die
+		// startwertgebundenen Messungen in docs/e2e-messwerte.md entwerten, wie es die Datei selbst als
+		// Regel führt. Zeigt sich einmal ein Dialog des Standardpfads mit demselben Muster, gehört das
+		// Gatter weg und das Band neu gemessen.
+		if ((!_mitZustaenden || !_eingabeGeschickt)
+		    && dialog.FindChild("*LineEdit*", true, false) is LineEdit feld && feld.IsVisibleInTree())
 		{
 			_eingabeGeschickt = true;
 
