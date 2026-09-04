@@ -119,8 +119,12 @@ Zweites**, weil dort die Entscheidung wirklich fällt. B und D sind Verfeinerung
 
 1. **Wo genau sitzt die Exportauswahl im Client**, und verträgt sie eine zusätzliche Zeile je Stadt, oder
    müsste sie dafür umgebaut werden? Das entscheidet über den Aufwand von Stufe C.
-2. **Soll der Tooltip den Grundpreis nennen?** Er verrät damit indirekt die Warentabelle. Ich halte das
-   für richtig — ohne Bezugsgröße bleibt der Abschlag abstrakt —, aber es ist eine Designentscheidung.
+2. **Soll der Tooltip den Grundpreis nennen?** *Beantwortet: ja.* Ohne Bezugsgröße bleibt der Abschlag
+   abstrakt; dass er dabei die Warentabelle verrät, ist der geringere Preis. Zurückrechnen lässt er sich
+   allerdings nicht: `GetRohstoffPreisVonIDX` teilt ganzzahlig ab, sodass mehrere Grundpreise auf
+   denselben Marktpreis fallen (über Grundpreis 1–60 × Abschlag 0–50 gemessen: 60 % der Rückrechnungen
+   falsch — und die angezeigten Zahlen gehen dann beim Nachrechnen nicht auf). Seit Lib 4.7.0 liefert
+   ihn `Stadt.GetRohstoffBasispreisVonIDX` direkt. Wer ihn anderswo anzeigt, nimmt diesen Zugriff.
 3. **Braucht der Kaufpreis dieselbe Behandlung?** Der Abschlag wirkt auf `GetRohstoffPreisVonIDX`, und
    das ist derselbe Wert, zu dem der Spieler *einkauft*. Eine gesättigte Stadt ist also zugleich eine
    billige Einkaufsquelle — ein Zusammenhang, den ein Tooltip nebenbei mit erklären könnte.
