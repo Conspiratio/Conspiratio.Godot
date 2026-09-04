@@ -11,6 +11,12 @@ namespace Conspiratio.Godot.assets.scripts;
 /// Einwohner, Kriminalität sowie Haupt-/Nebenproduktion, Nachfrage, mögliche Werkstätten und den
 /// Lagerstand des Landes je Rohstoff. Die Icon-Reihen werden – wie im Original – aus den Daten
 /// des StadtInformationenManager aufgebaut. Der Rechtsklick schließt die Anzeige.
+///
+/// Die farbigen Lagerstandsfelder tragen zusätzlich die Sättigung <i>dieser</i> Stadt (Stufe D aus
+/// docs/saettigungsrabatt-sichtbar-konzept.md). Das ist hier mehr als eine Ergänzung: Die Farbe misst
+/// den Anteil am Vorrat des <b>ganzen Landes</b> und sieht damit einem Sättigungssignal zum
+/// Verwechseln ähnlich, ohne eines zu sein. Wer sie dafür hält, liest den Markt falsch und merkt es
+/// nie – der Tooltip stellt beides nebeneinander und benennt den Unterschied.
 /// </summary>
 public partial class StadtInformationenDialog : DialogBase
 {
@@ -69,7 +75,7 @@ public partial class StadtInformationenDialog : DialogBase
 		BaueRohstoffreihe(mgr.Nebenproduktion, 457, 285, 30, 36);
 		BaueRohstoffreihe(mgr.Nachfrage, 301, 330, 46, 52);
 		BaueRohstoffreihe(mgr.Werkstaetten, 301, 391, 46, 52);
-		BaueLagerstand(mgr.Lagerstand);
+		BaueLagerstand(stadtId, mgr.Lagerstand);
 
 		return ShowAndAwait();
 	}
@@ -111,7 +117,7 @@ public partial class StadtInformationenDialog : DialogBase
 	}
 
 	// Lagerstand: Rasterreihen zu je 7 Icons; das farbige Feld (rot/orange/grün) zeigt die Bewertung.
-	private void BaueLagerstand(IReadOnlyList<Lagerbestand> lager)
+	private void BaueLagerstand(int stadtId, IReadOnlyList<Lagerbestand> lager)
 	{
 		float pad = 3 * S;
 
@@ -126,7 +132,7 @@ public partial class StadtInformationenDialog : DialogBase
 			{
 				Color = FarbeFuer(lager[i].Stufe),
 				MouseFilter = MouseFilterEnum.Pass,
-				TooltipText = lager[i].Name + " (" + StufeText(lager[i].Stufe) + ")"
+				TooltipText = BeschreibeLagerfeld(stadtId, lager[i])
 			};
 			feld.Position = new Vector2(x * S, y * S);
 			feld.Size = new Vector2(30 * S, 30 * S);
@@ -178,6 +184,23 @@ public partial class StadtInformationenDialog : DialogBase
 			_rohstoffIcons[rohId] = textur;
 		}
 		return textur;
+	}
+
+	/// <summary>
+	/// Was in diesem Feld steckt – erst die Sättigung dieser Stadt, dann die Klarstellung, was die
+	/// Farbe misst.
+	///
+	/// Die Reihenfolge ist Absicht: Oben steht, was der Spieler für eine Handelsentscheidung braucht
+	/// (was die Ware hier einbringt und warum), unten die Einordnung der Farbe. Ohne diesen zweiten
+	/// Teil bliebe das Feld eine Falle: Es färbt sich nach dem Anteil am Vorrat des ganzen Landes,
+	/// was mit der örtlichen Sättigung zwar korreliert, aber anders normiert ist – eine große Stadt
+	/// kann landesweit viel lagern und trotzdem längst nicht gesättigt sein.
+	/// </summary>
+	private static string BeschreibeLagerfeld(int stadtId, Lagerbestand bestand)
+	{
+		return Marktlage.BeschreibeMarktpreis(stadtId, bestand.RohId) + "\n\n" +
+		       "Die Farbe zeigt etwas anderes: den Anteil am Vorrat des ganzen Landes (" +
+		       StufeText(bestand.Stufe) + ", " + bestand.Anteil + " %).";
 	}
 
 	private static Color FarbeFuer(Lagerstufe stufe) => stufe switch

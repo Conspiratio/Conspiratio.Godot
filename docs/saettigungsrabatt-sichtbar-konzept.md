@@ -131,6 +131,26 @@ Dort stehen Einwohner, Nachfrage und Lagerstand bereits nebeneinander. Eine Zeil
 „Sättigung: 3 Jahresbedarfe → −30 %" macht aus drei Einzelwerten eine Aussage — und entschärft zugleich
 die oben beschriebene Verwechslungsgefahr mit dem landesweiten Lagerstand.
 
+**Umgesetzt am Tooltip der Lagerstandsfelder**, nicht als eigene Zeile: Der Dialog folgt den festen
+Koordinaten des WinForms-Originals (Entwurf 632×596), und das Lagerstandsraster reicht bereits bis
+y ≈ 555 — für eine zusätzliche Zeile ist darunter kein verlässlicher Platz. Der Tooltip nennt zuerst
+die Sättigung dieser Stadt und danach, was die Farbe misst.
+
+**Die Verwechslungsgefahr ist gemessen, nicht vermutet.** In einem 26-Jahre-Lauf wurden für alle
+14 Städte Lagerstufe, Landesanteil und örtlicher Abschlag verglichen. Gesättigt war der Markt in drei
+Fällen — und die Farbe wies in **allen dreien** in die gefährliche Richtung:
+
+| Stadt | Stufe (Farbe) | Anteil am Landesvorrat | örtlicher Abschlag |
+|---|---|---|---|
+| Altenfield | niedrig (rot) | 21 % | **29 %** |
+| Frozen Castle | niedrig (rot) | 23 % | 14 % |
+| Crowbrigde | normal (orange) | 56 % | **50 %** (Deckel) |
+
+Ein rotes Feld liest sich als „hier liegt wenig, guter Absatzmarkt" — während der Preis dort schon um
+29 % gedrückt ist. Die beiden Größen sind eben verschieden normiert: Anteil am Landesvorrat gegen
+Vielfaches des örtlichen Jahresbedarfs. (Kleine Stichprobe — der Treiber handelt nur eine Ware —, aber
+die Richtung war einheitlich.)
+
 ## Was ich ausdrücklich **nicht** vorschlage
 
 - **Keine Regeländerung.** Die Mechanik ist gemessen und kalibriert; hier geht es allein darum, dass der
