@@ -302,7 +302,8 @@ The game needs the editor to play, so changes are verified in three complementar
    bought base and a mission victory, and fails the run naming any view it did not reach. It is **off by
    default and must never be set in a measurement run** — cheat-built state distorts the wealth band —
    needs >= ~12 years, ends the game early through the mission victory, and skips the save/load probe.
-   No CI or weekly job passes it yet, so the assertion only protects what someone runs by hand.
+   The weekly workflow runs it in its own job (`abdeckung`, two seeds, 20 years, one player),
+   deliberately separate from the measuring runs in the same file.
    Two obstacles it had to work around, both worth knowing: an office whose only elector is the Regent
    gets deposed by one hostile AI every year, and `FuehreAmtsenthebungenDurch` runs immediately before
    `HalteWahlenAb` - the player loses the office before ever voting; pick an office with no electors of

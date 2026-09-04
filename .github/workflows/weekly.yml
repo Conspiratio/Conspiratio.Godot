@@ -113,3 +113,88 @@ jobs:
           path: wochenlauf.log
           if-no-files-found: warn
           retention-days: 30
+
+  # Ein zweiter Job, bewusst getrennt vom Messlauf oben: --zustaende baut ueber den CheatManager
+  # Zustaende, die sich nicht erspielen lassen (eine Anklage, ein Waehleramt, ein gekaufter
+  # Stuetzpunkt, ein erfuellter Auftrag) und sichert zu, dass die vier Ansichten dahinter auch
+  # wirklich erscheinen. Genau diese vier hat bis dahin kein automatischer Lauf je geoeffnet - ihnen
+  # fehlte nie Spielzeit, sondern ein Spielzustand.
+  #
+  # Warum getrennt und nicht als weitere Matrixzeile oben: Der gecheatete Zustand verfaelscht das
+  # Endvermoegen (der Spieler haelt kurzzeitig ein Amt und Millionen Taler), der Auftragssieg beendet
+  # das Spiel vorzeitig, und die Speicher-/Ladeprobe entfaellt dadurch. Als Abdeckungslauf ist das
+  # richtig, als Messwert waere es Unsinn - die Baender in docs/e2e-messwerte.md duerfen niemals aus
+  # einem Lauf mit diesem Schalter stammen.
+  #
+  # Der Schalter braucht rund zwoelf Jahre, bis alle vier Zustaende an der Reihe waren; 20 geben
+  # Luft. Ein fester Startwert dient der Regression, ein zufaelliger der Streuung - --seed=0 gibt den
+  # gezogenen Wert aus, ein auffaelliger Lauf laesst sich also nachstellen.
+  abdeckung:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: zustaende-fest
+            seed: 1
+          - name: zustaende-zufall
+            seed: 0
+
+    name: ${{ matrix.name }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Godot herunterladen
+        run: |
+          NAME="Godot_v${GODOT_VERSION}-stable_mono_linux_x86_64"
+          curl -sSfL -o godot.zip \
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/${NAME}.zip"
+          unzip -q godot.zip
+          # Siehe build.yml: Die Binary heisst anders als der Ordner, deshalb wird sie gesucht.
+          GODOT_BIN="$(find . -maxdepth 3 -type f -name 'Godot_v*_mono_linux*' ! -name '*.zip' | head -1)"
+          if [ -z "$GODOT_BIN" ]; then
+            echo "::error::Im Archiv wurde keine Godot-Binary gefunden. Inhalt:"
+            unzip -l godot.zip
+            exit 1
+          fi
+          chmod +x "$GODOT_BIN"
+          echo "GODOT=$(realpath "$GODOT_BIN")" >> "$GITHUB_ENV"
+          echo "Godot-Binary: $GODOT_BIN"
+
+      - name: Ressourcen importieren
+        run: $GODOT --headless --path . --import
+
+      - name: Build
+        run: dotnet build --configuration Debug
+
+      # Die eigentliche Zusicherung steckt im Treiber: Er merkt sich, welche der vier Ansichten er
+      # gesehen hat, und beendet sich mit Exit 1 unter Nennung der fehlenden. Der Exit-Code ist hier
+      # also das Tor; die Fehlersuche im Protokoll kommt zusaetzlich dazu.
+      - name: Abdeckungslauf mit --zustaende
+        timeout-minutes: 30
+        run: |
+          set -o pipefail
+          $GODOT --headless --path . "res://scenes/E2eTest.tscn" -- \
+            --jahre=20 --spieler=1 --zustaende --seed=${{ matrix.seed }} --verbose 2>&1 \
+            | tee abdeckung.log
+          if grep -qE "SCRIPT ERROR|Unhandled exception" abdeckung.log; then
+            echo "::error::Der Abdeckungslauf ${{ matrix.name }} hat Fehler gemeldet (siehe Protokoll)."
+            exit 1
+          fi
+
+      - name: Protokoll als Artefakt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: abdeckung-${{ matrix.name }}
+          path: abdeckung.log
+          if-no-files-found: warn
+          retention-days: 30
