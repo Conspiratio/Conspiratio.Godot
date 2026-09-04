@@ -83,6 +83,23 @@ deren Stärke mit dem Abschlag wächst. Damit erkennt der Spieler eine gesättig
 Vorsicht bei der Farbwahl: Die Stadtansicht nutzt Rot bereits für ungültige Nullwerte in den
 Produktionszeilen. Die Sättigung braucht ein eigenes Zeichen, sonst kollidieren zwei Bedeutungen.
 
+**Umgesetzt — und die Farbwahl entschied sich am Kontrast, nicht am Geschmack.** Zwei Messungen an
+gerenderten Bildern haben je einen ersten Entwurf verworfen:
+
+- **Auf der Steinwand darf die Farbe nicht dunkler werden.** Der erste Entwurf dunkelte das Gold zu
+  einem stumpfen Bronze ab. Gemessen: Gold trägt 2,08:1 gegen die Steinwand, das stumpfe Bronze nur
+  noch **1,26:1** — die Zahl wäre ausgerechnet beim vollen Abschlag fast in der Wand verschwunden.
+  Jetzt wird das Gold **entsättigt statt abgedunkelt** (bis `rgb(204, 189, 158)`); der Kontrast bleibt
+  über die ganze Skala zwischen 2,08:1 und 1,87:1, während der Blaukanal von 38 auf 158 steigt — das
+  Gold bleicht sichtbar aus, ohne unleserlich zu werden.
+- **Auf dem Pergament darf die Schriftfarbe gar nicht angetastet werden.** Dunkelbraun trägt dort rund
+  5:1, derselbe Ocker als Füllung nur noch rund 1,7:1 — dasselbe Problem. Die Zielstadt bekommt das
+  Signal deshalb als **Kontur** um die unverändert dunkle Schrift; das kostet keinen Kontrast.
+
+Beides läuft über `ErmittleSaettigungsAnteil`, das auf dem **gekappten** Abschlag rechnet: Oberhalb des
+Deckels ändert sich am Preis nichts mehr, also darf sich auch an der Farbe nichts mehr ändern — sonst
+verspräche sie eine Verschlechterung, die nicht eintritt.
+
 ### Stufe C — Beim Export die Zielstadt vergleichbar machen
 
 Der Export ist die Stelle, an der die Entscheidung tatsächlich fällt: Der Spieler wählt eine Zielstadt.

@@ -25,6 +25,33 @@ public partial class Stadt : Control
 	// Produktionszeilen liegen auf dem Pergament: dunkles Braun-Schwarz (wie in den Dialogen).
 	private static readonly Color PergamentText = new(0.16f, 0.11f, 0.05f);
 
+	/// <summary>
+	/// Gold, dem der Glanz fehlt: die Preiszeile eines gesättigten Marktes. Der Ton wird stumpfer,
+	/// je größer der Marktabschlag ist — bei <c>MaxAbschlagProzent</c> ganz erreicht.
+	///
+	/// Bewusst <b>kein</b> Rot: Das ist in dieser Ansicht schon vergeben (ungültige Nullwerte in den
+	/// Produktionszeilen, siehe <see cref="FaerbeNumeric"/>), und zwei Bedeutungen auf einer Farbe
+	/// lassen sich nicht auseinanderhalten. Auch nicht dunkler als hier: Die Zeile steht auf der
+	/// Steinwand und lebt vom Kontrast zu <see cref="OutlineDunkel"/>.
+	/// </summary>
+	private static readonly Color GoldStumpf = new(0.80f, 0.74f, 0.62f);
+
+	/// <summary>
+	/// Dasselbe Zeichen auf Pergament, aber als <b>Kontur</b> statt als Schriftfarbe: die Zielstadt der
+	/// Verkaufszeile, wenn dort schon Ware liegt. Die Deckkraft wächst mit dem Abschlag, bei 0 ist die
+	/// Kontur unsichtbar.
+	///
+	/// Warum nicht die Schriftfarbe wie bei der Preiszeile: Auf dem hellen Pergament kostet jeder
+	/// warme Farbton Kontrast. Dunkelbraun auf Pergament trägt rund 5:1, derselbe Ocker als Füllung
+	/// nur noch rund 1,7:1 — die Zielstadt wäre ausgerechnet dann am schlechtesten zu lesen, wenn ihr
+	/// Markt am vollsten ist. Als Kontur um die unverändert dunkle Schrift kostet dasselbe Signal
+	/// keinen Kontrast. Wieder kein Rot: Das gehört den ungültigen Werten.
+	/// </summary>
+	private static readonly Color PergamentGesaettigt = new(0.72f, 0.45f, 0.05f);
+
+	/// <summary>Stärke der Sättigungskontur auf dem Zielstadt-Knopf.</summary>
+	private const int SaettigungsKonturStaerke = 5;
+
 	private Label _labelPlayerNameAndOffice;
 	private Label _labelPlaceDate;
 	private Label _labelTaler;
@@ -259,6 +286,10 @@ public partial class Stadt : Control
 		_labelsPreis[nr].Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString();
 		_labelsPreis[nr].TooltipText = BeschreibeMarktpreis(_stadtId, rohstoffId);
 
+		// Stufe B: Dem Preis sieht man an, dass er gedrückt ist - ohne dass man dafür hovern muss.
+		_labelsPreis[nr].AddThemeColorOverride("font_color",
+			GoldFarbe.Lerp(GoldStumpf, ErmittleSaettigungsAnteil(SW.Dynamisch.GetStadtwithID(_stadtId), rohstoffId)));
+
 		_labelsBestand[nr].Visible = hatWerkstatt;
 		_labelsBestand[nr].Text = FormatiereBestand(_handelsManager.GetLagerbestand(_stadtId, rohstoffId));
 		_labelsBestand[nr].TooltipText = "Obere Hälfte: einkaufen, untere Hälfte: verkaufen\n(die Ziffernposition bestimmt die Menge)";
@@ -286,6 +317,20 @@ public partial class Stadt : Control
 	{
 		return (stadt.GetRohstoffIDXVorrat(rohstoffId) * Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent)
 		       / ErmittleJahresbedarf(stadt);
+	}
+
+	/// <summary>
+	/// Wie weit der Markt zum Deckel hin gesättigt ist, als Anteil zwischen 0 und 1 — die Stärke, mit
+	/// der die Sättigungsfarbe eingemischt wird. Gerechnet wird auf dem <b>gekappten</b> Abschlag:
+	/// Oberhalb des Deckels ändert sich am Preis nichts mehr, also soll sich auch an der Farbe nichts
+	/// mehr ändern — sonst verspäche sie eine Verschlechterung, die nicht eintritt.
+	/// </summary>
+	private static float ErmittleSaettigungsAnteil(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt, int rohstoffId)
+	{
+		int abschlag = System.Math.Min(Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent,
+		                               ErmittleRohAbschlagProzent(stadt, rohstoffId));
+
+		return (float)abschlag / Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent;
 	}
 
 	/// <summary>
@@ -485,9 +530,20 @@ public partial class Stadt : Control
 			_numericsStaette[slot].Wert = produktionsslot.GetVerkaufStadt();
 			_numericsStaette[slot].Text = "in " + SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()).GetGebietsName();
 
-			// Verkaufsmenge 0 = kein Verkauf: rot; sonst schwarz. Die Zielstadt bleibt schwarz.
+			// Verkaufsmenge 0 = kein Verkauf: rot; sonst schwarz.
 			FaerbeNumeric(_numericsMenge[slot], produktionsslot.GetVerkaufAnzahl() > 0);
-			FaerbeNumeric(_numericsStaette[slot], true);
+
+			// Die Zielstadt bekommt dagegen die Sättigungskontur: Nach der Messung in
+			// <see cref="BeschreibeZielstadt"/> ist in der Zeile kein Platz für eine Zahl, Farbe aber
+			// kostet keine Breite - und ohne sie bliebe ein voller Zielmarkt bis zum Hovern verborgen.
+			float saettigung = ErmittleSaettigungsAnteil(
+				SW.Dynamisch.GetStadtwithID(produktionsslot.GetVerkaufStadt()),
+				produktionsslot.GetVerkaufRohstoff());
+
+			_numericsStaette[slot].AddThemeColorOverride("font_color", PergamentText);
+			_numericsStaette[slot].AddThemeColorOverride("font_outline_color",
+				new Color(PergamentGesaettigt, saettigung));
+			_numericsStaette[slot].AddThemeConstantOverride("outline_size", SaettigungsKonturStaerke);
 
 			// Was die Ware in der gewählten Zielstadt einbringt, hängt am Zahlen-Knopf der Zielstadt -
 			// also an dem Bedienelement, mit dem der Spieler die Städte durchschaltet.
@@ -538,6 +594,10 @@ public partial class Stadt : Control
 	private void FaerbeNumeric(NumericButtonWithSounds numeric, bool gueltig)
 	{
 		numeric.AddThemeColorOverride("font_color", gueltig ? PergamentText : new Color(0.65f, 0.05f, 0.05f));
+
+		// Die Saettigungskontur des Verkaufsmodus abraeumen: Theme-Overrides ueberdauern den Wechsel
+		// der Taetigkeit, sonst behielte ein auf "Produzieren" umgestellter Slot den Ockerrand.
+		numeric.AddThemeConstantOverride("outline_size", 0);
 	}
 
 	private static string AktionsartAlsText(EnumProduktionsslotAktionsart aktionsart)
