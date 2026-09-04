@@ -257,10 +257,58 @@ public partial class Stadt : Control
 
 		_labelsPreis[nr].Visible = hatWerkstatt;
 		_labelsPreis[nr].Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString();
+		_labelsPreis[nr].TooltipText = BeschreibeMarktpreis(rohstoffId);
 
 		_labelsBestand[nr].Visible = hatWerkstatt;
 		_labelsBestand[nr].Text = FormatiereBestand(_handelsManager.GetLagerbestand(_stadtId, rohstoffId));
 		_labelsBestand[nr].TooltipText = "Obere Hälfte: einkaufen, untere Hälfte: verkaufen\n(die Ziffernposition bestimmt die Menge)";
+	}
+
+	/// <summary>
+	/// Macht den Sättigungsrabatt in <see cref="HandelsManager"/>/<c>Stadt.GetRohstoffPreisVonIDX</c>
+	/// für den Spieler lesbar: Der Preis in der Zeile ist bereits gerabattet, zeigt aber weder die
+	/// Ursache (wie viele Jahresbedarfe im Stadtlager liegen) noch, ob der Deckel erreicht ist.
+	/// Siehe docs/saettigungsrabatt-sichtbar-konzept.md, Stufe A.
+	/// </summary>
+	private string BeschreibeMarktpreis(int rohstoffId)
+	{
+		var stadt = SW.Dynamisch.GetStadtwithID(_stadtId);
+		string rohstoffName = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
+
+		int einwohner = stadt.GetEinwohner();
+		int vorrat = stadt.GetRohstoffIDXVorrat(rohstoffId);
+		int preis = stadt.GetRohstoffPreisVonIDX(rohstoffId);
+		int jahresbedarf = System.Math.Max(1, einwohner / 10);
+
+		// Ungekappter Abschlag in Prozentpunkten, wie in Stadt.GetRohstoffPreisVonIDX vor dem
+		// Min(MaxAbschlagProzent, ...) - durch 10 verrät er zugleich, wie viele Jahresbedarfe
+		// tatsächlich im Stadtlager liegen (10 % je vollem Jahresbedarf).
+		int rohAbschlagProzent = (vorrat * Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent) / jahresbedarf;
+		int abschlagProzent = System.Math.Min(Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent, rohAbschlagProzent);
+
+		if (abschlagProzent == 0)
+		{
+			return rohstoffName + ": Grundpreis " + preis.ToStringGeld() + ".\n" +
+			       stadt.GetGebietsName() + " verbraucht " + jahresbedarf + " im Jahr und lagert " + vorrat +
+			       " — kein Marktabschlag, Ihr erhaltet " + preis.ToStringGeld() + ".";
+		}
+
+		string jahresbedarfeText = rohAbschlagProzent % 10 == 0
+			? (rohAbschlagProzent / 10) + (rohAbschlagProzent == 10 ? " Jahresbedarf" : " Jahresbedarfe")
+			: (rohAbschlagProzent / 10) + "," + (rohAbschlagProzent % 10) + " Jahresbedarfe";
+
+		// Es gibt keinen öffentlichen Zugriff auf Stadt._rohstoffPreis (den ungerabatteten Preis) -
+		// daher hier aus dem gerabatteten Preis und dem (gekappten) Abschlagprozent zurückgerechnet.
+		int grundpreis = (int)System.Math.Round(preis * 100.0 / (100 - abschlagProzent));
+
+		string hinweisDeckel = abschlagProzent == Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent
+			? " (Höchstwert erreicht — mehr Vorrat drückt den Preis nicht weiter)"
+			: "";
+
+		return rohstoffName + ": Grundpreis " + grundpreis.ToStringGeld() + ".\n" +
+		       stadt.GetGebietsName() + " verbraucht " + jahresbedarf + " im Jahr und lagert " + vorrat +
+		       " — " + jahresbedarfeText + ".\n" +
+		       "Marktabschlag " + abschlagProzent + " %" + hinweisDeckel + ", Ihr erhaltet " + preis.ToStringGeld() + ".";
 	}
 
 	private static string FormatiereBestand(int anzahl)
