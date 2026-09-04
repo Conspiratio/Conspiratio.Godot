@@ -269,6 +269,13 @@ public partial class Stadt : Control
 	/// für den Spieler lesbar: Der Preis in der Zeile ist bereits gerabattet, zeigt aber weder die
 	/// Ursache (wie viele Jahresbedarfe im Stadtlager liegen) noch, ob der Deckel erreicht ist.
 	/// Siehe docs/saettigungsrabatt-sichtbar-konzept.md, Stufe A.
+	///
+	/// Der ungerabattete Grundpreis wird bewusst nicht genannt: Stadt._rohstoffPreis hat keinen
+	/// oeffentlichen Zugriff, und aus dem gerabatteten Preis laesst er sich nicht zurueckrechnen -
+	/// die Lib teilt dort ganzzahlig ab, sodass mehrere Grundpreise auf denselben Marktpreis fuehren
+	/// (gemessen ueber Grundpreis 1-60 x Abschlag 0-50: 60 % der Rueckrechnungen falsch). Ein falscher
+	/// Grundpreis waere schlimmer als gar keiner, weil die Zahlen dann beim Nachrechnen nicht aufgehen -
+	/// genau das, wozu ein erklaerender Tooltip einlaedt. Nennbar wird er erst mit einem Getter in der Lib.
 	/// </summary>
 	private string BeschreibeMarktpreis(int rohstoffId)
 	{
@@ -288,27 +295,26 @@ public partial class Stadt : Control
 
 		if (abschlagProzent == 0)
 		{
-			return rohstoffName + ": Grundpreis " + preis.ToStringGeld() + ".\n" +
-			       stadt.GetGebietsName() + " verbraucht " + jahresbedarf + " im Jahr und lagert " + vorrat +
-			       " — kein Marktabschlag, Ihr erhaltet " + preis.ToStringGeld() + ".";
+			return rohstoffName + " — Marktpreis " + preis.ToStringGeld() + ".\n" +
+			       stadt.GetGebietsName() + " verbraucht " + jahresbedarf + " im Jahr und lagert " +
+			       (vorrat == 0 ? "nichts" : vorrat.ToString()) + ": kein Überhang, kein Marktabschlag.";
 		}
 
-		string jahresbedarfeText = rohAbschlagProzent % 10 == 0
-			? (rohAbschlagProzent / 10) + (rohAbschlagProzent == 10 ? " Jahresbedarf" : " Jahresbedarfe")
-			: (rohAbschlagProzent / 10) + "," + (rohAbschlagProzent % 10) + " Jahresbedarfe";
-
-		// Es gibt keinen öffentlichen Zugriff auf Stadt._rohstoffPreis (den ungerabatteten Preis) -
-		// daher hier aus dem gerabatteten Preis und dem (gekappten) Abschlagprozent zurückgerechnet.
-		int grundpreis = (int)System.Math.Round(preis * 100.0 / (100 - abschlagProzent));
+		// Zehntel Jahresbedarfe, aus demselben ungekappten Abschlag gebildet wie der Prozentsatz -
+		// so gehen die beiden Zahlen im Tooltip miteinander auf, wenn der Spieler nachrechnet.
+		int zehntelBedarfe = (rohAbschlagProzent * 10) / Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent;
+		string jahresbedarfeText = zehntelBedarfe % 10 == 0
+			? (zehntelBedarfe / 10) + (zehntelBedarfe == 10 ? " Jahresbedarf" : " Jahresbedarfe")
+			: (zehntelBedarfe / 10) + "," + (zehntelBedarfe % 10) + " Jahresbedarfe";
 
 		string hinweisDeckel = abschlagProzent == Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent
-			? " (Höchstwert erreicht — mehr Vorrat drückt den Preis nicht weiter)"
+			? " — mehr Vorrat drückt ihn nicht weiter"
 			: "";
 
-		return rohstoffName + ": Grundpreis " + grundpreis.ToStringGeld() + ".\n" +
+		return rohstoffName + " — Marktpreis " + preis.ToStringGeld() + ".\n" +
 		       stadt.GetGebietsName() + " verbraucht " + jahresbedarf + " im Jahr und lagert " + vorrat +
-		       " — " + jahresbedarfeText + ".\n" +
-		       "Marktabschlag " + abschlagProzent + " %" + hinweisDeckel + ", Ihr erhaltet " + preis.ToStringGeld() + ".";
+		       ": " + jahresbedarfeText + ".\n" +
+		       "Das drückt den Preis um " + abschlagProzent + " %" + hinweisDeckel + ".";
 	}
 
 	private static string FormatiereBestand(int anzahl)
