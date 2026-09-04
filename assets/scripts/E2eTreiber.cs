@@ -1001,6 +1001,11 @@ public partial class E2eTreiber : Node
 		SetzeZahl(stadt, "HBoxDetail1/NumericMenge", bestand);
 		await NaechsterFrame();
 
+		// Eigener Ansichtsname, damit die eingerichtete Verkaufszeile ein eigenes Bildbudget
+		// bekommt: Der Schuss beim Betreten der Stadt (Schiesse(nameof(Stadt))) faellt vor diese
+		// Einrichtung und zeigt die Zeile deshalb immer leer.
+		await Schiesse("Stadt_Verkauf");
+
 		_exportierteWaren += bestand;
 	}
 

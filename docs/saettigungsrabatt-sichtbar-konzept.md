@@ -93,6 +93,21 @@ Vorschlag: im Auswahlschritt je Zielstadt den zu erwartenden Preis und den Absch
 Wahl eine informierte ist. Das ist inhaltlich der größte Gewinn der vier Stufen und zugleich der
 aufwendigste, weil er die Exportauswahl berührt.
 
+**Umgesetzt als Tooltip am Zielstadt-Knopf**, nicht als sichtbare Spalte — aus zwei Gründen, die erst
+der Blick in den Client zeigte:
+
+- **Es gibt keinen Auswahlschritt mit Liste.** Die Zielstadt wird in der Verkaufszeile über einen
+  `NumericButton` durchgeschaltet (`Stadt.OnStaetteChanged` → `SetzeVerkaufsStadtAusWert`). Eine Liste,
+  die man je Stadt annotieren könnte, existiert nicht.
+- **Die Zeile hat keinen Platz.** Gemessen mit der echten Schrift endet die Verkaufszeile im
+  ungünstigsten Fall (längster Stadtname „Frozen Castle", fünfstellige Fuhrkosten) bei x = 1017, das
+  Pergament von `BackgroundStadt.png` bei x = 1101. Es bleiben **84 px, rund sechs Zeichen**. Schon
+  „zu je 20 Taler" braucht 180 px, mit Abschlagsangabe 407 px. Der `HBoxContainer` reicht zwar bis
+  1360, aber das Pergament ist Teil des Hintergrundbildes — die Zeile liefe auf die Steinwand hinaus.
+
+Was damit ausfällt, ist die Auffälligkeit ohne Hovern. Wer sie will, muss bei der **Farbe** ansetzen
+(Stufe B), denn Farbe kostet keine Breite — oder das Hintergrundbild ändern.
+
 ### Stufe D — Die Sättigung im Stadtinformationen-Dialog benennen
 
 Dort stehen Einwohner, Nachfrage und Lagerstand bereits nebeneinander. Eine Zeile oder Spalte
@@ -117,8 +132,10 @@ Zweites**, weil dort die Entscheidung wirklich fällt. B und D sind Verfeinerung
 
 ## Offene Fragen
 
-1. **Wo genau sitzt die Exportauswahl im Client**, und verträgt sie eine zusätzliche Zeile je Stadt, oder
-   müsste sie dafür umgebaut werden? Das entscheidet über den Aufwand von Stufe C.
+1. **Wo genau sitzt die Exportauswahl im Client?** *Beantwortet:* in der Verkaufszeile der Stadtansicht,
+   als `NumericButton`, der die Städte durchschaltet — es gibt weder einen Auswahlschritt noch eine
+   Liste. Eine zusätzliche Angabe je Stadt verträgt die Zeile nicht (84 px Spielraum, siehe Stufe C);
+   der Aufwand lag deshalb nicht im Umbau, sondern im Messen.
 2. **Soll der Tooltip den Grundpreis nennen?** *Beantwortet: ja.* Ohne Bezugsgröße bleibt der Abschlag
    abstrakt; dass er dabei die Warentabelle verrät, ist der geringere Preis. Zurückrechnen lässt er sich
    allerdings nicht: `GetRohstoffPreisVonIDX` teilt ganzzahlig ab, sodass mehrere Grundpreise auf

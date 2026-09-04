@@ -257,11 +257,35 @@ public partial class Stadt : Control
 
 		_labelsPreis[nr].Visible = hatWerkstatt;
 		_labelsPreis[nr].Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString();
-		_labelsPreis[nr].TooltipText = BeschreibeMarktpreis(rohstoffId);
+		_labelsPreis[nr].TooltipText = BeschreibeMarktpreis(_stadtId, rohstoffId);
 
 		_labelsBestand[nr].Visible = hatWerkstatt;
 		_labelsBestand[nr].Text = FormatiereBestand(_handelsManager.GetLagerbestand(_stadtId, rohstoffId));
 		_labelsBestand[nr].TooltipText = "Obere Hälfte: einkaufen, untere Hälfte: verkaufen\n(die Ziffernposition bestimmt die Menge)";
+	}
+
+	/// <summary>
+	/// Der Jahresbedarf einer Stadt, wie ihn <c>Stadt.GetRohstoffPreisVonIDX</c> ansetzt: ein Zehntel
+	/// der Einwohner, mindestens 1 (der Divisionsschutz der Lib).
+	/// </summary>
+	private static int ErmittleJahresbedarf(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt)
+	{
+		return System.Math.Max(1, stadt.GetEinwohner() / 10);
+	}
+
+	/// <summary>
+	/// Der Mengenabschlag in Prozentpunkten, wie ihn <c>Stadt.GetRohstoffPreisVonIDX</c> vor dem
+	/// <c>Min(MaxAbschlagProzent, ...)</c> bildet - also <b>ungekappt</b>.
+	///
+	/// Ungekappt, weil der Wert dadurch zugleich verrät, wie viele Jahresbedarfe im Stadtlager liegen
+	/// (ein Jahresbedarf je <c>AbschlagJeBedarfsjahrProzent</c>). Am Deckel ginge diese Angabe verloren,
+	/// und genau sie ist der erklärende Teil: Ob dort fünf oder zwölf Jahresbedarfe liegen, macht
+	/// für den Preis keinen Unterschied mehr, für die Entscheidung des Spielers aber sehr wohl.
+	/// </summary>
+	private static int ErmittleRohAbschlagProzent(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt, int rohstoffId)
+	{
+		return (stadt.GetRohstoffIDXVorrat(rohstoffId) * Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent)
+		       / ErmittleJahresbedarf(stadt);
 	}
 
 	/// <summary>
@@ -277,21 +301,17 @@ public partial class Stadt : Control
 	/// angezeigten Werte dann beim Nachrechnen nicht aufgehen - genau die Probe, zu der ein erklärender
 	/// Tooltip einlädt.
 	/// </summary>
-	private string BeschreibeMarktpreis(int rohstoffId)
+	private static string BeschreibeMarktpreis(int stadtId, int rohstoffId)
 	{
-		var stadt = SW.Dynamisch.GetStadtwithID(_stadtId);
+		var stadt = SW.Dynamisch.GetStadtwithID(stadtId);
 		string rohstoffName = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
 
-		int einwohner = stadt.GetEinwohner();
 		int vorrat = stadt.GetRohstoffIDXVorrat(rohstoffId);
 		int preis = stadt.GetRohstoffPreisVonIDX(rohstoffId);
 		int grundpreis = stadt.GetRohstoffBasispreisVonIDX(rohstoffId);
-		int jahresbedarf = System.Math.Max(1, einwohner / 10);
+		int jahresbedarf = ErmittleJahresbedarf(stadt);
 
-		// Ungekappter Abschlag in Prozentpunkten, wie in Stadt.GetRohstoffPreisVonIDX vor dem
-		// Min(MaxAbschlagProzent, ...) - durch 10 verrät er zugleich, wie viele Jahresbedarfe
-		// tatsächlich im Stadtlager liegen (10 % je vollem Jahresbedarf).
-		int rohAbschlagProzent = (vorrat * Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent) / jahresbedarf;
+		int rohAbschlagProzent = ErmittleRohAbschlagProzent(stadt, rohstoffId);
 		int abschlagProzent = System.Math.Min(Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent, rohAbschlagProzent);
 
 		if (abschlagProzent == 0)
@@ -469,6 +489,11 @@ public partial class Stadt : Control
 			FaerbeNumeric(_numericsMenge[slot], produktionsslot.GetVerkaufAnzahl() > 0);
 			FaerbeNumeric(_numericsStaette[slot], true);
 
+			// Was die Ware in der gewählten Zielstadt einbringt, hängt am Zahlen-Knopf der Zielstadt -
+			// also an dem Bedienelement, mit dem der Spieler die Städte durchschaltet.
+			_numericsStaette[slot].TooltipText = BeschreibeZielstadt(produktionsslot.GetVerkaufStadt(),
+			                                                         produktionsslot.GetVerkaufRohstoff());
+
 			_labelsText2[slot].Visible = false;
 
 			// Reihenfolge wie im Original: "Verkauft", Anzahl, Rohstoff, Zielstadt, Kosten
@@ -480,6 +505,33 @@ public partial class Stadt : Control
 		}
 
 		_labelsKosten[slot].Text = "für " + _handelsManager.BerechneKosten(_stadtId, slot).ToStringGeld();
+	}
+
+	/// <summary>
+	/// Was ein Stück in der Zielstadt derzeit einbringt und warum - Stufe C aus
+	/// docs/saettigungsrabatt-sichtbar-konzept.md.
+	///
+	/// Der Export ist die Stelle, an der die Entscheidung fällt, und bis hierher war die Sättigung der
+	/// Zielstadt unsichtbar: Der Spieler lieferte blind in einen vollen Markt und sättigte ihn dabei
+	/// weiter, weil <c>BuchManager</c> die Menge in den Vorrat der <b>Ziel</b>stadt bucht.
+	///
+	/// <b>Warum ein Tooltip und keine sichtbare Spalte in der Zeile:</b> Dafür ist kein Platz. Die
+	/// Verkaufszeile endet im ungünstigsten Fall (längster Stadtname "Frozen Castle", fünfstellige
+	/// Fuhrkosten) bei x = 1017, das Pergament des Hintergrundbildes bei x = 1101 - gemessen bleiben
+	/// also 84 px, rund sechs Zeichen. Schon "zu je 20 Taler" braucht 180 px, mit Abschlagsangabe
+	/// 407 px; die Zeile liefe damit weit auf die Steinwand hinaus. Der <c>HBoxContainer</c> reicht
+	/// zwar bis 1360, das Pergament ist aber Teil von BackgroundStadt.png und nicht dehnbar.
+	///
+	/// Der Preis stimmt Stück für Stück: <c>BuchManager</c> liest ihn einmal je Lieferung und rechnet
+	/// die gesamte Menge damit ab - eine Lieferung drückt ihren eigenen Preis also nicht. Sie drückt
+	/// den des Folgejahres, weil die Menge erst am Rundenende in den Vorrat wandert. Es bleibt aber
+	/// eine Schätzung: Abgerechnet wird beim Buch zu Beginn des nächsten Zuges, nach
+	/// <c>RohPreiseRandomSchwanken</c>. Der letzte Satz des Tooltips sagt das ausdrücklich.
+	/// </summary>
+	private static string BeschreibeZielstadt(int zielStadtId, int rohstoffId)
+	{
+		return BeschreibeMarktpreis(zielStadtId, rohstoffId) + "\n" +
+		       "Abgerechnet wird beim Karawanenzug zu Beginn des nächsten Jahres — bis dahin kann sich der Preis bewegen.";
 	}
 
 	// Färbt einen Zahlen-Button je nach Gültigkeit: schwarz auf Pergament bzw. rot bei ungültigem (0-)Wert.
