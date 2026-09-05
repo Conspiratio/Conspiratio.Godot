@@ -59,7 +59,7 @@ push — it builds and runs the headless smoke test, which also fails when the r
 
 ### Verifying a change (the standard loop)
 
-The game needs the editor to play, so changes are verified in three complementary ways:
+The game needs the editor to play, so changes are verified in several complementary ways:
 
 1. **Rules go into a Lib test** (`Conspiratio.Lib.Tests`) — that is where a new manager's behaviour is
    pinned down for good. For a quick look before the test exists, a throwaway console project referencing
@@ -172,7 +172,9 @@ The game needs the editor to play, so changes are verified in three complementar
      round works **one** workshop slot in **one** city, and `GetMaxArbeiterAnzahl()` caps that at 99
      workers. Paket A/B bites far above it — Gesetz #3 starts at 2 to 6 million (16× the ceiling), and
      the workshop surcharge beyond `MaxSteigerungsstufen` needs a 21st business where the driver owns
-     one. Measuring those needs a console harness that builds a rich player directly, not a longer run.
+     one. The gap is wider than "one slot in one city" suggests: `GetMaxProdSlots()` is **2 per
+     city**, so the game allows up to 28 production lines across the 14 cities and the driver drives
+     one of them. Measuring those mechanics is what the balancing harness (item 7) is for.
    - **Only `--ohne-aktionen` measures the game; the default settings measure the driver.** Same seeds,
      15 years: +49 710 without actions against −19 033 with them (1 player), +15 147 against −11 798
      (2 players) — the sign flips with the switch, in both player counts. With actions the driver burns
@@ -318,6 +320,42 @@ The game needs the editor to play, so changes are verified in three complementar
    a second attempt costs another hour. Logs are uploaded either way, so you can read off which events
    a run actually hit. Weekly rather than nightly for cost: six runs are roughly 40 CI minutes, so daily
    would eat over 1 200 of the 2 000 free minutes a month; weekly leaves room for the push runs.
+
+7. **Balancing harness** (`Conspiratio.Lib.Harness`, in the **Lib** repo — a console project with a
+   `ProjectReference`, so it iterates without the NuGet cache dance). It builds a rich player directly
+   and *computes* the years instead of playing them. That is the only way into the wealth range where
+   the late-game brakes act at all:
+   ```bash
+   dotnet run --project Conspiratio.Lib.Harness -- --staedte=14 --jahre=40 --seeds=5 --start-taler=500000 --export --tabelle
+   ```
+   Measured that way (14 export lines, five seeds, 40 years): **1.75 to 2.11 million**, median 1.96 —
+   roughly **16x the driver's median** of 125 177, and the first configuration in which Gesetz #3
+   (2 to 6 million) is even within reach. Growth is close to linear at ~50 000 a year with no plateau;
+   the margin is thin (~320 000 revenue against ~290 000 costs), of which Unterhalt is only 10 500.
+   Switches: `--staedte`, `--slots` (1-2), `--staetten` (throttle per line, 0 = as many as workers and
+   storage allow), `--jahre`, `--seeds` (count or list), `--start-taler`, `--export`, `--vollstaendig`,
+   `--tabelle`.
+   - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
+     turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
+     describe a game that does not exist.
+   - **Selling where you produce is the worst price in the game.** A city pays least for its own main
+     production (Crowbrigde: beer 8, bricks 7 - the lowest values in its row). The first version sold
+     locally and therefore lost money in *every* configuration, even at a 1 % market discount. That was
+     a wrong point of sale, not a balancing finding, and it very nearly got reported as one. `--export`
+     ships to the dearest city instead, which flips the sign.
+   - **Enabling a workshop is not buying one.** `KaufeWerkstatt` also sets the starting storage, and
+     because storage expansion is multiplicative (`LagerraumManager`: `AktuellerLagerraum * Faktor`) it
+     can never lift off 0 - while `Kaufe` still reports success. `BuchManager` then silently discards
+     the whole production. Same shape as `MindestEinwohner` in city growth.
+   - **`VersuchTitelVerleihen` only earmarks a title**; `TitelVerleihungManager` grants it. Without that
+     second step the rank stays put and Hofhaltung sits at 0 forever.
+   - Deliberately omitted: death, family, court, random events, catastrophes. They scatter by tens of
+     thousands of talers and would bury what is being measured; `--vollstaendig` adds the AI year change
+     back for a cross-check.
+   - **Known limit:** the player builds no Ansehen, barely climbs the title ladder as a result, and pays
+     only 1 500 talers of Hofhaltung a year at 1.7 million wealth. What Hofhaltung really skims in the
+     late game is therefore still unmeasured - as is a strategy that sizes production to what the market
+     absorbs instead of producing the maximum.
 
 **Three testing habits that repeatedly paid off:**
 
