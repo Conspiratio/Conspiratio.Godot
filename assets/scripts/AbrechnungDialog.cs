@@ -55,6 +55,7 @@ public partial class AbrechnungDialog : DialogBase
 		AddPosition("Zölle", ergebnis.Zollkosten);
 		AddPosition("Sold", ergebnis.Sold);
 		AddPosition("Unterhalt", ergebnis.Unterhalt);
+		AddPosition("Kapazität", ergebnis.Kapazitaetsunterhalt);
 		AddPosition("Hofhaltung", ergebnis.Hofhaltung);
 		AddPosition("Gesamtkosten", ergebnis.Gesamtkosten);
 

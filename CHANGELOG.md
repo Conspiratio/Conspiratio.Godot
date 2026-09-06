@@ -6,6 +6,7 @@ _Unreleased_
 
 ### [DE]
 
+- Die Jahresabrechnung weist den neuen **Kapazitätsunterhalt** aus: Die n-te betriebene Produktionsstätte kostet das n-Fache eines Tausendstels der Grundeinheit im Jahr (Conspiratio.Lib). Er tritt neben den Unterhalt der besessenen Werkstätten — wer hält und nicht produziert, zahlt weiterhin nur jenen; wer groß produziert, zahlt zusätzlich diesen. Das Positionsraster des Dialogs trägt dafür eine 15. Zeile: Pergament und Schaltfläche sind um 45 px nach unten gerückt, weil der Knopf sonst unmittelbar auf der letzten Zeile säße (im Bildnachweis geprüft).
 #### Geändert
 
 - Der Lagerstand im Stadtinformationen-Dialog sagt jetzt, was er misst — und was nicht: Die farbigen Felder färben sich nach dem Anteil am Vorrat des **ganzen Landes** und sahen damit einem Sättigungssignal zum Verwechseln ähnlich, ohne eines zu sein. Ihr Tooltip nennt jetzt zuerst die Sättigung dieser Stadt (was die Ware hier einbringt und warum) und danach die Einordnung der Farbe samt Prozentanteil. Gemessen tut das not: In einem 26-Jahre-Lauf war Bier in Altenfield mit rotem Feld („niedrig“, 21 % Landesanteil) örtlich bereits um 29 % im Preis gedrückt, und Crowbrigde stand bei bloß orangem Feld schon am Höchstabschlag von 50 %. Siehe `docs/saettigungsrabatt-sichtbar-konzept.md` (Stufe D).
@@ -185,6 +186,7 @@ _Unreleased_
 
 ### [EN]
 
+- The annual settlement now lists the new **capacity upkeep**: the n-th production site in operation costs n times a thousandth of the base unit per year (Conspiratio.Lib). It sits alongside the upkeep for workshops owned — holding workshops without producing still costs only the latter, while producing at scale adds this on top. The dialog’s position grid gained a 15th row for it: the parchment and the button moved down by 45 px, because the button would otherwise sit directly on the last row (verified against a rendered screenshot).
 #### Changed
 
 - The stock display in the city information dialog now states what it measures — and what it does not: the coloured squares are shaded by each city's share of the **whole realm's** stock, which looks deceptively like a saturation signal without being one. Their tooltip now leads with this city's saturation (what the goods fetch here, and why) and then places the colour in context, including its percentage. Measurement shows this matters: in a 26-year run beer in Altenfield showed a red square (“low”, 21 % of the realm's stock) while its local price was already down 29 %, and Crowbrigde sat at the full 50 % discount behind a merely orange square. See `docs/saettigungsrabatt-sichtbar-konzept.md` (stage D).
