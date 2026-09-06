@@ -1,6 +1,6 @@
 # Konzept: Eine Bremse für den reinen Händler
 
-**Stand:** 2026-09-06 · **Betrifft:** eine Regeländerung in `Conspiratio.Lib` (`AbrechnungsManager`).
+**Stand:** 2026-09-06 (Ämterweg nachgemessen) · **Betrifft:** eine Regeländerung in `Conspiratio.Lib` (`AbrechnungsManager`).
 Nicht umgesetzt. Alle Zahlen sind mit `Conspiratio.Lib.Harness` gemessen, nicht geschätzt.
 
 ## Das Problem in einem Satz
@@ -11,12 +11,19 @@ Gemessen über 40 Jahre, 14 Exportlinien, drei Seeds:
 
 | Weg | Endvermögen (Median) | Verlauf |
 |---|---|---|
-| reiner Händler | **1 961 598** | steigt linear um ~50 000 im Jahr, flacht nie ab |
-| Adelsweg bis zum Herzog | 843 121 | steigt bis ~1 055 000 (Jahr 22), kippt danach nach unten |
+| reiner Händler | 1 961 598 | steigt linear um ~50 000 im Jahr, flacht nie ab |
+| Adelsweg **ohne** Ämter | 843 121 | steigt bis ~1 055 000 (Jahr 22), kippt danach nach unten |
+| Adelsweg **mit** Ämtern | **2 452 562** | steigt weiter, und schneller als der Händler |
 
 Die Hofhaltung des Herzogs kostet 50 000 im Jahr — genau das, was der ausgereizte Betrieb netto
-verdient. Deshalb kippt seine Kurve. Der Händler zahlt sie nie: Titel verlangen Wohnsitze und
+verdient. Deshalb kippt die mittlere Kurve. Der Händler zahlt sie nie: Titel verlangen Wohnsitze und
 Stützpunkte, und beides ist freiwillig.
+
+**Die dritte Zeile ist erst später dazugekommen und ändert das Bild.** Titel sind
+Zugangsvoraussetzung für Ämter, und der Regent zahlt 50 000 Taler im Jahr — exakt so viel, wie die
+Hofhaltung des Herzogs kostet. Wer den Weg zu Ende geht, ist damit nicht ärmer als der Händler,
+sondern reicher. Was unten über die Kalibrierung steht, gilt deshalb nur gegen die **mittlere** Zeile;
+die Einordnung am Ende des Dokuments zieht die Folgerung.
 
 ## Warum die vorhandene Bremse nicht greift
 
@@ -90,15 +97,18 @@ Rangs hinzu (Baron +75, Graf +100), was unmittelbar in die Gerichtsverhandlung e
 kauft, tauscht also Geld gegen Macht. Bliebe das Endvermögen beider Wege gleich, wäre der Adelsweg
 strikt besser: gleich viel Geld und obendrein Einfluss.
 
-Beide Wege mit Abgabe 130 gemessen, 40 Jahre, fünf Seeds:
+Alle Wege mit Abgabe 130 gemessen, 40 Jahre, fünf Seeds:
 
 | Weg | Endvermögen (Median) |
 |---|---|
-| reiner Händler | **874 918** |
-| Adelsweg bis zum Herzog | 266 441 |
+| reiner Händler | 874 918 |
+| Adelsweg ohne Ämter | 367 734 |
+| Adelsweg **mit** Ämtern | **1 235 506** |
 
-Der Händler behält gut das Dreifache. Das wiegt den Verzicht auf Ämter und Gerichtsstand auf, ohne
-den Adelsweg wertlos zu machen.
+Gegen den Adligen **ohne** Ämter behält der Händler das Zweieinhalbfache — so weit trägt die
+Begründung. Gegen den Adligen **mit** Ämtern liegt er 41 % zurück, und die Abgabe vergrößert diesen
+Rückstand sogar: ohne sie sind es 25 %. Sie wirkt auf beide Wege gleich, aber der Adlige hat eine
+zweite Einnahmequelle, die sie nicht berührt.
 
 Die Kurve erreicht dabei einen Ruhepunkt, statt ewig zu steigen: Anstieg bis rund 877 000 im Jahr 15,
 danach Pendeln zwischen 630 000 und 670 000. Die Abgabe beträgt 27 167 Taler im Jahr.
@@ -131,16 +141,45 @@ Mensch würde Stätten abbauen oder die Auslastung verbessern, sobald die Abgabe
 **Drei Seeds sind wenig.** Die Streuung zwischen ihnen beträgt hier rund 350 000 Taler; die Rangfolge
 der Grundeinheiten ist über alle Seeds einheitlich, die Einzelwerte sind es nicht.
 
-**Die Messung unterschätzt den Adelsweg.** Die Harness bildet seine Kosten ab — Hofhaltung,
-Wohnsitze, Stützpunkte — aber nicht seinen Ertrag: Ämter werden über Wahlen vergeben, die sie nicht
-abbildet, es fließt also kein Amtseinkommen, und der Gerichtsvorteil schlägt sich in keiner Zahl
-nieder. Der gemessene Abstand von 874 918 zu 266 441 ist deshalb eine **Obergrenze**; in Wirklichkeit
-liegen die Wege näher beieinander. Für 130 spricht das eher, als dagegen.
+**Wie lange man ein Amt hält, ist die entscheidende Unbekannte.** Die Harness *übernimmt* Ämter
+über `CheatManager.UebernehmeAmt`; im Spiel gewinnt man sie in einer Wahl und verliert sie durch
+Amtsenthebung. Die beiden gemessenen Adelszeilen sind deshalb eine **Klammer**, keine Aussage:
+367 734 wenn man nie ein Amt hält, 1 235 506 wenn man durchgehend das höchste hält. Wo der wirkliche
+Wert darin liegt, hängt allein an der Amtsdauer — und die bildet die Harness nicht ab.
 
-**Der Adlige fällt mit Abgabe unter seinen Startbestand** (500 000 zu Beginn, 266 441 nach 40 Jahren).
-Ob das zu hart ist, lässt sich ohne die fehlenden Amtseinnahmen nicht sagen. Sollte sich der Adelsweg
-im Spiel als finanziell unhaltbar erweisen, ist die Grundeinheit der erste Stellknopf — sie wirkt auf
-beide Wege gleich und lässt ihr Verhältnis unberührt.
+**Was die Ämter tragen, ist gemessen.** Der Unterschied zwischen beiden Adelszeilen beträgt
+1 609 441 Taler über 40 Jahre, rund 40 000 im Jahr. Das Spitzenamt zahlt 50 000; die Leiter darunter
+reicht von 700 (Ratsherr) über 8 000 (Vogt) und 20 000 (Finanzminister, Erzbischof) bis dorthin.
+
+**Der Ansehensgewinn ebenfalls.** Am Ende eines Herzog-und-Regent-Laufs steht ein rohes Ansehen von
+319 bis 332 — darin steckt der Ämterbonus, beim Regenten +100 — und ein Standesansehen von 469 bis
+482, also zuzüglich der 150 des Herzogtitels. Zum Vergleich: Die Schwellen des Gerichts liegen bei 80
+und 30. Der Standesbonus gilt ausdrücklich nur dort, wo über eine *Person* geurteilt wird (Gericht,
+Schuldenprozess), nicht in Wahlen.
+
+**Eine Zahl in einer früheren Fassung dieses Dokuments war nicht belastbar.** Die Harness setzte den
+Seed erst nach `CreateNewGame` und der Spielererstellung, die Welt entstand also ungeseedet. Der
+Händlerweg war davon unbeeindruckt, der Adelsweg nicht: Dieselbe Kommandozeile lieferte über mehrere
+Aufrufe 266 441, 367 734 und 187 274 Taler Median. Der Seed wird jetzt zweimal gesetzt, vor dem Aufbau
+und wenn das Spiel steht; alle Zahlen hier stammen aus dem reparierten Stand.
+
+## Einordnung: Was die Abgabe leistet — und was nicht
+
+Sie tut, wofür sie gebaut wurde: Die Kurve des Händlers erreicht einen Ruhepunkt, statt ewig zu
+steigen, und der Einsteiger merkt nichts davon. Das ist ein echter Spätspiel-Sink, und er ist
+bekämpfbar.
+
+Sie leistet **nicht**, was die ursprüngliche Begründung ihr zuschrieb. Die stützte sich darauf, dass
+der Adelsweg der finanziell schwächere sei und der Händler deshalb einen Vorsprung brauche. Mit
+Ämtern gemessen ist der Adelsweg der **stärkere** — er bringt 25 % mehr als der reine Handel und
+zusätzlich Ansehen, Gerichtsstand und Privilegien. Die Abgabe vergrößert diesen Abstand auf 41 %,
+weil sie nur die Produktionskapazität trifft, die beide gleichermaßen haben.
+
+Wer den Händlerweg finanziell attraktiver machen will, muss deshalb am Amtseinkommen ansetzen, nicht
+am Unterhalt. Bevor daran jemand dreht, wäre allerdings die Amtsdauer zu messen: Wenn ein Spieler den
+Regenten im Spiel nur wenige Jahre hält statt vier Jahrzehnte, ist der gemessene Vorsprung ein
+Zerrbild. Das ist der nächste sinnvolle Ausbau der Harness — Wahlen und Amtsenthebungen mitlaufen
+lassen.
 
 ## Wenn umgesetzt
 
