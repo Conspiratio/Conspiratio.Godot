@@ -1,6 +1,6 @@
 # Konzept: Eine Bremse für den reinen Händler
 
-**Stand:** 2026-09-05 · **Betrifft:** eine Regeländerung in `Conspiratio.Lib` (`AbrechnungsManager`).
+**Stand:** 2026-09-06 · **Betrifft:** eine Regeländerung in `Conspiratio.Lib` (`AbrechnungsManager`).
 Nicht umgesetzt. Alle Zahlen sind mit `Conspiratio.Lib.Harness` gemessen, nicht geschätzt.
 
 ## Das Problem in einem Satz
@@ -68,23 +68,40 @@ steuerbar.
 
 ## Die Kalibrierung
 
-40 Jahre, 14 Exportlinien, drei Seeds, Median Endvermögen:
+40 Jahre, 14 Exportlinien, fünf Seeds, Median Endvermögen:
 
 | Grundeinheit | Abgabe/Jahr | Endvermögen | |
 |---|---|---|---|
 | 0 | 0 | 1 961 598 | heute |
-| 60 | 12 539 | 1 460 078 | |
-| 120 | 25 078 | 958 518 | |
-| **150** | **31 347** | **707 718** | empfohlen |
+| 60 | 12 538 | 1 460 078 | |
+| 120 | 25 077 | 958 518 | |
+| **130** | **27 167** | **874 918** | **empfohlen** |
+| 150 | 31 347 | 707 718 | |
 | 180 | 37 616 | 456 958 | |
 | 240 | 50 155 | 0 | bankrott |
 
-**Empfohlen: 150.** Die Begründung liegt in der Symmetrie: Der Adelsweg endet bei 843 121, eine
-Grundeinheit zwischen 120 und 150 setzt den Händler in dieselbe Größenordnung. Damit ist keiner der
-beiden Wege strikt besser, und beide werden gebremst.
+**Empfohlen: 130.** Die Begründung ist ausdrücklich *kein* Gleichstand, sondern ein Vorsprung für
+den Händler.
 
-Die Kurve flacht dabei nicht nur ab, sie erreicht einen Ruhepunkt: Sie steigt bis rund 778 000 im
-Jahr 17, pendelt danach zwischen 440 000 und 500 000. Das ist die Form, die dem Adelsweg entspricht.
+Titel sind im Spiel keine Zierde. `GetMinTitelStadtEbene`, `GetMinTitelLandEbene` und
+`GetMinTitelReichsEbene` machen sie zur **Zugangsvoraussetzung für Ämter** — und Ämter bringen
+Amtseinkommen, Privilegien und eigenes Ansehen. Dazu zählt `GetAnsehenGesamt()` den `BonusAnsehen` des
+Rangs hinzu (Baron +75, Graf +100), was unmittelbar in die Gerichtsverhandlung eingeht. Wer Titel
+kauft, tauscht also Geld gegen Macht. Bliebe das Endvermögen beider Wege gleich, wäre der Adelsweg
+strikt besser: gleich viel Geld und obendrein Einfluss.
+
+Beide Wege mit Abgabe 130 gemessen, 40 Jahre, fünf Seeds:
+
+| Weg | Endvermögen (Median) |
+|---|---|
+| reiner Händler | **874 918** |
+| Adelsweg bis zum Herzog | 266 441 |
+
+Der Händler behält gut das Dreifache. Das wiegt den Verzicht auf Ämter und Gerichtsstand auf, ohne
+den Adelsweg wertlos zu machen.
+
+Die Kurve erreicht dabei einen Ruhepunkt, statt ewig zu steigen: Anstieg bis rund 877 000 im Jahr 15,
+danach Pendeln zwischen 630 000 und 670 000. Die Abgabe beträgt 27 167 Taler im Jahr.
 
 **Der Einsteiger merkt nichts.** Gemessen an einem Betrieb mit einer Stadt und zwei Stätten über
 15 Jahre: Endvermögen **24 579 mit und ohne Abgabe, auf den Taler gleich**. Zwei Stätten kosten
@@ -114,8 +131,16 @@ Mensch würde Stätten abbauen oder die Auslastung verbessern, sobald die Abgabe
 **Drei Seeds sind wenig.** Die Streuung zwischen ihnen beträgt hier rund 350 000 Taler; die Rangfolge
 der Grundeinheiten ist über alle Seeds einheitlich, die Einzelwerte sind es nicht.
 
-**Nicht gemessen:** wie sich die Abgabe auf einen Betrieb auswirkt, der beide Wege geht — Adel *und*
-Handel. Dort addieren sich Hofhaltung und Kapazitätsunterhalt, und das könnte zu viel sein.
+**Die Messung unterschätzt den Adelsweg.** Die Harness bildet seine Kosten ab — Hofhaltung,
+Wohnsitze, Stützpunkte — aber nicht seinen Ertrag: Ämter werden über Wahlen vergeben, die sie nicht
+abbildet, es fließt also kein Amtseinkommen, und der Gerichtsvorteil schlägt sich in keiner Zahl
+nieder. Der gemessene Abstand von 874 918 zu 266 441 ist deshalb eine **Obergrenze**; in Wirklichkeit
+liegen die Wege näher beieinander. Für 130 spricht das eher, als dagegen.
+
+**Der Adlige fällt mit Abgabe unter seinen Startbestand** (500 000 zu Beginn, 266 441 nach 40 Jahren).
+Ob das zu hart ist, lässt sich ohne die fehlenden Amtseinnahmen nicht sagen. Sollte sich der Adelsweg
+im Spiel als finanziell unhaltbar erweisen, ist die Grundeinheit der erste Stellknopf — sie wirkt auf
+beide Wege gleich und lässt ihr Verhältnis unberührt.
 
 ## Wenn umgesetzt
 
