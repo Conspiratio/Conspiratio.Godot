@@ -6,6 +6,7 @@ _Unreleased_
 
 ### [DE]
 
+- Fehlerbehebung Abrechnung: Ein einzelner Ansehenspunkt heißt jetzt auch im Zugewinn „+1 Punkt“ statt „+1 Punkte“. Den Singular kannte bisher nur der Verlustfall.
 - Die Jahresabrechnung weist den neuen **Kapazitätsunterhalt** aus: Die n-te betriebene Produktionsstätte kostet das n-Fache eines Tausendstels der Grundeinheit im Jahr (Conspiratio.Lib). Er tritt neben den Unterhalt der besessenen Werkstätten — wer hält und nicht produziert, zahlt weiterhin nur jenen; wer groß produziert, zahlt zusätzlich diesen. Das Positionsraster des Dialogs trägt dafür eine 15. Zeile: Pergament und Schaltfläche sind um 45 px nach unten gerückt, weil der Knopf sonst unmittelbar auf der letzten Zeile säße (im Bildnachweis geprüft).
 #### Geändert
 
@@ -186,6 +187,7 @@ _Unreleased_
 
 ### [EN]
 
+- Fix in the settlement: a single point of standing now reads “+1 Punkt” when gained, not “+1 Punkte”. Only the loss case knew the singular before.
 - The annual settlement now lists the new **capacity upkeep**: the n-th production site in operation costs n times a thousandth of the base unit per year (Conspiratio.Lib). It sits alongside the upkeep for workshops owned — holding workshops without producing still costs only the latter, while producing at scale adds this on top. The dialog’s position grid gained a 15th row for it: the parchment and the button moved down by 45 px, because the button would otherwise sit directly on the last row (verified against a rendered screenshot).
 #### Changed
 

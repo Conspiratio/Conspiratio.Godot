@@ -67,13 +67,17 @@ public partial class AbrechnungDialog : DialogBase
 
 	private static string FormatiereAnsehen(int aenderung)
 	{
+		// Der Singular gilt in beide Richtungen. Der positive Zweig kannte ihn als einziger nicht und
+		// schrieb "+1 Punkte", waehrend der negative korrekt "-1 Punkt" ausgab.
+		string einheit = System.Math.Abs(aenderung) == 1 ? " Punkt" : " Punkte";
+
 		if (aenderung > 0)
-			return "+" + aenderung + " Punkte";
+			return "+" + aenderung + einheit;
 
 		if (aenderung < 0)
-			return aenderung + (aenderung == -1 ? " Punkt" : " Punkte");
+			return aenderung + einheit;
 
-		return "±0 Punkte";
+		return "±0" + einheit;
 	}
 
 	private void AddPosition(string bezeichnung, int kosten)
