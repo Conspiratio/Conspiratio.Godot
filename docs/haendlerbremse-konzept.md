@@ -1,7 +1,12 @@
 # Konzept: Eine Bremse für den reinen Händler
 
-**Stand:** 2026-09-06 (Ämterweg nachgemessen) · **Betrifft:** eine Regeländerung in `Conspiratio.Lib` (`AbrechnungsManager`).
-Nicht umgesetzt. Alle Zahlen sind mit `Conspiratio.Lib.Harness` gemessen, nicht geschätzt.
+**Stand:** 2026-09-08 · **Betrifft:** `Conspiratio.Lib` (`AbrechnungsManager`).
+**Umgesetzt** als `KapazitaetsunterhaltProMille = 140`, samt Anzeige in der Jahresabrechnung des
+Clients. Alle Zahlen sind mit `Conspiratio.Lib.Harness` gemessen, nicht geschätzt.
+
+Das Dokument behält den Weg dorthin: Zwei Zwischenstände (Grundeinheit 130, Kalibrierung auf
+Gleichstand) haben sich als falsch begründet erwiesen, und beide Male hat erst eine weitere Messung
+das gezeigt. Wer die Grundeinheit später verstellt, sollte wissen, woran sie hängt.
 
 ## Das Problem in einem Satz
 
@@ -82,12 +87,13 @@ steuerbar.
 | 0 | 0 | 1 961 598 | heute |
 | 60 | 12 538 | 1 460 078 | |
 | 120 | 25 077 | 958 518 | |
-| **130** | **27 167** | **874 918** | **empfohlen** |
+| 130 | 27 167 | 874 918 | |
+| **140** | **29 257** | **791 318** | **umgesetzt** |
 | 150 | 31 347 | 707 718 | |
 | 180 | 37 616 | 456 958 | |
 | 240 | 50 155 | 0 | bankrott |
 
-**Empfohlen: 130.** Die Begründung ist ausdrücklich *kein* Gleichstand, sondern ein Vorsprung für
+**Umgesetzt: 140.** Die Begründung ist ausdrücklich *kein* Gleichstand, sondern ein Vorsprung für
 den Händler.
 
 Titel sind im Spiel keine Zierde. `GetMinTitelStadtEbene`, `GetMinTitelLandEbene` und
@@ -97,21 +103,20 @@ Rangs hinzu (Baron +75, Graf +100), was unmittelbar in die Gerichtsverhandlung e
 kauft, tauscht also Geld gegen Macht. Bliebe das Endvermögen beider Wege gleich, wäre der Adelsweg
 strikt besser: gleich viel Geld und obendrein Einfluss.
 
-Alle Wege mit Abgabe 130 gemessen, 40 Jahre, fünf Seeds:
+**Der Endstand, mit allem was inzwischen gebaut ist** — Abgabe 140, echte Wahlen und
+Amtsenthebungen, Ansehensverfall. 40 Jahre, 14 Exportlinien, fünf Seeds:
 
-| Weg | Endvermögen (Median) |
-|---|---|
-| reiner Händler | 874 918 |
-| Adelsweg ohne Ämter | 367 734 |
-| Adelsweg **mit** Ämtern | **1 235 506** |
+| Weg | Endvermögen (Median) | Rang | Amt | Standesansehen |
+|---|---|---|---|---|
+| reiner Händler | **791 318** | Ritter | keines | 60 |
+| Adelsweg | 384 239 | Graf bis Herzog | Zollmeister bis Regent | 182 – 324 |
 
-Gegen den Adligen **ohne** Ämter behält der Händler das Zweieinhalbfache — so weit trägt die
-Begründung. Gegen den Adligen **mit** Ämtern liegt er 41 % zurück, und die Abgabe vergrößert diesen
-Rückstand sogar: ohne sie sind es 25 %. Sie wirkt auf beide Wege gleich, aber der Adlige hat eine
-zweite Einnahmequelle, die sie nicht berührt.
+Der Händler hält gut **das Doppelte an Talern**, der Adlige das **Drei- bis Fünffache an
+Standesansehen** und als einziger ein Amt — mit Amtseinkommen, Privilegien und Stimmrecht. Das ist
+die beabsichtigte Asymmetrie.
 
-Die Kurve erreicht dabei einen Ruhepunkt, statt ewig zu steigen: Anstieg bis rund 877 000 im Jahr 15,
-danach Pendeln zwischen 630 000 und 670 000. Die Abgabe beträgt 27 167 Taler im Jahr.
+Die Kurve des Händlers erreicht dabei einen Ruhepunkt, statt ewig zu steigen. Die Abgabe beträgt bei
+646 Stätten 29 257 Taler im Jahr.
 
 **Der Einsteiger merkt nichts.** Gemessen an einem Betrieb mit einer Stadt und zwei Stätten über
 15 Jahre: Endvermögen **24 579 mit und ohne Abgabe, auf den Taler gleich**. Zwei Stätten kosten
@@ -169,24 +174,35 @@ Sie tut, wofür sie gebaut wurde: Die Kurve des Händlers erreicht einen Ruhepun
 steigen, und der Einsteiger merkt nichts davon. Das ist ein echter Spätspiel-Sink, und er ist
 bekämpfbar.
 
-Sie leistet **nicht**, was die ursprüngliche Begründung ihr zuschrieb. Die stützte sich darauf, dass
-der Adelsweg der finanziell schwächere sei und der Händler deshalb einen Vorsprung brauche. Mit
-Ämtern gemessen ist der Adelsweg der **stärkere** — er bringt 25 % mehr als der reine Handel und
-zusätzlich Ansehen, Gerichtsstand und Privilegien. Die Abgabe vergrößert diesen Abstand auf 41 %,
-weil sie nur die Produktionskapazität trifft, die beide gleichermaßen haben.
+**Die Amtsdauer war die entscheidende Unbekannte, und sie ist inzwischen gemessen.** Eine
+Zwischenfassung dieses Dokuments schloss, der Adelsweg sei der *stärkere* — 25 % mehr als der reine
+Handel. Das galt nur, weil die Harness sich Ämter damals per Cheat nahm und das höchste vier
+Jahrzehnte lang hielt. Mit echten Wahlen, Bewerbungen und Amtsenthebungen (`--wahlen`) hält ein
+Spieler am Ende alles zwischen dem Zollmeister (2 000 im Jahr) und dem Regenten (50 000) — und liegt
+damit finanziell rund die Hälfte unter dem Händler.
 
-Wer den Händlerweg finanziell attraktiver machen will, muss deshalb am Amtseinkommen ansetzen, nicht
-am Unterhalt. Bevor daran jemand dreht, wäre allerdings die Amtsdauer zu messen: Wenn ein Spieler den
-Regenten im Spiel nur wenige Jahre hält statt vier Jahrzehnte, ist der gemessene Vorsprung ein
-Zerrbild. Das ist der nächste sinnvolle Ausbau der Harness — Wahlen und Amtsenthebungen mitlaufen
-lassen.
+Die Klammer von damals — 367 734 ohne Amt bis 1 235 506 mit Dauer-Spitzenamt — ist damit auf einen
+Wert zusammengezogen: **384 239**. Er liegt nahe am unteren Ende, und das ist die eigentliche
+Erkenntnis: Ein Spitzenamt ist erreichbar, aber nicht zu halten.
 
-## Wenn umgesetzt
+## Was umgesetzt wurde
 
-- Neue Konstante in `AbrechnungsManager` neben `GrundunterhaltProWerkstatt`, eigener Posten im
-  `AbrechnungsErgebnis`, damit der Spieler ihn im Abrechnungsdialog sieht statt ihn zu suchen.
-- Tests in der Lib: Einsteiger zahlt nichts, Progression steigt quadratisch, Auslastung senkt sie.
-- Zweisprachiger CHANGELOG-Eintrag; **Spielstände brauchen keine Migration** (eine neue Konstante,
-  kein neues Feld auf dem Spieler).
-- Danach mit der Harness gegenmessen — dieselbe Konfiguration, damit die Zahlen dieses Dokuments
-  vergleichbar bleiben.
+- `AbrechnungsManager.KapazitaetsunterhaltProMille = 140`, eigener Posten
+  `AbrechnungsErgebnis.Kapazitaetsunterhalt`, fünf Tests in `KapazitaetsunterhaltTests`.
+- Der Godot-Abrechnungsdialog führt ihn zwischen Unterhalt und Hofhaltung. Das Positionsraster trägt
+  dafür eine 15. Zeile; Pergament und Schaltfläche mussten um 45 px wachsen, weil „Weiter" sonst
+  unmittelbar auf der letzten Zeile saß — im Bildnachweis geprüft, nicht geschätzt.
+- Spielstände brauchen keine Migration: eine Konstante, kein neues Feld auf dem Spieler.
+
+**Ein Folgebefund aus derselben Messreihe.** Das Ansehen wuchs linear mit der Spieldauer — ein
+schlichter Ritter ohne Amt kam nach 40 Jahren auf ein Standesansehen von 205, weil die
+Auslastungsbelohnung jedes Jahr bis zu 5 Punkte auf ein reines Konto buchte. Die Gerichtsschwellen
+(80 und 30) waren danach bedeutungslos. Sie anzuheben wäre falsch gewesen: Der Median der 390
+KI-Spieler liegt über 40 Jahre unverändert bei 29, die Schwellen sitzen also richtig — inflationiert
+war allein der Mensch, denn `PermaAnsehen` gibt es nur auf `HumSpieler`. Seit
+`AnsehensverfallProzent = 10` verblaßt Ruhm jährlich, und die Werte pendeln sich ein: KI-Median 29,
+Händler 60, Herzog mit Amt gut 300.
+
+Der Verfall wirkt auf den Adelsweg zurück, weil Ansehen in die Annahme von Stützpunktangeboten und in
+die Stimmen der KI eingeht. Die Adelszahlen oben sind deshalb mit ihm gemessen und nicht mit den
+älteren vergleichbar.

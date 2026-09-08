@@ -328,13 +328,18 @@ The game needs the editor to play, so changes are verified in several complement
    ```bash
    dotnet run --project Conspiratio.Lib.Harness -- --staedte=14 --jahre=40 --seeds=5 --start-taler=500000 --export --tabelle
    ```
-   Measured that way (14 export lines, five seeds, 40 years): **1.75 to 2.11 million**, median 1.96 —
-   roughly **16x the driver's median** of 125 177, and the first configuration in which Gesetz #3
-   (2 to 6 million) is even within reach. Growth is close to linear at ~50 000 a year with no plateau;
-   the margin is thin (~320 000 revenue against ~290 000 costs), of which Unterhalt is only 10 500.
+What it found, and what came of it: measured that way (14 export lines, five seeds, 40 years) the
+   pure trader ended at **1.75 to 2.11 million**, median 1.96 — roughly **16x the driver's median** of
+   125 177, growing in a straight line of ~50 000 a year that never flattened, with Unterhalt
+   contributing only 10 500 of a ~290 000 cost block. That is what the **Kapazitaetsunterhalt**
+   (`AbrechnungsManager.KapazitaetsunterhaltProMille`) was built to brake; with it the same run ends at
+   a median of **791 318** and the curve reaches a resting point. See
+   [`docs/haendlerbremse-konzept.md`](docs/haendlerbremse-konzept.md) for the calibration.
    Switches: `--staedte`, `--slots` (1-2), `--staetten` (throttle per line, 0 = as many as workers and
-   storage allow), `--jahre`, `--seeds` (count or list), `--start-taler`, `--export`, `--vollstaendig`,
-   `--tabelle`.
+   storage allow), `--jahre`, `--seeds` (count or list), `--start-taler`, `--export`, `--marktklug`,
+   `--adel` (residences and bases), `--aemter` (take the best office by cheat — an upper bound),
+   `--wahlen` (the real political cycle: applications, elections, depositions, AI deaths),
+   `--vollstaendig`, `--tabelle`.
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -352,10 +357,28 @@ The game needs the editor to play, so changes are verified in several complement
    - Deliberately omitted: death, family, court, random events, catastrophes. They scatter by tens of
      thousands of talers and would bury what is being measured; `--vollstaendig` adds the AI year change
      back for a cross-check.
-   - **Known limit:** the player builds no Ansehen, barely climbs the title ladder as a result, and pays
-     only 1 500 talers of Hofhaltung a year at 1.7 million wealth. What Hofhaltung really skims in the
-     late game is therefore still unmeasured - as is a strategy that sizes production to what the market
-     absorbs instead of producing the maximum.
+   - **The seed has to be set before the world is built, not after.** The first version seeded only
+     after `CreateNewGame` and player setup, so the world itself was drawn unseeded. The trader path was
+     unaffected (four identical runs), the noble path was not: the same command line produced medians of
+     266 441, 367 734 and 187 274 across invocations, and the difference was very nearly attributed to a
+     code change. The seed is now set twice, as in the E2E driver.
+   - **Two paths, measured against each other** (40 years, five seeds, medians), which is what the
+     late-game balancing turns on:
+
+     | | wealth | rank | office | Standesansehen |
+     |---|---|---|---|---|
+     | pure trader | 791 318 | Ritter | none | 60 |
+     | `--adel --wahlen` | 384 239 | Graf-Herzog | Zollmeister to Regent | 182-324 |
+
+     Titles are the gate to offices (`GetMinTitelStadtEbene` 1, `GetMinTitelLandEbene` 3,
+     `GetMinTitelReichsEbene` 5), and offices pay 700 (Ratsherr) to 50 000 (Regent) a year. **Do not
+     read `--aemter` as the noble path**: it takes the best office by cheat and holds it for forty
+     years, which produced a median of 1 235 506 and the false conclusion that the noble path is the
+     richer one. Office tenure is the whole question, and only `--wahlen` answers it.
+   - **What it still cannot do:** its trader never adapts. It keeps producing at full capacity even
+     while a levy ruins it, so every brake measurement **overstates the damage** - a human would shrink
+     capacity instead. `--marktklug` only throttles to one city's annual demand, which is a different
+     strategy, not an adaptive one.
 
 **Three testing habits that repeatedly paid off:**
 
