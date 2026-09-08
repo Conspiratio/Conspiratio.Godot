@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
+using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -211,6 +212,18 @@ public partial class PrivilegienDialog : DialogBase
 			return;
 		}
 
+		// „Handwerkslehre nehmen": Unterricht in einer Ware, die der Spieler auch betreibt.
+		if (privilegId == PrivilegienManager.HandwerkslehrePrivilegId)
+		{
+			SetProcessInput(false);
+			await ZeigeHandwerkslehre();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
 		// „Zum Duell fordern" (Issue #17): öffnet die Personen-Karte (Modus 14) zur Auswahl eines
 		// Amtsträgers. Das Privilegienfenster wird geschlossen; die Duell-Abwicklung erledigt die Lib
 		// (KontrahentenManager Modus 14).
@@ -225,6 +238,62 @@ public partial class PrivilegienDialog : DialogBase
 		// neu aufbauen, da sich die Privilegien ändern können (z. B. Amt niederlegen).
 		_privilegienManager.FuehreAus(privilegId);
 		Fill();
+	}
+
+	/// <summary>
+	/// Der Handwerksunterricht: Die Ware wird durchgeblättert wie die Karawane beim Transport –
+	/// „Stunde nehmen" unterrichtet, „Nächste Ware" blättert weiter, ein Rechtsklick beendet. Ohne
+	/// dieses dritte Ergebnis (<c>Cancel</c>) gäbe es aus einer Blätterschleife keinen Ausweg; bei nur
+	/// einer Ware heißt der zweite Knopf deshalb schlicht „Genug", wie beim Fechtunterricht.
+	/// </summary>
+	private static async Task ZeigeHandwerkslehre()
+	{
+		var fertigkeit = new ProduktionsfertigkeitManager();
+		var waren = ProduktionsfertigkeitManager.GetBetriebeneWaren();
+
+		if (waren.Count == 0)
+		{
+			await SW.UI.ShowText.ShowDialog("Ihr betreibt keine Produktion, in der Euch ein Meister\n" +
+			                                "etwas zeigen könnte.");
+			return;
+		}
+
+		var spieler = SW.Dynamisch.GetAktHum();
+		int i = 0;
+
+		while (true)
+		{
+			int ware = waren[i];
+			int preis = fertigkeit.GetLehrstundenPreis(ware);
+
+			string frage = "Ein Meister der " + SW.Dynamisch.GetRohstoffwithID(ware).GetRohName() +
+			               "-Herstellung\nbietet Euch Unterricht an.\n\n" +
+			               "Euer Können: " +
+			               ProduktionsfertigkeitManager.FertigkeitAlsText(spieler.GetProduktionsfertigkeit(ware)) +
+			               "\nDie Stunde kostet " + preis.ToStringGeld() + ".";
+
+			var antwort = await SW.UI.YesNoQuestion.ShowDialogText(frage, "Stunde nehmen",
+				waren.Count > 1 ? "Nächste Ware" : "Genug");
+
+			if (antwort == DialogResultGame.Yes)
+			{
+				if (fertigkeit.NimmLehrstunde(ware, out string meldung))
+					SoundManager.Instance.PlayCoins();
+				else
+				{
+					await SW.UI.ShowText.ShowDialog(meldung);
+					break;
+				}
+
+				continue;
+			}
+
+			// Bei einer einzigen Ware ist der zweite Knopf das Ende, sonst blättert er weiter.
+			if (antwort != DialogResultGame.No || waren.Count == 1)
+				break;
+
+			i = (i + 1) % waren.Count;
+		}
 	}
 
 	private void _on_link_button_close_pressed()

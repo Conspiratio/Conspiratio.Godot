@@ -86,6 +86,7 @@ public partial class Stadt : Control
 	private Main _main;
 	private HandelsManager _handelsManager;
 	private readonly AnwesenManager _anwesenManager = new AnwesenManager();
+	private readonly ProduktionsfertigkeitManager _fertigkeit = new ProduktionsfertigkeitManager();
 	private int _stadtId = 1;
 
 	// Called when the node enters the scene tree for the first time.
@@ -181,15 +182,36 @@ public partial class Stadt : Control
 		if (!@event.IsActionPressed("ui_next_or_close"))
 			return;
 
-		// Rechtsklick auf eine vorhandene Werkstätte bedeutet wie im Original: Werkstätte verkaufen
+		// Rechtsklick auf eine vorhandene Werkstätte bedeutet wie im Original: Werkstätte verkaufen.
+		// Sonst bietet die Warenzeile das Buch des hiesigen Händlers an, wo es eines gibt – es hängt
+		// bewusst an der Ware und nicht an einem eigenen Knopf, denn es gibt es nur dort, wo die Ware
+		// zur Hauptproduktion der Stadt gehört. Der Ortsbezug ist der ganze Sinn der Sache.
 		if (@event is InputEventMouseButton mausklick)
 		{
 			for (int nr = 1; nr <= AnzahlWerkstaetten; nr++)
 			{
-				if (_buttonsWerkstatt[nr].GetGlobalRect().HasPoint(mausklick.GlobalPosition) &&
-				    _handelsManager.RohstoffIdAnPlatz(_stadtId, nr) != 0 && _handelsManager.HatWerkstatt(_stadtId, nr))
+				int rohstoffId = _handelsManager.RohstoffIdAnPlatz(_stadtId, nr);
+
+				if (rohstoffId == 0)
+					continue;
+
+				bool aufWerkstatt = _buttonsWerkstatt[nr].Visible &&
+				                    _buttonsWerkstatt[nr].GetGlobalRect().HasPoint(mausklick.GlobalPosition);
+				bool aufRohstoff = _buttonsRohstoff[nr].Visible &&
+				                   _buttonsRohstoff[nr].GetGlobalRect().HasPoint(mausklick.GlobalPosition);
+
+				if (!aufWerkstatt && !aufRohstoff)
+					continue;
+
+				if (aufWerkstatt && _handelsManager.HatWerkstatt(_stadtId, nr))
 				{
 					await WerkstattVerkaufen(nr);
+					return;
+				}
+
+				if (_fertigkeit.GibtEsBuch(_stadtId, rohstoffId))
+				{
+					await BuchKaufen(rohstoffId);
 					return;
 				}
 			}
@@ -275,12 +297,15 @@ public partial class Stadt : Control
 		else
 		{
 			_buttonsWerkstatt[nr].TextureNormal = _symbolWerkstattKaufbar;
-			_buttonsWerkstatt[nr].TooltipText = "Werkstätte für " + rohstoffName + " kaufen (" + _handelsManager.GetWerkstattKaufpreis(_stadtId, nr).ToStringGeld() + ")";
+			_buttonsWerkstatt[nr].TooltipText = "Werkstätte für " + rohstoffName + " kaufen (" +
+			                                    _handelsManager.GetWerkstattKaufpreis(_stadtId, nr).ToStringGeld() + ")" +
+			                                    BuchHinweis(rohstoffId);
 		}
 
 		_buttonsRohstoff[nr].Visible = hatWerkstatt;
 		_buttonsRohstoff[nr].TextureNormal = _rohstoffIcons[rohstoffId];
-		_buttonsRohstoff[nr].TooltipText = rohstoffName + " (Klick: kompletten Bestand verkaufen)";
+		_buttonsRohstoff[nr].TooltipText = rohstoffName + " (Klick: kompletten Bestand verkaufen)" +
+		                                   BuchHinweis(rohstoffId);
 
 		_labelsPreis[nr].Visible = hatWerkstatt;
 		_labelsPreis[nr].Text = SW.Dynamisch.GetStadtwithID(_stadtId).GetRohstoffPreisVonIDX(rohstoffId).ToString();
@@ -571,6 +596,50 @@ public partial class Stadt : Control
 		{
 			_handelsManager.VerkaufeWerkstatt(_stadtId, nr);
 			SoundManager.Instance.PlayCoins();
+		}
+
+		Refresh();
+
+		if (Visible)
+			SetProcessInput(true);
+	}
+
+	/// <summary>
+	/// Die Tooltip-Zeile zum Buch, oder eine leere Zeichenkette, wo es keines gibt. Der Hinweis ist
+	/// nötig, weil ein Rechtsklick sonst nirgends ankündigt, was er tut – anders als beim Verkauf der
+	/// Werkstätte, dessen Zeile schon dort stand.
+	/// </summary>
+	private string BuchHinweis(int rohstoffId)
+	{
+		if (!_fertigkeit.GibtEsBuch(_stadtId, rohstoffId))
+			return "";
+
+		return "\nRechtsklick: Schrift über die Herstellung kaufen (" +
+		       _fertigkeit.GetBuchpreis(rohstoffId).ToStringGeld() + ")";
+	}
+
+	/// <summary>
+	/// Die Schrift des hiesigen Händlers: einmalig je Ware, und nur dort zu haben, wo die Ware zur
+	/// Hauptproduktion der Stadt gehört. Sie ist der billigste Weg zur Produktionsfertigkeit – dafür
+	/// muss man hinreisen.
+	/// </summary>
+	private async Task BuchKaufen(int rohstoffId)
+	{
+		SetProcessInput(false);
+
+		string rohstoffName = SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
+		int koennen = SW.Dynamisch.GetAktHum().GetProduktionsfertigkeit(rohstoffId);
+
+		if (await SW.UI.YesNoQuestion.ShowDialogText(
+			    "Ein Händler bietet Euch eine Schrift über die\nHerstellung von " + rohstoffName + " an.\n\n" +
+			    "Sie kostet " + _fertigkeit.GetBuchpreis(rohstoffId).ToStringGeld() + ".\n" +
+			    "Euer Können darin ist bislang " + ProduktionsfertigkeitManager.FertigkeitAlsText(koennen) + ".",
+			    "Kaufen und lesen", "Nicht nötig") == DialogResultGame.Yes)
+		{
+			if (_fertigkeit.KaufeBuch(_stadtId, rohstoffId, out string meldung))
+				SoundManager.Instance.PlayCoins();
+
+			await SW.UI.ShowText.ShowDialog(meldung);
 		}
 
 		Refresh();

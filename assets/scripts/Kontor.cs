@@ -287,6 +287,21 @@ public partial class Kontor : Control
 			}
 		}
 
+		// Produktionsfertigkeit: die Jahresereignisse der Erwerbswege – der Hausgelehrte im Schloss, das
+		// Verlernen einer lange nicht mehr hergestellten Ware, ein Schriftfund und die Einladung zu einem
+		// Vortrag. Der Aufruf vermerkt nebenbei, welche Waren der Spieler in diesem Jahr betreibt; daran
+		// hängt das Verlernen, und er muss deshalb jedes Jahr laufen, auch wenn nichts zu melden ist.
+		if (_geradeGeladen == false)
+		{
+			foreach (string meldung in await new ProduktionsfertigkeitManager().FuehreJahresereignisseDurch())
+			{
+				UpdateHud();
+				await _main.RundenNachrichtenDialog.ShowDialog("Handwerk\n\n" + meldung);
+			}
+
+			UpdateHud();
+		}
+
 		// KI-Beleidigung (selten, Issue #17): Eine KI beleidigt den Spieler – er wählt Satisfaktion (Duell
 		// im Morgengrauen) oder Verzicht (dann leidet sein Ansehen).
 		if (_geradeGeladen == false)
