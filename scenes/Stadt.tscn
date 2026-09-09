@@ -272,6 +272,60 @@ mouse_filter = 0
 text = "000.000"
 horizontal_alignment = 1
 
+[node name="LabelFertigkeit1" type="Label" parent="."]
+layout_mode = 0
+offset_left = 180.0
+offset_top = 528.0
+offset_right = 360.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
+[node name="LabelFertigkeit2" type="Label" parent="."]
+layout_mode = 0
+offset_left = 392.0
+offset_top = 528.0
+offset_right = 572.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
+[node name="LabelFertigkeit3" type="Label" parent="."]
+layout_mode = 0
+offset_left = 604.0
+offset_top = 528.0
+offset_right = 784.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
+[node name="LabelFertigkeit4" type="Label" parent="."]
+layout_mode = 0
+offset_left = 816.0
+offset_top = 528.0
+offset_right = 996.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
+[node name="LabelFertigkeit5" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1028.0
+offset_top = 528.0
+offset_right = 1208.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
+[node name="LabelFertigkeit6" type="Label" parent="."]
+layout_mode = 0
+offset_left = 1240.0
+offset_top = 528.0
+offset_right = 1420.0
+offset_bottom = 554.0
+mouse_filter = 0
+horizontal_alignment = 1
+
 [node name="ButtonHaus" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 1380.0

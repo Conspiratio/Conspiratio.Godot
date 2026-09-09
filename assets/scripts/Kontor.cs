@@ -402,7 +402,19 @@ public partial class Kontor : Control
 
 				produktion += string.Format(SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetTextQualitaetProduktion(),
 					BuchManager.QualitaetAlsText(buch.ProduktionsQualitaetProzent[rohstoffId])) + ": " +
-					buch.ProduzierteWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName() + "\n";
+					buch.ProduzierteWaren[rohstoffId] + " " + SW.Dynamisch.GetRohstoffwithID(rohstoffId).GetRohName();
+
+				// Ursache neben die Wirkung: Die Qualitätsangabe davor ist der Jahreswürfel, und das
+				// Können ist es, das dessen untere Hälfte anhebt. Es steht hier nur, wenn der Spieler
+				// etwas dafür getan hat – sonst stünde im ersten Spieljahr hinter jeder Ware
+				// „unkundig (0)", und die Dauerauskunft ist ohnehin die Warenspalte der Stadtansicht.
+				int koennen = buch.ProduktionsfertigkeitProzent[rohstoffId];
+
+				if (koennen > 0)
+					produktion += " (Euer Können: " +
+					              ProduktionsfertigkeitManager.FertigkeitAlsText(koennen) + ", " + koennen + ")";
+
+				produktion += "\n";
 			}
 
 			if (buch.EtwasVerloren)

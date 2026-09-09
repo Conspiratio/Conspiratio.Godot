@@ -4,6 +4,7 @@ using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
 using Conspiratio.Lib.Gameplay.Niederlassung;
+using Conspiratio.Lib.Gameplay.Personen;
 using Conspiratio.Lib.Gameplay.Spielwelt;
 using Godot;
 
@@ -60,6 +61,7 @@ public partial class Stadt : Control
 	private readonly TextureButton[] _buttonsRohstoff = new TextureButton[AnzahlWerkstaetten + 1];
 	private readonly Label[] _labelsPreis = new Label[AnzahlWerkstaetten + 1];
 	private readonly Label[] _labelsBestand = new Label[AnzahlWerkstaetten + 1];
+	private readonly Label[] _labelsFertigkeit = new Label[AnzahlWerkstaetten + 1];
 	private TextureButton _buttonHaus;
 	private TextureButton _buttonTransport;
 
@@ -104,9 +106,13 @@ public partial class Stadt : Control
 			_buttonsRohstoff[i] = GetNode<TextureButton>("ButtonRoh" + i);
 			_labelsPreis[i] = GetNode<Label>("LabelPreis" + i);
 			_labelsBestand[i] = GetNode<Label>("LabelBestand" + i);
+			_labelsFertigkeit[i] = GetNode<Label>("LabelFertigkeit" + i);
 
 			// Rohstoffbereich (auf Steinwand): Gold mit dunklem Rand statt des schwarzen Theme-Defaults.
-			foreach (var label in new[] { _labelsPreis[i], _labelsBestand[i] })
+			// Die Fertigkeitszeile bleibt bewusst beim vollen Gold: Das Ausbleichen weiter oben trägt
+			// seit Stufe B den Marktabschlag, und eine zweite Bedeutung auf demselben Kanal ließe sich
+			// nicht mehr auseinanderhalten. Die Fertigkeit bekommt Worte, nicht Farbe.
+			foreach (var label in new[] { _labelsPreis[i], _labelsBestand[i], _labelsFertigkeit[i] })
 			{
 				label.AddThemeColorOverride("font_color", GoldFarbe);
 				label.AddThemeColorOverride("font_outline_color", OutlineDunkel);
@@ -274,6 +280,7 @@ public partial class Stadt : Control
 			_buttonsRohstoff[nr].Visible = false;
 			_labelsPreis[nr].Visible = false;
 			_labelsBestand[nr].Visible = false;
+			_labelsFertigkeit[nr].Visible = false;
 			return;
 		}
 
@@ -318,6 +325,16 @@ public partial class Stadt : Control
 		_labelsBestand[nr].Visible = hatWerkstatt;
 		_labelsBestand[nr].Text = FormatiereBestand(_handelsManager.GetLagerbestand(_stadtId, rohstoffId));
 		_labelsBestand[nr].TooltipText = "Obere Hälfte: einkaufen, untere Hälfte: verkaufen\n(die Ziffernposition bestimmt die Menge)";
+
+		int koennen = SW.Dynamisch.GetAktHum().GetProduktionsfertigkeit(rohstoffId);
+
+		_labelsFertigkeit[nr].Visible = hatWerkstatt;
+		_labelsFertigkeit[nr].Text = ProduktionsfertigkeitManager.FertigkeitAlsText(koennen);
+		_labelsFertigkeit[nr].TooltipText = rohstoffName + ": " +
+		                                    ProduktionsfertigkeitManager.FertigkeitAlsText(koennen) +
+		                                    " (" + koennen + " von " + HumSpieler.MaxProduktionsfertigkeit + ")\n" +
+		                                    "Mit steigendem Können werden schlechte Jahre seltener –\n" +
+		                                    "gute werden nicht besser.";
 	}
 
 	private static string FormatiereBestand(int anzahl)
