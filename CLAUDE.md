@@ -339,7 +339,8 @@ What it found, and what came of it: measured that way (14 export lines, five see
    storage allow), `--jahre`, `--seeds` (count or list), `--start-taler`, `--export`, `--marktklug`,
    `--adel` (residences and bases), `--aemter` (take the best office by cheat — an upper bound),
    `--wahlen` (the real political cycle: applications, elections, depositions, AI deaths),
-   `--vollstaendig`, `--tabelle`.
+   `--vollstaendig`, `--tabelle`, `--ware=N` (put every line on one given resource instead of the
+   city's main production) and `--arbeiter=voll|exakt|null` (how the lines are staffed).
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -375,6 +376,23 @@ What it found, and what came of it: measured that way (14 export lines, five see
      read `--aemter` as the noble path**: it takes the best office by cheat and holds it for forty
      years, which produced a median of 1 235 506 and the false conclusion that the noble path is the
      richer one. Office tenure is the whole question, and only `--wahlen` answers it.
+   - **A staffing gap it measured, and what the numbers looked like.** `Produktionsslot`
+     computed the worker requirement as `sites * (workers / workshops)` — integer division
+     inside the parentheses. Wool, hide and rum are the only three goods with a ratio below one
+     (one worker per two workshops), so their requirement came out as 0 and they produced in
+     full with **no workers and no wages**. Measured over 14 wool lines, 40 years, export: a
+     fully or exactly staffed run gives **the same figures to the taler** before and after the
+     fix, and the standard configuration still has its median of 791 318 — so the documented
+     balancing is untouched. The gain was entirely in exploiting it: with no workers the old
+     code reached **−5 469 570 talers at full sales volume** (47 % discount) against
+     −6 822 570 when staffed correctly — 1 353 000 over 40 years, ~34 000 a year, at identical
+     output, and the same seed ended as a nobleman rather than a burgher. Two lessons beyond
+     the fix: **an instrument that always does the sensible thing cannot see an exploit** (both
+     the harness and the E2E driver staff every line, so neither would ever have found this —
+     `--arbeiter=null` exists to play the part of someone who knows better), and **a difference
+     stays readable in a configuration that is otherwise ruinous**: wool alone across fourteen
+     cities ends at zero wealth in every variant, but the gap between the variants is purely
+     additive and therefore still means something.
    - **What it still cannot do:** its trader never adapts. It keeps producing at full capacity even
      while a levy ruins it, so every brake measurement **overstates the damage** - a human would shrink
      capacity instead. `--marktklug` only throttles to one city's annual demand, which is a different
