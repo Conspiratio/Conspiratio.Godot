@@ -34,9 +34,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -300.0
-offset_top = -355.0
+offset_top = -374.0
 offset_right = 300.0
-offset_bottom = 400.0
+offset_bottom = 419.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_abrdg")
@@ -59,15 +59,15 @@ layout_mode = 0
 offset_left = 120.0
 offset_top = 74.0
 offset_right = 480.0
-offset_bottom = 650.0
+offset_bottom = 688.0
 columns = 2
 
 [node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_abrdg")]
 layout_mode = 0
 offset_left = 220.0
-offset_top = 660.0
+offset_top = 698.0
 offset_right = 381.0
-offset_bottom = 700.0
+offset_bottom = 738.0
 theme = ExtResource("4_abrdg")
 text = "Weiter"
 

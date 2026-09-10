@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Conspiratio.Godot.assets.scripts.managers;
 using Conspiratio.Lib.Allgemein;
 using Conspiratio.Lib.Extensions;
@@ -57,6 +57,12 @@ public partial class AbrechnungDialog : DialogBase
 		AddPosition("Unterhalt", ergebnis.Unterhalt);
 		AddPosition("Kapazität", ergebnis.Kapazitaetsunterhalt);
 		AddPosition("Hofhaltung", ergebnis.Hofhaltung);
+
+		// Der Faktor steht neben und nicht im Unterhalt: Er ist eine Entscheidung und keine Folge
+		// des Besitzes - man wird ihn mit einem Satz wieder los. Die Zeile erscheint wie alle
+		// anderen auch mit 0, damit die Zeilenzahl fest bleibt.
+		AddPosition("Faktor", ergebnis.Faktorlohn);
+
 		AddPosition("Gesamtkosten", ergebnis.Gesamtkosten);
 
 		// Der Gegenwert zur Kostenseite: was die Hofhaltungsstufe und die Auslastung der Betriebe in

@@ -6,10 +6,14 @@ namespace Conspiratio.Godot.assets.scripts.managers;
 /// <summary>
 /// Der Sättigungsabschlag aus <c>Stadt.GetRohstoffPreisVonIDX</c>, in Spielersprache übersetzt.
 ///
-/// Die Formel hat hier <b>einen</b> Wohnsitz, weil inzwischen drei Ansichten auf sie zugreifen: die
-/// Preiszeile und die Verkaufszeile der Stadtansicht sowie der Lagerstand im
-/// Stadtinformationen-Dialog. Eine zweite Kopie wäre genau die Art Duplikat, die stillschweigend
-/// auseinanderläuft, sobald jemand eine der Lib-Konstanten ändert.
+/// Gerechnet wird <b>nicht</b> hier: Jahresbedarf und Abschlag kommen seit Lib 4.10.0 aus
+/// <c>Stadt.GetJahresbedarf</c>, <c>GetRohAbschlagProzentVonIDX</c> und
+/// <c>GetAbschlagProzentVonIDX</c>. Diese Klasse ist nur noch die Übersetzung ins Deutsche und der
+/// gemeinsame Zugriffspunkt der drei Ansichten, die sie brauchen: die Preiszeile und die
+/// Verkaufszeile der Stadtansicht sowie der Lagerstand im Stadtinformationen-Dialog.
+///
+/// Vorher stand die Formel hier nachgebaut – mit einem Kommentar, der vor genau dieser zweiten
+/// Kopie warnte. Sie war trotzdem eine, weil die Lib die Bausteine nicht öffentlich hatte.
 ///
 /// Siehe docs/saettigungsrabatt-sichtbar-konzept.md.
 /// </summary>
@@ -21,7 +25,7 @@ public static class Marktlage
 	/// </summary>
 	public static int ErmittleJahresbedarf(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt)
 	{
-		return System.Math.Max(1, stadt.GetEinwohner() / 10);
+		return stadt.GetJahresbedarf();
 	}
 
 	/// <summary>
@@ -35,8 +39,7 @@ public static class Marktlage
 	/// </summary>
 	public static int ErmittleRohAbschlagProzent(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt, int rohstoffId)
 	{
-		return (stadt.GetRohstoffIDXVorrat(rohstoffId) * Conspiratio.Lib.Gameplay.Gebiete.Stadt.AbschlagJeBedarfsjahrProzent)
-		       / ErmittleJahresbedarf(stadt);
+		return stadt.GetRohAbschlagProzentVonIDX(rohstoffId);
 	}
 
 	/// <summary>
@@ -47,10 +50,8 @@ public static class Marktlage
 	/// </summary>
 	public static float ErmittleSaettigungsAnteil(Conspiratio.Lib.Gameplay.Gebiete.Stadt stadt, int rohstoffId)
 	{
-		int abschlag = System.Math.Min(Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent,
-		                               ErmittleRohAbschlagProzent(stadt, rohstoffId));
-
-		return (float)abschlag / Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent;
+		return (float)stadt.GetAbschlagProzentVonIDX(rohstoffId) /
+		       Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent;
 	}
 
 	/// <summary>
@@ -76,8 +77,8 @@ public static class Marktlage
 		int grundpreis = stadt.GetRohstoffBasispreisVonIDX(rohstoffId);
 		int jahresbedarf = ErmittleJahresbedarf(stadt);
 
-		int rohAbschlagProzent = ErmittleRohAbschlagProzent(stadt, rohstoffId);
-		int abschlagProzent = System.Math.Min(Conspiratio.Lib.Gameplay.Gebiete.Stadt.MaxAbschlagProzent, rohAbschlagProzent);
+		int rohAbschlagProzent = stadt.GetRohAbschlagProzentVonIDX(rohstoffId);
+		int abschlagProzent = stadt.GetAbschlagProzentVonIDX(rohstoffId);
 
 		if (abschlagProzent == 0)
 		{

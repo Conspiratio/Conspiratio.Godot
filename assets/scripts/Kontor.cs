@@ -287,6 +287,16 @@ public partial class Kontor : Control
 			}
 		}
 
+		// Der Faktor meldet ungefragt, welche belieferten Märkte den Höchstabschlag erreicht haben oder
+		// im nächsten Jahr erreichen. Das ist die Auskunft, für die man ihn hält: Sie kommt von selbst,
+		// statt auf eine Frage zu warten, die der Spieler nicht stellt, weil er den Grund nicht kennt.
+		// Ohne Faktor ist die Liste leer.
+		if (_geradeGeladen == false)
+		{
+			foreach (string warnung in new FaktorManager().ErmittleWarnungen())
+				await _main.RundenNachrichtenDialog.ShowDialog("Euer Faktor berichtet\n\n" + warnung);
+		}
+
 		// Produktionsfertigkeit: die Jahresereignisse der Erwerbswege – der Hausgelehrte im Schloss, das
 		// Verlernen einer lange nicht mehr hergestellten Ware, ein Schriftfund und die Einladung zu einem
 		// Vortrag. Der Aufruf vermerkt nebenbei, welche Waren der Spieler in diesem Jahr betreibt; daran

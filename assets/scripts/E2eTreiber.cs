@@ -827,9 +827,13 @@ public partial class E2eTreiber : Node
 		// anteilig, darueber steigt er nicht mehr – nur die Loehne. Ein fester Wert ist deshalb entweder
 		// zu knapp oder verbrennt Geld; gemessen war eine Ueberbesetzung klar defizitaer.
 		var ware = SW.Dynamisch.GetRohstoffwithID(rohstoffId);
-		int proStaette = ware.GetWerkstaetten() > 0 ? ware.GetArbeiter() / ware.GetWerkstaetten() : 1;
-		int staetten = ErmittleSinnvolleStaetten(stadtId, rohstoffId, ware, proStaette, out bool lagerIstDieGrenze);
-		int arbeiter = Math.Max(1, staetten * proStaette);
+		int staetten = ErmittleSinnvolleStaetten(stadtId, rohstoffId, ware, out bool lagerIstDieGrenze);
+
+		// Erst mal nehmen, dann teilen - wie die Lib. Ein Zwischenwert „Arbeiter je Stätte“ wäre bei
+		// Wolle, Fell und Rum null (ein Arbeiter je zwei Werkstätten), und der Lauf endete dann je
+		// nach Seed in einer DivideByZeroException: Welche Ware der Treiber betreibt, hängt an der
+		// Werkstätte seiner Heimatstadt.
+		int arbeiter = Math.Max(1, staetten * ware.GetArbeiter() / ware.GetWerkstaetten());
 
 		SetzeZahl(stadt, "HBoxDetail0/NumericStaette", staetten);
 		SetzeZahl(stadt, "HBoxDetail0/NumericMenge", arbeiter);
@@ -869,8 +873,11 @@ public partial class E2eTreiber : Node
 	///
 	/// <paramref name="lagerIstDieGrenze"/> sagt, welche der beiden bindet: Nur wenn es das Lager ist,
 	/// lohnt ein Ausbau.
+	///
+	/// Gerechnet wird mit dem Verhältnis der Ware statt mit einem Zwischenwert „Arbeiter je Stätte“:
+	/// Der wäre bei Wolle, Fell und Rum null und die Division darunter unmöglich.
 	/// </summary>
-	private static int ErmittleSinnvolleStaetten(int stadtId, int rohstoffId, Rohstoff ware, int proStaette,
+	private static int ErmittleSinnvolleStaetten(int stadtId, int rohstoffId, Rohstoff ware,
 	                                             out bool lagerIstDieGrenze)
 	{
 		double effizienz = SW.Dynamisch.GetStadtwithID(stadtId).GetEffizienzVonRohstoffMitIDX(rohstoffId);
@@ -880,7 +887,8 @@ public partial class E2eTreiber : Node
 		                       * ware.GetLagermengeProQMeter();
 
 		int nachLager = Math.Max(1, lagerplatzStueck / ertragJeStaette);
-		int nachArbeitern = Math.Max(1, SW.Statisch.GetMaxArbeiterAnzahl() / proStaette);
+		int nachArbeitern = Math.Max(1, SW.Statisch.GetMaxArbeiterAnzahl() * ware.GetWerkstaetten() /
+		                                ware.GetArbeiter());
 
 		lagerIstDieGrenze = nachLager < nachArbeitern;
 

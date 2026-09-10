@@ -11,6 +11,7 @@ public partial class Main : Control
 	public NewPlayerMenu NewPlayerMenu;
 	public Kontor Kontor;
 	public AbrechnungDialog AbrechnungDialog;
+	public FaktorDialog FaktorDialog;
 	public Stadt Stadt;
 	public LoadGameDialog LoadGameDialog;
 	public SaveGameDialog SaveGameDialog;

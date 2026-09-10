@@ -1,0 +1,110 @@
+[gd_scene load_steps=5 format=3 uid="uid://bfaktordlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/FaktorDialog.cs" id="1_fakdg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_fakdg"]
+[ext_resource type="PackedScene" uid="uid://ks7nlqqiwarp" path="res://scenes/controls/LinkButtonWithSounds.tscn" id="3_fakdg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="4_fakdg"]
+
+[node name="FaktorDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_fakdg")
+LabelTitlePath = NodePath("Panel/NinePatchRect/LabelTitle")
+LinkButtonWarePath = NodePath("Panel/NinePatchRect/LinkButtonWare")
+GridContainerMaerktePath = NodePath("Panel/NinePatchRect/GridContainerMaerkte")
+LabelHinweisPath = NodePath("Panel/NinePatchRect/LabelHinweis")
+LinkButtonEntlassenPath = NodePath("Panel/NinePatchRect/LinkButtonEntlassen")
+LinkButtonClosePath = NodePath("Panel/NinePatchRect/LinkButtonClose")
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NinePatchRect" type="NinePatchRect" parent="Panel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -550.0
+offset_top = -430.0
+offset_right = 550.0
+offset_bottom = 430.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_fakdg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitle" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 26.0
+offset_right = 1040.0
+offset_bottom = 66.0
+text = "Der Faktor berichtet"
+horizontal_alignment = 1
+
+[node name="LinkButtonWare" parent="Panel/NinePatchRect" instance=ExtResource("3_fakdg")]
+layout_mode = 0
+offset_left = 380.0
+offset_top = 70.0
+offset_right = 720.0
+offset_bottom = 108.0
+theme = ExtResource("4_fakdg")
+text = "Ware"
+
+[node name="GridContainerMaerkte" type="GridContainer" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 50.0
+offset_top = 116.0
+offset_right = 1000.0
+offset_bottom = 686.0
+theme_override_constants/h_separation = 24
+columns = 5
+
+[node name="LabelHinweis" type="Label" parent="Panel/NinePatchRect"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 706.0
+offset_right = 1040.0
+offset_bottom = 772.0
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 3
+text = "Hinweis"
+horizontal_alignment = 1
+
+[node name="LinkButtonEntlassen" parent="Panel/NinePatchRect" instance=ExtResource("3_fakdg")]
+layout_mode = 0
+offset_left = 120.0
+offset_top = 782.0
+offset_right = 520.0
+offset_bottom = 820.0
+theme = ExtResource("4_fakdg")
+text = "Entlassen"
+
+[node name="LinkButtonClose" parent="Panel/NinePatchRect" instance=ExtResource("3_fakdg")]
+layout_mode = 0
+offset_left = 700.0
+offset_top = 782.0
+offset_right = 1000.0
+offset_bottom = 820.0
+theme = ExtResource("4_fakdg")
+text = "Schließen"
+
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonWare" to="." method="_on_link_button_ware_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonEntlassen" to="." method="_on_link_button_entlassen_pressed"]
+[connection signal="pressed" from="Panel/NinePatchRect/LinkButtonClose" to="." method="_on_link_button_close_pressed"]

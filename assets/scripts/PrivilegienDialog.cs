@@ -212,6 +212,20 @@ public partial class PrivilegienDialog : DialogBase
 			return;
 		}
 
+		// „Faktor anstellen" bzw. „Faktor befragen": ein Eintrag für beides, weil immer nur
+		// einer der Fälle zutrifft. Wer keinen hat, bekommt die Frage; wer einen hat, den Bericht.
+		if (privilegId == PrivilegienManager.FaktorPrivilegId)
+		{
+			SetProcessInput(false);
+			await ZeigeFaktor();
+			Fill();
+
+			if (Visible)
+				SetProcessInput(true);
+
+			return;
+		}
+
 		// „Handwerkslehre nehmen": Unterricht in einer Ware, die der Spieler auch betreibt.
 		if (privilegId == PrivilegienManager.HandwerkslehrePrivilegId)
 		{
@@ -294,6 +308,34 @@ public partial class PrivilegienDialog : DialogBase
 
 			i = (i + 1) % waren.Count;
 		}
+	}
+
+	/// <summary>
+	/// Der Faktor: ohne einen im Dienst die Frage nach der Anstellung, sonst sein Bericht. Der Lohn
+	/// wird in der Frage genannt, denn er ist der ganze Preis – fällig wird er erst mit der
+	/// Jahresabrechnung, und dort steht er als eigener Posten.
+	/// </summary>
+	private async Task ZeigeFaktor()
+	{
+		var faktor = new FaktorManager();
+
+		if (faktor.IstAngestellt())
+		{
+			await _main.FaktorDialog.ShowDialog();
+			return;
+		}
+
+		if (await SW.UI.YesNoQuestion.ShowDialogText(
+			    "Ein Faktor bietet Euch seine Dienste an.\n\n" +
+			    "Er vergleicht für Euch die Märkte aller Städte\nund warnt, wo Ihr sie überfüllt.\n\n" +
+			    "Sein Lohn beträgt " + faktor.GetJahreslohn().ToStringGeld() + " im Jahr\n" +
+			    "und wächst mit der Zahl Eurer Standorte.",
+			    "In Dienst nehmen", "Nicht nötig") != DialogResultGame.Yes)
+			return;
+
+		faktor.StelleAn(out string meldung);
+		await SW.UI.ShowText.ShowDialog(meldung);
+		await _main.FaktorDialog.ShowDialog();
 	}
 
 	private void _on_link_button_close_pressed()
