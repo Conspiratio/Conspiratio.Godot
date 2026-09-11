@@ -325,6 +325,73 @@ Läufe je Stand können das bei der oben belegten Nicht-Reproduzierbarkeit aber 
 Wer es klären will, braucht deutlich mehr Läufe je Stand — oder einen Treiber, dessen Brautwerbung nicht
 am Vermögen hängt, denn dieses Nadelöhr ist eine Eigenheit des Treibers und keine des Spiels.
 
+## Schicht 7 — Produktionsfertigkeit, Faktor, Arbeiterbedarf (Lib 4.8.0 bis 4.11.0)
+
+Vier Dinge wirken zusammen: die **Produktionsfertigkeit** je Ware samt ihren sechs Erwerbswegen
+(von denen vier zu Zugbeginn von selbst laufen), der **Faktor** als Geldsenke, eine
+**Fehlerbehebung am Arbeiterbedarf** — Wolle, Fell und Rum produzierten voll ohne einen einzigen
+Arbeiter — und zwei Treiberänderungen: Er öffnet jetzt die Stadtinformationen, und er rechnet die
+Arbeiterzahl wie die Lib (erst nehmen, dann teilen) statt über einen Zwischenwert, der bei genau
+jenen drei Waren null wurde und den Lauf mit einer `DivideByZeroException` beendete.
+
+### Das Band
+
+`--jahre=15 --spieler=1 --ohne-aktionen`, zehn Seeds, je zwei Wiederholungen. **Beide Stände in
+derselben Sitzung gemessen**, der Vergleichsstand aus einem Worktree des Commits `ffb1f8e`
+(Lib 4.7.0):
+
+| Stand | Band | Mittel | Median | negativ |
+|---|---|---:|---:|---:|
+| Vorher 4.7.0 | −1 519 bis +43 396 | 17 538 | 14 257 | 1 von 20 |
+| Jetzt 4.11.0 | −4 869 bis +52 366 | 20 990 | 22 702 | 3 von 20 |
+
+**Das Vermögen bleibt, wo es war.** Die Mittel liegen 3 452 Taler auseinander, die Mediane 8 445 —
+beides unterhalb der Schwelle von rund 10 000, ab der ein Unterschied hier überhaupt etwas bedeutet,
+und die Spanne innerhalb eines Standes ist mit über 50 000 ein Vielfaches davon. Auch die drei
+negativen Läufe gegen einen sind bei n = 20 kein Signal.
+
+Das ist das erwartete Ergebnis, nicht ein enttäuschendes: Die Erwerbswege sind selten und klein
+(Vortrag 12 % Jahreschance für 1 500 Taler, Schriftfund 4 %), der Faktor wird ohne `--aktionen` nie
+angestellt, die Fertigkeit bleibt deshalb niedrig und ihr Ertragshebel entsprechend klein, und die
+Arbeiterbehebung trifft nur drei der einundzwanzig Waren. **Dass die Wege überhaupt funktionieren,
+belegen Lib-Tests über 3 000 Jahre**, nicht dieser Lauf — ein E2E-Durchlauf ist dafür zu kurz und zu
+verrauscht.
+
+Die Einzelwerte je Seed (Mittel der beiden Wiederholungen), wie in Schicht 6 nur der
+Vollständigkeit halber — ein Vergleich je Seed wäre unseriös:
+
+| Seed | 90210 | 2718 | 555 | 2023 | 4711 | 7 | 31337 | 42 | 13 | 1234 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 4.7.0 | 11 098 | 4 701 | 4 410 | 7 964 | 15 047 | 26 706 | 24 322 | 13 284 | 40 527 | 27 322 |
+| 4.11.0 | −3 454 | 23 067 | 6 837 | 31 648 | 6 705 | 52 366 | 14 317 | 28 664 | 22 764 | 26 991 |
+
+Wie wenig ein einzelner Seed taugt, zeigt Seed 13 im Protokollvergleich: Vorher fielen dort **879
+Klicks auf den Duelldialog**, nachher **keiner**. Ein einziges Duell, das die KI anzettelt oder
+nicht, verschiebt den halben Lauf.
+
+### Eine Ansicht mehr im Bildnachweis
+
+Der `StadtInformationenDialog` kam in keinem Lauf vor. Im Spiel hängt er an einem Rechtsklick auf
+eine Stadt der Handelskarte, und der setzt voraus, dass die Karte weiß, wo der Zeiger steht —
+headless erreichen synthetische Mausereignisse sie gar nicht. Der Treiber ruft jetzt dieselbe
+Methode auf wie der echte Rechtsklick; ein Bilderlauf über drei Jahre zeigt ihn dreimal.
+
+### Zwei Messfallen, die diese Schicht gekostet hat
+
+Beide sahen nicht wie Fehler aus, sondern wie Ergebnisse — das ist das Gefährliche daran.
+
+**Ein frischer Worktree braucht `--import`, bevor er messbar ist.** Ohne ihn lief der Treiber, gab
+einen Bericht aus und lieferte Talerstände von −180 bis +270 — klein, plausibel und über beide
+Wiederholungen **exakt gleich**, also scheinbar sauber reproduzierbar. Erst der Vergleich mit dem
+Hauptprojekt zeigte, dass da kein Spiel stattfand. Nach dem Import lieferte derselbe Seed 5 752
+Taler.
+
+**Ein gestoppter Hintergrundlauf schreibt weiter.** Die erste Vorher-Reihe wurde abgebrochen, der
+Prozess schrieb aber noch in dieselbe Ausgabedatei, während die Wiederholung schon lief. Das
+Ergebnis war eine Datei mit 26 statt 20 Zeilen, in der Werte aus beiden Läufen standen — erkennbar
+nur daran, dass einzelne Seeds viermal vorkamen. Seitdem prüft die Auswertung, dass **jeder Seed
+genau zweimal** in der Datei steht, bevor sie irgendetwas mittelt.
+
 ## KI-Aggressivität (`--aggressivitaet=N`)
 
 **Vor dem Handelsbalancing gemessen**, drei Seeds × 15 Jahre × 2 Spieler. Jede Einstellung von 1 bis 100
