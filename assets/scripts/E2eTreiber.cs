@@ -762,12 +762,39 @@ public partial class E2eTreiber : Node
 
 		_besuchteStaedte++;
 		await Schiesse(nameof(Stadt));
+		await ZeigeStadtinformationen(stadtId);
 		await FuehreHandelsrundeDurch(stadtId);
 
 		if (_mitAktionen)
 			await BedieneBildschirm(nameof(Stadt));
 
 		// Zurück auf die Karte, damit der Aufrufer von dort aus zum Kontor findet.
+		SchickeAbbruch();
+		await NaechsterFrame();
+	}
+
+	/// <summary>
+	/// Öffnet die Stadtinformationen – die einzige Ansicht, die sonst in keinem Lauf vorkommt.
+	///
+	/// Im Spiel hängen sie an einem <b>Rechtsklick auf eine Stadt der Handelskarte</b>, und der setzt
+	/// voraus, dass die Karte weiß, über welcher Stadt der Zeiger steht (<c>_hoverStadt</c>).
+	/// Headless erreichen synthetische Mausereignisse die Karte überhaupt nicht – derselbe Grund, aus
+	/// dem die Stadtansicht oben direkt geöffnet wird. Also derselbe Ausweg: der Aufruf, den
+	/// <c>Weltkarte.ZeigeStadtinformationen</c> beim echten Rechtsklick auch macht.
+	/// </summary>
+	private async Task ZeigeStadtinformationen(int stadtId)
+	{
+		_ = _main.StadtInformationenDialog.ShowDialog(stadtId);
+
+		if (!await WarteAufSichtbar(nameof(StadtInformationenDialog), 60))
+		{
+			_fehler.Add("Die Stadtinformationen zu Stadt " + stadtId + " ließen sich nicht öffnen.");
+			return;
+		}
+
+		await Schiesse(nameof(StadtInformationenDialog));
+
+		// Der Dialog kennt keinen Knopf, nur den Rechtsklick - wie das Pergament-Muster es vorsieht.
 		SchickeAbbruch();
 		await NaechsterFrame();
 	}
