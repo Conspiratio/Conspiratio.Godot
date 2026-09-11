@@ -435,9 +435,18 @@ What it found, and what came of it: measured that way (14 export lines, five see
      21 %, because he stops flooding the markets. Over 40 years his utilisation settles at 20 to
      35 %. **A caveat in the rule:** in export mode the revenue is last year's while the costs
      are this year's, so it is a rule of thumb — do not read a precise operating point off it.
+     He also **grows**, not only shrinks: at full utilisation, after a profitable year and only
+     where storage is the binding cap, he buys one expansion per line and leaves a reserve the
+     size of one year's costs. That third condition is the one that matters — if the worker cap
+     binds instead, extra storage is dead capital. In the standard setup it therefore changes
+     nothing (the worker cap binds there), but with a small starting store
+     (`--lagerausbauten=0`) it gains **+31 %**: 836 826 rigid against 1 100 307 adaptive, almost
+     catching up with the full initial build. Worth knowing: the **rigid** trader does better
+     with little storage than with much (836 826 against 791 318), because otherwise he runs
+     past his operating point and pays the capacity levy for it.
    - **What it still cannot do:** `--marktklug` throttles to one city's annual demand, which is a
-     fixed strategy rather than an adaptive one, and nothing ever buys more storage after the
-     initial build — the trader can shrink, but he cannot grow past what he started with.
+     fixed strategy rather than an adaptive one; nothing ever buys or sells a workshop; and the
+     trader never switches goods or destinations, however badly a market pays.
 
 **Three testing habits that repeatedly paid off:**
 
