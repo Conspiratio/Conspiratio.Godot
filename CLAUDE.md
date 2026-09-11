@@ -77,6 +77,11 @@ The game needs the editor to play, so changes are verified in several complement
 2. **Headless smoke test** (above) — catches broken scene loading, missing UIDs, and `_Ready()` NodePath wiring errors after every change.
 3. **Preview render** for a new dialog's layout — instantiate the dialog scene from a temporary `_preview_*.cs`/`.tscn`, set up a game (as in step 1), call its `ShowDialog(...)`, wait a few `ProcessFrame`s, then `GetViewport().GetTexture().GetImage().SavePng("user://preview_*.png")` and read the PNG back. **Run this one windowed (no `--headless`)** — headless has no rendering server and produces a blank/erroring image. Delete the `_preview_*` files afterward.
    - A windowed run only exits when your script calls `GetTree().Quit()`; if it hangs, **don't pipe its stdout through `head`/`grep`** (that blocks and shows nothing). Read the app's own log instead: `%APPDATA%\Godot\app_userdata\Conspiratio.Godot\logs\conspiratio.log`. Screenshots land next to it in `app_userdata\Conspiratio.Godot\`.
+   - A dialog hanging off `Main` needs `Main` itself — it resolves `_main` in `_Ready`. Instantiate
+     `res://scenes/Main.tscn` as `Main`, wait a few frames, set the game up, then call
+     `main.XDialog.ShowDialog(...)`. For state that would take a game to reach, set it directly
+     (`werkstatt.SetEnabled(true)`, `haus.SetHausID(…)`, `SetRohstoffrechteXZuY(…)`) instead of
+     buying it: the purchase paths demand a residence, the rights and the talers.
    - To capture a state that needs input, press buttons programmatically: `button.EmitSignal(BaseButton.SignalName.Pressed)`. For multi-step flows, shoot on a fixed interval and press whatever is on screen, then pick the interesting frames.
 
 4. **Automated play-through** (`scenes/E2eTest.tscn`) — plays a whole game headless and fails with exit
@@ -164,6 +169,12 @@ The game needs the editor to play, so changes are verified in several complement
    **The measurement history lives in [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md)**, not here — it
    is a chain in which each layer invalidates the one before, and keeping it in this file made the
    current state hard to find. What carries over as method:
+   - **A fresh `git worktree` needs `--import` before it can be measured.** Without it the driver
+     still runs and reports, but produces talers near zero — identical across repeats, so it looks
+     reproducible rather than broken. After the import the same seed gave 5 752 instead of −180.
+     Related: a background run stopped with `TaskStop` keeps writing to its output file, so a
+     restarted series can interleave with the dead one. Have the evaluation assert that each seed
+     appears exactly as often as expected before it averages anything.
    - **Read a band, never a single number.** The seed dominates everything else; cross-seed differences
      below ~10 000 talers mean nothing. The current band (Schicht 5, ten seeds) is **+3 900 to
      +53 000**, mean 24 862, median 22 480, none negative, against a pre-project mean of ~72 000.
@@ -374,6 +385,10 @@ What it found, and what came of it: measured that way (14 export lines, five see
    - Deliberately omitted: death, family, court, random events, catastrophes. They scatter by tens of
      thousands of talers and would bury what is being measured; `--vollstaendig` adds the AI year change
      back for a cross-check.
+   - **Build the configuration you are about to run.** `dotnet build` without `-c Release`
+     followed by `dotnet run -c Release --no-build` keeps executing the *old* Release assembly, so
+     a changed constant shows no effect at all — three calibration series printed identical
+     numbers before that was noticed.
    - **The seed has to be set before the world is built, not after.** The first version seeded only
      after `CreateNewGame` and player setup, so the world itself was drawn unseeded. The trader path was
      unaffected (four identical runs), the noble path was not: the same command line produced medians of
@@ -564,6 +579,11 @@ Discovered the hard way; check these before designing around an assumption:
 - **Async dialogs**: dialogs return `Task<DialogResultGame>` (or `Task`) via a `TaskCompletionSource` that is resolved when a button closes the dialog (see `YesNoDialog.cs`). Callers `await SW.UI.YesNoQuestion.ShowDialogText(...)` or `await _main.SomeDialog.ShowDialog(...)`.
 - **Parchment dialog pattern**: most content dialogs are a `NinePatchRect` named `Rahmen` using `BackgroundDialog.png` (`uid://cq1th2hp46uxa`) with `patch_margin` 15 on all sides, dark text `Color(0.16, 0.11, 0.05)`, on the shared theme (`uid://bkne0d4c2vxts`). `ShowDialog()` shows the node + `SetProcessInput(true)` + returns a fresh `TaskCompletionSource.Task`; `_Input` closes on `ui_next_or_close`. Copy an existing one (`StatistikDialog`, `StadtInformationenDialog`) rather than starting fresh. For data-driven icon grids, author static labels in the `.tscn` and add the icons in code from the manager's data, scaling the WinForms Designer coordinates by a constant factor into the parchment.
 - **`TextureRect` sizing gotcha**: the default `ExpandMode.KeepSize` forces the texture's native size as the control minimum. To size an icon freely, set `ExpandMode = IgnoreSize` **before** assigning `Size` (object-initializer order matters — the initializer runs before post-construction assignments).
+- **`CustomMinimumSize` is a minimum, not a maximum.** A longer text widens the column and pushes
+  a `GridContainer` past its own rect — keep headings and cells short, or the table leaves the
+  parchment. The first draft of the factor's table ran 500 px over the edge for want of this.
+- **The parchment texture carries no text at its frayed edge.** Of a 1 100 px `NinePatchRect` only
+  about 30–1 018 is light ground; lay tables out against that, not against the frame.
 - **`Font.GetMultilineStringSize` ignores wrapping**, despite taking a width parameter: it counts only
   explicit `\n`. Measuring a wrapped label with it undercounts badly (231 px for an eight-line text that
   needs ~300). To size a container to wrapped text before the first draw, wrap word by word yourself —
@@ -593,11 +613,19 @@ Two mechanics that have gone wrong before:
     (`<<'PY'`) is supposed to pass the body through verbatim, but an apostrophe in the text still broke
     the command (`unexpected EOF while looking for matching ‘`), and **a single backslash is eaten one
     level on the way in** — `'\n'` written in the script body arrives at Python as a real newline, so an
-    anchor containing a C# `\n` escape never matches. A file has neither problem.
-  - **Preserve CRLF.** Both repos use CRLF. Reading with `io.open(p, encoding='utf-8-sig')` normalises
-    line endings to `\n`, so writing back with `newline=''` silently converts the whole file to LF and
-    turns a three-line change into a full-file diff. Always write with `newline='\r\n'`; check with
-    `git diff --stat` that the diff is the size you expect.
+    anchor containing a C# `\n` escape never matches. A file has neither problem. Keep such
+    scripts and their backups in the scratchpad, **not in `/tmp`**: Git Bash maps `/tmp`
+    elsewhere than the Python process, so a `cp` there and a read from there silently miss each
+    other — which once left a whole measurement running against an unchanged file.
+  - **Measure the line endings per file, never assume them.** They are mixed even within one kind:
+    `scenes/Main.tscn` is CRLF but `scenes/Stadt.tscn` is LF; `docs/e2e-messwerte.md` is CRLF but
+    `docs/haendlerbremse-konzept.md` is LF. Most `.cs` files carry a BOM, `BuchErgebnis.cs` does
+    not. Check with `open(p,'rb').read()` and count `\r\n` against `\n` before editing.
+  - **Pair the newline modes.** Read with `newline=''` (keeps the original endings) → write with
+    `newline=''`. Writing with `newline='\r\n'` then turns every `\r\n` into `\r\r\n` and the diff
+    becomes the whole file. Reading *without* `newline=''` normalises to `\n`, and only then is
+    `newline='\r\n'` the right way out. Check with `git diff --stat` that the diff is the size you
+    expect — two full-file diffs in one session came from this.
   - **Insert whole blocks, not fragments.** Splicing a method in front of a `public` signature landed it
     between that method’s `<summary>` and its `<param>` tags, splitting the XML doc in two. Anchor on the
     start of the doc comment, not on the signature.
