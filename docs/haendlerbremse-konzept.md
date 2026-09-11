@@ -111,6 +111,22 @@ den Händler.
 > Seeds, Mediane): Platz 1 bringt 791 318, Platz 4 dagegen 2 741 260 und Platz 6 2 751 310 —
 > der Preis der höheren Warenstufen schlägt den Effizienzvorteil um mehr als das Dreifache.
 > Die Grundeinheit 140 ist also an der **ungünstigsten Warenwahl des Spiels** geeicht.
+>
+> **Eine Neueichung am klugen Händler wurde versucht und ist gescheitert** — und das ist selbst
+> das Ergebnis. Wer je Stadt den besten Platz wählt und drosselt, zahlt 3 849 Taler Abgabe bei
+> 550 000 Gesamtkosten, also 0,7 %: Die Abgabe hängt an der **Zahl der Stätten** und wächst
+> quadratisch darin, und hochwertige Ware erzielt denselben Erlös mit einem Bruchteil davon.
+> Eine härtere Grundeinheit macht ihn sogar reicher (140 → 2 633 870, 400 → 2 832 410,
+> 800 → 2 852 762), weil sie den drosselnden Händler früher auf seinen günstigeren
+> Betriebspunkt zwingt; eine Gewichtung nach Warenstufe ändert nichts (2 909 668). Und der
+> Adelsweg liegt bei dieser Warenwahl mit 2 800 078 **gleichauf** — die Begründung oben, der
+> Händler solle das Doppelte halten, trägt dort nicht mehr.
+>
+> Was bliebe, wenn das Spätspiel des klugen Händlers zu reich erscheint: die **Marktsättigung**
+> härter stellen (`Stadt.MaxAbschlagProzent` oder `AbschlagJeBedarfsjahrProzent`) — sie ist es,
+> die ihn heute bei 2,6 bis 2,9 Millionen hält —, das **Vermögensgesetz** enger fassen, dessen
+> Grenze mit 2 bis 6 Millionen ohnehin in diesem Bereich liegt, oder den Kapazitätsunterhalt an
+> den **Erlös** statt an die Stätten hängen. Alle drei sind Regeländerungen, keine Eichung.
 
 Titel sind im Spiel keine Zierde. `GetMinTitelStadtEbene`, `GetMinTitelLandEbene` und
 `GetMinTitelReichsEbene` machen sie zur **Zugangsvoraussetzung für Ämter** — und Ämter bringen

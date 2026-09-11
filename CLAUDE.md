@@ -346,8 +346,9 @@ What it found, and what came of it: measured that way (14 export lines, five see
    `--fertigkeit=N` (production skill of every resource run), `--lehrgeld` (pay for that skill
    with real lessons instead of being given it), `--adaptiv` (a trader who throttles when a year
    loses money, expands his storage out of profit and switches goods when another slot in the
-   same city carries considerably more) and `--startplatz=N` (which workshop slot the lines
-   begin on).
+   same city carries considerably more), `--startplatz=N` (which workshop slot the lines
+   begin on) and `--bester-platz` (per city the slot with the highest contribution — the choice
+   an attentive player makes).
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -462,6 +463,18 @@ What it found, and what came of it: measured that way (14 export lines, five see
      does not. Switching goods does not close that gap: it is worth 1 136 459 against 1 144 547,
      i.e. nothing, because the conversion costs the storage expansion and the price difference
      between the workshops.
+   - **The capacity levy does not reach the informed trader, and no number changes that.** An
+     attempt to recalibrate it against `--bester-platz --adaptiv` failed, which is itself the
+     result: the levy comes to **3 849 talers against 550 000 in total costs** there (0.7 %).
+     It hangs on the *number of sites* and grows quadratically in them, so earning the same
+     revenue from few sites of high-tier goods escapes it. Three routes were measured, none
+     works: a harsher base unit makes him **richer** (140 → 2 633 870, 400 → 2 832 410,
+     800 → 2 852 762) because it pushes the throttling trader onto his better operating point
+     sooner; weighting sites by goods tier changes nothing (2 909 668); and with this choice of
+     goods the noble path draws level at 2 800 078, so the original reasoning — the trader
+     should hold twice as much — no longer applies. What limits him instead is **saturation**
+     (discount 13–21 %, wealth settling at 2.6–2.9 million) and the wealth law's 2–6 million
+     band. The levy stays at 140: it works against the volume trader it was built for.
    - **What it still cannot do:** `--marktklug` throttles to one city's annual demand, which is a
      fixed strategy rather than an adaptive one; the trader never opens a second production line
      in a city that would carry one; and nothing ever moves a line to a different city.
