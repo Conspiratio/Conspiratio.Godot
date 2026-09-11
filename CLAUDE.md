@@ -343,9 +343,11 @@ What it found, and what came of it: measured that way (14 export lines, five see
    `--wahlen` (the real political cycle: applications, elections, depositions, AI deaths),
    `--vollstaendig`, `--tabelle`, `--ware=N` (put every line on one given resource instead of the
    city's main production), `--arbeiter=voll|exakt|null` (how the lines are staffed),
-   `--fertigkeit=N` (production skill of every resource run) and `--lehrgeld` (pay for that
-   skill with real lessons instead of being given it) and `--adaptiv` (a trader who throttles
-   when a year loses money instead of always producing flat out).
+   `--fertigkeit=N` (production skill of every resource run), `--lehrgeld` (pay for that skill
+   with real lessons instead of being given it), `--adaptiv` (a trader who throttles when a year
+   loses money, expands his storage out of profit and switches goods when another slot in the
+   same city carries considerably more) and `--startplatz=N` (which workshop slot the lines
+   begin on).
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -444,9 +446,25 @@ What it found, and what came of it: measured that way (14 export lines, five see
      catching up with the full initial build. Worth knowing: the **rigid** trader does better
      with little storage than with much (836 826 against 791 318), because otherwise he runs
      past his operating point and pays the capacity levy for it.
+   - **The starting slot decides almost everything — and every figure above sits on the worst
+     one.** `--startplatz` was built to test the switching rule and turned up something bigger.
+     Measured over 14 lines, 40 years, three seeds, medians, no adapting:
+
+     | slot | 1 | 2 | 3 | 4 | 5 | 6 |
+     |---|---:|---:|---:|---:|---:|---:|
+     | median | **791 318** | 2 072 949 | 1 713 064 | 2 741 260 | 2 676 052 | 2 751 310 |
+
+     Slot 1 carries the city's main production and therefore the highest efficiency, but those
+     are tier-1 goods; the higher slots carry tiers 2 and 3, whose price beats the efficiency
+     advantage several times over. **So every harness number in this file — including the
+     791 318 the capacity levy was calibrated against — describes a trader making the least
+     favourable goods in the game**, and the brake weighs correspondingly lighter on anyone who
+     does not. Switching goods does not close that gap: it is worth 1 136 459 against 1 144 547,
+     i.e. nothing, because the conversion costs the storage expansion and the price difference
+     between the workshops.
    - **What it still cannot do:** `--marktklug` throttles to one city's annual demand, which is a
-     fixed strategy rather than an adaptive one; nothing ever buys or sells a workshop; and the
-     trader never switches goods or destinations, however badly a market pays.
+     fixed strategy rather than an adaptive one; the trader never opens a second production line
+     in a city that would carry one; and nothing ever moves a line to a different city.
 
 **Three testing habits that repeatedly paid off:**
 

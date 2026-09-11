@@ -104,6 +104,13 @@ den Händler.
 > Abstand zum Adelsweg begründet, und der bleibt bestehen (siehe unten). Wer die Grundeinheit
 > neu begründen will, sollte aber am anpassungsfähigen Händler messen: Der starre zeigt eine
 > Wirkung, die im Spiel niemand erleidet, der aufpasst.
+>
+> **Und noch etwas steht unter diesen Zahlen:** Sie gelten für einen Händler auf
+> **Werkstattplatz 1** jeder Stadt. Der trägt zwar die Hauptproduktion und damit die höchste
+> Effizienz, aber es sind Waren der Stufe 1. Mit `--startplatz` gemessen (40 Jahre, drei
+> Seeds, Mediane): Platz 1 bringt 791 318, Platz 4 dagegen 2 741 260 und Platz 6 2 751 310 —
+> der Preis der höheren Warenstufen schlägt den Effizienzvorteil um mehr als das Dreifache.
+> Die Grundeinheit 140 ist also an der **ungünstigsten Warenwahl des Spiels** geeicht.
 
 Titel sind im Spiel keine Zierde. `GetMinTitelStadtEbene`, `GetMinTitelLandEbene` und
 `GetMinTitelReichsEbene` machen sie zur **Zugangsvoraussetzung für Ämter** — und Ämter bringen
