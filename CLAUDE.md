@@ -101,7 +101,15 @@ The game needs the editor to play, so changes are verified in several complement
    setting from 1 to 100 completes all years with exit 0 — what rises with the setting is the **dialog
    burden**, not the difficulty of the outcome: final wealth is dominated by per-seed noise. Figures in
    [`docs/e2e-messwerte.md`](docs/e2e-messwerte.md) (measured **before** the trade balancing).
-   Four things to know before touching it — the rest is commented at the point in `E2eTreiber.cs`
+   **Where the code lives:** `E2eTreiber` is one class in six files, split by what the driver is
+   doing — `E2eTreiber.cs` holds the fields and the course of a year, `.Bereiche.cs` the tour of
+   the Kontor and all dialog handling, `.Handel.cs` the trade round, `.Familie.cs` courtship and
+   succession, `.Zustaende.cs` everything `--zustaende` builds, `.Aufbau.cs` game setup, the
+   save probe and the screenshots. It was one 2 578-line file before; the split moved code and
+   changed nothing, which was verified by a seed run matching to the taler and by comparing
+   every body line.
+
+   Four things to know before touching it — the rest is commented at the point in the driver
    where it matters:
    - A dialog counts as *waiting* only when it is visible **and** `IsProcessingInput()` — except menu
      screens, which run on button signals and never enable `_Input`
