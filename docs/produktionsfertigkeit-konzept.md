@@ -229,7 +229,49 @@ eine Werkstatt besitzt. Bei sechs Städten rund 2 850 im Jahr, also deutlich üb
 aufs Neue und macht den Spieler nicht reicher, sondern klüger. Der Skill dagegen ist Fortschritt —
 einmal bezahlt, für immer wirksam — und darf deshalb nur klein sein.
 
-## Was vorher gemessen werden muss
+## Was gemessen wurde
+
+Nachgetragen, nachdem Regel, Erwerbswege und Anzeige standen. Der Harness kannte die Fertigkeit
+bis dahin nicht – die drei Fragen unten waren also offen, obwohl das Feature fertig war. Zwei
+neue Schalter machen sie messbar: `--fertigkeit=N` setzt jede betriebene Ware darauf,
+`--lehrgeld` bezahlt den Weg dorthin mit echten Lehrstunden statt ihn zu schenken.
+
+14 Exportlinien, 40 Jahre, fünf Seeds, Mediane des Endvermögens:
+
+| Fertigkeit | Startkapital 500 000 | Startkapital 900 000 |
+|---|---:|---:|
+| 0 | 791 318 | 1 191 318 |
+| 50 (geschenkt) | 1 052 901 | — |
+| 100 (geschenkt) | 1 312 390 | — |
+| 100 (mit Lehrgeld bezahlt) | 828 743 | 1 138 890 |
+
+**1. Der Ertragshebel ist groß – größer, als die Regel vermuten lässt.** Geschenkte volle
+Fertigkeit bringt **+66 %** Endvermögen. Die Regel hebt den Ertrag nur um rund 5 %, aber sie hebt
+ihn auf eine dünne Marge (rund 320 000 Erlös gegen 290 000 Kosten), und die Kosten bleiben
+gleich: Ein Zwanzigstel mehr Erlös ist dort die Hälfte mehr Gewinn. Wer die Fertigkeit billig
+bekommt, bekommt viel.
+
+**2. Die Sättigung fängt ihn nicht auf.** Die Erwartung oben – mehr Ware drückt den Preis, der
+Hebel begrenzt sich teilweise selbst – **bestätigt sich nicht**: Der Marktabschlag steht bei
+Fertigkeit 100 praktisch unverändert (10/17/18 % gegen 10/17/11 % über drei Seeds). Wer in
+vierzehn Städte exportiert, verschiebt mit 5 % mehr Menge keinen Vorrat nennenswert. Die
+Selbstbegrenzung gibt es nur für den, der alles in eine Stadt liefert.
+
+**3. Bezahlt trägt die Senke.** Das Lehrgeld für die betriebenen Waren beträgt rund 378 000
+Taler, und damit liegt das Ergebnis im Rauschen um den ungelernten Fall: +4,7 % bei 500 000
+Startkapital, **−4,4 % bei 900 000**. Der zweite Vergleich ist der ehrlichere, weil dort das
+Lehrgeld nicht zugleich als Betriebskapital fehlt. Über vierzig Jahre zehrt die Preisstaffel den
+Ertragsgewinn also ungefähr auf – genau das, was ein dauerhafter Ertragsbonus tun muss, um kein
+Anti-Sink zu sein.
+
+**Was daraus folgt.** Die Kalibrierung trägt, aber sie hängt vollständig am Preis des Erwerbs,
+nicht an der Regel. Gemessen ist nur der Lehrstundenweg; Buch (+10 für 2 000 bis 6 000),
+Meisterschrift (+15, gratis gefunden), Vortrag (+4 für 1 500) und Hausgelehrter (+2 im Jahr für
+3 000) sind je Punkt billiger. Wer sie nutzt, bekommt denselben Hebel günstiger – die
+Meisterschrift sogar umsonst. Sollte sich das Spätspiel als zu reich erweisen, ist der Preis der
+billigen Wege die Stellschraube, nicht der Bonus selbst.
+
+### Was dafür nötig war
 
 Ein Ertragshebel ist genau die Art Änderung, die nicht nach Gefühl entschieden werden darf, und das
 Messinstrument fehlt: Ein E2E-Lauf kann das Spätspiel nicht beurteilen (ein Werkstattplatz, eine

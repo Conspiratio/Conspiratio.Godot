@@ -340,7 +340,9 @@ What it found, and what came of it: measured that way (14 export lines, five see
    `--adel` (residences and bases), `--aemter` (take the best office by cheat — an upper bound),
    `--wahlen` (the real political cycle: applications, elections, depositions, AI deaths),
    `--vollstaendig`, `--tabelle`, `--ware=N` (put every line on one given resource instead of the
-   city's main production) and `--arbeiter=voll|exakt|null` (how the lines are staffed).
+   city's main production), `--arbeiter=voll|exakt|null` (how the lines are staffed),
+   `--fertigkeit=N` (production skill of every resource run) and `--lehrgeld` (pay for that
+   skill with real lessons instead of being given it).
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -393,6 +395,19 @@ What it found, and what came of it: measured that way (14 export lines, five see
      stays readable in a configuration that is otherwise ruinous**: wool alone across fourteen
      cities ends at zero wealth in every variant, but the gap between the variants is purely
      additive and therefore still means something.
+   - **The production skill: a small rule with a large lever.** `--fertigkeit` measured what
+     `docs/produktionsfertigkeit-konzept.md` had asked for and nobody could answer, because the
+     harness did not know the quantity. Given for free, full skill raises the 40-year median
+     from 791 318 to **1 312 390 (+66 %)** — far more than the rule's ~5 % more yield suggests,
+     because it lifts a thin margin (~320 000 revenue against ~290 000 costs) while the costs
+     stay put. **Saturation does not absorb it**, contrary to what the concept expected: the
+     market discount barely moves (10/17/18 % against 10/17/11 %), since 5 % more volume spread
+     over fourteen cities shifts no stock. **Paid for, the sink holds**: ~378 000 in lessons
+     puts the result back into the noise around the unskilled case (+4,7 % at 500 000 starting
+     capital, −4,4 % at 900 000, the latter being the fairer comparison because the fee does
+     not double as missing working capital). So the calibration rests entirely on **the price
+     of acquisition, not on the rule** — and only the lessons route is measured; books, a
+     master's writing, lectures and the household scholar are cheaper per point.
    - **What it still cannot do:** its trader never adapts. It keeps producing at full capacity even
      while a levy ruins it, so every brake measurement **overstates the damage** - a human would shrink
      capacity instead. `--marktklug` only throttles to one city's annual demand, which is a different
