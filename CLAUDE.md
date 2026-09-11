@@ -335,6 +335,8 @@ What it found, and what came of it: measured that way (14 export lines, five see
    (`AbrechnungsManager.KapazitaetsunterhaltProMille`) was built to brake; with it the same run ends at
    a median of **791 318** and the curve reaches a resting point. See
    [`docs/haendlerbremse-konzept.md`](docs/haendlerbremse-konzept.md) for the calibration.
+   **That figure describes a trader who does not react** — with `--adaptiv` the same brake
+   leaves him at 1 144 547 instead, see the entry on adapting below.
    Switches: `--staedte`, `--slots` (1-2), `--staetten` (throttle per line, 0 = as many as workers and
    storage allow), `--jahre`, `--seeds` (count or list), `--start-taler`, `--export`, `--marktklug`,
    `--adel` (residences and bases), `--aemter` (take the best office by cheat — an upper bound),
@@ -342,7 +344,8 @@ What it found, and what came of it: measured that way (14 export lines, five see
    `--vollstaendig`, `--tabelle`, `--ware=N` (put every line on one given resource instead of the
    city's main production), `--arbeiter=voll|exakt|null` (how the lines are staffed),
    `--fertigkeit=N` (production skill of every resource run) and `--lehrgeld` (pay for that
-   skill with real lessons instead of being given it).
+   skill with real lessons instead of being given it) and `--adaptiv` (a trader who throttles
+   when a year loses money instead of always producing flat out).
    - **Its turn order is its most important property**: book, trade, credits, settlement, turn close,
      turn messages, economic round end - mirrored from `Kontor.cs`. Diverge from it and the numbers
      describe a game that does not exist.
@@ -372,6 +375,10 @@ What it found, and what came of it: measured that way (14 export lines, five see
      |---|---|---|---|---|
      | pure trader | 791 318 | Ritter | none | 60 |
      | `--adel --wahlen` | 384 239 | Graf-Herzog | Zollmeister to Regent | 182-324 |
+
+     With `--adaptiv` both sit higher — 1 144 547 and 493 866 — but **the ratio holds** (2.06x
+     against 2.32x), and the noble keeps his offices and his 182-324 Standesansehen either way.
+     The asymmetry the balancing turns on is therefore robust against how the trader plays.
 
      Titles are the gate to offices (`GetMinTitelStadtEbene` 1, `GetMinTitelLandEbene` 3,
      `GetMinTitelReichsEbene` 5), and offices pay 700 (Ratsherr) to 50 000 (Regent) a year. **Do not
@@ -408,10 +415,29 @@ What it found, and what came of it: measured that way (14 export lines, five see
      not double as missing working capital). So the calibration rests entirely on **the price
      of acquisition, not on the rule** — and only the lessons route is measured; books, a
      master's writing, lectures and the household scholar are cheaper per point.
-   - **What it still cannot do:** its trader never adapts. It keeps producing at full capacity even
-     while a levy ruins it, so every brake measurement **overstates the damage** - a human would shrink
-     capacity instead. `--marktklug` only throttles to one city's annual demand, which is a different
-     strategy, not an adaptive one.
+   - **Adapting changes what the brakes are worth** (`--adaptiv`). The trader used to recompute
+     his capacity every year but always to the maximum storage and the worker cap allowed, so he
+     kept producing flat out while a levy ruined him. He now carries a utilisation figure: a
+     losing year takes 15 points off, a profitable one gives 5 back (asymmetric, so it settles
+     rather than oscillates). Measured over 40 years, five seeds, medians:
+
+     | | without the capacity levy | with | brake |
+     |---|---:|---:|---:|
+     | rigid | 1 961 598 | 791 318 | −60 % |
+     | adaptive | 1 876 208 | 1 144 547 | −39 % |
+
+     So **every brake measurement taken with the rigid trader overstates the damage by about a
+     third**, and the calibration figure of 791 318 describes someone who lets himself be
+     ruined. Note the other diagonal too: without a brake, adapting does not pay (1 876 208
+     against 1 961 598) — it is an answer to pressure, not better play, which is why the rigid
+     trader was a reasonable default for years. In a ruinous configuration the difference is
+     stark: the loss falls to a tenth (−8.2 to −0.83 million) and the market discount from 47 to
+     21 %, because he stops flooding the markets. Over 40 years his utilisation settles at 20 to
+     35 %. **A caveat in the rule:** in export mode the revenue is last year's while the costs
+     are this year's, so it is a rule of thumb — do not read a precise operating point off it.
+   - **What it still cannot do:** `--marktklug` throttles to one city's annual demand, which is a
+     fixed strategy rather than an adaptive one, and nothing ever buys more storage after the
+     initial build — the trader can shrink, but he cannot grow past what he started with.
 
 **Three testing habits that repeatedly paid off:**
 

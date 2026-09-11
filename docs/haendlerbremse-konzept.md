@@ -96,6 +96,15 @@ steuerbar.
 **Umgesetzt: 140.** Die Begründung ist ausdrücklich *kein* Gleichstand, sondern ein Vorsprung für
 den Händler.
 
+> **Nachgetragen: Diese Tabelle beschreibt einen Händler, der nicht reagiert.** Der Harness fuhr
+> den Betrieb damals immer auf Anschlag, auch während die Abgabe ihn ruinierte. Mit `--adaptiv`
+> — er drosselt nach einem Verlustjahr — senkt dieselbe Abgabe das Endvermögen nur von
+> 1 876 208 auf **1 144 547** statt auf 791 318, die Bremse wirkt also um rund ein Drittel
+> schwächer als hier gemessen. **Die Wahl von 140 bleibt davon unberührt**, denn sie wurde am
+> Abstand zum Adelsweg begründet, und der bleibt bestehen (siehe unten). Wer die Grundeinheit
+> neu begründen will, sollte aber am anpassungsfähigen Händler messen: Der starre zeigt eine
+> Wirkung, die im Spiel niemand erleidet, der aufpasst.
+
 Titel sind im Spiel keine Zierde. `GetMinTitelStadtEbene`, `GetMinTitelLandEbene` und
 `GetMinTitelReichsEbene` machen sie zur **Zugangsvoraussetzung für Ämter** — und Ämter bringen
 Amtseinkommen, Privilegien und eigenes Ansehen. Dazu zählt `GetAnsehenGesamt()` den `BonusAnsehen` des
@@ -110,6 +119,18 @@ Amtsenthebungen, Ansehensverfall. 40 Jahre, 14 Exportlinien, fünf Seeds:
 |---|---|---|---|---|
 | reiner Händler | **791 318** | Ritter | keines | 60 |
 | Adelsweg | 384 239 | Graf bis Herzog | Zollmeister bis Regent | 182 – 324 |
+
+Mit einem Händler, der drosselt (`--adaptiv`), liegen beide höher — **das Verhältnis aber
+bleibt**, und darauf kam es an:
+
+| Weg | starr | adaptiv |
+|---|---:|---:|
+| reiner Händler | 791 318 | 1 144 547 |
+| Adelsweg | 384 239 | 493 866 |
+| **Vorsprung des Händlers** | **2,06×** | **2,32×** |
+
+Der Adlige hält in beiden Fällen sein Standesansehen von 182 bis 324 und Ämter bis zum Regenten.
+Die Asymmetrie, um die es hier geht, ist also robust gegen die Spielweise.
 
 Der Händler hält gut **das Doppelte an Talern**, der Adlige das **Drei- bis Fünffache an
 Standesansehen** und als einziger ein Amt — mit Amtseinkommen, Privilegien und Stimmrecht. Das ist
