@@ -1,0 +1,141 @@
+[gd_scene load_steps=6 format=3 uid="uid://kreditdlg1"]
+
+[ext_resource type="Script" path="res://assets/scripts/KreditDialog.cs" id="1_krdlg"]
+[ext_resource type="Texture2D" uid="uid://cq1th2hp46uxa" path="res://assets/backgrounds/BackgroundDialog.png" id="2_krdlg"]
+[ext_resource type="Theme" uid="uid://bkne0d4c2vxts" path="res://assets/resources/standard_theme.tres" id="3_krdlg"]
+[ext_resource type="PackedScene" uid="uid://numericbtnws1" path="res://scenes/controls/NumericButtonWithSounds.tscn" id="4_krdlg"]
+[ext_resource type="PackedScene" uid="uid://cjjy04owdlrv0" path="res://scenes/controls/ButtonWithSounds.tscn" id="5_krdlg"]
+
+[node name="KreditDialog" type="Control" groups=["Dialogs"]]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_krdlg")
+script = ExtResource("1_krdlg")
+LabelAngebotPath = NodePath("Rahmen/LabelAngebot")
+NumericBetragPath = NodePath("Rahmen/HBoxBetrag/NumericBetrag")
+LabelKostenPath = NodePath("Rahmen/LabelKosten")
+ButtonAnnehmenPath = NodePath("Rahmen/HBoxKnoepfe/ButtonAnnehmen")
+ButtonAblehnenPath = NodePath("Rahmen/HBoxKnoepfe/ButtonAblehnen")
+LabelAbsagenPath = NodePath("Rahmen/LabelAbsagen")
+
+[node name="Rahmen" type="NinePatchRect" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -270.0
+offset_right = 400.0
+offset_bottom = 270.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_krdlg")
+patch_margin_left = 15
+patch_margin_top = 15
+patch_margin_right = 15
+patch_margin_bottom = 15
+
+[node name="LabelTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 28.0
+offset_right = 760.0
+offset_bottom = 72.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 38
+text = "Der Geldleiher"
+horizontal_alignment = 1
+
+[node name="LabelAngebot" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 92.0
+offset_right = 740.0
+offset_bottom = 186.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="LabelBetragTitel" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 198.0
+offset_right = 740.0
+offset_bottom = 234.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Wie viel wollt Ihr davon nehmen?"
+horizontal_alignment = 1
+
+[node name="HBoxBetrag" type="HBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 242.0
+offset_right = 560.0
+offset_bottom = 290.0
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="NumericBetrag" parent="Rahmen/HBoxBetrag" instance=ExtResource("4_krdlg")]
+layout_mode = 2
+size_flags_vertical = 4
+custom_minimum_size = Vector2(110, 40)
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+
+[node name="LabelTaler" type="Label" parent="Rahmen/HBoxBetrag"]
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Taler"
+
+[node name="LabelKosten" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 300.0
+offset_right = 740.0
+offset_bottom = 380.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 26
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="LabelAbsagen" type="Label" parent="Rahmen"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 384.0
+offset_right = 740.0
+offset_bottom = 424.0
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+theme_override_font_sizes/font_size = 22
+text = "..."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="HBoxKnoepfe" type="HBoxContainer" parent="Rahmen"]
+layout_mode = 0
+offset_left = 100.0
+offset_top = 434.0
+offset_right = 700.0
+offset_bottom = 494.0
+theme_override_constants/separation = 40
+alignment = 1
+
+[node name="ButtonAnnehmen" parent="Rahmen/HBoxKnoepfe" instance=ExtResource("5_krdlg")]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 56)
+text = "Annehmen"
+
+[node name="ButtonAblehnen" parent="Rahmen/HBoxKnoepfe" instance=ExtResource("5_krdlg")]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 56)
+text = "Ablehnen"

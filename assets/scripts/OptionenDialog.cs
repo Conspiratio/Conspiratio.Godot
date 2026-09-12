@@ -17,6 +17,7 @@ public partial class OptionenDialog : DialogBase
 	private controls.CheckBoxWithSounds _checkMusikAus;
 	private controls.CheckBoxWithSounds _checkTipps;
 	private controls.CheckBoxWithSounds _checkStatistik;
+	private controls.CheckBoxWithSounds _checkTodesfaelle;
 	private controls.CheckBoxWithSounds _checkStuetzpunkt;
 	private controls.CheckBoxWithSounds _checkMilitaer;
 	private controls.CheckBoxWithSounds _checkDuelle;
@@ -39,6 +40,7 @@ public partial class OptionenDialog : DialogBase
 		_checkMusikAus = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckMusikAus");
 		_checkTipps = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckTipps");
 		_checkStatistik = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckStatistik");
+		_checkTodesfaelle = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckTodesfaelle");
 		_checkStuetzpunkt = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckStuetzpunkt");
 		_checkMilitaer = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckMilitaer");
 		_checkDuelle = GetNode<controls.CheckBoxWithSounds>("Rahmen/VBoxChecks/CheckDuelle");
@@ -57,6 +59,7 @@ public partial class OptionenDialog : DialogBase
 		_checkMusikAus.Toggled += OnMusikAusgeschaltet;
 		_checkTipps.Toggled += an => ClientSettings.TippsAnzeigen = an;
 		_checkStatistik.Toggled += an => ClientSettings.StatistikAnzeigen = an;
+		_checkTodesfaelle.Toggled += OnTodesfaelleGeaendert;
 		_checkStuetzpunkt.Toggled += an => ClientSettings.StuetzpunktereignisseKiAnzeigen = an;
 		_checkMilitaer.Toggled += an => ClientSettings.MilitaerereignisseKiAnzeigen = an;
 		_checkDuelle.Toggled += an => ClientSettings.DuelleInteraktiv = an;
@@ -65,6 +68,16 @@ public partial class OptionenDialog : DialogBase
 		_sliderMusik.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusMusik, (int)wert);
 		_sliderEffekt.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusEffekt, (int)wert);
 		_sliderStimmen.ValueChanged += wert => OnLautstaerke(AudioEinstellungen.BusStimmen, (int)wert);
+
+		// Hörprobe am Ende des Ziehens, wie im Original (frmEinstellungen, ScrollEventType.EndScroll):
+		// Ein Klang bei jedem Zwischenwert ergäbe während des Ziehens ein Stakkato. Der Musikregler
+		// braucht keine – die Musik läuft ja bereits und ändert sich hörbar mit.
+		_sliderEffekt.DragEnded += _ => SoundManager.Instance.SpieleEffektprobe();
+		_sliderStimmen.DragEnded += _ => SoundManager.Instance.SpieleStimmprobe();
+
+		// Tastatur und Mausrad lösen kein DragEnded aus; über diese Wege wäre der Regler sonst stumm.
+		_sliderEffekt.GuiInput += ereignis => ProbeBeiTastatur(ereignis, SoundManager.Instance.SpieleEffektprobe);
+		_sliderStimmen.GuiInput += ereignis => ProbeBeiTastatur(ereignis, SoundManager.Instance.SpieleStimmprobe);
 
 		_sliderKiAggressivitaet.ValueChanged += OnKiAggressivitaetGeaendert;
 	}
@@ -77,6 +90,12 @@ public partial class OptionenDialog : DialogBase
 		_checkMusikAus.ButtonPressed = ClientSettings.MusikAusschalten;
 		_checkTipps.ButtonPressed = ClientSettings.TippsAnzeigen;
 		_checkStatistik.ButtonPressed = ClientSettings.StatistikAnzeigen;
+
+		// Wie beim Aggressivitätsregler: Läuft ein Spiel, gilt dessen Wert – der ist es, was wirkt.
+		// Die ClientSettings sind nur die Vorgabe für neue Spiele.
+		_checkTodesfaelle.ButtonPressed = SW.Dynamisch.Spielstand != null
+			? SW.Dynamisch.TodesfaelleAnzeigen
+			: ClientSettings.TodesfaelleAnzeigen;
 		_checkStuetzpunkt.ButtonPressed = ClientSettings.StuetzpunktereignisseKiAnzeigen;
 		_checkMilitaer.ButtonPressed = ClientSettings.MilitaerereignisseKiAnzeigen;
 		_checkDuelle.ButtonPressed = ClientSettings.DuelleInteraktiv;
@@ -103,6 +122,32 @@ public partial class OptionenDialog : DialogBase
 		_laedt = false;
 
 		return ShowAndAwait();
+	}
+
+	/// <summary>
+	/// Spielt die Hörprobe, wenn der Regler über Tastatur oder Mausrad verstellt wurde. Godot meldet
+	/// <c>DragEnded</c> nur für das Ziehen mit der Maus.
+	/// </summary>
+	private static void ProbeBeiTastatur(InputEvent ereignis, System.Action probe)
+	{
+		if (ereignis is InputEventKey { Pressed: true, Echo: false } or InputEventMouseButton { Pressed: true })
+			probe();
+	}
+
+	/// <summary>
+	/// Schreibt die Einstellung in den laufenden Spielstand (dort wirkt sie) und zugleich in die
+	/// ClientSettings als Vorgabe für neue Spiele. Aus dem Hauptmenü heraus gibt es noch keinen
+	/// Spielstand – dann bleibt nur die Vorgabe.
+	/// </summary>
+	private void OnTodesfaelleGeaendert(bool anzeigen)
+	{
+		if (_laedt)
+			return;
+
+		ClientSettings.TodesfaelleAnzeigen = anzeigen;
+
+		if (SW.Dynamisch.Spielstand != null)
+			SW.Dynamisch.TodesfaelleAnzeigen = anzeigen;
 	}
 
 	private void OnMusikAusgeschaltet(bool ausgeschaltet)

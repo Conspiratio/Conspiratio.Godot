@@ -35,11 +35,11 @@ file_logging/max_log_files=10
 
 window/size/viewport_width=1600
 window/size/viewport_height=900
+window/size/mode=3
 window/stretch/mode="canvas_items"
 mouse_cursor/custom_image="res://assets/cursor/CurSword-32x32x24.png"
 window/size/width=1600
 window/size/height=900
-window/size/mode=3
 
 [dotnet]
 

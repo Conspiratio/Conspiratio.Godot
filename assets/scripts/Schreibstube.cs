@@ -142,23 +142,40 @@ public partial class Schreibstube : Control
 		_labelTaler.Text = spieler.GetTalerFormatiert();
 	}
 
+	/// <summary>
+	/// Der Geldleiher. Das Angebot wird im <see cref="KreditDialog"/> gezeigt, in dem der Spieler den
+	/// Betrag bis zur angebotenen Höchstsumme selbst wählt – die Angebotshöhe richtet sich nach dem
+	/// Vermögen eines zufälligen Gläubigers und hat mit dem eigenen Bedarf nichts zu tun.
+	///
+	/// Ablehnen ist begrenzt (<see cref="SchreibstubeManager.MaxKreditAbsagenProZug"/>): Vorher kostete
+	/// es nichts und würfelte ein neues Angebot, Höhe und Zinssatz waren also beliebig oft nachziehbar.
+	/// </summary>
 	private async void _on_area_geldleiher_pressed()
 	{
 		SetProcessInput(false);
 
-		if (_schreibstubeManager.KannKreditNehmen() == false)
+		if (!_schreibstubeManager.HatFreienKreditplatz())
 		{
 			await SW.UI.ShowText.ShowDialog("Niemand ist mehr bereit, Euch in diesem Jahr noch weitere Taler vorzustrecken");
+		}
+		else if (_schreibstubeManager.GetVerbleibendeAbsagen() <= 0)
+		{
+			await SW.UI.ShowText.ShowDialog("Ihr habt heute genug Angebote ausgeschlagen. Der Geldleiher ist für dieses Jahr nicht mehr zu sprechen.");
 		}
 		else
 		{
 			var angebot = _schreibstubeManager.ErstelleKreditAngebot();
+			int betrag = await _main.KreditDialog.ShowDialog(angebot, _schreibstubeManager.GetVerbleibendeAbsagen());
 
-			if (await SW.UI.YesNoQuestion.ShowDialogText(angebot.GetAngebotsText(), "Annehmen", "Ablehnen") == DialogResultGame.Yes)
+			if (betrag > 0)
 			{
-				_schreibstubeManager.NimmKredit(angebot);
+				_schreibstubeManager.NimmKredit(angebot, betrag);
 				SoundManager.Instance.PlayCoins();
 				UpdateHud();
+			}
+			else
+			{
+				_schreibstubeManager.LehneKreditAb();
 			}
 		}
 

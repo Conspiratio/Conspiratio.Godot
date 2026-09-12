@@ -78,6 +78,17 @@ public static class ClientSettings
 		set => SetValue("optionen", "statistik_anzeigen", value);
 	}
 
+	/// <summary>
+	/// Vorgabe für neue Spiele, ob die Todesfälle unter den KI-Spielern am Jahresende gemeldet werden.
+	/// Der wirksame Wert steht im Spielstand (<c>SW.Dynamisch.TodesfaelleAnzeigen</c>) – die Einstellung
+	/// wurde bisher allein beim Anlegen eines Spiels gesetzt und war danach nicht mehr zu ändern.
+	/// </summary>
+	public static bool TodesfaelleAnzeigen
+	{
+		get => GetBool("optionen", "todesfaelle_anzeigen", true);
+		set => SetValue("optionen", "todesfaelle_anzeigen", value);
+	}
+
 	public static bool StuetzpunktereignisseKiAnzeigen
 	{
 		get => GetBool("optionen", "stuetzpunktereignisse_ki_anzeigen", true);

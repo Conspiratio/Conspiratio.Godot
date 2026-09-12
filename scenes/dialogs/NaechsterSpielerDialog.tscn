@@ -12,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_nsp")
 LabelSpielerPath = NodePath("LabelSpieler")
+LabelAuftragPath = NodePath("LabelAuftrag")
 
 [node name="TextureRect" type="TextureRect" parent="."]
 layout_mode = 1
@@ -24,9 +25,9 @@ texture = ExtResource("2_nsp")
 
 [node name="LabelUeberschrift" type="Label" parent="."]
 layout_mode = 0
-offset_left = 500.0
+offset_left = 240.0
 offset_top = 135.0
-offset_right = 1100.0
+offset_right = 1360.0
 offset_bottom = 180.0
 theme_override_colors/font_color = Color(0.95, 0.8, 0.15, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
@@ -34,13 +35,14 @@ theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 30
 text = "Nächster Spieler"
 horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="LabelSpieler" type="Label" parent="."]
 layout_mode = 0
-offset_left = 500.0
+offset_left = 240.0
 offset_top = 200.0
-offset_right = 1100.0
-offset_bottom = 320.0
+offset_right = 1360.0
+offset_bottom = 330.0
 theme_override_colors/font_color = Color(0.95, 0.8, 0.15, 1)
 theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
 theme_override_constants/outline_size = 5
@@ -48,3 +50,19 @@ theme_override_font_sizes/font_size = 36
 text = "Spielername,
 Amt"
 horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="LabelAuftrag" type="Label" parent="."]
+layout_mode = 0
+offset_left = 240.0
+offset_top = 350.0
+offset_right = 1360.0
+offset_bottom = 440.0
+theme_override_colors/font_color = Color(0.95, 0.8, 0.15, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.06, 0.02, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 28
+text = ""
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3

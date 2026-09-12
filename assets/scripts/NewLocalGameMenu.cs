@@ -55,6 +55,11 @@ public partial class NewLocalGameMenu : Control
 		_checkBoxTestmodus = GetNode<CheckBoxWithSounds>(CheckBoxTestmodusPath);
 		_checkBoxShowDeaths = GetNode<CheckBoxWithSounds>(CheckBoxShowDeathsPath);
 
+		// Vorbelegung aus den Einstellungen: Das Häkchen lässt sich seit diesem Feedback auch im
+		// laufenden Spiel umstellen, und dann soll das nächste Spiel nicht wieder bei der Werkseinstellung
+		// anfangen. Die Szene setzt den Anfangswert, der hier überschrieben wird.
+		_checkBoxShowDeaths.ButtonPressed = ClientSettings.TodesfaelleAnzeigen;
+
 		_optionButtonDifficulty = GetNode<OptionButton>(OptionButtonDifficultyPath);
 		_optionButtonMission = GetNode<OptionButton>(OptionButtonMissionPath);
 		_optionButtonDifficulty.ItemSelected += _ => AktualisiereAuftragsliste();
@@ -117,6 +122,10 @@ public partial class NewLocalGameMenu : Control
 
 		// Die in den Optionen gewählte KI-Aggressivität (Prozent) als Vorgabe für dieses Spiel übernehmen
 		SW.Dynamisch.Spielstand.Einstellungen.KiAggressivitaetProzent = ClientSettings.KiAggressivitaetProzent;
+
+		// Umgekehrt die hier getroffene Wahl als Vorgabe merken – das Einstellungsfenster zeigt sie an,
+		// und das nächste neue Spiel beginnt damit.
+		ClientSettings.TodesfaelleAnzeigen = _checkBoxShowDeaths.ButtonPressed;
 
 		// Den gewählten Auftrag (Mission) übernehmen – „Kein Auftrag" bedeutet freies/endloses Spiel.
 		SW.Dynamisch.Spielstand.Einstellungen.Auftrag = GetSelectedAuftrag();

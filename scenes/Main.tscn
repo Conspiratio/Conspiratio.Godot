@@ -14,6 +14,7 @@
 [ext_resource type="PackedScene" uid="uid://cs8v21xd3rxyy" path="res://scenes/dialogs/SaveGameDialog.tscn" id="53_svgdg"]
 [ext_resource type="PackedScene" uid="uid://schreibstube1" path="res://scenes/Schreibstube.tscn" id="11_schrb"]
 [ext_resource type="PackedScene" uid="uid://kreditbuchdlg" path="res://scenes/dialogs/KreditbuchDialog.tscn" id="12_krbdg"]
+[ext_resource type="PackedScene" uid="uid://kreditdlg1" path="res://scenes/dialogs/KreditDialog.tscn" id="12_krdlg"]
 [ext_resource type="PackedScene" uid="uid://gesetzedlg001" path="res://scenes/dialogs/GesetzeDialog.tscn" id="13_gsdg"]
 [ext_resource type="PackedScene" uid="uid://weltkarte0001" path="res://scenes/Weltkarte.tscn" id="14_wkart"]
 [ext_resource type="PackedScene" uid="uid://hausverwaltungdlg" path="res://scenes/dialogs/HausVerwaltungDialog.tscn" id="15_hvdlg"]
@@ -186,6 +187,10 @@ visible = false
 layout_mode = 1
 
 [node name="KreditbuchDialog" parent="." instance=ExtResource("12_krbdg")]
+visible = false
+layout_mode = 1
+
+[node name="KreditDialog" parent="." instance=ExtResource("12_krdlg")]
 visible = false
 layout_mode = 1
 

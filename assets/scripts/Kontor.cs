@@ -222,11 +222,13 @@ public partial class Kontor : Control
 		var spieler = SW.Dynamisch.GetAktHum();
 		string ankuendigung = spieler.GetTitelGegendert() + " " + spieler.GetName() + ",\n" + spieler.GetAmtNameUndOrt();
 
-		// Bei aktivem Auftrag den Fortschritt als Erinnerung mit ankündigen.
-		if (AuftragManager.IstAuftragAktiv())
-			ankuendigung += "\n\n" + new AuftragManager().GetFortschrittText(spieler);
+		// Bei aktivem Auftrag den Fortschritt als Erinnerung mit ankündigen – in einem eigenen Label,
+		// weil die Zeile deutlich breiter ist als die Namenszeile (siehe NaechsterSpielerDialog).
+		string auftrag = AuftragManager.IstAuftragAktiv()
+			? new AuftragManager().GetFortschrittText(spieler)
+			: "";
 
-		await _main.NaechsterSpielerDialog.ShowDialog(ankuendigung);
+		await _main.NaechsterSpielerDialog.ShowDialog(ankuendigung, auftrag);
 
 		_rundenManager.BeginneZug();
 

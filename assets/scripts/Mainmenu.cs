@@ -23,7 +23,38 @@ public partial class Mainmenu : Control
 
 		_main = GetParent<Main>();
 
+		// Im Hauptmenü lief bisher überhaupt keine Musik: Der Titelbildschirm startet die Introfanfare,
+		// und weil Intro und Outro einmalige Stücke sind, verstummt die Musik an deren Ende – die erste
+		// Hintergrundmusik kam erst im Kontor. Das Menü übernimmt das jetzt selbst.
+		VisibilityChanged += StarteMenuemusik;
+		SoundManager.Instance.EinmaligesStueckBeendet += StarteMenuemusik;
+
+		StarteMenuemusik();
+
 		BieteCrashMeldungAn();
+	}
+
+	public override void _ExitTree()
+	{
+		// Der SoundManager ist ein Autoload und überlebt diese Szene; ohne das Abmelden hielte sein
+		// Ereignis das entladene Menü am Leben und riefe später auf ein freigegebenes Objekt.
+		if (SoundManager.Instance != null)
+			SoundManager.Instance.EinmaligesStueckBeendet -= StarteMenuemusik;
+	}
+
+	/// <summary>
+	/// Schaltet auf die Hintergrundmusik um, sobald das Menü sichtbar ist – aber erst, wenn die
+	/// Introfanfare ausgespielt hat: Sie sofort zu überblenden wäre schlechter als die Stille, die es
+	/// zu beheben gilt. Nach dem Ende der Fanfare ruft der SoundManager hier noch einmal an.
+	/// Die Sichtbarkeitsprüfung ist nötig, weil das Ereignis auch eintrifft, während längst ein Spiel
+	/// läuft – dort bestimmt der jeweilige Bildschirm die Musik (Kirche, Hinterzimmer, Kampf).
+	/// </summary>
+	private void StarteMenuemusik()
+	{
+		if (!Visible || SoundManager.Instance.SpieltEinmaligesStueck())
+			return;
+
+		SoundManager.Instance.SpieleMusik(SoundManager.MusikKategorie.Standard);
 	}
 
 	/// <summary>

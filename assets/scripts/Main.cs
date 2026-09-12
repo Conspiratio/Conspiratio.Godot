@@ -17,6 +17,7 @@ public partial class Main : Control
 	public SaveGameDialog SaveGameDialog;
 	public Schreibstube Schreibstube;
 	public KreditbuchDialog KreditbuchDialog;
+	public KreditDialog KreditDialog;
 	public GesetzeDialog GesetzeDialog;
 	public HofhaltungDialog HofhaltungDialog;
 	public Weltkarte Weltkarte;

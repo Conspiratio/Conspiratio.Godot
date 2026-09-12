@@ -27,9 +27,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -500.0
-offset_top = -320.0
+offset_top = -340.0
 offset_right = 500.0
-offset_bottom = 323.0
+offset_bottom = 343.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("2_optdlg")
@@ -54,8 +54,8 @@ layout_mode = 0
 offset_left = 70.0
 offset_top = 120.0
 offset_right = 500.0
-offset_bottom = 501.0
-theme_override_constants/separation = 14
+offset_bottom = 520.0
+theme_override_constants/separation = 10
 
 [node name="CheckMusikAus" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
 layout_mode = 2
@@ -71,6 +71,11 @@ text = "Tipps anzeigen"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Statistik anzeigen"
+
+[node name="CheckTodesfaelle" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
+text = "Todesfälle anzeigen"
 
 [node name="CheckStuetzpunkt" parent="Rahmen/VBoxChecks" instance=ExtResource("4_optdlg")]
 layout_mode = 2
@@ -138,18 +143,18 @@ value = 100.0
 [node name="LabelAgg" type="Label" parent="Rahmen"]
 layout_mode = 0
 offset_left = 70.0
-offset_top = 531.0
+offset_top = 550.0
 offset_right = 700.0
-offset_bottom = 563.0
+offset_bottom = 582.0
 theme_override_colors/font_color = Color(0.16, 0.11, 0.05, 1)
 text = "Aggressivität der KI-Spieler: 50 %"
 
 [node name="SliderKiAggressivitaet" type="HSlider" parent="Rahmen"]
 layout_mode = 0
 offset_left = 70.0
-offset_top = 575.0
+offset_top = 594.0
 offset_right = 700.0
-offset_bottom = 603.0
+offset_bottom = 622.0
 min_value = 1.0
 max_value = 100.0
 value = 50.0

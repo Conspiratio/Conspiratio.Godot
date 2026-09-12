@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -175,8 +176,36 @@ public partial class SoundManager : Node
 	/// <summary>Länge der Fanfare in Sekunden – z. B. um eine Sprachausgabe erst danach zu starten.</summary>
 	public double GetFanfareLaenge() => _sfxFanfare?.GetLength() ?? 0;
 
+	/// <summary>
+	/// Hörprobe für den Effekt-Regler im Einstellungsfenster (im Original das Bongo des Rechtsklicks).
+	/// Eigener Name statt <see cref="PlayRightClick"/>, damit am Aufrufer steht, wozu der Klang dient.
+	/// </summary>
+	public void SpieleEffektprobe() => SpieleEffekt(_sfxRechtsklick);
+
+	/// <summary>
+	/// Hörprobe für den Stimmen-Regler: dieselbe Sprachaufnahme wie im Original („Bin ich laut genug?").
+	/// Ein Klang auf dem Effekt-Bus hülfe hier nichts – zu prüfen ist der Stimmen-Bus.
+	/// </summary>
+	public void SpieleStimmprobe() => SpieleStimme("res://assets/voice/31_bin_ich_laut_genug.wav");
+
 	/// <summary>Startet die Titelmusik (wird vom Titelbildschirm aufgerufen).</summary>
 	public void PlayIntro() => SpieleMusik(MusikKategorie.Intro);
+
+	/// <summary>
+	/// Läuft gerade ein einmaliges Stück (Intro oder Outro)? Diese beiden werden am Ende nicht
+	/// wiederholt, sondern lassen die Musik verstummen – das Hauptmenü fragt danach, um die
+	/// Fanfare ausspielen zu lassen, statt sie mit der Hintergrundmusik zu überblenden.
+	/// </summary>
+	public bool SpieltEinmaligesStueck()
+	{
+		return _aktuelleKategorie is MusikKategorie.Intro or MusikKategorie.Outro && _musik.Playing;
+	}
+
+	/// <summary>
+	/// Wird gefeuert, wenn ein einmaliges Stück (Intro/Outro) zu Ende gespielt ist. Ohne dieses Signal
+	/// müsste das Hauptmenü in <c>_Process</c> pollen, ob die Fanfare vorbei ist.
+	/// </summary>
+	public event Action EinmaligesStueckBeendet;
 
 	private void SpieleEffekt(AudioStream stream)
 	{
@@ -270,6 +299,7 @@ public partial class SoundManager : Node
 		if (_aktuelleKategorie is MusikKategorie.Intro or MusikKategorie.Outro)
 		{
 			_aktuelleKategorie = MusikKategorie.Keine;
+			EinmaligesStueckBeendet?.Invoke();
 			return;
 		}
 

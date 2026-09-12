@@ -406,8 +406,16 @@ What it found, and what came of it: measured that way (14 export lines, five see
      against 2.32x), and the noble keeps his offices and his 182-324 Standesansehen either way.
      The asymmetry the balancing turns on is therefore robust against how the trader plays.
 
+     **The noble figure is superseded by the deposition cooldown** (Lib 4.12.0): with the same command
+     it now measures **676 253**, because an office once won is held far longer. Attributed by control
+     runs in one session — cooldown off gives 392 139 (the row above, within noise), cooldown on 676 253,
+     of which the doubled city-tier offices contribute only ~2 %. The trader row is unaffected (it holds
+     no office) and still reproduces 791 318 to the taler. **Re-measure the noble row before using it**;
+     the ratio the balancing rests on has narrowed from 2.06x to about 1.2x.
+
      Titles are the gate to offices (`GetMinTitelStadtEbene` 1, `GetMinTitelLandEbene` 3,
-     `GetMinTitelReichsEbene` 5), and offices pay 700 (Ratsherr) to 50 000 (Regent) a year. **Do not
+     `GetMinTitelReichsEbene` 5), and offices pay 1 400 (Ratsherr, doubled in Lib 4.12.0) to 50 000
+     (Regent) a year. **Do not
      read `--aemter` as the noble path**: it takes the best office by cheat and holds it for forty
      years, which produced a median of 1 235 506 and the false conclusion that the noble path is the
      richer one. Office tenure is the whole question, and only `--wahlen` answers it.

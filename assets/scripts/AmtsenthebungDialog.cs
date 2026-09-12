@@ -106,7 +106,11 @@ public partial class AmtsenthebungDialog : DialogBase
 		BaueWaehler(verfahren.Waehler.Count);
 
 		_labelTitel.Text = "Amtsenthebung";
-		_labelMeldung.Text = "Eine Absetzung von " + verfahren.OpferName + " wurde beantragt.";
+
+		// Wer den Antrag gestellt hat, stand bisher nirgends – das Opfer wusste nicht, gegen wen es sich
+		// wehren müsste. Den Satz baut die Lib, weil sie den Fall „kein benennbarer Antragsteller"
+		// (altes Spiel oder Gerichtsbeschluss) kennt.
+		_labelMeldung.Text = verfahren.GetAntragText();
 
 		OffenerNachrichtenschirm = this;
 		Show();

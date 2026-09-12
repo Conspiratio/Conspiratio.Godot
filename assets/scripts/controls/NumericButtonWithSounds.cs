@@ -8,14 +8,21 @@ namespace Conspiratio.Godot.assets.scripts.controls;
 /// Portierung des WinForms-NumericButtons: ein flacher Button, der seinen Wert anzeigt und
 /// per Klick verändert — obere Hälfte erhöht, untere Hälfte verringert, die X-Position des
 /// Klicks bestimmt die Zehnerpotenz (Klick auf die führende Stelle ändert um den größten Schritt).
+///
+/// <b>Die Trefferzonen werden aus den echten Schriftmaßen berechnet, nicht aus festen Pixeln.</b>
+/// Das Original rechnete mit den Maßen seiner Arial 15.75 (Textbeginn bei 25 px, je Ziffer
+/// <c>Schriftgröße − 2</c> = 13,75 px). Das Theme dieses Clients zeichnet den Button aber mit
+/// Schriftgröße 32: Die Zonen waren damit etwa halb so breit wie die Ziffern, und ein Klick traf
+/// regelmäßig eine andere Stelle als die, auf der der Zeiger stand. Gemessen wird jetzt die
+/// tatsächlich gezeichnete Zeichenkette – das deckt zugleich den Fall ohne Tausendertrenner ab, wo
+/// <see cref="FormatiereWert"/> nicht mit Nullen auffüllt und der Text darum kürzer ist als das
+/// unterstellte Stellenfeld.
 /// </summary>
 [GlobalClass]
 public partial class NumericButtonWithSounds : Button
 {
 	[Signal]
 	public delegate void WertChangedEventHandler(int neuerWert);
-
-	private const float OriginalSchriftgroesse = 16;  // Arial 15.75 im Original bestimmt die Ziffernbreite
 
 	private int _wert;
 	private int _maximalerWert = 999999999;
@@ -136,29 +143,65 @@ public partial class NumericButtonWithSounds : Button
 	{
 		int erhoehen = position.Y > Size.Y / 2 ? -1 : 1;
 
-		if (NurEinserSchritte || position.X >= 137)
+		if (NurEinserSchritte)
 			return erhoehen;
 
-		if (position.X < 25)
-		{
-			if (_wert >= 10)
-				erhoehen *= Zehnerpotenz(_maximaleStellen - 1);
+		return erhoehen * Zehnerpotenz(ErmittleStelleUnterCursor(position.X));
+	}
 
-			return erhoehen;
+	/// <summary>
+	/// Welche Dezimalstelle liegt unter der X-Position? 0 = Einer, 1 = Zehner und so fort.
+	///
+	/// Die Zeichen werden von links durchgegangen und jeweils gefragt, bis wohin der Text bis
+	/// einschließlich dieses Zeichens reicht; getroffen ist das erste, dessen Ende rechts vom Zeiger
+	/// liegt. Kumulativ gemessen statt Zeichen für Zeichen, weil eine Proportionalschrift
+	/// unterschneidet und sich die Einzelbreiten sonst zu etwas anderem aufsummieren als der
+	/// gezeichnete Text breit ist.
+	///
+	/// Ein Tausenderpunkt braucht keine Sonderbehandlung: Rechts von ihm stehen genauso viele Ziffern
+	/// wie rechts der Ziffer links von ihm, er liefert also dieselbe Stelle.
+	/// </summary>
+	private int ErmittleStelleUnterCursor(float x)
+	{
+		string text = Text;
+
+		if (string.IsNullOrEmpty(text))
+			return 0;
+
+		var schrift = GetThemeFont("font");
+
+		if (schrift == null)
+			return 0;
+
+		int schriftgroesse = GetThemeFontSize("font_size");
+
+		// Der Text beginnt nicht am Rand des Knopfes, sondern hinter dem Innenabstand der StyleBox.
+		var rahmen = GetThemeStylebox("normal");
+		float textBeginn = rahmen?.GetOffset().X ?? 0;
+
+		for (int i = 0; i < text.Length; i++)
+		{
+			float bisHierher = schrift.GetStringSize(text.Substring(0, i + 1), HorizontalAlignment.Left, -1,
+													 schriftgroesse).X;
+
+			if (x < textBeginn + bisHierher)
+				return Math.Min(ZaehleZiffernNach(text, i), _maximaleStellen - 1);
 		}
 
-		for (int i = 1; i <= 7; i++)
-		{
-			if (position.X < 25 + (OriginalSchriftgroesse - 2) * i)
-			{
-				if (_maximaleStellen - 1 - i > 0)
-					erhoehen *= Zehnerpotenz(_maximaleStellen - 1 - i);
+		// Rechts neben dem Text: die Einerstelle, wie überall sonst der kleinste Schritt.
+		return 0;
+	}
 
-				return erhoehen;
-			}
-		}
+	/// <summary>Wie viele Ziffern stehen rechts von Position <paramref name="index"/>?</summary>
+	private static int ZaehleZiffernNach(string text, int index)
+	{
+		int ziffern = 0;
 
-		return erhoehen;
+		for (int i = index + 1; i < text.Length; i++)
+			if (char.IsDigit(text[i]))
+				ziffern++;
+
+		return ziffern;
 	}
 
 	private static int Zehnerpotenz(int stellen)
